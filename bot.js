@@ -1,5 +1,5 @@
 // Require the necessary discord.js classes
-const { Discord, Client, GatewayIntentBits, Collection, MessageEmbed } = require('discord.js')
+const { Discord, Client, GatewayIntentBits, Collection, EmbedBuilder, InteractionType } = require('discord.js')
 const { SlashCommandBuilder } = require('@discordjs/builders')
 const { REST } = require('@discordjs/rest')
 const { Routes } = require('discord-api-types/v9')
@@ -230,11 +230,11 @@ function dbClose(db){
 // 20211108 krh Initial Coding
 //============================================================================
 function announce(message){
-    const responseEmbed = new MessageEmbed()
+    const responseEmbed = new EmbedBuilder()
 	.setColor('#0099ff')
 	.setTitle('Pyro Freelancer Corps Announcement')
 	.setURL('https://discord.js.org/')
-	.setAuthor('Pyro Freelancer Corps', 'https://i.imgur.com/5sZV5QN.png', 'https://robertsspaceindustries.com/orgs/PFCS')
+	.setAuthor({name:'Pyro Freelancer Corps', iconURL:'https://i.imgur.com/5sZV5QN.png', url:'https://robertsspaceindustries.com/orgs/PFCS'})
 	.setDescription('Some description here')
 	.setThumbnail('https://i.imgur.com/RdZBmhk.png')
 	.addFields(
@@ -243,10 +243,10 @@ function announce(message){
 		{ name: 'Field 1', value: 'Some value here', inline: true },
 		{ name: 'Field 2', value: 'Some value here', inline: true },
 	)
-	.addField('Field 3', 'Some value here', true)
+	.addFields({name:'Field 3', value: 'Some value here', inline: true})
 	.setImage('https://i.imgur.com/RdZBmhk.png')
 	.setTimestamp()
-	.setFooter('Official PFC Communication', 'https://i.imgur.com/5sZV5QN.pngg')
+	.setFooter({text:'Official PFC Communication', iconURL:'https://i.imgur.com/5sZV5QN.png'})
 
 interaction.reply({ embeds: [responseEmbed] })
 }
@@ -712,7 +712,7 @@ client.on('interactionCreate', async interaction => {
 	var roles = interaction.member._roles
 	var command = client.commands.get(interaction.commandName)
 
-	if (interaction.isCommand()) {
+	if (interaction.type === InteractionType.ApplicationCommand) {
 		
 		var message = interaction.user.username + ' used command **' + interaction.commandName + '**'
 		if (interaction.options._hoistedOptions[0] != undefined){

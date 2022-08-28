@@ -22,7 +22,7 @@ module.exports ={
 		const SCApiLiveOrganization = SCApiLive + SCApiOrganization
 		
 		const fetch = require('node-fetch') // required to call the Star Citizen API
-		const { MessageEmbed } = require ('discord.js') // required to send the embed to Discord
+		const { EmbedBuilder } = require ('discord.js') // required to send the embed to Discord
 		
 		const orgname = interaction.options._hoistedOptions[0].value
 		
@@ -55,16 +55,16 @@ module.exports ={
 				orgRecruiting = 'Closed'
 			}
 			
-			const responseEmbed = new MessageEmbed()
+			const responseEmbed = new EmbedBuilder()
 			.setColor('#0099ff')
 			.setTitle(orgName + ' - ' + orgMembers + ' members')
 			.setURL(orgURL)
 			//.setAuthor(orgOrg, orgOrgImg, 'https://robertsspaceindustries.com/orgs/' + orgOrgSID)
 			.setThumbnail(orgLogo)
 			.setTimestamp()
-			.setFooter('Official PFC Communication', 'https://i.imgur.com/5sZV5QN.png')
+			.setFooter({text:'Official PFC Communication', iconURL:'https://i.imgur.com/5sZV5QN.png'})
 			.setDescription(orgBio)
-			.addField('Recruiting Status: ', orgRecruiting)
+			.addFields({name: 'Recruiting Status: ', value:orgRecruiting})
 			
 			
 			interaction.user.send({ embeds: [responseEmbed] })

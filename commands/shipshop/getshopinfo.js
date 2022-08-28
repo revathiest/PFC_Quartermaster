@@ -2,7 +2,7 @@ module.exports ={
 	getshopinfo: function(interaction, dealers, version){
 				
 		var args = interaction.options._hoistedOptions[0]
-		const { Client, Intents, MessageEmbed } = require('discord.js')
+		const { Client, Intents, EmbedBuilder } = require('discord.js')
 		const { getshipmanuf } = require ('./getshipmanuf.js')
 		var shops = dealers.ShopLayoutNodes.ShopLayoutNode
 		var shiplist = []
@@ -11,20 +11,20 @@ module.exports ={
 		if (args == undefined || args == null || args == ''){
 
 			//var shops = dealers.ShopLayoutNodes.ShopLayoutNode
-			const responseEmbed = new MessageEmbed()
+			const responseEmbed = new EmbedBuilder()
 				.setColor('#0099ff')
 				.setTitle('Ship Shops - ' + version)
-				.setAuthor('Pyro Freelancer Corps', 'https://i.imgur.com/5sZV5QN.png', 'https://robertsspaceindustries.com/orgs/PFCS')
+				.setAuthor({name: 'Pyro Freelancer Corps', iconURL: 'https://i.imgur.com/5sZV5QN.png', url: 'https://robertsspaceindustries.com/orgs/PFCS'})
 				.setThumbnail('https://i.imgur.com/RdZBmhk.png')
 				.setTimestamp()
-				.setFooter('Official PFC Communication', 'https://i.imgur.com/5sZV5QN.pngg')
+				.setFooter({text:'Official PFC Communication', iconURL:'https://i.imgur.com/5sZV5QN.png'})
 			
 			shops.forEach( shop => {
 				const tmpshop = shop.Name.split('_')
-				if (responseEmbed.description == undefined || responseEmbed.description == null ){
+				if (responseEmbed.data.description == undefined || responseEmbed.data.description == null ){
 					responseEmbed.setDescription( '**' + tmpshop[0] + '** located in ' + tmpshop[1])
 				} else {
-					responseEmbed.setDescription(responseEmbed.description + '\n**' + tmpshop[0] + '** located in ' + tmpshop[1])
+					responseEmbed.setDescription(responseEmbed.data.description + '\n**' + tmpshop[0] + '** located in ' + tmpshop[1])
 				}
 			})
 			interaction.user.send({ embeds: [responseEmbed] })
@@ -37,13 +37,13 @@ module.exports ={
 			if (args.value.toLowerCase() == tmpshop[0].toLowerCase()){
 				const inventory = shop.ShopInventoryNodes.ShopInventoryNode
 				
-				const responseEmbed = new MessageEmbed()
+				const responseEmbed = new EmbedBuilder()
 				.setColor('#0099ff')
 				.setTitle(tmpshop[0] + ' - ' + tmpshop[1] + ' - ' + version)
-				.setAuthor('Pyro Freelancer Corps', 'https://i.imgur.com/5sZV5QN.png', 'https://robertsspaceindustries.com/orgs/PFCS')
+				.setAuthor({name: 'Pyro Freelancer Corps', iconURL: 'https://i.imgur.com/5sZV5QN.png', url: 'https://robertsspaceindustries.com/orgs/PFCS'})
 				.setThumbnail('https://i.imgur.com/RdZBmhk.png')
 				.setTimestamp()
-				.setFooter('Official PFC Communication', 'https://i.imgur.com/5sZV5QN.pngg')
+				.setFooter({text:'Official PFC Communication', iconURL:'https://i.imgur.com/5sZV5QN.png'})
 			
 				inventory.forEach( ship => {
 					
@@ -64,13 +64,6 @@ module.exports ={
 						const shopPrice = price.Node.BasePrice.toLocaleString( undefined, {minimumFractionDigits: 0} )
 							tmplist = [manufacturer, shipName, shopPrice]
 							shiplist.push(tmplist)
-						
-						
-							// if (responseEmbed.description == undefined || responseEmbed.description == null ){
-							// responseEmbed.setDescription( shipName + ' - ' + shopPrice + ' aUEC')
-							// } else {
-								// responseEmbed.setDescription(responseEmbed.description + '\n' + shipName + ' - ' + shopPrice + ' aUEC')
-							// }
 						}
 					})
 				})
@@ -90,7 +83,7 @@ module.exports ={
 						
 						const manufName = getshipmanuf(manufTag)
 						
-						responseEmbed.addField('**' + manufName + '** (' + manufTag + ')', manufList)
+						responseEmbed.addFields({name:'**' + manufName + '** (' + manufTag + ')', value:manufList})
 					}
 				}
 				

@@ -15,12 +15,8 @@ module.exports ={
 		
 		// Database Definitions
 		const mysql = require('mysql')
-		const database = mysql.createConnection({
-			host: 'na05-sql.pebblehost.com',
-			user: 'customer_230193_pfc',
-			password: 'oZmTmYJ4l5!si1gbCNs@',
-			database: 'customer_230193_pfc',
-		})
+		const connectioninfo = require ("../database.json")
+		const database = mysql.createConnection(connectioninfo)
 		
 		//initiate the database connection
 		database.connect(

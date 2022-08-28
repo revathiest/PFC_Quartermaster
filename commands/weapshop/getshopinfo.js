@@ -2,17 +2,17 @@ module.exports ={
 	getshopinfo: function(interaction, dealers, version){
 				
 		var args = interaction.options._hoistedOptions[0]
-		const { Client, Intents, MessageEmbed } = require('discord.js')
+		const { Client, Intents, EmbedBuilder } = require('discord.js')
 		const { getplanetname } = require ('./getplanetname.js')
 		var shops = dealers.ShopLayoutNodes.ShopLayoutNode
 		var shoploclist = []
 		
-		const responseEmbed = new MessageEmbed()
+		const responseEmbed = new EmbedBuilder()
 		.setColor('#0099ff')
-		.setAuthor('Pyro Freelancer Corps', 'https://i.imgur.com/5sZV5QN.png', 'https://robertsspaceindustries.com/orgs/PFCS')
+		.setAuthor({name:'Pyro Freelancer Corps', iconURL:'https://i.imgur.com/5sZV5QN.png', url:'https://robertsspaceindustries.com/orgs/PFCS'})
 		.setThumbnail('https://i.imgur.com/RdZBmhk.png')
 		.setTimestamp()
-		.setFooter('Official PFC Communication', 'https://i.imgur.com/5sZV5QN.pngg')
+		.setFooter({text:'Official PFC Communication', iconURL:'https://i.imgur.com/5sZV5QN.png'})
 		
 		// No arguments were provided
 		if (args == undefined || args == null || args == ''){
@@ -22,11 +22,12 @@ module.exports ={
 			
 			shops.forEach( shop => {
 				const tmpshop = shop.Name.split('_')
-				if (responseEmbed.description == undefined || responseEmbed.description == null ){
+				if (responseEmbed.data.description == undefined || responseEmbed.data.description == null ){
 					responseEmbed.setDescription( '**' + tmpshop[0] + '**')
 				} else {
-					responseEmbed.setDescription(responseEmbed.description + '\n**' + tmpshop[0] + '**')
+					responseEmbed.setDescription(responseEmbed.data.description + '\n**' + tmpshop[0] + '**')
 				}
+				var tmp = responseEmbed.getDescription()
 			})
 			interaction.user.send({ embeds: [responseEmbed] })
 			interaction.reply({content: 'Check your DMs', ephemeral: true})

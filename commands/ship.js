@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
-const { MessageEmbed, MessageActionRow, MessageSelectMenu } = require ('discord.js') // required to send the embed to Discord
+const { EmbedBuilder, ActionRowBuilder, SelectMenuBuilder } = require ('discord.js') // required to send the embed to Discord
 const fetch = require('node-fetch') // required to call the Star Citizen API
 var ship
 
@@ -36,8 +36,8 @@ module.exports ={
 			
 			if (ship.data.length > 1) {
 				
-				const row = new MessageActionRow()
-				var options = new MessageSelectMenu()
+				const row = new ActionRowBuilder()
+				var options = new SelectMenuBuilder()
 					.setCustomId('selectShip')
 					.setPlaceholder('Please select a ship')
 				var count = 0
@@ -182,14 +182,14 @@ module.exports ={
 		}
 		
 		
-		const responseEmbed = new MessageEmbed()
+		const responseEmbed = new EmbedBuilder()
 		.setColor('#0099ff')
 		.setTitle(shipName)
 		.setURL(shipPledgeURL)
-		.setAuthor(shipManuf)
+		.setAuthor({name: shipManuf.valueOf()})
 		.setThumbnail(shipManufLogo)
 		.setTimestamp()
-		.setFooter('Official PFC Communication', 'https://i.imgur.com/5sZV5QN.png')
+		.setFooter({text:'Official PFC Communication', iconURL:'https://i.imgur.com/5sZV5QN.png'})
 		.setImage(shipImg)
 		.addFields(
 			{ name: 'Height', value: height, inline: true },

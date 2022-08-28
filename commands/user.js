@@ -24,7 +24,7 @@ module.exports ={
 		const SCApiEagerUser = SCApiEager + SCApiUser
 		
 		const fetch = require('node-fetch') // required to call the Star Citizen API
-		const { MessageEmbed } = require ('discord.js') // required to send the embed to Discord
+		const { EmbedBuilder } = require ('discord.js') // required to send the embed to Discord
 		
 		const username = interaction.options._hoistedOptions[0].value
 		
@@ -64,14 +64,14 @@ module.exports ={
 				
 			
 			
-			const responseEmbed = new MessageEmbed()
+			const responseEmbed = new EmbedBuilder()
 			.setColor('#0099ff')
 			.setTitle(userOrgRank + ' - ' + userName)
 			.setURL(userURL)
-			.setAuthor(userOrg, userOrgImg, 'https://robertsspaceindustries.com/orgs/' + userOrgSID)
+			.setAuthor({name: userOrg, iconURL:userOrgImg, url:'https://robertsspaceindustries.com/orgs/' + userOrgSID})
 			.setThumbnail(userImg)
 			.setTimestamp()
-			.setFooter('Official PFC Communication', 'https://i.imgur.com/5sZV5QN.png')
+			.setFooter({text:'Official PFC Communication', iconURL:'https://i.imgur.com/5sZV5QN.png'})
 			
 			if (user.data.profile.website != undefined) {
 				userBio = userBio + '\n' + user.data.profile.website
@@ -97,7 +97,7 @@ module.exports ={
 					}
 				})
 				
-				responseEmbed.addField('Organization Affiliations', afflist)
+				responseEmbed.addFields({name: 'Organization Affiliations', value:afflist})
 			
 			}
 			

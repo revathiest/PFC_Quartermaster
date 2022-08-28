@@ -1,5 +1,5 @@
 // Require the necessary discord.js classes
-const { Discord, Client, GatewayIntentBits, Collection, EmbedBuilder, InteractionType } = require('discord.js')
+const { Discord, Client, GatewayIntentBits, Collection, EmbedBuilder, InteractionType, PermissionFlagsBits } = require('discord.js')
 const { SlashCommandBuilder } = require('@discordjs/builders')
 const { REST } = require('@discordjs/rest')
 const { Routes } = require('discord-api-types/v9')
@@ -123,11 +123,14 @@ player
     .on('playlistAdd',  (queue, playlist) =>
         client.channels.cache.get(chanPFCMusic).send('Playlist ' + playlist + ' with ' + playlist.songs.length + ' was added to the queue.'))
     // Emitted when there was no more music to play.
-    .on('queueDestroyed',  (queue) =>
-        client.channels.cache.get(chanPFCMusic).send('The queue was destroyed.'))
-    // Emitted when the queue was destroyed (either by ending or stopping).    
     .on('queueEnd',  (queue) =>
-        client.channels.cache.get(chanPFCMusic).send('The queue has ended.'))
+		client.channels.cache.get(chanPFCMusic).send('The queue has ended.'))
+    // Emitted when the queue was destroyed (either by ending or stopping).
+    .on('queueDestroyed',  (queue) =>
+		client.channels.cache.get(chanPFCMusic).send('The queue was destroyed.'))
+	//Emitted wahen the queue is cleared.
+	.on('queueCleared', (queue) =>
+		client.channels.cache.get(chanPFCMusic).send('Queue was cleared.'))
     // Emitted when a song changed.
     .on('songChanged', (queue, newSong, oldSong) => 
         client.channels.cache.get(chanPFCMusic).send('**Now Playing:** ' + newSong))
@@ -141,8 +144,6 @@ player
     .on('clientUndeafen', (queue) =>
         client.channels.cache.get(chanBotLog).send('I got undefeanded.'))
     // Emitted when there was an error in runtime
-	.on('queueCleared', (queue) =>
-		client.channels.cache.get(chanPFCMusic).send('Queue was cleared.'))
     .on('error', (error, queue) => {
         client.channels.cache.get(chanBotLog).send('Error: (music)' + error.stack)
     })
@@ -155,6 +156,9 @@ stream
 	.on('tweet', tweet => {
 	const twitterMessage = '**'+tweet.user.name + '** just tweeted this!\n https://twitter.com/' + tweet.user.screen_name + '/status/' + tweet.id_str
 	
+	//Making sure that the bot has access to the News channel.  We dont want the dev bot posting there.
+	var botHasAccess = client.channels.cache.get(chanSCNews).permissionsFor(clientId).has(PermissionFlagsBits.ViewChannel)
+
 	if (tweet.retweeted_status
     || tweet.in_reply_to_status_id
     || tweet.in_reply_to_status_id_str
@@ -163,14 +167,20 @@ stream
     || tweet.in_reply_to_screen_name) {
 		return
 	} else {
-		client.channels.cache.get(chanSCNews).send(twitterMessage)
+		
+		if (botHasAccess){
+			client.channels.cache.get(chanSCNews).send(twitterMessage)
+		} else {
+			client.channels.cache.get(chanBotLog).send(twitterMessage)
+		}
 	}
 	return false
 	})
 
-client.once('ready', () => { 
-	client.channels.cache.get(chanBotLog).send('Startup completed!')
-})
+client
+	.once('ready', () => { 
+		client.channels.cache.get(chanBotLog).send('Startup completed!')
+	})
 
 //============================================================================
 // This is the PFC Announcement embed

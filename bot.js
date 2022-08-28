@@ -3,7 +3,7 @@ const { Discord, Client, GatewayIntentBits, Collection, EmbedBuilder, Interactio
 const { SlashCommandBuilder } = require('@discordjs/builders')
 const { REST } = require('@discordjs/rest')
 const { Routes } = require('discord-api-types/v9')
-const { clientId, guildId, token } = require('./config.json')
+const { clientId, guildId, token, dbinfo, twitter} = require('./config.json')
 const Twitter = require('twit') // Imports the twitter library
 const fs = require('fs') // imports the file io library
 const mysql = require('mysql') // required to connect to database
@@ -18,42 +18,36 @@ const client = new Client({ intents: [
 	GatewayIntentBits.GuildVoiceStates
 ]})
 
-const twitterConf = {
-	consumer_key: 'cHI1u2L9rk8MqHjWEmiUlYkWU',
-	consumer_secret: 'm2WiHuKvv2c6s7uGMfMGHStZkcbj3Lh2RrUaOrRaPjKygLpM94',
-    access_token: '40008264-4ie8l0mCO93xMVrvJdlvpBdswf2cRFhND0kRpA3Qf',
-    access_token_secret: 'dQbf8LxEGitTHmxnJ1cLmjwOfYeCw10VsAZZluHJhSXYX'
+//***********************************************************/
+//Twitter setup
+//***********************************************************/
+
+const twitterClient = new Twitter(twitter)
+const {twitterchans} = require('./config.json')
+
+var twitfollow = ''
+
+for(var key in twitterchans){
+	if (twitterchans.hasOwnProperty(key)){
+		if (twitfollow == ''){
+			twitfollow = twitterchans[key]
+		} else {
+			twitfollow += ',' + twitterchans[key]
+		}
 	}
-
-const twitterClient = new Twitter(twitterConf)
-
-const player = new Player(client, {
-    leaveOnEmpty: true,
-	leaveOnStop: false,
-	leaveOnEnd: false// This options are optional.
-})
-
-//Twitter users who can be followed
-const robertsspaceind = '803542770' // @RobertsSpaceInd
-const every3minutes = '2899773086' // @Every3Minutes
-const alltheminutes = '2871186250' // @alltheminutes
-const bigbenclock = '86391789' //@beg_ben_clock
-const revathiest = '40008264' //@revathiest
-
+}
 
 // Create a stream to follow tweets
 const stream = twitterClient.stream('statuses/filter', {
-	follow: [
-		robertsspaceind, 
-		revathiest
-	].join(',')
+	follow: twitfollow
 })
 
 const fetch = require('node-fetch') // required to call the Star Citizen API
 const success = true
 const failed = false
 // Star Citizen API URL definitions
-const SCAApiBase = 'https://api.starcitizen-api.com/77210b95720bd50b3584ead32936dfd4/v1/'
+const SCAPIkey = require('./config.json')
+const SCAApiBase = 'https://api.starcitizen-api.com/'+SCAPIkey+'/v1/'
 //API Modes
 const SCApiCache = SCAApiBase + 'cache/'
 const SCApiLive = SCAApiBase + 'live/'
@@ -76,25 +70,12 @@ const SCApiEagerOrgMembers = SCApiEager + SCApiOrgMem
 //Organization
 const SCApiCacheOrganization = SCApiCache + SCApiOrganization
 const SCApiLiveOrganization = SCApiLive + SCApiOrganization
-//PFC Discord Rank Definitions
-const roleAdmin = '849044491343757343'
-const roleEnsign = '818693870811873310'
-const roleLieutenant = '818693786276069416'
-const roleCommander = '818693674640080960'
-const roleCaptain = '818693518271840286'
-const roleAdmiral = '818693289930522665'
-const roleFltAdmiral = '818668219551842344'
-const roleRecruit = '833440108647677953'
-const roleWreckRaiders = '835723606905454664'
-const roleAffiliate = '833415056783441931'
-const roleStowaway = '823083914116595743'
+
 //PFC Discord Channel Definitions
 const chanBotLog = '908482195214172200'
 const chanBotTest = '907426072700801094'
 const chanSCNews = '818848322734260224'
 const chanPFCMusic = '898758865317937162'
-//Server Definitions
-const guildPFC = '818666637858177046'
 
 //Console listener
 const pebble = process.stdin
@@ -121,7 +102,15 @@ pebble.addListener("data", result => {
 
 })
 
+//***********************************************************/
+//Music Player Setup
+//***********************************************************/
 
+const player = new Player(client, {
+    leaveOnEmpty: true,
+	leaveOnStop: false,
+	leaveOnEnd: false// This options are optional.
+})
 
 player
     // Emitted when channel was empty.
@@ -155,13 +144,13 @@ player
 	.on('queueCleared', (queue) =>
 		client.channels.cache.get(chanPFCMusic).send('Queue was cleared.'))
     .on('error', (error, queue) => {
-        client.channels.cache.get(chanBotLog).send('Error: (music)' + error.message)
+        client.channels.cache.get(chanBotLog).send('Error: (music)' + error.stack)
     })
 
 // With luck, this will keep twitter from killing the bot.
 stream
 	.on('error', (error) => {
-		client.channels.cache.get(chanBotLog).send('Error: (twitter)' + error.message)
+		client.channels.cache.get(chanBotLog).send('Error: (twitter)' + error.stack)
 	})
 	.on('tweet', tweet => {
 	const twitterMessage = '**'+tweet.user.name + '** just tweeted this!\n https://twitter.com/' + tweet.user.screen_name + '/status/' + tweet.id_str
@@ -172,8 +161,6 @@ stream
     || tweet.in_reply_to_user_id
     || tweet.in_reply_to_user_id_str
     || tweet.in_reply_to_screen_name) {
-		// client.channels.cache.get(chanBotLog).send('Blocked the following tweet from ' + tweet.user.name)
-		// client.channels.cache.get(chanBotLog).send('https://twitter.com/' + tweet.user.screen_name + '/status/' + tweet.id_str)
 		return
 	} else {
 		client.channels.cache.get(chanSCNews).send(twitterMessage)
@@ -181,49 +168,9 @@ stream
 	return false
 	})
 
-client.once('ready', () => { // prints "Ready!" to the console once the bot is online
+client.once('ready', () => { 
 	client.channels.cache.get(chanBotLog).send('Startup completed!')
 })
-
-//============================================================================
-// getDatabase() - Creates the database object
-// 20211108 krh Initial Coding
-//============================================================================
-function dbOpen(){
-	const database = mysql.createConnection({
-	host: 'na05-sql.pebblehost.com',
-	user: 'customer_230193_pfc',
-	password: 'oZmTmYJ4l5!si1gbCNs@',
-	database: 'customer_230193_pfc',
-	})
-
-	database.connect(
-		function(err){
-			if (err){
-				return console.error('Database error: ', err.stack)
-			}
-			client.channels.cache.get(chanBotLog).send('Connected to the MySQL Server')
-		}
-	)
-	return database
-}
-
-//============================================================================
-// dbClose(db) - Closes the database object
-// 20211108 krh Initial Coding
-//============================================================================
-function dbClose(db){
-		db.end(
-		function(err){
-			if (err){
-				return console.error('Database error: ', err.stack)
-			}
-			client.channels.cache.get(chanBotLog).send('Connection to the MySQL Server ended')
-		}
-	)
-}
-
-
 
 //============================================================================
 // This is the PFC Announcement embed
@@ -251,158 +198,6 @@ function announce(message){
 interaction.reply({ embeds: [responseEmbed] })
 }
 
-
-//============================================================================
-// This a test function to send a message to a specific channel
-// 20211108 krh Initial Coding
-//============================================================================
-function channelLog(logMessage){
-
-	client.channels.cache.get(chanBotLog).send(logMessage)
-
-}
-
-//============================================================================
-// This a test function to the rank of a user
-// 20211108 krh Initial Coding
-//============================================================================
-async function rank(message){
-	try {
-		const thisrole = await message.guild.roles.fetch(roleStowaway)
-		const member = await message.mentions.members.first()
-
-		member.roles.add(thisrole).then(client.channels.cache.get(chanBotLog).send("success"))
-		
-	} catch(err) {
-		client.channels.cache.get(chanBotLog).send(err)	
-	}
-}
-
-//============================================================================818666637858177046
-// This is the Command List.  To add new commands, simply add a new commands.set()
-// 20211108 krh Initial Coding
-//============================================================================
-async function getRole(rank){
-	
-	switch (rank){
-		case 'Recruit':
-			return roleRecruit
-			break
-		case 'Ensign':
-			return roleEnsign
-			break
-		case 'Lieutenant':
-			return roleLieutenant
-			break
-		case 'Commander':
-			return roleCommander
-			break
-		case 'Captain':
-			return roleCaptain
-			break
-		case 'Admiral':
-			return roleAdmiral
-			break
-		case 'Fleet Admiral':
-			return roleFltAdmiral
-			break
-		case 'Wreck Raiders':
-			return roleWreckRaiders
-			break
-		case 'Affilliate':
-			return roleAffiliate
-			break
-		default:
-			return roleStowaway
-	}
-}
-
-
-//============================================================================
-// getRSIUser - This command will return the user json from RSI
-// 20211108 krh Initial Coding
-//============================================================================
-async function updateRSIUser(item){
-	
-	const RSIname = item.handle
-	var Discname = null
-	
-	try {
-		var server = await client.guilds.fetch(guildPFC)
-		server.members.fetch().then(members => {
-			members.forEach(member => {
-				if (RSIname == member.user.username){
-					Discname = member.user.username
-					if (Discname != null) {
-						addRecord(RSIname, Discname)
-					}
-				}
-			})
-		})
-
-	} catch (error) {
-		client.channels.cache.get(chanBotLog).send(error)
-	}
-}
-
-
-//============================================================================
-// syncRSIUser - This command will update the user mapping in the database 
-// 20211108 krh Initial Coding
-//============================================================================
-async function mapRSIUsers(OrgName){
-	
-	const name = OrgName.toString()
-	
-	var ret = await fetch(SCApiCacheOrgMembers + name).then(response => response.text())
-	var OrgMembers = JSON.parse(ret)
-	if (OrgMembers.data == null) {
-		ret = await fetch(SCApiLiveOrgMembers + name).then(response => response.text())
-		OrgMembers = JSON.parse(ret)
-		client.channels.cache.get(chanBotLog).send('Data was null')
-	} 
-	
-	if (OrgMembers.data == undefined || OrgMembers.data == []) {
-		client.channels.cache.get(chanBotLog).send('Data was undefined')
-		return failed
-	}
-	
-	OrgMembers.data.forEach(element => {
-		updateRSIUser(element)
-		// const RSIname = member.handle
-		// const DiscName = client.user.fetch(RSIname)
-		// client.channels.cache.get(chanBotLog).send(RSIname + ' maps to ' + DiscName)
-	})
-
-}
-
-function addRecord(RSI_name, Disc_name){
-
-	const db = dbOpen()
-
-		db.beginTransaction(function(err) {
-		if (err) { throw err }
-		
-		const querystring = "INSERT INTO mapUserMember SET RSI_Username='" + RSI_name + "', Discord_Username='" + Disc_name + "'"
-		db.query(querystring)
-		db.commit()
-		dbClose(db)
-	})
-	
-}
-
-//============================================================================
-// memlist(message) This shows a list of users in the server
-// 20211114 krh Initial Coding
-//============================================================================
-async function memlist(message){
-	const guild = await client.guilds.fetch(guildPFC)
-	guild.members.fetch().then(members => {
-		members.forEach(member => client.channels.cache.get(chanBotLog).send(member.user.username))
-	})
-
-}
-
 //============================================================================
 // This is the music bot section
 // 20211114 krh Initial Coding
@@ -417,9 +212,10 @@ async function play(interaction){
 			interaction.reply({content: 'Adding your song to the queue', ephemeral: false})
 		} catch (error) {
 			interaction.reply("It doesn't look like you're in a voice channel that I can join.")
+			return
 		}
 		let song = await queue.play(args).catch(error => {
-			console.log(error)				
+			console.log(error.stack)				
 			if(!guildQueue)
 				queue.stop()
 		})
@@ -439,6 +235,7 @@ async function playlist(interaction){
 			interaction.reply({content: 'Adding your playlist to the queue', ephemeral: false})
 		} catch (error) {
 			interaction.reply("It doesn't look like you're in a voice channel that I can join.")
+			return
 		}
 		let song = await queue.playlist(args).catch(error => {
 			console.log(error)

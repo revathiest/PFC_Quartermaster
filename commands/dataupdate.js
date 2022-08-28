@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
+const { dbinfo } = require('./../config.json')
 
 module.exports ={
 	data: new SlashCommandBuilder()
@@ -14,12 +15,7 @@ module.exports ={
 		
 		// Database Definitions
 		const mysql = require('mysql')
-		const database = mysql.createConnection({
-			host: 'na05-sql.pebblehost.com',
-			user: 'customer_230193_pfc',
-			password: 'oZmTmYJ4l5!si1gbCNs@',
-			database: 'customer_230193_pfc',
-		})
+		const database = mysql.createConnection(dbinfo)
 		
 		//initiate the database connection
 		database.connect(

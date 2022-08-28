@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
+const { dbinfo } = require('./../config.json')
 const fetch = require('node-fetch') // required to call the Star Citizen API
 	
 // Star Citizen API URL 
@@ -28,12 +29,7 @@ module.exports ={
 		
 		// Database Definitions
 		const mysql = require('mysql')
-		const database = mysql.createConnection({
-			host: 'na05-sql.pebblehost.com',
-			user: 'customer_230193_pfc',
-			password: 'oZmTmYJ4l5!si1gbCNs@',
-			database: 'customer_230193_pfc',
-		})
+		const database = mysql.createConnection(dbinfo)
 		
 		//initiate the database connection
 		database.connect(

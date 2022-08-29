@@ -1,43 +1,12 @@
 // Require the necessary discord.js classes
 const { Discord, Client, GatewayIntentBits, Collection, EmbedBuilder, InteractionType, PermissionFlagsBits } = require('discord.js')
-const { SlashCommandBuilder } = require('@discordjs/builders')
 const { REST } = require('@discordjs/rest')
 const { Routes } = require('discord-api-types/v9')
-const { clientId, guildId, token, dbinfo, twitter} = require('./config.json')
 const Twitter = require('twit') // Imports the twitter library
 const fs = require('fs') // imports the file io library
-const mysql = require('mysql') // required to connect to database
 const { Player } = require("discord-music-player") // required for music functionality
+const { clientId, guildId, token, dbinfo, twitter} = require('./config.json')
 const rest = new REST({ version: '9' }).setToken(token)
-
-const fetch = require('node-fetch') // required to call the Star Citizen API
-const success = true
-const failed = false
-// Star Citizen API URL definitions
-const SCAPIkey = require('./config.json')
-const SCAApiBase = 'https://api.starcitizen-api.com/'+SCAPIkey+'/v1/'
-//API Modes
-const SCApiCache = SCAApiBase + 'cache/'
-const SCApiLive = SCAApiBase + 'live/'
-const SCApiAuto = SCAApiBase + 'auto/'
-const SCApiEager = SCAApiBase + 'eager/'
-//API Categoris
-const SCApiUser = 'user/'
-const SCApiOrgMem = 'organization_members/'
-const SCApiOrganization = 'organization/'
-//Users
-const SCApiCacheUser = SCApiCache + SCApiUser
-const SCApiLiveUser = SCApiLive + SCApiUser
-const SCApiAutoUser = SCApiAuto + SCApiUser
-const SCApiEagerUser = SCApiEager + SCApiUser
-//Organization Members
-const SCApiCacheOrgMembers = SCApiCache + SCApiOrgMem
-const SCApiLiveOrgMembers = SCApiLive + SCApiOrgMem
-const SCApiAutoOrgMembers = SCApiAuto + SCApiOrgMem
-const SCApiEagerOrgMembers = SCApiEager + SCApiOrgMem
-//Organization
-const SCApiCacheOrganization = SCApiCache + SCApiOrganization
-const SCApiLiveOrganization = SCApiLive + SCApiOrganization
 
 //PFC Discord Channel Definitions
 const chanBotLog = '908482195214172200'
@@ -199,9 +168,25 @@ interaction.reply({ embeds: [responseEmbed] })
 client.commands = new Collection()
 var cmdsToRegister = []
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
+const playercommandFiles = fs.readdirSync('./commands/musiccommands').filter(file => file.endsWith('.js'))
 
+console.log('====Registering Star Citizen Commands: ')
 for (const file of commandFiles) {
 	const command = require('./commands/' + file)
+	// Set a new item in the Collection
+	// With the key as the command name and the value as the exported module
+	try{
+		client.commands.set(command.data.name, command)
+		cmdsToRegister.push(command.data.toJSON())
+		console.log('Registered command ' + command.data.name)
+	} catch (error) {
+		console.error(error)
+	}
+}
+
+console.log('====Registering Music Commands: ')
+for (const file of playercommandFiles) {
+	const command = require('./commands/musiccommands/' + file)
 	// Set a new item in the Collection
 	// With the key as the command name and the value as the exported module
 	try{

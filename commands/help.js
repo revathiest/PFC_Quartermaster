@@ -34,6 +34,5 @@ module.exports ={
 
 		await interaction.user.send({ embeds: [responseEmbed] })
 		await interaction.reply({content: 'Check your DMs', ephemeral: true})
-	
 	}
 }

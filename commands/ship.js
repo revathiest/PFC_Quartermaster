@@ -3,7 +3,7 @@ const { EmbedBuilder, ActionRowBuilder, SelectMenuBuilder } = require ('discord.
 const fetch = require('node-fetch') // required to call the Star Citizen API
 var ship
 
-module.exports ={
+module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('ship')
 		.setDescription('Get information about a Ship')

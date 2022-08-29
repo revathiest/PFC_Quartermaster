@@ -58,7 +58,7 @@ module.exports ={
 				console.log('Database Drained. ')
 			})
 			.on('endqueue', (sequence) => {
-				console.log('Database Enqueued: ' + sequence)
+				console.log('Database queue ended: ' + sequence)
 			})
 		
 	}

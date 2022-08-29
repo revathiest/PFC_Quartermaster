@@ -10,38 +10,6 @@ const mysql = require('mysql') // required to connect to database
 const { Player } = require("discord-music-player") // required for music functionality
 const rest = new REST({ version: '9' }).setToken(token)
 
-// Create a new client instance
-const client = new Client({ intents: [
-	GatewayIntentBits.Guilds, 
-	GatewayIntentBits.GuildMessages,
-	GatewayIntentBits.GuildMembers,
-	GatewayIntentBits.GuildVoiceStates
-]})
-
-//***********************************************************/
-//Twitter setup
-//***********************************************************/
-
-const twitterClient = new Twitter(twitter)
-const {twitterchans} = require('./config.json')
-
-var twitfollow = ''
-
-for(var key in twitterchans){
-	if (twitterchans.hasOwnProperty(key)){
-		if (twitfollow == ''){
-			twitfollow = twitterchans[key]
-		} else {
-			twitfollow += ',' + twitterchans[key]
-		}
-	}
-}
-
-// Create a stream to follow tweets
-const stream = twitterClient.stream('statuses/filter', {
-	follow: twitfollow
-})
-
 const fetch = require('node-fetch') // required to call the Star Citizen API
 const success = true
 const failed = false
@@ -77,30 +45,72 @@ const chanBotTest = '907426072700801094'
 const chanSCNews = '818848322734260224'
 const chanPFCMusic = '898758865317937162'
 
-//Console listener
-const pebble = process.stdin
-pebble.addListener("data", result => {
-	
-	const text = result.toString().trim().split(/ +/g)
+// Create a new client instance
+const client = new Client({ intents: [
+	GatewayIntentBits.Guilds, 
+	GatewayIntentBits.GuildMessages,
+	GatewayIntentBits.GuildMembers,
+	GatewayIntentBits.GuildVoiceStates
+]})
 
-	switch (text[0]){
-		case 'run':
-			try{
-				client.commands.get(text[1]).execute()
-			} catch (error) {
-				console.log(error)
-			}
-		case 'say':
-			break;
-		default:
-	}	
-	
-	
-	if (text == 'webupdate'){
-		client.commands.get('webupdate').execute()
+client.chanBotLog = chanBotLog
+client.chanBotTest = chanBotTest
+client.chanSCNews = chanSCNews
+client.chanPFCMusic = chanPFCMusic
+
+//***********************************************************/
+//Twitter setup
+//***********************************************************/
+
+const twitterClient = new Twitter(twitter)
+const {twitterchans} = require('./config.json')
+
+var twitfollow = ''
+
+for(var key in twitterchans){
+	if (twitterchans.hasOwnProperty(key)){
+		if (twitfollow == ''){
+			twitfollow = twitterchans[key]
+		} else {
+			twitfollow += ',' + twitterchans[key]
+		}
 	}
+}
 
+// Create a stream to follow tweets
+const stream = twitterClient.stream('statuses/filter', {
+	follow: twitfollow
 })
+
+client.stream = stream
+
+stream
+	.on('error', (error) => {
+		client.channels.cache.get(chanBotLog).send('Error: (twitter)' + error.stack)
+	})
+	.on('tweet', tweet => {
+	const twitterMessage = '**'+tweet.user.name + '** just tweeted this!\n https://twitter.com/' + tweet.user.screen_name + '/status/' + tweet.id_str
+	
+	//Making sure that the bot has access to the News channel.  We dont want the dev bot posting there.
+	var botHasAccess = client.channels.cache.get(chanSCNews).permissionsFor(clientId).has(PermissionFlagsBits.ViewChannel)
+
+	if (tweet.retweeted_status
+    || tweet.in_reply_to_status_id
+    || tweet.in_reply_to_status_id_str
+    || tweet.in_reply_to_user_id
+    || tweet.in_reply_to_user_id_str
+    || tweet.in_reply_to_screen_name) {
+		return
+	} else {
+		
+		if (botHasAccess){
+			client.channels.cache.get(chanSCNews).send(twitterMessage)
+		} else {
+			client.channels.cache.get(chanBotLog).send(twitterMessage)
+		}
+	}
+	return false
+	})
 
 //***********************************************************/
 //Music Player Setup
@@ -111,6 +121,8 @@ const player = new Player(client, {
 	leaveOnStop: false,
 	leaveOnEnd: false// This options are optional.
 })
+
+client.player = player
 
 player
     // Emitted when channel was empty.
@@ -148,35 +160,10 @@ player
         client.channels.cache.get(chanBotLog).send('Error: (music)' + error.stack)
     })
 
-// With luck, this will keep twitter from killing the bot.
-stream
-	.on('error', (error) => {
-		client.channels.cache.get(chanBotLog).send('Error: (twitter)' + error.stack)
-	})
-	.on('tweet', tweet => {
-	const twitterMessage = '**'+tweet.user.name + '** just tweeted this!\n https://twitter.com/' + tweet.user.screen_name + '/status/' + tweet.id_str
-	
-	//Making sure that the bot has access to the News channel.  We dont want the dev bot posting there.
-	var botHasAccess = client.channels.cache.get(chanSCNews).permissionsFor(clientId).has(PermissionFlagsBits.ViewChannel)
 
-	if (tweet.retweeted_status
-    || tweet.in_reply_to_status_id
-    || tweet.in_reply_to_status_id_str
-    || tweet.in_reply_to_user_id
-    || tweet.in_reply_to_user_id_str
-    || tweet.in_reply_to_screen_name) {
-		return
-	} else {
-		
-		if (botHasAccess){
-			client.channels.cache.get(chanSCNews).send(twitterMessage)
-		} else {
-			client.channels.cache.get(chanBotLog).send(twitterMessage)
-		}
-	}
-	return false
-	})
-
+//***********************************************************/
+//Client Setup
+//***********************************************************/
 client
 	.once('ready', () => { 
 		client.channels.cache.get(chanBotLog).send('Startup completed!')
@@ -208,201 +195,6 @@ function announce(message){
 interaction.reply({ embeds: [responseEmbed] })
 }
 
-//============================================================================
-// This is the music bot section
-// 20211114 krh Initial Coding
-//============================================================================
-async function play(interaction){
-	const args = interaction.options._hoistedOptions[0].value
-	if (interaction.channel.id == chanPFCMusic || interaction.channel.id == chanBotTest) {
-		let guildQueue = player.getQueue(interaction.guild.id)
-		let queue = player.createQueue(interaction.guild.id)
-		try{
-			await queue.join(interaction.member.voice.channel)
-			interaction.reply({content: 'Adding your song to the queue', ephemeral: false})
-		} catch (error) {
-			interaction.reply("It doesn't look like you're in a voice channel that I can join.")
-			return
-		}
-		let song = await queue.play(args).catch(error => {
-			console.log(error.stack)				
-			if(!guildQueue)
-				queue.stop()
-		})
-	} else {
-		interaction.reply({content: 'I only accept that command in #music', ephemeral: true})
-	}
-		
-}
-
-async function playlist(interaction){
-	const args = interaction.options._hoistedOptions[0].value
-	if (interaction.channel.id == chanPFCMusic || interaction.channel.id == chanBotTest) {
-		let guildQueue = player.getQueue(interaction.guild.id)
-		let queue = player.createQueue(interaction.guild.id)
-		try{
-			await queue.join(interaction.member.voice.channel)
-			interaction.reply({content: 'Adding your playlist to the queue', ephemeral: false})
-		} catch (error) {
-			interaction.reply("It doesn't look like you're in a voice channel that I can join.")
-			return
-		}
-		let song = await queue.playlist(args).catch(error => {
-			console.log(error)
-			if(!guildQueue)
-				queue.stop()
-		})
-	} else {
-		interaction.reply('I only accept that command in #music')
-	}
-}
-
-async function shuffle(interaction) {
-	if (interaction.channel.id == chanPFCMusic || interaction.channel.id == chanBotTest) {
-		let guildQueue = player.getQueue(interaction.guild.id)
-		if (guildQueue == undefined){
-			interaction.reply('There is queue to shuffle right now.')
-		} else {
-			try{
-				guildQueue.shuffle()
-			} catch (error) {
-				client.channels.cache.get(chanBotLog).send (error)
-			}
-		interaction.reply({content: 'Now shuffling the playlist', ephemeral: false})
-		}
-	} else {
-		interaction.reply('I only accept that command in #music')
-	}
-}
-
-async function skip(interaction) {
-	if (interaction.channel.id == chanPFCMusic || interaction.channel.id == chanBotTest) {
-		let guildQueue = player.getQueue(interaction.guild.id)
-		if (guildQueue == undefined){
-			interaction.reply('There is no song playing right now.')
-		} else {
-			try{
-				guildQueue.skip()
-			} catch (error) {
-				client.channels.cache.get(chanBotLog).send (error)
-			}
-		interaction.reply({content: 'Song Skipped', ephemeral: false})
-		}
-	} else {
-		interaction.reply('I only accept that command in #music')
-	}
-}
-async function stop(interaction) {
-	if (interaction.channel.id == chanPFCMusic || interaction.channel.id == chanBotTest) {
-		let guildQueue = player.getQueue(interaction.guild.id)
-		if (guildQueue == undefined){
-			interaction.reply('There is no song playing right now.')
-		} else {
-			try{
-				guildQueue.stop()
-			} catch (error) {
-				client.channels.cache.get(chanBotLog).send(error)
-			}
-		interaction.reply({content: 'Queue Destroyed', ephemeral: false})
-		}
-	} else {
-		interaction.reply('I only accept that command in #music')
-	}
-}
-async function pause(interaction) {
-	if (interaction.channel.id == chanPFCMusic || interaction.channel.id == chanBotTest) {
-		let guildQueue = player.getQueue(interaction.guild.id)
-		if (guildQueue == undefined){
-			interaction.reply('There is no song playing right now.')
-		} else {
-			try{
-				guildQueue.setPaused(true)
-			} catch (error) {
-				client.channels.cache.get(chanBotLog).send (error)
-			}
-		interaction.reply({content: 'Music paused', ephemeral: false})
-		}
-	} else {
-		interaction.reply('I only accept that command in #music')
-	}
-}
-async function resume(interaction) {
-	if (interaction.channel.id == chanPFCMusic || interaction.channel.id == chanBotTest) {
-		let guildQueue = player.getQueue(interaction.guild.id)
-		if (guildQueue == undefined){
-			interaction.reply('There is no paused song.')
-		} else {
-			try{
-				guildQueue.setPaused(false)
-			} catch (error) {
-				client.channels.cache.get(chanBotLog).send (error)
-			}
-		interaction.reply({content: 'Music resumed', ephemeral: false})
-		}
-	} else {
-		interaction.reply('I only accept that command in #music')
-	}
-}
-async function clear(interaction) {
-	if (interaction.channel.id == chanPFCMusic || interaction.channel.id == chanBotTest) {
-		let guildQueue = player.getQueue(interaction.guild.id)
-		if (guildQueue == undefined){
-			interaction.reply({content: 'There is currently no queue.', ephemeral: true})
-		} else {
-			try{
-				guildQueue.clearQueue()
-			} catch (error) {
-				client.channels.cache.get(chanBotLog).send (error)
-			}
-		interaction.reply({content: 'Queue cleared', ephemeral: false})
-		}
-	} else {
-		interaction.reply('I only accept that command in #music')
-	}
-}
-async function queue(interaction) {
-	if (interaction.channel.id == chanPFCMusic || interaction.channel.id == chanBotTest) {
-		let guildQueue = player.getQueue(interaction.guild.id)
-		if (guildQueue == undefined){
-			interaction.reply({content: 'The queue is empty', ephemeral: true})
-			return
-		}
-		songs = guildQueue.songs
-		if (songs.length <= 10){
-			songs.forEach(song => {
-				client.channels.cache.get(chanPFCMusic).send(song.name)
-			})
-			interaction.reply({content: 'Done', ephemeral: true})
-		} else {
-			client.channels.cache.get(chanPFCMusic).send(interaction.user.username + ' requested the queue')
-			interaction.reply({content:"Its a long list.  I'll send it to your DMs.", ephemeral: true})
-			songs.forEach(song => { 
-			interaction.user.send(song.name)
-			})
-			interaction.editReply({content: 'Check your DMs', ephemeral: true})
-		}
-	} else {
-		interaction.reply('I only accept that command in #music')
-	}
-
-}
-async function playing(interaction) {
-	if (interaction.channel.id == chanPFCMusic || interaction.channel.id == chanBotTest) {
-		let guildQueue = player.getQueue(interaction.guild.id)
-		if (guildQueue == undefined){
-			interaction.reply('There is no song playing right now.')
-		} else {
-			try{
-				interaction.reply('Now Playing: ' + guildQueue.nowPlaying)
-			} catch (error) {
-				client.channels.cache.get(chanBotLog).send(error)
-			}
-		}
-	} else {
-		interaction.reply('I only accept that command in #music')
-	}
-}
-
 //This creates the commands so that they can be run.
 client.commands = new Collection()
 var cmdsToRegister = []
@@ -420,84 +212,6 @@ for (const file of commandFiles) {
 		console.error(error)
 	}
 }
-
-client.commands.set('play', play)
-cmdsToRegister.push({
-	name: 'play', 
-	description: 'Song or link to add to the queue', 
-	options: [{
-		type: 3,
-		name: 'song',
-		description: 'Song or link to add to the queue',
-		required: true
-	}], 
-	default_permissions: undefined})
-	
-client.commands.set('playlist', playlist)
-cmdsToRegister.push({
-	name: 'playlist', 
-	description: 'Playlist to add to the queue', 
-	options: [{
-		type: 3,
-		name: 'playlist',
-		description: 'playlist to add to the queue',
-		required: true
-	}], 
-	default_permissions: undefined})
-	
-client.commands.set('shuffle', shuffle)
-cmdsToRegister.push({
-	name: 'shuffle', 
-	description: 'Play the queue in a random order', 
-	options: [], 
-	default_permissions: undefined})
-	
-client.commands.set('skip', skip)
-cmdsToRegister.push({
-	name: 'skip', 
-	description: 'Skip the current song', 
-	options: [], 
-	default_permissions: undefined})
-	
-client.commands.set('stop', stop)
-cmdsToRegister.push({
-	name: 'stop', description: 'Stop the music and destroy the queue', 
-	options: [], 
-	default_permissions: undefined})
-	
-client.commands.set('pause', pause)
-cmdsToRegister.push({
-	name: 'pause', description: 'Pause the music (it can be resumed later)', 
-	options: [], 
-	default_permissions: undefined})
-	
-client.commands.set('resume', resume)
-cmdsToRegister.push({
-	name: 'resume', 
-	description: 'Resume the music after it has been paused', 
-	options: [], 
-	default_permissions: undefined})
-	
-client.commands.set('clear', clear)
-cmdsToRegister.push({
-	name: 'clear', 
-	description: 'Clear all songs from the pending queue', 
-	options: [], 
-	default_permissions: undefined})
-	
-client.commands.set('queue', queue)
-cmdsToRegister.push({
-	name: 'queue', 
-	description: 'Show the current queue', 
-	options: [], 
-	default_permissions: undefined})
-	
-client.commands.set('playing', playing)
-cmdsToRegister.push({
-	name: 'playing', 
-	description: 'Show the song that is currently playing', 
-	options: [], 
-	default_permissions: undefined});
 
 (async () => {
 	try {

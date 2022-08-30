@@ -9,7 +9,6 @@ module.exports ={
 	role: '849044491343757343', //Server Admin Only
 
 	async execute(interaction, client){
-		//const { getshopinfo } = require ('./weapshop/getshopinfo.js')
 		
 		var shops = null
 		
@@ -35,7 +34,6 @@ module.exports ={
 				database.query(querystring, function (err, result, fields) {
 					if (err) { console.log(err) }
 					shops = result
-					//console.log('Shop List Retrieved')
 					
 					querystring = "DELETE FROM SHOPS;"
 					database.query(querystring)
@@ -57,8 +55,7 @@ module.exports ={
 					shops.forEach(shop => {
 						querystring = "SELECT data FROM gamedata WHERE category_id = 6 AND name = '" + shop.name + "' AND version = (SELECT MAX(version) FROM gamedata)"
 						database.query(querystring, function (err, result, fields) {
-							if (err) { console.log(err) }
-							//console.log('Shop data retrieved for ' + shop.name)							
+							if (err) { console.log(err) }						
 							
 							const shopdata = JSON.parse(result[0].data.toString())
 							updateshop(database, shopdata, shop.name) //For some reason, We're not getting the Weapons Shop info into the database
@@ -83,13 +80,11 @@ module.exports ={
 				database.query(querystring, function (err, result, fields) {
 					if (err) { console.log(err) }
 					weaps = result
-					//console.log('Weapon List Retrieved')
 
 					weaps.forEach(weap => {
 						querystring = "SELECT data FROM gamedata WHERE category_id = 2 AND name = '" + weap.name + "' AND version = (SELECT MAX(version) FROM gamedata)"
 						database.query(querystring, function (err, result, fields) {
 							if (err) { console.log(err) }
-							//console.log('Weapon data retrieved for ' + weap.name)	
 							
 							const weapdata = JSON.parse(result[0].data.toString())
 							var Manufacturer
@@ -98,8 +93,6 @@ module.exports ={
 							Object.keys(keylist).forEach(key => {
 								if (key.startsWith("SCItemManufacturer")) {
 									Manufacturer = keylist[key].Localization.Name
-									//console.log(Manufacturer.Localization.Name)
-									//console.log(Manufacturer)
 								}	
 							})
 							
@@ -154,14 +147,12 @@ module.exports ={
 				database.query(querystring, function (err, result, fields) {
 					if (err) { console.log(err) }
 					mags = result
-					//console.log('Weapon Magazine List Retrieved')
 					
 
 					mags.forEach(mag => {
 						querystring = "SELECT data FROM gamedata WHERE category_id = 3 AND name = '" + mag.name + "' AND version = (SELECT MAX(version) FROM gamedata)"
 						database.query(querystring, function (err, result, fields) {
 							if (err) { console.log(err) }
-							//console.log('Magazine data retrieved for ' + mag.name)	
 							
 							const magdata = JSON.parse(result[0].data.toString())
 							var Manufacturer
@@ -170,8 +161,6 @@ module.exports ={
 							Object.keys(keylist).forEach(key => {
 								if (key.startsWith("SCItemManufacturer")) {
 									Manufacturer = keylist[key].Localization.Name
-									//console.log(Manufacturer.Localization.Name)
-									//console.log(Manufacturer)
 								}	
 							})
 							
@@ -226,14 +215,12 @@ module.exports ={
 				database.query(querystring, function (err, result, fields) {
 					if (err) { console.log(err) }
 					commodities = result
-					//console.log('Commodity List Retrieved')
 					
 
 					commodities.forEach(commodity => {
 						querystring = "SELECT data FROM gamedata WHERE category_id = 4 AND name = '" + commodity.name + "' AND version = (SELECT MAX(version) FROM gamedata)"
 						database.query(querystring, function (err, result, fields) {
 							if (err) { console.log(err) }
-							//console.log('Commodity data retrieved for ' + commodity.name)	
 							const commdata = JSON.parse(result[0].data.toString())
 							
 							var ID = commdata.__ref
@@ -301,14 +288,12 @@ module.exports ={
 				database.query(querystring, function (err, result, fields) {
 					if (err) { console.log(err) }
 					manufacturers = result
-					//console.log('Manufacturer List Retrieved')
 					
 
 					manufacturers.forEach(manufacturer => {
 						querystring = "SELECT data FROM gamedata WHERE category_id = 7 AND name = '" + manufacturer.name + "' AND version = (SELECT MAX(version) FROM gamedata)"
 						database.query(querystring, function (err, result, fields) {
 							if (err) { console.log(err) }
-							//console.log('Manufacturer data retrieved for ' + manufacturer.name)	
 							const manufdata = JSON.parse(result[0].data.toString())
 			
 							var ID = manufdata.__ref
@@ -347,14 +332,12 @@ module.exports ={
 				database.query(querystring, function (err, result, fields) {
 					if (err) { console.log(err) }
 					ships = result
-					//console.log('Ship List Retrieved')
 					
 
 					ships.forEach(ship => {
 						querystring = "SELECT data FROM gamedata WHERE category_id = 1 AND name = '" + ship.name + "' AND version = (SELECT MAX(version) FROM gamedata)"
 						database.query(querystring, function (err, result, fields) {
 							if (err) { console.log(err + " for " + ship.displayname) }
-							//console.log('Ship data retrieved for ' + ship.name)	
 							const shipdata = JSON.parse(result[0].data.toString())
 							const name = shipdata.name
 							const displayname = shipdata.displayname
@@ -426,9 +409,7 @@ function updateparts(database, part, name, damagemax){
 	}
 	
 	if (Array.isArray(part)){
-		//console.log("Array of parts found")
 		for (let i = 0; i < part.length; i++){
-			//console.log(part[i].name + " - part found. (2)")
 			updateparts(database, part[i], name, damagemax)
 		}
 	}
@@ -437,24 +418,19 @@ function updateparts(database, part, name, damagemax){
 		
 		if(part.ItemPort.flags != undefined){
 			
-			//console.log("Flags found")
-			
 			var splitflags = part.ItemPort.flags.split(" ")
 
 			for (let i = 0; i < splitflags.length; i++){
 				 if (splitflags[i] == "uneditable") {
-					//console.log("Uneditable part")
 					KEEP = false
 				} 
 			}
 
 			if (part.Parts != undefined){
-				//console.log("Found more parts")
 				updateparts(database, part.Parts.Part, name, damagemax)
 			} 
 			
 		} else {
-			//console.log("No flags for part - " + part.name)
 			if (part.Parts != undefined){
 				updateparts(database, part.Parts.Part, name, damagemax)
 			}
@@ -465,13 +441,11 @@ function updateparts(database, part, name, damagemax){
 	}
 	
 	if (part.Parts != undefined){
-		//console.log("Found more parts")
 		updateparts(database, part.Parts.Part, name, damagemax)
 	}
 
 	if(KEEP){
 		//Here's where we'll put the part data in.
-		//console.log(part.name + " - part found (1).")
 		
 		var _shipname = name
 		var _portname = ''
@@ -496,7 +470,6 @@ function updateparts(database, part, name, damagemax){
 			_portsubtype + "', " +
 			_maxsize + ", " +
 			_minsize + ")"
-			//console.log(querystring)
 			database.query(querystring)
 			database.commit()
 		})
@@ -508,18 +481,13 @@ function updateparts(database, part, name, damagemax){
 function updateshop(database, shopnode, shoptype){
 	
 	if (Array.isArray(shopnode)){
-		//console.log("Array of nodes found")
 		for (let i = 0; i < shopnode.length; i++){
-			//console.log(shopnode[i].Name + " - shop found.")
 			updateshop(database, shopnode[i], shoptype)
 		}
 	}
 	
-	//console.log(shopnode.Name + " - current node.")
-	
 	if (shopnode.ShopInventoryNodes != undefined && shopnode.ShopInventoryNodes != null){
 		const invnode = shopnode.ShopInventoryNodes.ShopInventoryNode
-		//console.log(shopnode.Name + " - inventory found.")
 		updateinv(database, invnode, shopnode.ID)
 		
 		database.beginTransaction(function(err) {
@@ -536,7 +504,6 @@ function updateshop(database, shopnode, shoptype){
 	
 	if (shopnode.ShopLayoutNodes != undefined && shopnode.ShopLayoutNodes != null){
 		const nextnode = shopnode.ShopLayoutNodes.ShopLayoutNode
-		//console.log(shopnode.Name + " - layout found.")
 		updateshop(database, nextnode, shoptype)
 		return
 	}

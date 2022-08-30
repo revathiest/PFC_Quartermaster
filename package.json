@@ -14,5 +14,6 @@
     "tweetnacl": "^1.0.3",
     "twit": "^2.2.11",
     "ytdl-core": "^4.11.1"
-  }
+  },
+  "main": "bot.js"
 }

@@ -61,7 +61,7 @@ stream
 	const twitterMessage = '**'+tweet.user.name + '** just tweeted this!\n https://twitter.com/' + tweet.user.screen_name + '/status/' + tweet.id_str
 	
 	//Making sure that the bot has access to the News channel.  We dont want the dev bot posting there.
-	var botHasAccess = client.channels.cache.get(chanSCNews).permissionsFor(clientId).has(PermissionFlagsBits.ViewChannel)
+	var botHasAccess = client.channels.cache.get(chanSCNews).permissionsFor(clientId).has(PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages)
 
 	if (tweet.retweeted_status
     || tweet.in_reply_to_status_id

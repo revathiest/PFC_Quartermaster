@@ -7,6 +7,7 @@ const fs = require('fs') // imports the file io library
 const { Player } = require("discord-music-player") // required for music functionality
 const { clientId, guildId, token, dbinfo, twitter} = require('./config.json')
 const rest = new REST({ version: '9' }).setToken(token)
+const{process_messages, test_message} = require("./process_messages")
 
 //PFC Discord Channel Definitions
 const chanBotLog = '908482195214172200'
@@ -19,7 +20,10 @@ const client = new Client({ intents: [
 	GatewayIntentBits.Guilds, 
 	GatewayIntentBits.GuildMessages,
 	GatewayIntentBits.GuildMembers,
-	GatewayIntentBits.GuildVoiceStates
+	GatewayIntentBits.GuildVoiceStates,
+	GatewayIntentBits.DirectMessages, 
+	GatewayIntentBits.MessageContent,
+	GatewayIntentBits.GuildScheduledEvents
 ]})
 
 client.chanBotLog = chanBotLog
@@ -213,6 +217,10 @@ for (const file of playercommandFiles) {
 	}
 })()
 
+//***********************************************************/
+//Client Setup
+//***********************************************************/
+
 client.on('interactionCreate', async interaction => {
 	
 	var roles = interaction.member._roles
@@ -281,7 +289,23 @@ client.once('ready', () => {
 // Login to Discord with your client's token
 client.login(token)
 
+//***********************************************************/
+//This is the chat reaction section
+//***********************************************************/
 
+var allowmessage = true;
 
+setInterval(() => {
+	allowmessage = true;
+}, 30000);
 
+client.on("messageCreate", function(message){
+    allowmessage = process_messages(message, allowmessage);
+});
 
+// Here is where we set up the chatter
+
+function sendsomeMessage() {
+	console.log("Hello world!")
+}
+setInterval(sendsomeMessage, 1000)

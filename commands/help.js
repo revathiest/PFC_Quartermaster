@@ -13,7 +13,6 @@ module.exports ={
 	async execute(interaction, client){
 		
 		const { EmbedBuilder } = require ('discord.js')
-		const bot = require ( './../bot.js')
 			
 		const responseEmbed = new EmbedBuilder()
 			.setColor('#0099ff')

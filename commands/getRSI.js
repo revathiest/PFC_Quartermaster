@@ -6,7 +6,7 @@ module.exports ={
 		"name":"Get RSI Profile"
 	},
 
-	async execute(interaction, client){
+	async execute(interaction){
 		
 		// Star Citizen API URL definitions
 		const SCAApiBase = 'https://api.starcitizen-api.com/77210b95720bd50b3584ead32936dfd4/v1/'

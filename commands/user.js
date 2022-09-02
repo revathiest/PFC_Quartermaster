@@ -26,7 +26,13 @@ module.exports ={
 		const fetch = require('node-fetch') // required to call the Star Citizen API
 		const { EmbedBuilder } = require ('discord.js') // required to send the embed to Discord
 		
-		const temp = interaction.targetMember.nickname.split(" ")
+		var temp
+
+		if (!interaction.targetMember.nickname){
+			temp = interaction.targetUser.username.split(" ")
+		} else {
+			temp = interaction.targetMember.nickname.split(" ")
+		}
 		var username = temp[temp.length - 1]		
 		
 		var answer = await fetch(SCApiEagerUser + username).then(response => response.text())

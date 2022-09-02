@@ -23,7 +23,9 @@ const client = new Client({ intents: [
 	GatewayIntentBits.GuildVoiceStates,
 	GatewayIntentBits.DirectMessages, 
 	GatewayIntentBits.MessageContent,
-	GatewayIntentBits.GuildScheduledEvents
+	GatewayIntentBits.GuildScheduledEvents,
+	GatewayIntentBits.GuildPresences,
+	GatewayIntentBits.GuildIntegrations
 ]})
 
 client.chanBotLog = chanBotLog
@@ -181,7 +183,13 @@ for (const file of commandFiles) {
 	// With the key as the command name and the value as the exported module
 	try{
 		client.commands.set(command.data.name, command)
-		cmdsToRegister.push(command.data.toJSON())
+		try{
+			cmdsToRegister.push(command.data.toJSON())
+			console.log(JSON.stringify(command.data.toJSON()))
+		}catch{
+			cmdsToRegister.push(command.data)
+			console.log(JSON.stringify(command.data))
+		}
 		console.log('Registered command ' + command.data.name)
 	} catch (error) {
 		console.error(error)
@@ -280,11 +288,33 @@ client.on('interactionCreate', async interaction => {
 client.on('error', (error) => {
 		client.channels.cache.get(chanBotLog).send('Error: (client)' + error.stack)
 	})
+	
+client.on("userUpdate", function(oldMember, newMember){
+	const membername = newMember.nickname
+	console.log(`a guild member's presence changes`);
+});
 
 // When the client is ready, run this code (only once)
 client.once('ready', () => {
 	console.log('Ready!')
 })
+
+client.on("userNoteUpdate", function(user, oldNote, newNote){
+	const tmpuser = user
+	const tmpoldNote = oldNote
+	const tmpnewNote = newNote
+    console.log(`a member's note is updated`);
+});
+
+// presenceUpdate
+/* Emitted whenever a guild member's presence changes, or they change one of their details.
+PARAMETER    TYPE               DESCRIPTION
+oldMember    GuildMember        The member before the presence update
+newMember    GuildMember        The member after the presence update    */
+client.on("presenceUpdate", function(oldMember, newMember){
+	var tempnewMember = newMember.member.displayName
+    console.log(`a guild member's presence changes: ` + tempnewMember);
+});
 
 // Login to Discord with your client's token
 client.login(token)
@@ -306,6 +336,6 @@ client.on("messageCreate", function(message){
 // Here is where we set up the chatter
 
 function sendsomeMessage() {
-	console.log("Hello world!")
+	//console.log("Hello world!")
 }
 setInterval(sendsomeMessage, 1000)

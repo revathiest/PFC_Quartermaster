@@ -1,12 +1,14 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
-const { dbinfo } = require('./../config.json')
+const { dbinfo, botPermsReq } = require('./../config.json')
+const Builder = new SlashCommandBuilder()
+
+Builder.type = 1
+Builder.default_member_permissions = botPermsReq
+Builder.setName('dataupdate')
+Builder.setDescription('*ADMIN COMMAND* Update info from game data')
 
 module.exports ={
-	data: new SlashCommandBuilder()
-		.setName('dataupdate')
-		.setDescription('*ADMIN COMMAND* Update info from game data'),
-
-	role: '849044491343757343', //Server Admin Only
+	data: Builder,
 
 	async execute(interaction, client){
 		

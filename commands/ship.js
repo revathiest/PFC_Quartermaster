@@ -2,12 +2,17 @@ const { SlashCommandBuilder } = require('@discordjs/builders')
 const { EmbedBuilder, ActionRowBuilder, SelectMenuBuilder } = require ('discord.js') // required to send the embed to Discord
 const fetch = require('node-fetch') // required to call the Star Citizen API
 var ship
+const { botPermsReq } = require('./../config.json')
+const Builder = new SlashCommandBuilder()
+
+Builder.type = 1
+Builder.default_member_permissions = botPermsReq
+Builder	.setName('ship')
+Builder.setDescription('Get information about a Ship')
+Builder.addStringOption(option => option.setName('name').setDescription('The name of the ship to look up.').setRequired(true)),
 
 module.exports = {
-	data: new SlashCommandBuilder()
-		.setName('ship')
-		.setDescription('Get information about a Ship')
-		.addStringOption(option => option.setName('name').setDescription('The name of the ship to look up.').setRequired(true)),
+	data: Builder,
 
 	async execute(interaction, client){
 		

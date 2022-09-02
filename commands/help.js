@@ -1,9 +1,14 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
+const { botPermsReq } = require('./../config.json')
+const Builder = new SlashCommandBuilder()
+
+Builder.type = 1
+Builder.default_member_permissions = botPermsReq
+Builder.setName('help')
+Builder.setDescription('Sends Help information to the user')
 
 module.exports ={
-	data: new SlashCommandBuilder()
-		.setName('help')
-		.setDescription('Sends Help information to the user'),
+	data: Builder,
 
 	//============================================================================
 	// 20211109 krh Initial Coding

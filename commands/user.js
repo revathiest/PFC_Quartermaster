@@ -1,10 +1,10 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
 
 module.exports ={
-	data: new SlashCommandBuilder()
-		.setName('user')
-		.setDescription('Retrieves user information from the Star Citizen API')
-		.addStringOption(option => option.setName('name').setDescription('The name of the user to look up.')),
+	data: {
+		"type":2,
+		"name":"Get RSI Profile"
+	},
 
 	async execute(interaction, client){
 		
@@ -26,7 +26,8 @@ module.exports ={
 		const fetch = require('node-fetch') // required to call the Star Citizen API
 		const { EmbedBuilder } = require ('discord.js') // required to send the embed to Discord
 		
-		const username = interaction.options._hoistedOptions[0].value
+		const temp = interaction.targetMember.nickname.split(" ")
+		var username = temp[temp.length - 1]		
 		
 		var answer = await fetch(SCApiEagerUser + username).then(response => response.text())
 		var user = JSON.parse(answer)
@@ -105,7 +106,7 @@ module.exports ={
 			interaction.reply({content: 'Check your DMs', ephemeral: true})
 		
 		} else {
-			interaction.reply('That user does not exist.')
+			interaction.reply('RSI doesnt recognize that user.')
 		}
 	}
 

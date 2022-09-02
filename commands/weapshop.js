@@ -1,14 +1,16 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
-const { dbinfo } = require('./../config.json')
+const { dbinfo , botPermsReq } = require('./../config.json')
+const Builder = new SlashCommandBuilder()
+
+Builder.type = 1
+Builder.default_member_permissions = botPermsReq
+Builder.setName('weapshop')
+Builder.setDescription('Get information about Weapon Shops **IN DEVELOPMENT**')
+Builder.addStringOption(option => option.setName('name').setDescription('The ID of the shop to look up.'))
+Builder.addStringOption(option => option.setName('location').setDescription('The location of the shop to look up.')),
 
 module.exports ={
-	data: new SlashCommandBuilder()
-		.setName('weapshop')
-		.setDescription('Get information about Weapon Shops **IN DEVELOPMENT**')
-		.addStringOption(option => option.setName('name').setDescription('The ID of the shop to look up.'))
-		.addStringOption(option => option.setName('location').setDescription('The location of the shop to look up.')),
-
-	role: '849044491343757343',
+	data: Builder,
 
 	async execute(interaction, client){
 		const { getshopinfo } = require ('./weapshop/getshopinfo.js')

@@ -1,10 +1,15 @@
 const {SlashCommandBuilder } = require('@discordjs/builders')
+const { botPermsReq } = require('./../config.json')
+const Builder = new SlashCommandBuilder()
+
+Builder.type = 1
+Builder.default_member_permissions = botPermsReq
+Builder.setName('org')
+Builder.setDescription('Retrieves information about an Organization from the Star Citizen API')
+Builder.addStringOption(option => option.setName('name').setDescription('The name of the Organization to look up.').setRequired(true)),
 
 module.exports ={
-	data: new SlashCommandBuilder()
-		.setName('org')
-		.setDescription('Retrieves information about an Organization from the Star Citizen API')
-		.addStringOption(option => option.setName('name').setDescription('The name of the Organization to look up.').setRequired(true)),
+	data: Builder,
 
 	async execute(interaction, client){
 		

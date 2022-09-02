@@ -1,10 +1,15 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
 const { mysql } = require('mysql')
+const { botPermsReq } = require('./../config.json')
+const Builder = new SlashCommandBuilder()
+
+Builder.type = 1
+Builder.default_member_permissions = botPermsReq
+Builder.setName('test')
+Builder.setDescription('A test command for testing discord.js features'),
 
 module.exports ={
-	data: new SlashCommandBuilder()
-	.setName('test')
-	.setDescription('A test command for testing discord.js features'),
+	data: Builder,
 
 	async execute(interaction, client){
 

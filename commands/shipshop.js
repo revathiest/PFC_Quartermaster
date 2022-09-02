@@ -1,10 +1,15 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
+const { botPermsReq } = require('./../config.json')
+const Builder = new SlashCommandBuilder()
+
+Builder.type = 1
+Builder.default_member_permissions = botPermsReq
+Builder.setName('shipshop')
+Builder.setDescription('Get information about Ship Shops')
+Builder.addStringOption(option => option.setName('model').setDescription('The ID of the shop to look up.')),
 
 module.exports ={
-	data: new SlashCommandBuilder()
-		.setName('shipshop')
-		.setDescription('Get information about Ship Shops')
-		.addStringOption(option => option.setName('model').setDescription('The ID of the shop to look up.')),
+	data: Builder,
 
 	async execute(interaction, client){
 		

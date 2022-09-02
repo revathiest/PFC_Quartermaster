@@ -1,9 +1,14 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
+const { botPermsReq } = require('./../config.json')
+const Builder = new SlashCommandBuilder()
+
+Builder.type = 1
+Builder.default_member_permissions = botPermsReq
+Builder	.setName('reset')
+Builder.setDescription('Restarts the Quartermaster (Admin only)')
 
 module.exports ={
-	data: new SlashCommandBuilder()
-	.setName('reset')
-	.setDescription('Restarts the Quartermaster (Admin only)'),
+	data: Builder,
 
 	async execute(interaction, client){
 	

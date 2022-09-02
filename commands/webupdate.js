@@ -1,6 +1,12 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
-const { dbinfo } = require('./../config.json')
+const { dbinfo ,botPermsReq } = require('./../config.json')
 const fetch = require('node-fetch') // required to call the Star Citizen API
+const Builder = new SlashCommandBuilder()
+
+Builder.type = 1
+Builder.default_member_permissions = botPermsReq
+Builder.setName('webupdate')
+Builder.setDescription('*ADMIN COMMAND* Update info from RSI website')
 	
 // Star Citizen API URL 
 const SCAApi = 'https://api.starcitizen-api.com/77210b95720bd50b3584ead32936dfd4/v1/live/'
@@ -20,10 +26,7 @@ const RequestTypes = [
 		
 
 module.exports ={
-	data: new SlashCommandBuilder()
-		.setName('webupdate')
-		.setDescription('*ADMIN COMMAND* Update info from RSI website'),
-	role: '849044491343757343', //Server Admin Only
+	data: Builder,
 
 	async execute(interaction, client){
 		

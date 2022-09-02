@@ -1,10 +1,14 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
-const { EmbedBuilder, ActionRowBuilder, SelectMenuBuilder } = require ('discord.js') // required to send the embed to Discord
+const { botPermsReq } = require('./../../config.json')
+const Builder = new SlashCommandBuilder()
+
+Builder.type = 1
+Builder.default_member_permissions = botPermsReq
+Builder.setName('playing')
+Builder.setDescription('Show the song that is currently playing')
 
 module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('playing')
-        .setDescription('Show the song that is currently playing'),
+    data: Builder,
 
     async execute(interaction, client) {
         if (interaction.channel.id == client.chanPFCMusic || interaction.channel.id == client.chanBotTest) {

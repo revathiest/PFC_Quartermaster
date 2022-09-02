@@ -1,9 +1,14 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
+const { botPermsReq } = require('./../../config.json')
+const Builder = new SlashCommandBuilder()
+
+Builder.type = 1
+Builder.default_member_permissions = botPermsReq
+Builder.setName('skip')
+Builder.setDescription('Skip the current song')
 
 module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('skip')
-        .setDescription('Skip the current song'),
+    data: Builder,
 
     async execute(interaction, client) {
         if (interaction.channel.id == client.chanPFCMusic || interaction.channel.id == client.chanBotTest) {

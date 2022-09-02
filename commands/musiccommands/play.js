@@ -1,10 +1,15 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
+const { botPermsReq } = require('./../../config.json')
+const Builder = new SlashCommandBuilder()
+
+Builder.type = 1
+Builder.default_member_permissions = botPermsReq
+Builder.setName('play')
+Builder.setDescription('Add a song to the queue')
+Builder.addStringOption(option => option.setName('name').setDescription('The name of the song you want to hear.').setRequired(true))
 
 module.exports = {
-	data: new SlashCommandBuilder()
-		.setName('play')
-		.setDescription('Add a song to the queue')
-		.addStringOption(option => option.setName('name').setDescription('The name of the song you want to hear.').setRequired(true)),
+	data: Builder,
 
     async execute(interaction, client){
         const args = interaction.options._hoistedOptions[0].value

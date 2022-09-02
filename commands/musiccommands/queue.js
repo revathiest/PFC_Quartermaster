@@ -1,9 +1,14 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
+const { botPermsReq } = require('./../../config.json')
+const Builder = new SlashCommandBuilder()
+
+Builder.type = 1
+Builder.default_member_permissions = botPermsReq
+Builder.setName('queue')
+Builder.setDescription('Show the current queue.')
 
 module.exports = {
-	data: new SlashCommandBuilder()
-        .setName('queue')
-        .setDescription('Show the current queue.'),
+	data: Builder,
 
     async execute(interaction, client) {
         if (interaction.channel.id == client.chanPFCMusic || interaction.channel.id == client.chanBotTest) {

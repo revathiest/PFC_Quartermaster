@@ -185,10 +185,8 @@ for (const file of commandFiles) {
 		client.commands.set(command.data.name, command)
 		try{
 			cmdsToRegister.push(command.data.toJSON())
-			console.log(JSON.stringify(command.data.toJSON()))
 		}catch{
 			cmdsToRegister.push(command.data)
-			console.log(JSON.stringify(command.data))
 		}
 		console.log('Registered command ' + command.data.name)
 	} catch (error) {

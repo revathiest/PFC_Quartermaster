@@ -1,7 +1,10 @@
+const { botPermsReq } = require('../config.json')
+	
 module.exports ={
 	data: {
 		"type":2,
-		"name":"Get RSI Profile"
+		"name":"Get RSI Profile",
+		"default_member_permissions":botPermsReq
 	},
 
 	async execute(interaction){
@@ -25,6 +28,8 @@ module.exports ={
 		const { EmbedBuilder } = require ('discord.js') // required to send the embed to Discord
 		
 		var temp
+		
+		await interaction.deferReply();
 
 		if (!interaction.targetMember.nickname){
 			temp = interaction.targetUser.username.split(" ")
@@ -38,7 +43,7 @@ module.exports ={
 		
 		if (user.data == null ){
 			if (user.data == null){
-				interaction.reply({content: user.message, ephemeral: true})
+				interaction.editReply({content: user.message, ephemeral: true})
 				return
 			}
 		}
@@ -107,10 +112,10 @@ module.exports ={
 			}
 			
 			interaction.user.send({ embeds: [responseEmbed] })
-			interaction.reply({content: 'Check your DMs', ephemeral: true})
+			interaction.editReply({content: 'Check your DMs', ephemeral: true})
 		
 		} else {
-			interaction.reply('RSI doesnt recognize that user.')
+			interaction.editReply('RSI doesnt recognize that user.')
 		}
 	}
 

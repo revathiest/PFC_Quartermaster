@@ -1,7 +1,10 @@
+const { botPermsReq } = require('../config.json')
+
 module.exports ={
 	data: {
 		"type":2,
-		"name":"Get RSI Org"
+		"name":"Get RSI Org",
+		"default_member_permissions":botPermsReq
 	},
 
 	async execute(interaction, client){
@@ -26,6 +29,8 @@ module.exports ={
 
 		var temp
 
+		await interaction.deferReply();
+
 		if (!interaction.targetMember.nickname){
 			temp = interaction.targetUser.username.split(" ")
 		} else {
@@ -38,7 +43,7 @@ module.exports ={
 		
 		if (user.data == null ){
 			if (user.data == null){
-				interaction.reply({content: user.message, ephemeral: true})
+				interaction.editReply({content: user.message, ephemeral: true})
 				return
 			}
 		}
@@ -54,7 +59,7 @@ module.exports ={
 		
 		if (org.data == null ){
 			if (org.data == null){
-				interaction.reply(org.message)
+				interaction.editReply(org.message)
 				return
 			}
 		}
@@ -91,10 +96,10 @@ module.exports ={
 			
 			
 			interaction.user.send({ embeds: [responseEmbed] })
-			interaction.reply({content: 'Check your DMs', ephemeral: true})
+			interaction.editReply({content: 'Check your DMs', ephemeral: true})
 		
 		} else {
-			interaction.reply(SCApiLiveOrganization + orgname)
+			interaction.editReply(SCApiLiveOrganization + orgname)
 		}
 	}
 

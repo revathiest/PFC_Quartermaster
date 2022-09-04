@@ -7,13 +7,14 @@ const fs = require('fs') // imports the file io library
 const { Player } = require("discord-music-player") // required for music functionality
 const { clientId, guildId, token, dbinfo, twitter} = require('./config.json')
 const rest = new REST({ version: '9' }).setToken(token)
-const{process_messages, test_message} = require("./process_messages")
+const{ process_messages } = require("./process_messages")
 
 //PFC Discord Channel Definitions
-const chanBotLog = '908482195214172200'
-const chanBotTest = '907426072700801094'
-const chanSCNews = '818848322734260224'
-const chanPFCMusic = '898758865317937162'
+var chanBotLog
+var chanBotTest
+var chanSCNews
+var chanPFCMusic
+var chanPFCRules
 
 // Create a new client instance
 const client = new Client({ intents: [
@@ -25,7 +26,8 @@ const client = new Client({ intents: [
 	GatewayIntentBits.MessageContent,
 	GatewayIntentBits.GuildScheduledEvents,
 	GatewayIntentBits.GuildPresences,
-	GatewayIntentBits.GuildIntegrations
+	GatewayIntentBits.GuildIntegrations,
+	GatewayIntentBits.GuildMessageReactions
 ]})
 
 client.chanBotLog = chanBotLog
@@ -39,6 +41,7 @@ client.chanPFCMusic = chanPFCMusic
 
 const twitterClient = new Twitter(twitter)
 const {twitterchans} = require('./config.json')
+const { updaterules } = require('./botactions/updaterules')
 
 var twitfollow = ''
 
@@ -134,15 +137,6 @@ player
     .on('error', (error, queue) => {
         client.channels.cache.get(chanBotLog).send('Error: (music)' + error.stack)
     })
-
-
-//***********************************************************/
-//Client Setup
-//***********************************************************/
-client
-	.once('ready', () => { 
-		client.channels.cache.get(chanBotLog).send('Startup completed!')
-	})
 
 //============================================================================
 // This is the PFC Announcement embed
@@ -283,6 +277,82 @@ client.on('interactionCreate', async interaction => {
 	}
 })
 
+client.on('messageReactionAdd', (reaction, user) => {
+	//Was the reaction in the rules channel?
+	if (reaction.message.channel.id == chanBotLog){
+		switch(reaction.emoji.name){
+			case 'Flame':
+				var userid = user.id
+				client.guilds.fetch(guildId).then(guild => {
+					guild.members.fetch(userid).then(member => {
+						member.roles.add('833440108647677953') //Recruit
+						console.log(member.name)
+					})
+				})
+				break
+			case 'StarCitizen':
+				var userid = user.id
+				client.guilds.fetch(guildId).then(guild => {
+					guild.members.fetch(userid).then(member => {
+						member.roles.add('823083914116595743') //Stowaway
+						console.log(member.name)
+					})
+				})
+				break
+			case '🎖️':
+				var userid = user.id
+				client.guilds.fetch(guildId).then(guild => {
+					guild.members.fetch(userid).then(member => {
+						member.roles.add('833415056783441931') //Affiliate
+						console.log(member.name)
+					})
+				})
+				break
+			default:
+				console.log(`It's not one of the role reactions`)
+				console.log('it was '+ reaction.emoji.name)
+		}
+	}
+})
+
+client.on('messageReactionRemove', (reaction, user) =>{
+	//Was the reaction in the rules channel?
+	if (reaction.message.channel.id == chanBotLog){
+		switch(reaction.emoji.name){
+			case 'Flame':
+				var userid = user.id
+				client.guilds.fetch(guildId).then(guild => {
+					guild.members.fetch(userid).then(member => {
+						member.roles.remove('833440108647677953') //Recruit
+						console.log(member.name)
+					})
+				})
+				break
+			case 'StarCitizen':
+				var userid = user.id
+				client.guilds.fetch(guildId).then(guild => {
+					guild.members.fetch(userid).then(member => {
+						member.roles.remove('823083914116595743') //Stowaway
+						console.log(member.name)
+					})
+				})
+				break
+			case '🎖️':
+				var userid = user.id
+				client.guilds.fetch(guildId).then(guild => {
+					guild.members.fetch(userid).then(member => {
+						member.roles.remove('833415056783441931') //Affiliate
+						console.log(member.name)
+					})
+				})
+				break
+			default:
+				console.log(`It's not one of the role reactions`)
+				console.log('it was '+ reaction.emoji.name)
+		}
+	}
+})
+
 client.on('error', (error) => {
 		client.channels.cache.get(chanBotLog).send('Error: (client)' + error.stack)
 	})
@@ -295,6 +365,39 @@ client.on("userUpdate", function(oldMember, newMember){
 // When the client is ready, run this code (only once)
 client.once('ready', () => {
 	console.log('Ready!')
+
+	client.channels._cache.forEach(channel => {
+		if(channel.type == 0){
+			switch(channel.name){
+				case 'star-citizen-news':
+					chanSCNews = channel.id
+					console.log("Channel " + channel.name + " registered.")
+					break;
+				case 'pfc-bot-testing':
+					chanBotTest = channel.id
+					console.log("Channel " + channel.name + " registered.")
+					break;
+				case 'pfc-bot-activity-log':
+					chanBotLog = channel.id
+					console.log("Channel " + channel.name + " registered.")
+					break;
+				case 'music':
+					chanPFCMusic = channel.id
+					console.log("Channel " + channel.name + " registered.")
+					break;
+				case 'rules':
+					chanPFCRules = channel.id
+					console.log("Channel " + channel.name + " registered.")
+					break;
+				default:		
+			}
+		}
+	})
+
+	client.channels.cache.get(chanBotLog).send('Startup Complete!')
+
+	updaterules(client, chanBotLog)
+
 })
 
 client.on("userNoteUpdate", function(user, oldNote, newNote){
@@ -327,7 +430,7 @@ setInterval(() => {
 	allowmessage = true;
 }, 30000);
 
-client.on("messageCreate", function(message){
+client.on("messageCreate", function(message, interaction){
     allowmessage = process_messages(message, allowmessage);
 });
 

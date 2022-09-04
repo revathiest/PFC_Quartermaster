@@ -12,6 +12,8 @@ module.exports ={
 	data: Builder,
 
 	async execute(interaction, client){
+
+		interaction.deferReply({ephemeral: true})
 		
 		// message.channel.send("Nice try.  It's not ready yet")
 		// return
@@ -20,8 +22,8 @@ module.exports ={
 		
 		// Database Definitions
 		const mysql = require('mysql')
-		const connectioninfo = require ("../database.json")
-		const database = mysql.createConnection(connectioninfo)
+		const { dbinfo } = require ("../config.json")
+		const database = mysql.createConnection(dbinfo)
 		
 		//initiate the database connection
 		database.connect(

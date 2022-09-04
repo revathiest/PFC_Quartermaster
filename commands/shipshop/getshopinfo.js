@@ -28,7 +28,7 @@ module.exports ={
 				}
 			})
 			interaction.user.send({ embeds: [responseEmbed] })
-			interaction.reply({content: 'Check your DMs', ephemeral: true})
+			interaction.editReply({content: 'Check your DMs', ephemeral: true})
 			return
 		}
 		
@@ -89,7 +89,7 @@ module.exports ={
 				
 				//console.log(shiplist)
 				interaction.user.send({ embeds: [responseEmbed] })
-			interaction.reply({content: 'Check your DMs', ephemeral: true})
+			interaction.editReply({content: 'Check your DMs', ephemeral: true})
 
 				//Here is where we'll get the list of shops
 				//And after we've sent the embed... we'll return

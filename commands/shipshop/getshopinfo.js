@@ -7,10 +7,6 @@ module.exports ={
 		var shops = dealers.ShopLayoutNodes.ShopLayoutNode
 		var shiplist = []
 		
-		if(!interaction.deferred){
-			interaction.deferReply({ephemeral: true})
-		}
-		
 		// No arguments were provided
 		if (args == undefined || args == null || args == ''){
 
@@ -32,7 +28,7 @@ module.exports ={
 				}
 			})
 			interaction.user.send({ embeds: [responseEmbed] })
-			interaction.editReply({content: 'Check your DMs', ephemeral: true})
+			
 			return
 		}
 		
@@ -93,19 +89,18 @@ module.exports ={
 				
 				//console.log(shiplist)
 				interaction.user.send({ embeds: [responseEmbed] })
-			interaction.editReply({content: 'Check your DMs', ephemeral: true})
+				
+				if(interaction.deferred){
+					interaction.editReply({content: 'Check your DMs', ephemeral: true})
+				} else {
+					interaction.reply({content: 'Check your DMs', ephemeral: true})
+				}
 
 				//Here is where we'll get the list of shops
 				//And after we've sent the embed... we'll return
 				return
 			}
 		})
-		
-		
-		
-		
-		
-		
-		
+	
 	}
 }

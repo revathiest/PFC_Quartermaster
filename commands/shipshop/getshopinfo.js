@@ -28,6 +28,12 @@ module.exports ={
 				}
 			})
 			interaction.user.send({ embeds: [responseEmbed] })
+				
+			if(interaction.deferred || interaction.replied){
+				interaction.editReply({content: 'Check your DMs', ephemeral: true})
+			} else {
+				interaction.reply({content: 'Check your DMs', ephemeral: true})
+			}
 			
 			return
 		}
@@ -89,8 +95,8 @@ module.exports ={
 				
 				//console.log(shiplist)
 				interaction.user.send({ embeds: [responseEmbed] })
-				
-				if(interaction.deferred){
+
+				if(interaction.deferred || interaction.replied){
 					interaction.editReply({content: 'Check your DMs', ephemeral: true})
 				} else {
 					interaction.reply({content: 'Check your DMs', ephemeral: true})

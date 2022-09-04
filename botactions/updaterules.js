@@ -80,9 +80,7 @@ async function setmessage(client, embedid, rulesEmbed, ruleschannel){
 	var channel = client.channels.cache.get(ruleschannel)
 
 		try{
-			messagetoUpdate = await channel.messages.fetch(embedid)	
-			console.log(messagetoUpdate)
-			console.log(messagetoUpdate.id)
+			messagetoUpdate = await channel.messages.fetch(embedid)
 			if(messagetoUpdate.author.id == client.user.id){
 				messagetoUpdate.edit({embeds: [rulesEmbed]})
 				return 'success'

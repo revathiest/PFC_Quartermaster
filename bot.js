@@ -30,11 +30,6 @@ const client = new Client({ intents: [
 	GatewayIntentBits.GuildMessageReactions
 ]})
 
-client.chanBotLog = chanBotLog
-client.chanBotTest = chanBotTest
-client.chanSCNews = chanSCNews
-client.chanPFCMusic = chanPFCMusic
-
 //***********************************************************/
 //Twitter setup
 //***********************************************************/
@@ -371,22 +366,27 @@ client.once('ready', () => {
 			switch(channel.name){
 				case 'star-citizen-news':
 					chanSCNews = channel.id
+					client.chanSCNews = chanSCNews
 					console.log("Channel " + channel.name + " registered.")
 					break;
 				case 'pfc-bot-testing':
 					chanBotTest = channel.id
+					client.chanBotTest = chanBotTest
 					console.log("Channel " + channel.name + " registered.")
 					break;
 				case 'pfc-bot-activity-log':
 					chanBotLog = channel.id
+					client.chanBotLog = chanBotLog
 					console.log("Channel " + channel.name + " registered.")
 					break;
 				case 'music':
 					chanPFCMusic = channel.id
+					client.chanPFCMusic = chanPFCMusic
 					console.log("Channel " + channel.name + " registered.")
 					break;
 				case 'rules':
 					chanPFCRules = channel.id
+					client.chanPFCRules = chanPFCRules
 					console.log("Channel " + channel.name + " registered.")
 					break;
 				default:		

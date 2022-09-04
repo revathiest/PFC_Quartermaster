@@ -7,6 +7,10 @@ module.exports ={
 		var shops = dealers.ShopLayoutNodes.ShopLayoutNode
 		var shiplist = []
 		
+		if(!interaction.deferred){
+			interaction.deferReply({ephemeral: true})
+		}
+		
 		// No arguments were provided
 		if (args == undefined || args == null || args == ''){
 

@@ -2,7 +2,7 @@ const { EmbedBuilder } = require('discord.js')
 const { dbinfo } = require('../config.json')
 
 module.exports ={
-	updaterules: async function(client, chanBotLog){
+	updaterules: async function(client, chanPFCRules){
 		const mysql = require('mysql')
 		const database = mysql.createConnection(dbinfo)
 
@@ -60,7 +60,7 @@ module.exports ={
 					rulesEmbed.setTimestamp()
 					rulesEmbed.setFooter({text:'Official PFC Communication', iconURL:'https://i.imgur.com/5sZV5QN.png'})
 
-					setmessage(client, embedid, rulesEmbed, chanBotLog)
+					setmessage(client, embedid, rulesEmbed, chanPFCRules)
 
 				})
 
@@ -71,13 +71,13 @@ module.exports ={
     }
 }
 
-async function setmessage(client, embedid, rulesEmbed, chanBotLog){
+async function setmessage(client, embedid, rulesEmbed, ruleschannel){
 	const mysql = require('mysql')
 	const database = mysql.createConnection(dbinfo)
 
 	var messagetoUpdate
 	var newmessageid
-	var channel = client.channels.cache.get(chanBotLog)
+	var channel = client.channels.cache.get(ruleschannel)
 
 		try{
 			messagetoUpdate = await channel.messages.fetch(embedid)	
@@ -86,7 +86,7 @@ async function setmessage(client, embedid, rulesEmbed, chanBotLog){
 			messagetoUpdate.edit({embeds: [rulesEmbed]})
 			return 'success'
 		}catch{
-			newmessageid =await client.channels.cache.get(chanBotLog).send({embeds: [rulesEmbed]}).then(embedMessage =>{return embedMessage.id})
+			newmessageid =await client.channels.cache.get(ruleschannel).send({embeds: [rulesEmbed]}).then(embedMessage =>{return embedMessage.id})
 		}
 
 		database.connect(

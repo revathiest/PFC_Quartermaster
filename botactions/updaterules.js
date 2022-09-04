@@ -2,7 +2,7 @@ const { EmbedBuilder } = require('discord.js')
 const { dbinfo, chanBotLog} = require('../config.json')
 
 module.exports ={
-	updaterules: async function(client, chanPFCRules){
+	updaterules: async function(client, chanPFCRules, chanBotLog){
 		const mysql = require('mysql')
 		const database = mysql.createConnection(dbinfo)
 

@@ -396,7 +396,7 @@ client.once('ready', () => {
 
 	client.channels.cache.get(chanBotLog).send('Startup Complete!')
 
-	updaterules(client, chanBotLog)
+	updaterules(client, chanPFCRules, chanBotLog)
 
 })
 

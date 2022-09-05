@@ -2,7 +2,7 @@ module.exports ={
 	getshopinfo: function(interaction, dealers, version){
 				
 		var args = interaction.options._hoistedOptions[0]
-		const { Client, Intents, EmbedBuilder } = require('discord.js')
+		const { Client, Intents, EmbedBuilder, ActionRowBuilder } = require('discord.js')
 		const { getshipmanuf } = require ('./getshipmanuf.js')
 		var shops = dealers.ShopLayoutNodes.ShopLayoutNode
 		var shiplist = []
@@ -27,12 +27,11 @@ module.exports ={
 					responseEmbed.setDescription(responseEmbed.data.description + '\n**' + tmpshop[0] + '** located in ' + tmpshop[1])
 				}
 			})
-			interaction.user.send({ embeds: [responseEmbed] })
-				
-			if(interaction.deferred && interaction.replied){
-				interaction.editReply({content: 'Check your DMs', ephemeral: true})
+
+			if(interaction.deferred){
+				interaction.editReply({ embeds: [responseEmbed], ephemeral: true})
 			} else {
-				interaction.reply({content: 'Check your DMs', ephemeral: true})
+				interaction.reply({ embeds: [responseEmbed], ephemeral: true})
 			}
 			
 			return
@@ -93,17 +92,11 @@ module.exports ={
 					}
 				}
 				
-				//console.log(shiplist)
-				interaction.user.send({ embeds: [responseEmbed] })
-
-				if(interaction.deferred && interaction.replied){
-					interaction.editReply({content: 'Check your DMs', ephemeral: true})
+				if(interaction.deferred){
+					interaction.editReply({ embeds: [responseEmbed], ephemeral: true})
 				} else {
-					interaction.reply({content: 'Check your DMs', ephemeral: true})
+					interaction.reply({ embeds: [responseEmbed], ephemeral: true})
 				}
-
-				//Here is where we'll get the list of shops
-				//And after we've sent the embed... we'll return
 				return
 			}
 		})

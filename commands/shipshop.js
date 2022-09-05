@@ -13,8 +13,10 @@ module.exports ={
 
 	async execute(interaction, client){
 
-		interaction.deferReply({ephemeral: true})
-		
+		if (!interaction.replied){
+			interaction.deferReply({ephemeral: true})
+		}
+
 		// message.channel.send("Nice try.  It's not ready yet")
 		// return
 		
@@ -41,7 +43,6 @@ module.exports ={
 				const querystring = "SELECT * FROM gamedata WHERE category_id = 6 AND name = 'Dealership' AND version = (SELECT MAX(version) FROM gamedata)"
 				database.query(querystring, function (err, result, fields) {
 					if (err) { console.log(err) }
-					console.log(result[0].data)
 					const dealers = JSON.parse(result[0].data.toString())
 					const version = result[0].version
 					getshopinfo(interaction, dealers, version)

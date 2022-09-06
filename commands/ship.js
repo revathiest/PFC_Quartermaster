@@ -103,7 +103,9 @@ module.exports = {
 	async option(interaction, client){
 
 		if (!interaction.replied && !interaction.deferred){
+			console.log('deferring the interaction')
 			interaction.deferReply({ephemeral: true})
+			console.log('interaction deferred')
 		}
 
 		var index = 0
@@ -275,9 +277,13 @@ module.exports = {
 				}
 
 				if( interaction.replied || interaction.deferred){
+					console.log('Editying the reply')
 					interaction.editReply({ embeds: [responseEmbed], ephemeral: true })
+					console.log('Reply edited')
 				} else {
+					console.log('Sending the reply')
 					interaction.reply({ embeds: [responseEmbed], ephemeral: true })
+					console.log('Reply sent')
 				}
 			})
 		})

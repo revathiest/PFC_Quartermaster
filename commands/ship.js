@@ -269,7 +269,11 @@ module.exports = {
 						responseEmbed.addFields({name: 'In-game Price', value: 'aUEC ' + result[0]['Price'].toLocaleString()})
 					}
 				}
-				interaction.reply({ embeds: [responseEmbed], ephemeral: true })
+				if (interaction.replied || interaction.deferred){
+					interaction.editReply({ embeds: [responseEmbed], ephemeral: true })
+				} else {
+					interaction.reply({ embeds: [responseEmbed], ephemeral: true })
+				}
 			})
 		})
 

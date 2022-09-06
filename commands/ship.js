@@ -104,8 +104,11 @@ module.exports = {
 
 		if (!interaction.replied && !interaction.deferred){
 			console.log('deferring the interaction ' + interaction.id)
-			interaction.deferReply({ephemeral: true})
-			console.log('interaction deferred')
+			interaction.deferReply({ephemeral: true}).then(result => {
+				console.log(result)
+				console.log(interaction.deferred)
+				console.log('interaction deferred')
+			})
 		}
 
 		var index = 0
@@ -277,19 +280,11 @@ module.exports = {
 				}
 
 				if( interaction.replied || interaction.deferred){
-					console.log(interaction.id)
-					console.log('Replied: ' + interaction.replied)
-					console.log('Deferred: ' + interaction.deferred)
-					console.log('Editying the reply')
+					console.log(interaction)
 					interaction.editReply({ embeds: [responseEmbed], ephemeral: true })
-					console.log('Reply edited')
 				} else {
-					console.log(interaction.id)
-					console.log('Replied: ' + interaction.replied)
-					console.log('Deferred: ' + interaction.deferred)
-					console.log('Sending the reply')
+					console.log(interaction)
 					interaction.reply({ embeds: [responseEmbed], ephemeral: true })
-					console.log('Reply sent')
 				}
 			})
 		})

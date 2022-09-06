@@ -28,32 +28,40 @@ module.exports ={
 			}
 		)
 		
+
+		database.beginTransaction(function(err){
+			console.log("Clearing all game data tables")
+			querystring = "DELETE FROM SHOPS;"
+			database.query(querystring)
+			querystring = "DELETE FROM SHOPINV;"
+			database.query(querystring)
+			querystring = "DELETE FROM INVITEMS;"
+			database.query(querystring)
+			querystring = "DELETE FROM COMMODITIES;"
+			database.query(querystring)
+			querystring = "DELETE FROM MANUFACTURERS;"
+			database.query(querystring)
+			querystring = "DELETE FROM SHIPS;"
+			database.query(querystring)
+			querystring = "DELETE FROM ITEMPORTS;"
+			database.query(querystring)
+			
+			database.commit()
+		})
+
+
+
+
+
 		//Bring in everything we want from the shop files.  These are category_id 6
 		database.beginTransaction(function(err) {
+			console.log("Getting shop information from game data files")
 			if (err) { console.log (err) }	
 			try{
 				var querystring = "SELECT name FROM gamedata WHERE category_id = 6 AND version = (SELECT MAX(version) FROM gamedata)"
 				database.query(querystring, function (err, result, fields) {
 					if (err) { console.log(err) }
 					shops = result
-					
-					querystring = "DELETE FROM SHOPS;"
-					database.query(querystring)
-					querystring = "DELETE FROM SHOPINV;"
-					database.query(querystring)
-					querystring = "DELETE FROM INVITEMS;"
-					database.query(querystring)
-					querystring = "DELETE FROM COMMODITIES;"
-					database.query(querystring)
-					querystring = "DELETE FROM MANUFACTURERS;"
-					database.query(querystring)
-					querystring = "DELETE FROM SHIPS;"
-					database.query(querystring)
-					querystring = "DELETE FROM ITEMPORTS;"
-					database.query(querystring)
-					
-					database.commit()
-
 					shops.forEach(shop => {
 						querystring = "SELECT data FROM gamedata WHERE category_id = 6 AND name = '" + shop.name + "' AND version = (SELECT MAX(version) FROM gamedata)"
 						database.query(querystring, function (err, result, fields) {
@@ -76,6 +84,7 @@ module.exports ={
 		
 		//Bring in everything we want from the weapon files.  These are category_id 2
 		database.beginTransaction(function(err) {
+			console.log("Getting weapon data from game data files")
 			if (err) { console.log (err) }	
 			try{
 				var querystring = "SELECT name FROM gamedata WHERE category_id = 2 AND version = (SELECT MAX(version) FROM gamedata)"
@@ -118,6 +127,7 @@ module.exports ={
 							const Size = weapdata.Components.SAttachableComponentParams.AttachDef.Size
 							const Grade = weapdata.Components.SAttachableComponentParams.AttachDef.Grade
 							
+							console.log("Saving inventory item")
 							querystring = "INSERT INTO INVITEMS (ID, ManufID, Name, ShortName, Description, Manufacturer, Mass, Type, SubType, Size, Grade) VALUES ('" + 
 							ID + "', '" +
 							ManufID + "', '" +
@@ -143,6 +153,7 @@ module.exports ={
 		
 		//Bring in everything we want from the weapon magazine files.  These are category_id 3
 		database.beginTransaction(function(err) {
+			console.log("Getting weapon magazine data from game data files")
 			if (err) { console.log (err) }	
 			try{
 				var querystring = "SELECT name FROM gamedata WHERE category_id = 3 AND version = (SELECT MAX(version) FROM gamedata)"
@@ -186,6 +197,7 @@ module.exports ={
 							const Size = magdata.Components.SAttachableComponentParams.AttachDef.Size
 							const Grade = magdata.Components.SAttachableComponentParams.AttachDef.Grade
 							
+							console.log("Saving inventory item")
 							querystring = "INSERT INTO INVITEMS (ID, ManufID, Name, ShortName, Description, Manufacturer, Mass, Type, SubType, Size, Grade) VALUES ('" + 
 							ID + "', '" +
 							ManufID + "', '" +
@@ -211,6 +223,7 @@ module.exports ={
 		
 		//Bring in everything we want from the Commodity files.  These are category_id 4
 		database.beginTransaction(function(err) {
+			console.log("Getting comoddity data from game data files")
 			if (err) { console.log (err) }	
 			try{
 				var querystring = "SELECT name FROM gamedata WHERE category_id = 4 AND version = (SELECT MAX(version) FROM gamedata)"
@@ -261,6 +274,7 @@ module.exports ={
 								SubType = SubType.replace(regex, "''")						
 							}
 							
+							console.log("Saving comoddity information")
 							querystring = "INSERT INTO COMMODITIES (ID, Name, Type, SubType, Price, TypeID, SubTypeID, Volatility, DecayRate) VALUES ('" + 
 							ID + "', '" +
 							Name + "', '" +
@@ -284,6 +298,7 @@ module.exports ={
 		
 		//Bring in everything we want from the Manufacturer files.  These are category_id 7
 		database.beginTransaction(function(err) {
+			console.log("Getting manufacturer data from game data files")
 			if (err) { console.log (err) }	
 			try{
 				var querystring = "SELECT name FROM gamedata WHERE category_id = 7 AND version = (SELECT MAX(version) FROM gamedata)"
@@ -298,9 +313,13 @@ module.exports ={
 							if (err) { console.log(err) }
 							const manufdata = JSON.parse(result[0].data.toString())
 			
+							var Name = 'Unknown'
+							var Description = 'Unknown'
 							var ID = manufdata.__ref
-							var Name = manufdata.Localization.Name
-							var Description = manufdata.Localization.Description
+							if (manufdata.Localization){
+								Name = manufdata.Localization.Name
+								Description = manufdata.Localization.Description
+							}
 							var Code = manufdata.Code
 							
 							if (Code == ""){ return }
@@ -310,6 +329,7 @@ module.exports ={
 							Name = Name.replace(regex, "''")
 							Description = Description.replace(regex, "''")
 							
+							console.log("Saving manufacturer informaton for " + Name)
 							querystring = "INSERT INTO MANUFACTURERS (ID, Name, Description, Code) VALUES ('" + 
 							ID + "', '" +
 							Name + "', '" +
@@ -328,6 +348,7 @@ module.exports ={
 		
 		//Bring in everything we want from the Ship files.  These are category_id 1
 		database.beginTransaction(function(err) {
+			console.log("Getting ship data from game data files")
 			if (err) { console.log (err) }	
 			try{
 				var querystring = "SELECT name FROM gamedata WHERE category_id = 1 AND version = (SELECT MAX(version) FROM gamedata)"
@@ -340,7 +361,16 @@ module.exports ={
 						querystring = "SELECT data FROM gamedata WHERE category_id = 1 AND name = '" + ship.name + "' AND version = (SELECT MAX(version) FROM gamedata)"
 						database.query(querystring, function (err, result, fields) {
 							if (err) { console.log(err + " for " + ship.displayname) }
-							const shipdata = JSON.parse(result[0].data.toString())
+							var shipdata
+							try{
+							var tmp = result[0].data.toString()
+							var tmp2 = tmp.replace(/\.\./g, '0.')
+							var shipdatastring = tmp2.replace(/:\./g, ':')
+							shipdata = JSON.parse(shipdatastring)
+							} catch (error){
+								console.log(result[0].data.toString())
+								console.log(error.stack)
+							}
 							const name = shipdata.name
 							const displayname = shipdata.displayname
 							const size = shipdata.size
@@ -355,6 +385,7 @@ module.exports ={
 							
 							damagemax = updateparts(database, part, displayname, damagemax)
 							
+							console.log("Saving ship information for " + displayname)
 							querystring = "INSERT INTO SHIPS (Name, Size, Mass, DisplayName) VALUES ('" + 
 							name + "', " +
 							size + ", " +
@@ -395,19 +426,20 @@ module.exports ={
 }
 		
 function updateparts(database, part, name, damagemax){
-
+	
+	console.log("Updating ship parts information for " + name)
 	var KEEP = true
 	
-	console.log(damagemax)
+	//console.log(damagemax)
 	
 	if (part.damageMax != undefined) {
 		console.log(damagemax + " + " + part.damageMax)
 		damagemax = damagemax + part.damageMax
-		console.log("Max damage updated (" + damagemax + ")")
+		//console.log("Max damage updated (" + damagemax + ")")
 	}	
 	if (part.damagemax != undefined) {
 		damagemax = damagemax + part.damagemax
-		console.log("Max damage updated (" + damagemax + ")")
+		//console.log("Max damage updated (" + damagemax + ")")
 	}
 	
 	if (Array.isArray(part)){
@@ -465,6 +497,7 @@ function updateparts(database, part, name, damagemax){
 		_minsize = (part.ItemPort.minsize != undefined ? part.ItemPort.minsize : 0)
 
 		database.beginTransaction(function(err) {
+			console.log("Saving itemport information for " + _shipname)
 			var querystring = "INSERT INTO ITEMPORTS (ShipName, PortName, PortType, PortSubtype, MaxSize, MinSize) VALUES ('" +
 			_shipname + "', '" +
 			_portname + "', '" +
@@ -481,6 +514,8 @@ function updateparts(database, part, name, damagemax){
 }
 
 function updateshop(database, shopnode, shoptype){
+
+	console.log("Updating shop information")
 	
 	if (Array.isArray(shopnode)){
 		for (let i = 0; i < shopnode.length; i++){
@@ -493,6 +528,7 @@ function updateshop(database, shopnode, shoptype){
 		updateinv(database, invnode, shopnode.ID)
 		
 		database.beginTransaction(function(err) {
+			console.log('Saving shop information for ' + shopnode.Name)
 			var querystring = "INSERT INTO SHOPS (ID, Name, ShopType, AcceptStolen) VALUES ('" +
 			shopnode.ID + "', '" +
 			shopnode.Name + "', '" +
@@ -513,10 +549,13 @@ function updateshop(database, shopnode, shoptype){
 }
 
 function updateinv(database, invnode, shopid){
+
+	console.log("Updating shop inventories")
 	
 	for (let i = 0; i < invnode.length; i++){
 		
 		database.beginTransaction(function(err) {
+			console.log('Saving shop inventory information')
 			var querystring = "INSERT INTO SHOPINV (ShopID, InvID, invName, TransType) VALUES ('" +
 			shopid + "', '" +
 			invnode[i].InventoryID + "', '" +
@@ -529,6 +568,7 @@ function updateinv(database, invnode, shopid){
 }
 
 function updateprices (database, prices){	
+	console.log("Updating price information")
 	for (let i = 0; i < prices.length; i++){
 		
 		database.beginTransaction(function(err) {

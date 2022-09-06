@@ -1,9 +1,9 @@
-const { SlashCommandBuilder } = require('@discordjs/builders')
-const { EmbedBuilder, ActionRowBuilder, SelectMenuBuilder } = require ('discord.js') // required to send the embed to Discord
+const { EmbedBuilder, ActionRowBuilder, SelectMenuBuilder, SlashCommandBuilder } = require ('discord.js') // required to send the embed to Discord
 const fetch = require('node-fetch') // required to call the Star Citizen API
-var ship
-const { botPermsReq } = require('./../config.json')
+const { botPermsReq, dbinfo } = require('./../config.json')
+const mysql = require('mysql')
 const Builder = new SlashCommandBuilder()
+var ship
 
 Builder.type = 1
 Builder.default_member_permissions = botPermsReq
@@ -16,6 +16,13 @@ module.exports = {
 
 	async execute(interaction, client){
 		
+		if (interaction.replied){
+			console.log('replied')
+		}		
+		if (interaction.deferred){
+			console.log('deferred')
+		}
+
 		const shipname = interaction.options._hoistedOptions[0].value
 		
 		// Star Citizen API URL 
@@ -24,17 +31,29 @@ module.exports = {
 
 		
 		if (shipname == '' || shipname == undefined){
-			interaction.reply({content: 'Which ship do you want me to find?', ephemeral: true})
+			if (interaction.replied || interaction.deferred){
+				interaction.editReply({content: 'Which ship do you want me to find?', ephemeral: true})
+			} else {
+				interaction.reply({content: 'Which ship do you want me to find?', ephemeral: true})
+			}
 			return
 		}
 		
-		interaction.reply({content: 'Let me think about that...', ephemeral: true})
+		if (interaction.replied || interaction.deferred){
+			interaction.editReply({content: 'Let me think about that...', ephemeral: true})
+		} else {
+			interaction.reply({content: 'Let me think about that...', ephemeral: true})
+		}
 		
 		var answer = await fetch(SCAApi + shipname).then(response => response.text())
 		ship = JSON.parse(answer)	
 
-		if (ship.data[0] == undefined ){
-			interaction.editReply({content: 'I cant find that ship', ephemeral: true})
+			if (ship.data[0] == undefined ){
+			if (interaction.replied || interaction.deferred){
+				interaction.editReply({content: 'I cant find that ship', ephemeral: true})
+			} else {
+				interaction.reply({content: 'I cant find that ship', ephemeral: true})
+			}
 			return
 		}
 		if (ship.data[0].name != undefined) {
@@ -60,8 +79,11 @@ module.exports = {
 				row.addComponents(
 					options
 				)
-				
-				interaction.editReply({content: "I've found more than one ship that meets that filter.  Which one do you want?", components: [row]})
+				if (interaction.replied || interaction.deferred){
+					interaction.editReply({content: "I've found more than one ship that meets that filter.  Which one do you want?", components: [row]})
+				} else {
+					interaction.reply({content: "I've found more than one ship that meets that filter.  Which one do you want?", components: [row]})
+				}
 			
 			} else {
 		
@@ -70,11 +92,19 @@ module.exports = {
 			}
 			
 		} else {
-			interaction.editReply({content: 'That ship does not exist.', ephemeral: true})
+			if (interaction.replied || interaction.deferred){
+				interaction.editReply({content: 'That ship does not exist.', ephemeral: true})
+			} else {
+				interaction.reply({content: 'That ship does not exist.', ephemeral: true})
+			}
 		}
 	},
 	
 	async option(interaction, client){
+
+		if (!interaction.replied && !interaction.deferred){
+			interaction.deferReply({ephemeral: true})
+		}
 
 		var index = 0
 		
@@ -84,6 +114,7 @@ module.exports = {
 			var shipManufLogo = 'Unknown'
 			var shipName = 'Unknown'
 			var shipManuf = 'Unknown'
+			var shipManufCode = 'Unknown'
 			var afterburner_speed = 'Unknown'
 			var beam = 'Unknown'
 			var height = 'Unknown'
@@ -105,6 +136,7 @@ module.exports = {
 		
 		shipName = ship.data[index].name
 		shipManuf = ship.data[index].manufacturer.name
+		shipManufCode = ship.data[index].manufacturer.code
 		
 		if (ship.data[index].url.slice(0,4) == 'http'){
 			shipPledgeURL = ship.data[index].url
@@ -150,7 +182,7 @@ module.exports = {
 		
 		if (ship.data[index].mass != '' && ship.data[index].mass != null && ship.data[index].mass != undefined){
 			const tmp = ship.data[index].mass.valueOf()
-			mass = tmp.toLocaleString() + 'kg'
+			mass = tmp.toLocaleString() + ' kg'
 		}
 		
 		if (ship.data[index].size != '' && ship.data[index].size != null && ship.data[index].size != undefined){
@@ -185,41 +217,70 @@ module.exports = {
 		if (ship.data[index].description != null && ship.data[index].description != ''){
 			shipDesc = ship.data[index].description
 		}
+		const database = mysql.createConnection(dbinfo)
 		
-		
-		const responseEmbed = new EmbedBuilder()
-		.setColor('#0099ff')
-		.setTitle(shipName)
-		.setURL(shipPledgeURL)
-		.setAuthor({name: shipManuf.valueOf()})
-		.setThumbnail(shipManufLogo)
-		.setTimestamp()
-		.setFooter({text:'Official PFC Communication', iconURL:'https://i.imgur.com/5sZV5QN.png'})
-		.setImage(shipImg)
-		.addFields(
-			{ name: 'Height', value: height, inline: true },
-			{ name: 'Length', value: length, inline: true  },
-			{ name: 'Beam', value: beam, inline: true  },
-			{ name: 'Mass', value: mass, inline: true  },
-			{ name: 'Focus', value: focus, inline: true  },
-			{ name: 'Cargo Capacity', value: cargocapacity, inline: true  },
-			{ name: 'Size', value: size, inline: true  },
-			{ name: 'Min Crew', value: min_crew, inline: true  },
-			{ name: 'Max Crew', value: max_crew, inline: true  },
-			{ name: 'SCM Speed', value: scm_speed, inline: true  },
-			{ name: 'Production Status', value: production_status, inline: true  },
-			{ name: 'Pledge Price', value: '$' + price, inline: true  },
-			{ name: '\u200B', value: 'Last Updated: ' + modified  }
-			
+		database.connect(
+			function(err){
+				if (err){
+					return console.error('Database error: ', err.message)
+				}
+				console.log('Connected to the MySQL Server')
+			}
 		)
 
-		responseEmbed.setDescription(shipDesc)		
-		interaction.user.send({ embeds: [responseEmbed] })
-		
-		if( !interaction.replied){
-			interaction.reply({content: 'Check your DMs', ephemeral: true})
-		} else {
-			interaction.editReply({content: 'Check your DMs', ephemeral: true})
-		}
+		database.beginTransaction(function(err){
+			console.log("Getting ship information from database")
+
+			const querystring = "Select * from SHIPS join SHOPINV on SHIPS.DisplayName  = REPLACE(SHOPINV.invName, '_', ' ') where DisplayName = '" + shipManufCode + " " + shipName + "'AND Price IS NOT NULL"
+
+			database.query(querystring, function(err, result, fields){
+			if(err){ console.log(err.stack) }
+				var tmp = result
+				console.log(tmp[0])		
+				if (result[0]){
+					if(result[0]['Mass']){
+						mass = result[0]['Mass'].toLocaleString() + ' kg'
+					}
+				}	
+						
+				const responseEmbed = new EmbedBuilder()
+				.setDescription(shipDesc)	
+				.setColor('#0099ff')
+				.setTitle(shipName)
+				.setURL(shipPledgeURL)
+				.setAuthor({name: shipManuf.valueOf()})
+				.setThumbnail(shipManufLogo)
+				.setTimestamp()
+				.setFooter({text:'Official PFC Communication', iconURL:'https://i.imgur.com/5sZV5QN.png'})
+				.setImage(shipImg)
+				.addFields(
+					{ name: 'Height', value: height, inline: true },
+					{ name: 'Length', value: length, inline: true  },
+					{ name: 'Beam', value: beam, inline: true  },
+					{ name: 'Mass', value: mass, inline: true  },
+					{ name: 'Focus', value: focus, inline: true  },
+					{ name: 'Cargo Capacity', value: cargocapacity, inline: true  },
+					{ name: 'Size', value: size, inline: true  },
+					{ name: 'Min Crew', value: min_crew, inline: true  },
+					{ name: 'Max Crew', value: max_crew, inline: true  },
+					{ name: 'SCM Speed', value: scm_speed, inline: true  },
+					{ name: 'Production Status', value: production_status, inline: true  },
+					{ name: 'Pledge Price', value: '$' + price, inline: true  },
+					{ name: '\u200B', value: 'Last Updated: ' + modified  }
+				)
+				if(result[0]){
+					if(result[0]['Price']){
+						responseEmbed.addFields({name: 'In-game Price', value: 'aUEC ' + result[0]['Price'].toLocaleString()})
+					}
+				}
+
+				if( interaction.replied || interaction.deferred){
+					interaction.editReply({ embeds: [responseEmbed], ephemeral: true })
+				} else {
+					interaction.reply({ embeds: [responseEmbed], ephemeral: true })
+				}
+			})
+		})
+
 	}		
 }

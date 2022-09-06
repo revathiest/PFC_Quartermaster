@@ -413,8 +413,8 @@ PARAMETER    TYPE               DESCRIPTION
 oldMember    GuildMember        The member before the presence update
 newMember    GuildMember        The member after the presence update    */
 client.on("presenceUpdate", function(oldMember, newMember){
-	var tempnewMember = newMember.member.displayName
-    console.log(`a guild member's presence changes: ` + tempnewMember);
+	//var tempnewMember = newMember.member.displayName
+    //console.log(`a guild member's presence changes: ` + tempnewMember);
 });
 
 // Login to Discord with your client's token

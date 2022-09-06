@@ -102,15 +102,6 @@ module.exports = {
 	
 	async option(interaction, client){
 
-		if (!interaction.replied && !interaction.deferred){
-			console.log('deferring the interaction ' + interaction.id)
-			interaction.deferReply({ephemeral: true}).then(result => {
-				console.log(result)
-				console.log(interaction.deferred)
-				console.log('interaction deferred')
-			})
-		}
-
 		var index = 0
 		
 			const baseURL = 'https://robertsspaceindustries.com'
@@ -278,14 +269,7 @@ module.exports = {
 						responseEmbed.addFields({name: 'In-game Price', value: 'aUEC ' + result[0]['Price'].toLocaleString()})
 					}
 				}
-
-				if( interaction.replied || interaction.deferred){
-					console.log(interaction)
-					interaction.editReply({ embeds: [responseEmbed], ephemeral: true })
-				} else {
-					console.log(interaction)
-					interaction.reply({ embeds: [responseEmbed], ephemeral: true })
-				}
+				interaction.reply({ embeds: [responseEmbed], ephemeral: true })
 			})
 		})
 

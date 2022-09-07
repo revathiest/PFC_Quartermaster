@@ -313,7 +313,7 @@ client.on('messageReactionAdd', (reaction, user) => {
 
 client.on('messageReactionRemove', (reaction, user) =>{
 	//Was the reaction in the rules channel?
-	if (reaction.message.channel.id == chanBotLog){
+	if (reaction.message.channel.id == chanPFCRules){
 		switch(reaction.emoji.name){
 			case 'Flame':
 				var userid = user.id

@@ -8,6 +8,7 @@ const { Player } = require("discord-music-player") // required for music functio
 const { clientId, guildId, token, dbinfo, twitter} = require('./config.json')
 const rest = new REST({ version: '9' }).setToken(token)
 const{ process_messages } = require("./process_messages")
+const{getvariable, setvariable} = require('./botactions/variablehandler.js')
 
 //PFC Discord Channel Definitions
 var chanBotLog
@@ -423,11 +424,14 @@ client.login(token)
 //***********************************************************/
 //This is the chat reaction section
 //***********************************************************/
-
+var messagecount
 var allowmessage = true;
-var messagecount = {};
+getvariable(client,'messagecount', function(response){
+	messagecount = response
+})
 const countBasedChatter = require('./countBasedChatter.json')
 const {countForSpam, timeForSpam} = require('./config.json');
+
 
 setInterval(() => {
 	allowmessage = true;
@@ -435,17 +439,27 @@ setInterval(() => {
 
 client.on("messageCreate", function(message, interaction){
     allowmessage = process_messages(message, allowmessage);
+
+	if(messagecount == undefined){
+		return
+	}
+
 	if(!messagecount[message.channel.id]){
 		messagecount[message.channel.id] = 1
+		setvariable(client, 'messagecount', messagecount)
 	} else {
 		messagecount[message.channel.id] += 1
+		setvariable(client, 'messagecount', messagecount)
 	}
+
 	if (messagecount[message.channel.id] >= countForSpam){
 		
 		client.channels.cache.get(chanBotTest).send(selectRandomMessage(countBasedChatter))
 		
 		messagecount[message.channel.id] = 0
+		setvariable(client, 'messagecount', messagecount)
 	}
+	
 });
 
 function selectRandomMessage(messageList){

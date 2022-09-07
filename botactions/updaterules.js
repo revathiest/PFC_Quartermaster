@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require('discord.js')
-const { dbinfo, chanBotLog} = require('../config.json')
+const { dbinfo } = require('../config.json')
 
 module.exports ={
 	updaterules: async function(client, chanPFCRules, chanBotLog){

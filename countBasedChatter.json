@@ -1,0 +1,7 @@
+{
+	"help": "If you would like to know the commands I know, try /help",
+	"user": "You can use the /user command to get the profile information for users on the RSI website",
+	"org": "The /org command will give you information from the RSI website about that org.  You'll need to know the Org's SID",
+	"ship" : "Try the /ship command to get information about a particular type of ship",
+	"music" : "If you're in the #music channel, you can use /play and /playlist to queue up songs for me to play.  use /help to learn more commands."
+}

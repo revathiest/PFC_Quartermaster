@@ -425,18 +425,43 @@ client.login(token)
 //***********************************************************/
 
 var allowmessage = true;
+var messagecount = {};
+const countBasedChatter = require('./countBasedChatter.json')
+const {countForSpam, timeForSpam} = require('./config.json');
 
 setInterval(() => {
 	allowmessage = true;
-}, 30000);
+}, timeForSpam);
 
 client.on("messageCreate", function(message, interaction){
     allowmessage = process_messages(message, allowmessage);
+	if(!messagecount[message.channel.id]){
+		messagecount[message.channel.id] = 1
+	} else {
+		messagecount[message.channel.id] += 1
+	}
+	if (messagecount[message.channel.id] >= countForSpam){
+		
+		client.channels.cache.get(chanBotTest).send(selectRandomMessage(countBasedChatter))
+		
+		messagecount[message.channel.id] = 0
+	}
 });
 
-// Here is where we set up the chatter
+function selectRandomMessage(messageList){
 
-function sendsomeMessage() {
-	//console.log("Hello world!")
+	const keylist = Object.keys(messageList)
+	const keylistlen = keylist.length
+
+	const tmp = messageList[keylist[Math.floor(Math.random() * keylistlen)]] 
+	return tmp
 }
+
+//***********************************************************/
+// Here is where we set up the chatter
+//***********************************************************/
+function sendsomeMessage() {
+
+}
+
 setInterval(sendsomeMessage, 1000)

@@ -29,7 +29,7 @@ module.exports ={
 
 		var temp
 
-		await interaction.deferReply();
+		await interaction.deferReply({ephemeral: true});
 
 		if (!interaction.targetMember.nickname){
 			temp = interaction.targetUser.username.split(" ")

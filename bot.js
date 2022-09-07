@@ -1,14 +1,14 @@
 // Require the necessary discord.js classes
-const { Discord, Client, GatewayIntentBits, Collection, EmbedBuilder, InteractionType, PermissionFlagsBits } = require('discord.js')
-const { REST } = require('@discordjs/rest')
-const { Routes } = require('discord-api-types/v9')
-const Twitter = require('twit') // Imports the twitter library
-const fs = require('fs') // imports the file io library
-const { Player } = require("discord-music-player") // required for music functionality
-const { clientId, guildId, token, dbinfo, twitter} = require('./config.json')
-const rest = new REST({ version: '9' }).setToken(token)
-const{ process_messages } = require("./process_messages")
-const{getvariable, setvariable} = require('./botactions/variablehandler.js')
+const { Discord, Client, GatewayIntentBits, Collection, EmbedBuilder, InteractionType, PermissionFlagsBits } = require('discord.js');
+const { REST } = require('@discordjs/rest');
+const { Routes } = require('discord-api-types/v9');
+const Twitter = require('twit'); // Imports the twitter library
+const fs = require('fs'); // imports the file io library
+const { Player } = require("discord-music-player"); // required for music functionality
+const { clientId, guildId, token, dbinfo, twitter} = require('./config.json');
+const rest = new REST({ version: '9' }).setToken(token);
+const{ process_messages } = require("./process_messages");
+const{getvariable, setvariable} = require('./botactions/variablehandler.js');
 
 //PFC Discord Channel Definitions
 var chanBotLog
@@ -29,17 +29,17 @@ const client = new Client({ intents: [
 	GatewayIntentBits.GuildPresences,
 	GatewayIntentBits.GuildIntegrations,
 	GatewayIntentBits.GuildMessageReactions
-]})
+]});
 
 //***********************************************************/
 //Twitter setup
 //***********************************************************/
 
-const twitterClient = new Twitter(twitter)
-const {twitterchans} = require('./config.json')
-const { updaterules } = require('./botactions/updaterules')
+const twitterClient = new Twitter(twitter);
+const {twitterchans} = require('./config.json');
+const { updaterules } = require('./botactions/updaterules');
 
-var twitfollow = ''
+var twitfollow = '';
 
 for(var key in twitterchans){
 	if (twitterchans.hasOwnProperty(key)){
@@ -49,14 +49,14 @@ for(var key in twitterchans){
 			twitfollow += ',' + twitterchans[key]
 		}
 	}
-}
+};
 
 // Create a stream to follow tweets
 const stream = twitterClient.stream('statuses/filter', {
 	follow: twitfollow
-})
+});
 
-client.stream = stream
+client.stream = stream;
 
 stream
 	.on('error', (error) => {
@@ -66,7 +66,7 @@ stream
 	const twitterMessage = '**'+tweet.user.name + '** just tweeted this!\n https://twitter.com/' + tweet.user.screen_name + '/status/' + tweet.id_str
 	
 	//Making sure that the bot has access to the News channel.  We dont want the dev bot posting there.
-	var botHasAccess = client.channels.cache.get(chanSCNews).permissionsFor(clientId).has(PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages)
+	var botHasAccess = client.channels.cache.get(chanSCNews).permissionsFor(clientId).has(PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages);
 
 	if (tweet.retweeted_status
     || tweet.in_reply_to_status_id
@@ -78,9 +78,9 @@ stream
 	} else {
 		
 		if (botHasAccess){
-			client.channels.cache.get(chanSCNews).send(twitterMessage)
+			client.channels.cache.get(chanSCNews).send(twitterMessage);
 		} else {
-			client.channels.cache.get(chanBotLog).send(twitterMessage)
+			client.channels.cache.get(chanBotLog).send(twitterMessage);
 		}
 	}
 	return false
@@ -94,9 +94,9 @@ const player = new Player(client, {
     leaveOnEmpty: true,
 	leaveOnStop: false,
 	leaveOnEnd: false// This options are optional.
-})
+});
 
-client.player = player
+client.player = player;
 
 player
     // Emitted when channel was empty.
@@ -132,7 +132,7 @@ player
     // Emitted when there was an error in runtime
     .on('error', (error, queue) => {
         client.channels.cache.get(chanBotLog).send('Error: (music)' + error.stack)
-    })
+    });
 
 //============================================================================
 // This is the PFC Announcement embed
@@ -155,63 +155,63 @@ function announce(message){
 	.addFields({name:'Field 3', value: 'Some value here', inline: true})
 	.setImage('https://i.imgur.com/RdZBmhk.png')
 	.setTimestamp()
-	.setFooter({text:'Official PFC Communication', iconURL:'https://i.imgur.com/5sZV5QN.png'})
+	.setFooter({text:'Official PFC Communication', iconURL:'https://i.imgur.com/5sZV5QN.png'});
 
-interaction.reply({ embeds: [responseEmbed] })
-}
+interaction.reply({ embeds: [responseEmbed] });
+};
 
 //This creates the commands so that they can be run.
-client.commands = new Collection()
-var cmdsToRegister = []
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
-const playercommandFiles = fs.readdirSync('./commands/musiccommands').filter(file => file.endsWith('.js'))
+client.commands = new Collection();
+var cmdsToRegister = [];
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+const playercommandFiles = fs.readdirSync('./commands/musiccommands').filter(file => file.endsWith('.js'));
 
-console.log('====Registering Star Citizen Commands: ')
+console.log('====Registering Star Citizen Commands: ');
 for (const file of commandFiles) {
 	const command = require('./commands/' + file)
 	// Set a new item in the Collection
 	// With the key as the command name and the value as the exported module
 	try{
-		client.commands.set(command.data.name, command)
+		client.commands.set(command.data.name, command);
 		try{
-			cmdsToRegister.push(command.data.toJSON())
+			cmdsToRegister.push(command.data.toJSON());
 		}catch{
-			cmdsToRegister.push(command.data)
+			cmdsToRegister.push(command.data);
 		}
-		console.log('Registered command ' + command.data.name)
+		console.log('Registered command ' + command.data.name);
 	} catch (error) {
-		console.error(error)
+		console.error(error);
 	}
-}
+};
 
-console.log('====Registering Music Commands: ')
+console.log('====Registering Music Commands: ');
 for (const file of playercommandFiles) {
-	const command = require('./commands/musiccommands/' + file)
+	const command = require('./commands/musiccommands/' + file);
 	// Set a new item in the Collection
 	// With the key as the command name and the value as the exported module
 	try{
-		client.commands.set(command.data.name, command)
-		cmdsToRegister.push(command.data.toJSON())
-		console.log('Registered command ' + command.data.name)
+		client.commands.set(command.data.name, command);
+		cmdsToRegister.push(command.data.toJSON());
+		console.log('Registered command ' + command.data.name);
 	} catch (error) {
-		console.error(error)
+		console.error(error);
 	}
-}
+};
 
 (async () => {
 	try {
-		console.log('Started refreshing application (/) commands.')
+		console.log('Started refreshing application (/) commands.');
 
 		await rest.put(
 			Routes.applicationGuildCommands(clientId, guildId),
 			{ body: cmdsToRegister },
 		)
 
-		console.log('Successfully reloaded application (/) commands.')
+		console.log('Successfully reloaded application (/) commands.');
 	} catch (error) {
-		console.error(error)
+		console.error(error);
 	}
-})()
+})();
 
 //***********************************************************/
 //Client Setup
@@ -219,8 +219,8 @@ for (const file of playercommandFiles) {
 
 client.on('interactionCreate', async interaction => {
 	
-	var roles = interaction.member._roles
-	var command = client.commands.get(interaction.commandName)
+	var roles = interaction.member._roles;
+	var command = client.commands.get(interaction.commandName);
 
 	if (interaction.type === InteractionType.ApplicationCommand) {
 		
@@ -228,18 +228,18 @@ client.on('interactionCreate', async interaction => {
 		if (interaction.options._hoistedOptions[0] != undefined){
 			message = message + ' with options **' +interaction.options._hoistedOptions[0].value + '**'
 		}
-		client.channels.cache.get(chanBotLog).send(message)
+		client.channels.cache.get(chanBotLog).send(message);
 		
 		
 		if (command.role != undefined){
 			if (!roles.includes(command.role)){
-				interaction.reply("You're not authorized to use that command")
+				interaction.reply("You're not authorized to use that command");
 				return
 			}
 		}
 		
 		if (!command) {
-			interaction.reply('Unable to find command...')
+			interaction.reply('Unable to find command...');
 			return
 		}
 		
@@ -247,7 +247,7 @@ client.on('interactionCreate', async interaction => {
 			if (typeof command.execute === 'function'){
 				await command.execute(interaction, client);
 			} else {
-				command(interaction)
+				command(interaction);
 			}
 		} catch (error) {
 			console.error(error);
@@ -425,13 +425,12 @@ client.login(token)
 //This is the chat reaction section
 //***********************************************************/
 var messagecount
-var allowmessage = true;
 getvariable(client,'messagecount', function(response){
 	messagecount = response
 })
+var allowmessage = true;
 const countBasedChatter = require('./countBasedChatter.json')
 const {countForSpam, timeForSpam} = require('./config.json');
-
 
 setInterval(() => {
 	allowmessage = true;
@@ -439,11 +438,6 @@ setInterval(() => {
 
 client.on("messageCreate", function(message, interaction){
     allowmessage = process_messages(message, allowmessage);
-
-	if(messagecount == undefined){
-		return
-	}
-
 	if(!messagecount[message.channel.id]){
 		messagecount[message.channel.id] = 1
 		setvariable(client, 'messagecount', messagecount)

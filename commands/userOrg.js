@@ -59,7 +59,7 @@ module.exports ={
 		
 		if (org.data == null ){
 			if (org.data == null){
-				interaction.editReply(org.message)
+				interaction.editReply({content: org.message, ephemeral: true})
 				return
 			}
 		}
@@ -94,12 +94,10 @@ module.exports ={
 			.setDescription(orgBio)
 			.addFields({name: 'Recruiting Status: ', value:orgRecruiting})
 			
-			
-			interaction.user.send({ embeds: [responseEmbed] })
-			interaction.editReply({content: 'Check your DMs', ephemeral: true})
+			interaction.editReply({embeds: [responseEmbed], ephemeral: true})
 		
 		} else {
-			interaction.editReply(SCApiLiveOrganization + orgname)
+			interaction.editReply({content: 'RSI doesnt recognize that organization.', ephemeral: true})
 		}
 	}
 

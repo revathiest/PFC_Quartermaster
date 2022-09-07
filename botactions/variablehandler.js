@@ -13,7 +13,7 @@ module.exports ={
 				if (err){
 					return console.error('Database error: ', err.message)
 				}
-				console.log('Connected to the MySQL Server')
+				console.log('Connected to the MySQL Server: Retrieving variable ' + key)
 			}
 		)
 
@@ -43,7 +43,7 @@ module.exports ={
 				if (err){
 					return console.error('Database error: ', err.message)
 				}
-				console.log('Connected to the MySQL Server')
+				console.log('Connected to the MySQL Server: Updating variable ' + key)
 			}
 		)
 

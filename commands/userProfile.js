@@ -111,11 +111,10 @@ module.exports ={
 			
 			}
 			
-			interaction.user.send({ embeds: [responseEmbed] })
-			interaction.editReply({content: 'Check your DMs', ephemeral: true})
+			interaction.editReply({embeds: [responseEmbed], ephemeral: true})
 		
 		} else {
-			interaction.editReply('RSI doesnt recognize that user.')
+			interaction.editReply({content: 'RSI doesnt recognize that user.', ephemeral: true})
 		}
 	}
 

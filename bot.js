@@ -51,12 +51,12 @@ for(var key in twitterchans){
 	}
 };
 
-// Create a stream to follow tweets
+//Create a stream to follow tweets
 const stream = twitterClient.stream('statuses/filter', {
 	follow: twitfollow
 });
 
-client.stream = stream;
+//client.stream = stream;
 
 stream
 	.on('error', (error) => {

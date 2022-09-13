@@ -52,7 +52,7 @@ for(var key in twitterchans){
 };
 
 //Create a stream to follow tweets
-const stream = twitterClient.stream('statuses/filter', {
+/*const stream = twitterClient.stream('statuses/filter', {
 	follow: twitfollow
 });
 
@@ -84,7 +84,7 @@ stream
 		}
 	}
 	return false
-	})
+	})*/
 
 //***********************************************************/
 //Music Player Setup

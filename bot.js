@@ -2,7 +2,7 @@
 const { Discord, Client, GatewayIntentBits, Collection, EmbedBuilder, InteractionType, PermissionFlagsBits } = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
-const Twitter = require('twit'); // Imports the twitter library
+const Twitter = require('twitter-v2'); // Imports the twitter library
 const fs = require('fs'); // imports the file io library
 const { Player } = require("discord-music-player"); // required for music functionality
 const { clientId, guildId, token, dbinfo, twitter} = require('./config.json');
@@ -50,6 +50,33 @@ for(var key in twitterchans){
 		}
 	}
 };
+
+
+//var stream = twitterClient.stream("search/recent", {
+//	query: "from:RobertsSpaceInd"
+//});
+
+//client.stream = stream;
+
+async function listenForever(streamFactory, dataConsumer) {
+	try {
+	  var response = streamFactory()
+	  for await (const { meta, data } of response) {
+		if (meta.result_count > 0) {
+			dataConsumer(data);
+		}
+	  }
+	  // The stream has been closed by Twitter. It is usually safe to reconnect.
+	  console.log('Stream disconnected healthily. Reconnecting.');
+	  setTimeout(() => listenForever(streamFactory, dataConsumer), 30000);
+	} catch (error) {
+	  // An error occurred so we reconnect to the stream. Note that we should
+	  // probably have retry logic here to prevent reconnection after a number of
+	  // closely timed failures (may indicate a problem that is not downstream).
+	  console.warn('Stream disconnected with error. Retrying.', error);
+	  setTimeout(() => listenForever(streamFactory, dataConsumer), 30000);
+	}
+  }
 
 //Create a stream to follow tweets
 /*const stream = twitterClient.stream('statuses/filter', {
@@ -397,7 +424,27 @@ client.once('ready', () => {
 
 	client.channels.cache.get(chanBotLog).send('Startup Complete!')
 
-	updaterules(client, chanPFCRules, chanBotLog)
+	updaterules(client, chanPFCRules, chanBotLog).then(() => {
+
+		listenForever(() => twitterClient.stream("tweets/search/recent", {
+					query: "from:RobertsSpaceInd",
+					start_time: new Date(new Date() - 42000).toISOString(),
+					end_time: new Date(new Date() - 12000).toISOString(),
+					expansions: "author_id"
+				}),
+			(data) => {
+				if (data != undefined){
+					client.channels.cache.get(chanSCNews).send(
+						"**Star Citizen** just tweeted this!\n" +
+						"https://twitter.com/RobertsSpaceInd/status/" + data[0].id
+						)
+					console.log(data[0].text)
+				} else {
+					console.log('data is undefined')
+				}
+			}
+		);
+	});
 
 })
 

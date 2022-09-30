@@ -51,13 +51,6 @@ for(var key in twitterchans){
 	}
 };
 
-
-//var stream = twitterClient.stream("search/recent", {
-//	query: "from:RobertsSpaceInd"
-//});
-
-//client.stream = stream;
-
 async function listenForever(streamFactory, dataConsumer) {
 	try {
 	  var response = streamFactory()
@@ -77,41 +70,6 @@ async function listenForever(streamFactory, dataConsumer) {
 	  setTimeout(() => listenForever(streamFactory, dataConsumer), 30000);
 	}
   }
-
-//Create a stream to follow tweets
-/*const stream = twitterClient.stream('statuses/filter', {
-	follow: twitfollow
-});
-
-//client.stream = stream;
-
-stream
-	.on('error', (error) => {
-		client.channels.cache.get(chanBotLog).send('Error: (twitter)' + error.stack)
-	})
-	.on('tweet', tweet => {
-	const twitterMessage = '**'+tweet.user.name + '** just tweeted this!\n https://twitter.com/' + tweet.user.screen_name + '/status/' + tweet.id_str
-	
-	//Making sure that the bot has access to the News channel.  We dont want the dev bot posting there.
-	var botHasAccess = client.channels.cache.get(chanSCNews).permissionsFor(clientId).has(PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages);
-
-	if (tweet.retweeted_status
-    || tweet.in_reply_to_status_id
-    || tweet.in_reply_to_status_id_str
-    || tweet.in_reply_to_user_id
-    || tweet.in_reply_to_user_id_str
-    || tweet.in_reply_to_screen_name) {
-		return
-	} else {
-		
-		if (botHasAccess){
-			client.channels.cache.get(chanSCNews).send(twitterMessage);
-		} else {
-			client.channels.cache.get(chanBotLog).send(twitterMessage);
-		}
-	}
-	return false
-	})*/
 
 //***********************************************************/
 //Music Player Setup
@@ -307,27 +265,30 @@ client.on('messageReactionAdd', (reaction, user) => {
 			case 'Flame':
 				var userid = user.id
 				client.guilds.fetch(guildId).then(guild => {
+					client.channels.cache.get(chanBotLog).send(user.username + " clicked the <:Flame:821839818240557136> reaction")
 					guild.members.fetch(userid).then(member => {
 						member.roles.add('833440108647677953') //Recruit
-						console.log(member.name)
+						client.channels.cache.get(chanBotLog).send("Recruit role was added to " + member.user.username)
 					})
 				})
 				break
 			case 'StarCitizen':
 				var userid = user.id
 				client.guilds.fetch(guildId).then(guild => {
+					client.channels.cache.get(chanBotLog).send(user.username + " clicked the <:StarCitizen:821855258136805456> reaction")
 					guild.members.fetch(userid).then(member => {
 						member.roles.add('823083914116595743') //Stowaway
-						console.log(member.name)
+						client.channels.cache.get(chanBotLog).send("Stowaway role was added to " + member.user.username)
 					})
 				})
 				break
 			case '🎖️':
 				var userid = user.id
 				client.guilds.fetch(guildId).then(guild => {
+					client.channels.cache.get(chanBotLog).send(user.username + " clicked the 🎖️ reaction")
 					guild.members.fetch(userid).then(member => {
 						member.roles.add('833415056783441931') //Affiliate
-						console.log(member.name)
+						client.channels.cache.get(chanBotLog).send("Affiliate role was added to " + member.user.username)
 					})
 				})
 				break
@@ -345,27 +306,30 @@ client.on('messageReactionRemove', (reaction, user) =>{
 			case 'Flame':
 				var userid = user.id
 				client.guilds.fetch(guildId).then(guild => {
+					client.channels.cache.get(chanBotLog).send(user.username + " clicked the <:Flame:821839818240557136> reaction")
 					guild.members.fetch(userid).then(member => {
 						member.roles.remove('833440108647677953') //Recruit
-						console.log(member.name)
+						client.channels.cache.get(chanBotLog).send("Recruit role was removed from " + member.user.username)
 					})
 				})
 				break
 			case 'StarCitizen':
 				var userid = user.id
 				client.guilds.fetch(guildId).then(guild => {
+					client.channels.cache.get(chanBotLog).send(user.username + " clicked the <:StarCitizen:821855258136805456> reaction")
 					guild.members.fetch(userid).then(member => {
 						member.roles.remove('823083914116595743') //Stowaway
-						console.log(member.name)
+						client.channels.cache.get(chanBotLog).send("Stowaway role was removed from " + member.user.username)
 					})
 				})
 				break
 			case '🎖️':
 				var userid = user.id
 				client.guilds.fetch(guildId).then(guild => {
+					client.channels.cache.get(chanBotLog).send(user.username + " clicked the 🎖️ reaction")
 					guild.members.fetch(userid).then(member => {
 						member.roles.remove('833415056783441931') //Affiliate
-						console.log(member.name)
+						client.channels.cache.get(chanBotLog).send("Affiliate role was removed from " + member.user.username)
 					})
 				})
 				break

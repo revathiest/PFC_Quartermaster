@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require('discord.js')
-const { dbinfo } = require('../config.json')
+const { bot_type, dbinfo } = require('../config.json')
 
 module.exports ={
 	updaterules: async function(client, chanPFCRules, chanBotLog){
@@ -92,7 +92,12 @@ async function setmessage(client, embedid, rulesEmbed, ruleschannel){
 				return 'Cannot edit message from another user'
 			}
 		}catch{
-			newmessageid =await client.channels.cache.get(ruleschannel).send({embeds: [rulesEmbed]}).then(embedMessage =>{return embedMessage.id})
+			if (bot_type == "development"){
+				console.log("Development bot.  Skipping message update for #rules channel");
+				newmessageid = embedid;
+			} else {
+				newmessageid = await client.channels.cache.get(ruleschannel).send({embeds: [rulesEmbed]}).then(embedMessage =>{return embedMessage.id})
+			}
 		}
 
 		database.connect(

@@ -5,7 +5,7 @@ const { Routes } = require('discord-api-types/v9');
 const Twitter = require('twitter-v2'); // Imports the twitter library
 const fs = require('fs'); // imports the file io library
 const { Player } = require("discord-music-player"); // required for music functionality
-const { clientId, guildId, token, dbinfo, twitter} = require('./config.json');
+const { bot_type, clientId, guildId, token, dbinfo, twitter} = require('./config.json');
 const rest = new REST({ version: '9' }).setToken(token);
 const{ process_messages } = require("./process_messages");
 const{getvariable, setvariable} = require('./botactions/variablehandler.js');
@@ -471,20 +471,26 @@ setInterval(() => {
 
 client.on("messageCreate", function(message, interaction){
     allowmessage = process_messages(message, allowmessage);
-	if(!messagecount[message.channel.id]){
-		messagecount[message.channel.id] = 1
-		setvariable(client, 'messagecount', messagecount)
-	} else {
-		messagecount[message.channel.id] += 1
-		setvariable(client, 'messagecount', messagecount)
+	if (isProduction){
+		if(!messagecount[message.channel.id]){
+			messagecount[message.channel.id] = 1
+			setvariable(client, 'messagecount', messagecount)
+		} else {
+			messagecount[message.channel.id] += 1
+			setvariable(client, 'messagecount', messagecount)
+		}
 	}
 
 	if (messagecount[message.channel.id] >= countForSpam){
 		
-		client.channels.cache.get(chanBotTest).send(selectRandomMessage(countBasedChatter))
+		if (isDevelopment) {
+			client.channels.cache.get(chanBotTest).send(selectRandomMessage(countBasedChatter))
+		} else {
+			client.channels.cache.get(message.channel.id).send(selectRandomMessage(countBasedChatter))
 		
-		messagecount[message.channel.id] = 0
-		setvariable(client, 'messagecount', messagecount)
+			messagecount[message.channel.id] = 0
+			setvariable(client, 'messagecount', messagecount)
+		}
 	}
 	
 });
@@ -506,3 +512,23 @@ function sendsomeMessage() {
 }
 
 setInterval(sendsomeMessage, 1000)
+
+function isProduction(){
+	if (bot_type == "production"){
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function isDevelopment(){
+	if (bot_type == "development"){
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function getBotType(){
+	return bot_type
+}

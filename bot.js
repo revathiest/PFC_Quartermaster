@@ -436,9 +436,8 @@ async function getusername(streamFactory, dataConsumer) {
 	  	streamFactory().then((response) => {
 			dataConsumer(response)
 		});
-	  	console.log('Stream disconnected healthily. Reconnecting.');
 	} catch (error) {
-	  	console.warn('Stream disconnected with error. Retrying.', error);
+	  	console.warn('Stream disconnected with error: ', error.stack);
 	}
   }
 

@@ -28,7 +28,11 @@ module.exports ={
 				var querystring = "SELECT * from PFC_BOT_RULES_EMBED"
 				database.query(querystring, function (err, result, fields) {
 					if (err) { console.log(err) }
-					embedid = result[0].Embed_id
+					if (result.length == 0) {
+						embedid = null
+					} else {
+						embedid = result[0].Embed_id
+					}
 				})
 			} catch (error){
 				console.log(error.stack)

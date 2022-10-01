@@ -390,34 +390,57 @@ client.once('ready', () => {
 
 	updaterules(client, chanPFCRules, chanBotLog).then(() => {
 
+	var twitchans = {}
+	var numchans = Object.keys(twitterchans).length
+	var curchan = 1;
+
+	if (numchans > 1){
+		for(const [key, value] of Object.entries(twitterchans)) {
+			if (curchan == 1){
+				twitchans = 'from:' + value.toString();
+				curchan += 1;
+			} else {
+				twitchans = twitchans + ' OR from:' + value.toString() ;
+				curchan += 1;
+			}
+		};	
+	} else { 
+		twitchans = twitterchans.valueOf();
+	}
+
 		listenForever(() => twitterClient.stream("tweets/search/recent", {
-					query: "from:RobertsSpaceInd",
+					query: twitchans,
 					start_time: new Date(new Date() - 42000).toISOString(),
 					end_time: new Date(new Date() - 12000).toISOString(),
 					expansions: "author_id"
 				}),
-			(data) => {
-				if (data != undefined){
-					client.channels.cache.get(chanSCNews).send(
-						"**Star Citizen** just tweeted this!\n" +
-						"https://twitter.com/RobertsSpaceInd/status/" + data[0].id
-						)
-					console.log(data[0].text)
-				} else {
-					console.log('data is undefined')
-				}
+			(message) => {
+				getusername(() => twitterClient.get("users/" + message[0].author_id, {
+				}), (data) => {
+					if (data != undefined){
+						client.channels.cache.get(chanSCNews).send(
+							"**" + data.data.name + "** just tweeted this!\n" +
+							"https://twitter.com/"+ data.data.username + "/status/" + message[0].id
+							)
+					} else {
+						console.log('data is undefined')
+					}
+				})
 			}
 		);
 	});
-
 })
 
-client.on("userNoteUpdate", function(user, oldNote, newNote){
-	const tmpuser = user
-	const tmpoldNote = oldNote
-	const tmpnewNote = newNote
-    console.log(`a member's note is updated`);
-});
+async function getusername(streamFactory, dataConsumer) {
+	try {
+	  	streamFactory().then((response) => {
+			dataConsumer(response)
+		});
+	  	console.log('Stream disconnected healthily. Reconnecting.');
+	} catch (error) {
+	  	console.warn('Stream disconnected with error. Retrying.', error);
+	}
+  }
 
 // presenceUpdate
 /* Emitted whenever a guild member's presence changes, or they change one of their details.

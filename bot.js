@@ -405,7 +405,7 @@ client.once('ready', () => {
 			}
 		};	
 	} else { 
-		twitchans = twitterchans.valueOf();
+		twitchans = Object.values(twitterchans)[0];
 	}
 
 		listenForever(() => twitterClient.stream("tweets/search/recent", {

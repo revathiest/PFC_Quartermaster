@@ -471,8 +471,12 @@ setInterval(() => {
 
 client.on("messageCreate", function(message, interaction){
     allowmessage = process_messages(message, allowmessage);
+	
+	if (messagecount == undefined){
+		messagecount = {}
+	}
 	if (isProduction){
-		if(messagecount[message.channel.id] == undefined || !messagecount[message.channel.id]){
+		if(messagecount == undefined || !messagecount[message.channel.id]){
 			messagecount[message.channel.id] = 1
 			setvariable(client, 'messagecount', messagecount)
 		} else {

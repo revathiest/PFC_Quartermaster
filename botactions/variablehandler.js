@@ -24,7 +24,11 @@ module.exports ={
 				var querystring = "SELECT Value from PFC_VARIABLES WHERE varKey = '" + key + "'"
 				database.query(querystring, function (err, result, fields) {
 					if (err) { console.log(err) }
-					return callback(JSON.parse(result[0].Value.toString()))
+					if (result && result.length != 0){
+						return callback(JSON.parse(result[0].Value.toString()))
+					} else {
+						return callback(undefined)
+					}
 				})
 
 			} catch (error){

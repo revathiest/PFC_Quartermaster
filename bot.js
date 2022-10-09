@@ -475,7 +475,7 @@ client.on("messageCreate", function(message, interaction){
 	if (messagecount == undefined){
 		messagecount = {}
 	}
-	if (isProduction){
+	if (isProduction()){
 		if(messagecount == undefined || !messagecount[message.channel.id]){
 			messagecount[message.channel.id] = 1
 			setvariable(client, 'messagecount', messagecount)
@@ -487,7 +487,7 @@ client.on("messageCreate", function(message, interaction){
 
 	if (messagecount[message.channel.id] >= countForSpam){
 		
-		if (isDevelopment) {
+		if (isDevelopment()) {
 			client.channels.cache.get(chanBotTest).send(selectRandomMessage(countBasedChatter))
 		} else {
 			client.channels.cache.get(message.channel.id).send(selectRandomMessage(countBasedChatter))

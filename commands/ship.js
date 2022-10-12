@@ -19,7 +19,7 @@ module.exports = {
 
 		const shipname = interaction.options._hoistedOptions[0].value
 
-		var url = scapibase + shipname + '?locale=en_EN&include=hardpoints,components,shops.items'
+		var url = scapibase + shipname + '?locale=en_EN&include=components,shops.items'
 		
 		var answer = await fetch(url).then(response => response.text())
 		ship = JSON.parse(answer)	

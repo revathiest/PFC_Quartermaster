@@ -260,17 +260,14 @@ client.on('interactionCreate', async interaction => {
 
 client.on('messageReactionAdd', (reaction, user) => {
 	if (reactionroles[reaction.message.channel.id] != undefined){
-		console.log("Found one!")
-
 		if(reactionroles[reaction.message.channel.id][reaction.emoji.name] != undefined){
 			var reacticon = reactionroles[reaction.message.channel.id][reaction.emoji.name]
 			var role = reaction.message.guild.roles.cache.find(role => role.name === reacticon.name);
-			console.log("Found the emoji too!")
 			var userid = user.id
 			client.guilds.fetch(guildId).then(guild => {
 				client.channels.cache.get(chanBotLog).send(user.username + " clicked the " + reacticon.icon + " reaction")
 				guild.members.fetch(userid).then(member => {
-					member.roles.add(role.id) //Recruit
+					member.roles.add(role.id)
 					client.channels.cache.get(chanBotLog).send(reacticon.name + " role was added to " + member.user.username)
 				})
 			})
@@ -280,16 +277,14 @@ client.on('messageReactionAdd', (reaction, user) => {
 
 client.on('messageReactionRemove', (reaction, user) =>{
 	if (reactionroles[reaction.message.channel.id] != undefined){
-		console.log("Found one!")
-
 		if(reactionroles[reaction.message.channel.id][reaction.emoji.name] != undefined){
 			var reacticon = reactionroles[reaction.message.channel.id][reaction.emoji.name]
 			var role = reaction.message.guild.roles.cache.find(role => role.name === reacticon.name);
-			console.log("Found the emoji too!")
 			var userid = user.id
 			client.guilds.fetch(guildId).then(guild => {
 				client.channels.cache.get(chanBotLog).send(user.username + " clicked the " + reacticon.icon + " reaction")
 				guild.members.fetch(userid).then(member => {
+					member.roles.remove(role.id)
 					client.channels.cache.get(chanBotLog).send(reacticon.name + " role was removed from " + member.user.username)
 				})
 			})
@@ -369,7 +364,7 @@ client.once('ready', () => {
 		twitchans = Object.values(twitterchans)[0];
 	}
 
-		/*listenForever(() => twitterClient.stream("tweets/search/recent", {
+		listenForever(() => twitterClient.stream("tweets/search/recent", {
 					query: twitchans,
 					start_time: new Date(new Date() - 42000).toISOString(),
 					end_time: new Date(new Date() - 12000).toISOString(),
@@ -388,7 +383,7 @@ client.once('ready', () => {
 					}
 				})
 			}
-		);*/
+		);
 	});
 })
 

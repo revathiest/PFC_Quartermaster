@@ -19,7 +19,7 @@ module.exports = {
 
 		const shipname = interaction.options._hoistedOptions[0].value
 
-		var url = scapibase + shipname + '?locale=en_EN&include=shops.items'
+		var url = scapibase + shipname + '?locale=en_EN&include=hardpoints,components,shops.items'
 		
 		var answer = await fetch(url).then(response => response.text())
 		ship = JSON.parse(answer)	
@@ -64,8 +64,10 @@ module.exports = {
 		var production_status = 'Unknown'
 		var scm_speed = 'Unknown'
 		var modified = 'Unknown'
+		var version = 'Unknown'
 		
-		shipName = shipinfo.name
+		shipName = shipinfo.name + ' (' + shipinfo.version + ")"
+		//shipPledgeURL = baseURL + shipinfo.name
 		shipManuf = shipinfo.manufacturer.name
 		shipManufCode = shipinfo.manufacturer.code
 		afterburner_speed = shipinfo.speed.afterburner.toString()
@@ -116,7 +118,7 @@ module.exports = {
 		.setDescription(shipDesc)	
 		.setColor('#0099ff')
 		.setTitle(shipName)
-		.setURL(shipPledgeURL)
+		//.setURL(shipPledgeURL)
 		.setAuthor({name: shipManuf.valueOf()})
 		.setTimestamp()
 		.setFooter({text:'Official PFC Communication', iconURL:'https://i.imgur.com/5sZV5QN.png'})

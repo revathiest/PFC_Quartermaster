@@ -259,9 +259,9 @@ client.on('interactionCreate', async interaction => {
 })
 
 client.on('messageReactionAdd', (reaction, user) => {
-	if (reactionroles[reaction.message.channel.id] != undefined){
-		if(reactionroles[reaction.message.channel.id][reaction.emoji.name] != undefined){
-			var reacticon = reactionroles[reaction.message.channel.id][reaction.emoji.name]
+	if (reactionroles[reaction.message.channel.name] != undefined){
+		if(reactionroles[reaction.message.channel.name][reaction.emoji.name] != undefined){
+			var reacticon = reactionroles[reaction.message.channel.name][reaction.emoji.name]
 			var role = reaction.message.guild.roles.cache.find(role => role.name === reacticon.name);
 			var userid = user.id
 			client.guilds.fetch(guildId).then(guild => {
@@ -276,9 +276,9 @@ client.on('messageReactionAdd', (reaction, user) => {
 })
 
 client.on('messageReactionRemove', (reaction, user) =>{
-	if (reactionroles[reaction.message.channel.id] != undefined){
-		if(reactionroles[reaction.message.channel.id][reaction.emoji.name] != undefined){
-			var reacticon = reactionroles[reaction.message.channel.id][reaction.emoji.name]
+	if (reactionroles[reaction.message.channel.name] != undefined){
+		if(reactionroles[reaction.message.channel.name][reaction.emoji.name] != undefined){
+			var reacticon = reactionroles[reaction.message.channel.name][reaction.emoji.name]
 			var role = reaction.message.guild.roles.cache.find(role => role.name === reacticon.name);
 			var userid = user.id
 			client.guilds.fetch(guildId).then(guild => {

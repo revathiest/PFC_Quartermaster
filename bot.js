@@ -5,7 +5,7 @@ const { Routes } = require('discord-api-types/v9');
 const Twitter = require('twitter-v2'); // Imports the twitter library
 const fs = require('fs'); // imports the file io library
 const { Player } = require("discord-music-player"); // required for music functionality
-const { bot_type, clientId, guildId, token, dbinfo, twitter} = require('./config.json');
+const { bot_type, clientId, guildId, token, dbinfo, twitter, reactionroles} = require('./config.json');
 const rest = new REST({ version: '9' }).setToken(token);
 const{ process_messages } = require("./process_messages");
 const{getvariable, setvariable} = require('./botactions/variablehandler.js');
@@ -259,83 +259,40 @@ client.on('interactionCreate', async interaction => {
 })
 
 client.on('messageReactionAdd', (reaction, user) => {
-	//Was the reaction in the rules channel?
-	if (reaction.message.channel.id == chanPFCRules){
-		switch(reaction.emoji.name){
-			case 'Flame':
-				var userid = user.id
-				client.guilds.fetch(guildId).then(guild => {
-					client.channels.cache.get(chanBotLog).send(user.username + " clicked the <:Flame:821839818240557136> reaction")
-					guild.members.fetch(userid).then(member => {
-						member.roles.add('833440108647677953') //Recruit
-						client.channels.cache.get(chanBotLog).send("Recruit role was added to " + member.user.username)
-					})
+	if (reactionroles[reaction.message.channel.id] != undefined){
+		console.log("Found one!")
+
+		if(reactionroles[reaction.message.channel.id][reaction.emoji.name] != undefined){
+			var reacticon = reactionroles[reaction.message.channel.id][reaction.emoji.name]
+			var role = reaction.message.guild.roles.cache.find(role => role.name === reacticon.name);
+			console.log("Found the emoji too!")
+			var userid = user.id
+			client.guilds.fetch(guildId).then(guild => {
+				client.channels.cache.get(chanBotLog).send(user.username + " clicked the " + reacticon.icon + " reaction")
+				guild.members.fetch(userid).then(member => {
+					member.roles.add(role.id) //Recruit
+					client.channels.cache.get(chanBotLog).send(reacticon.name + " role was added to " + member.user.username)
 				})
-				break
-			case 'StarCitizen':
-				var userid = user.id
-				client.guilds.fetch(guildId).then(guild => {
-					client.channels.cache.get(chanBotLog).send(user.username + " clicked the <:StarCitizen:821855258136805456> reaction")
-					guild.members.fetch(userid).then(member => {
-						member.roles.add('823083914116595743') //Stowaway
-						client.channels.cache.get(chanBotLog).send("Stowaway role was added to " + member.user.username)
-					})
-				})
-				break
-			case '🎖️':
-				var userid = user.id
-				client.guilds.fetch(guildId).then(guild => {
-					client.channels.cache.get(chanBotLog).send(user.username + " clicked the 🎖️ reaction")
-					guild.members.fetch(userid).then(member => {
-						member.roles.add('833415056783441931') //Affiliate
-						client.channels.cache.get(chanBotLog).send("Affiliate role was added to " + member.user.username)
-					})
-				})
-				break
-			default:
-				console.log(`It's not one of the role reactions`)
-				console.log('it was '+ reaction.emoji.name)
+			})
 		}
 	}
 })
 
 client.on('messageReactionRemove', (reaction, user) =>{
-	//Was the reaction in the rules channel?
-	if (reaction.message.channel.id == chanPFCRules){
-		switch(reaction.emoji.name){
-			case 'Flame':
-				var userid = user.id
-				client.guilds.fetch(guildId).then(guild => {
-					client.channels.cache.get(chanBotLog).send(user.username + " clicked the <:Flame:821839818240557136> reaction")
-					guild.members.fetch(userid).then(member => {
-						member.roles.remove('833440108647677953') //Recruit
-						client.channels.cache.get(chanBotLog).send("Recruit role was removed from " + member.user.username)
-					})
+	if (reactionroles[reaction.message.channel.id] != undefined){
+		console.log("Found one!")
+
+		if(reactionroles[reaction.message.channel.id][reaction.emoji.name] != undefined){
+			var reacticon = reactionroles[reaction.message.channel.id][reaction.emoji.name]
+			var role = reaction.message.guild.roles.cache.find(role => role.name === reacticon.name);
+			console.log("Found the emoji too!")
+			var userid = user.id
+			client.guilds.fetch(guildId).then(guild => {
+				client.channels.cache.get(chanBotLog).send(user.username + " clicked the " + reacticon.icon + " reaction")
+				guild.members.fetch(userid).then(member => {
+					client.channels.cache.get(chanBotLog).send(reacticon.name + " role was removed from " + member.user.username)
 				})
-				break
-			case 'StarCitizen':
-				var userid = user.id
-				client.guilds.fetch(guildId).then(guild => {
-					client.channels.cache.get(chanBotLog).send(user.username + " clicked the <:StarCitizen:821855258136805456> reaction")
-					guild.members.fetch(userid).then(member => {
-						member.roles.remove('823083914116595743') //Stowaway
-						client.channels.cache.get(chanBotLog).send("Stowaway role was removed from " + member.user.username)
-					})
-				})
-				break
-			case '🎖️':
-				var userid = user.id
-				client.guilds.fetch(guildId).then(guild => {
-					client.channels.cache.get(chanBotLog).send(user.username + " clicked the 🎖️ reaction")
-					guild.members.fetch(userid).then(member => {
-						member.roles.remove('833415056783441931') //Affiliate
-						client.channels.cache.get(chanBotLog).send("Affiliate role was removed from " + member.user.username)
-					})
-				})
-				break
-			default:
-				console.log(`It's not one of the role reactions`)
-				console.log('it was '+ reaction.emoji.name)
+			})
 		}
 	}
 })
@@ -386,6 +343,10 @@ client.once('ready', () => {
 		}
 	})
 
+	client.channels.cache.get('996129261985480704').messages.fetch({limit: 100}).then(messages => {
+		console.log(`Retrieved ${messages.size} messages from #division-signup.`)
+	})
+
 	client.channels.cache.get(chanBotLog).send('Startup Complete!')
 
 	updaterules(client, chanPFCRules, chanBotLog).then(() => {
@@ -408,7 +369,7 @@ client.once('ready', () => {
 		twitchans = Object.values(twitterchans)[0];
 	}
 
-		listenForever(() => twitterClient.stream("tweets/search/recent", {
+		/*listenForever(() => twitterClient.stream("tweets/search/recent", {
 					query: twitchans,
 					start_time: new Date(new Date() - 42000).toISOString(),
 					end_time: new Date(new Date() - 12000).toISOString(),
@@ -427,7 +388,7 @@ client.once('ready', () => {
 					}
 				})
 			}
-		);
+		);*/
 	});
 })
 

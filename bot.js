@@ -344,7 +344,14 @@ client.once('ready', () => {
 
 	client.channels.cache.get(chanBotLog).send('Startup Complete!')
 
-	updaterules(client, chanPFCRules, chanBotLog).then(() => {
+	var rulesChan = ''
+	if (isProduction()){
+		rulesChan = chanPFCRules
+	} else if (isDevelopment()) {
+		rulesChan = chanBotTest
+	}
+
+	updaterules(client, rulesChan, chanBotLog).then(() => {
 
 	var twitchans = {}
 	var numchans = Object.keys(twitterchans).length

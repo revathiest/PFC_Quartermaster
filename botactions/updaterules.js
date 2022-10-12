@@ -55,12 +55,13 @@ module.exports ={
 						ruletext = ruletext + "**" + rule.RuleNum + "**. " + rule.RuleText + "\r\n"
 					})
 
+					ruletext = ruletext + "https://robertsspaceindustries.com/orgs/PFCS \r\n"
+
 					rulesEmbed.setColor('#0099ff')
 					rulesEmbed.setTitle('Welcome to the Pyro Freelancer Corps Discord')
 					rulesEmbed.setURL('https://discord.js.org/')
 					rulesEmbed.setAuthor({name:'Pyro Freelancer Corps', iconURL:'https://i.imgur.com/5sZV5QN.png', url:'https://robertsspaceindustries.com/orgs/PFCS'})
 					rulesEmbed.setDescription(ruletext)
-					//rulesEmbed.setThumbnail('https://i.imgur.com/RdZBmhk.png')
 					rulesEmbed.setTimestamp()
 					rulesEmbed.setFooter({text:'Official PFC Communication', iconURL:'https://i.imgur.com/5sZV5QN.png'})
 
@@ -93,7 +94,8 @@ async function setmessage(client, embedid, rulesEmbed, ruleschannel){
 			}
 		}catch{
 			if (bot_type == "development"){
-				console.log("Development bot.  Skipping message update for #rules channel");
+				console.log("Development bot.  Sending new message to test channel.");
+				client.channels.cache.get(ruleschannel).send({embeds: [rulesEmbed]}).then(embedMessage =>{return embedMessage.id})
 				newmessageid = embedid;
 			} else {
 				newmessageid = await client.channels.cache.get(ruleschannel).send({embeds: [rulesEmbed]}).then(embedMessage =>{return embedMessage.id})

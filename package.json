@@ -23,7 +23,7 @@
     "sodium-native": "^3.4.1",
     "tweetnacl": "^1.0.3",
     "twitter-v2": "^1.1.0",
-    "ytdl-core": "^4.11.1"
+    "ytdl-core": "^4.11.4"
   },
   "nodeVersion": "17.9.1"
 }

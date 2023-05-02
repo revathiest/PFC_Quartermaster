@@ -52,24 +52,22 @@ for(var key in twitterchans){
 };
 
 async function listenForever(streamFactory, dataConsumer) {
-	try {
-	  var response = streamFactory()
-	  for await (const { meta, data } of response) {
-		if (meta.result_count > 0) {
+	while (true) {
+	  try {
+		const response = streamFactory();
+		for await (const { meta, data } of response) {
+		  if (meta.result_count > 0) {
 			dataConsumer(data);
+		  }
 		}
+		console.log('Stream disconnected healthily. Reconnecting.');
+	  } catch (error) {
+		console.warn('Stream disconnected with error. Retrying.', error);
 	  }
-	  // The stream has been closed by Twitter. It is usually safe to reconnect.
-	  console.log('Stream disconnected healthily. Reconnecting.');
-	  setTimeout(() => listenForever(streamFactory, dataConsumer), 30000);
-	} catch (error) {
-	  // An error occurred so we reconnect to the stream. Note that we should
-	  // probably have retry logic here to prevent reconnection after a number of
-	  // closely timed failures (may indicate a problem that is not downstream).
-	  console.warn('Stream disconnected with error. Retrying.', error);
-	  setTimeout(() => listenForever(streamFactory, dataConsumer), 30000);
+	  await new Promise(resolve => setTimeout(resolve, 30000));
 	}
   }
+  
 
 //***********************************************************/
 //Music Player Setup
@@ -119,32 +117,6 @@ player
         client.channels.cache.get(chanBotLog).send('Error: (music)' + error.stack)
     });
 
-//============================================================================
-// This is the PFC Announcement embed
-// 20211108 krh Initial Coding
-//============================================================================
-function announce(message){
-    const responseEmbed = new EmbedBuilder()
-	.setColor('#0099ff')
-	.setTitle('Pyro Freelancer Corps Announcement')
-	.setURL('https://discord.js.org/')
-	.setAuthor({name:'Pyro Freelancer Corps', iconURL:'https://i.imgur.com/5sZV5QN.png', url:'https://robertsspaceindustries.com/orgs/PFCS'})
-	.setDescription('Some description here')
-	.setThumbnail('https://i.imgur.com/RdZBmhk.png')
-	.addFields(
-		{ name: 'Regular field title', value: message.toString() },
-		{ name: '\u200B', value: '\u200B' },
-		{ name: 'Field 1', value: 'Some value here', inline: true },
-		{ name: 'Field 2', value: 'Some value here', inline: true },
-	)
-	.addFields({name:'Field 3', value: 'Some value here', inline: true})
-	.setImage('https://i.imgur.com/RdZBmhk.png')
-	.setTimestamp()
-	.setFooter({text:'Official PFC Communication', iconURL:'https://i.imgur.com/5sZV5QN.png'});
-
-interaction.reply({ embeds: [responseEmbed] });
-};
-
 //This creates the commands so that they can be run.
 client.commands = new Collection();
 var cmdsToRegister = [];
@@ -153,35 +125,29 @@ const playercommandFiles = fs.readdirSync('./commands/musiccommands').filter(fil
 
 console.log('====Registering Star Citizen Commands: ');
 for (const file of commandFiles) {
-	const command = require('./commands/' + file)
-	// Set a new item in the Collection
-	// With the key as the command name and the value as the exported module
-	try{
-		client.commands.set(command.data.name, command);
-		try{
-			cmdsToRegister.push(command.data.toJSON());
-		}catch{
-			cmdsToRegister.push(command.data);
-		}
-		console.log('Registered command ' + command.data.name);
+	const command = require('./commands/' + file);
+	try {
+	  client.commands.set(command.data.name, command);
+	  cmdsToRegister.push(command.data.toJSON() || command.data);
+	  console.log(`Registered command ${command.data.name}`);
 	} catch (error) {
-		console.error(error);
+	  console.error(error);
 	}
-};
+  }
+  
 
 console.log('====Registering Music Commands: ');
 for (const file of playercommandFiles) {
-	const command = require('./commands/musiccommands/' + file);
-	// Set a new item in the Collection
-	// With the key as the command name and the value as the exported module
-	try{
-		client.commands.set(command.data.name, command);
-		cmdsToRegister.push(command.data.toJSON());
-		console.log('Registered command ' + command.data.name);
+	try {
+	  const command = require(`./commands/musiccommands/${file}`);
+	  client.commands.set(command.data.name, command);
+	  cmdsToRegister.push(command.data.toJSON() || command.data);
+	  console.log(`Registered command ${command.data.name}`);
 	} catch (error) {
-		console.error(error);
+	  console.error(error);
 	}
-};
+  }
+  
 
 (async () => {
 	try {
@@ -203,98 +169,92 @@ for (const file of playercommandFiles) {
 //***********************************************************/
 
 client.on('interactionCreate', async interaction => {
-	
-	var roles = interaction.member._roles;
-	var command = client.commands.get(interaction.commandName);
-
-	if (interaction.type === InteractionType.ApplicationCommand) {
-		
-		var message = interaction.user.username + ' used command **' + interaction.commandName + '**'
-		if (interaction.options._hoistedOptions[0] != undefined){
-			message = message + ' with options **' +interaction.options._hoistedOptions[0].value + '**'
+	const roles = interaction.member._roles;
+	const command = client.commands.get(interaction.commandName);
+  
+	if (interaction.isCommand()) {
+	  let message = `${interaction.user.username} used command **${interaction.commandName}**`;
+	  if (interaction.options._hoistedOptions[0]) {
+		message += ` with options **${interaction.options._hoistedOptions[0].value}**`;
+	  }
+	  client.channels.cache.get(chanBotLog).send(message);
+  
+	  if (command && command.role && !roles.includes(command.role)) {
+		await interaction.reply("You're not authorized to use that command");
+		return;
+	  }
+  
+	  if (!command) {
+		await interaction.reply('Unable to find command...');
+		return;
+	  }
+  
+	  try {
+		if (typeof command.execute === 'function') {
+		  await command.execute(interaction, client);
+		} else {
+		  command(interaction);
 		}
-		client.channels.cache.get(chanBotLog).send(message);
-		
-		
-		if (command.role != undefined){
-			if (!roles.includes(command.role)){
-				interaction.reply("You're not authorized to use that command");
-				return
-			}
-		}
-		
-		if (!command) {
-			interaction.reply('Unable to find command...');
-			return
-		}
-		
-		try {
-			if (typeof command.execute === 'function'){
-				await command.execute(interaction, client);
-			} else {
-				command(interaction);
-			}
-		} catch (error) {
-			console.error(error);
-			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-		}
-	} else if(interaction.isButton()) {
-		
-		var message = interaction.user.username + ' clicked button **' + interaction.customId + '** for command **' + interaction.message.interaction.commandName + '**'
-		client.channels.cache.get(chanBotLog).send(message)
-		
-		command = client.commands.get(interaction.message.interaction.commandName)
-		command.button(interaction, client)
-	} else if(interaction.isSelectMenu()) {
-		
-		var message = interaction.user.username + ' selected option **' + interaction.values[0] + '** for command **' + interaction.message.interaction.commandName + '**'
-		client.channels.cache.get(chanBotLog).send(message)
-		
-		command = client.commands.get(interaction.message.interaction.commandName)
-		command.option(interaction, client)
+	  } catch (error) {
+		console.error(error);
+		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+	  }
+	} else if (interaction.isButton()) {
+	  const message = `${interaction.user.username} clicked button **${interaction.customId}** for command **${interaction.message.interaction.commandName}**`;
+	  client.channels.cache.get(chanBotLog).send(message);
+  
+	  command = client.commands.get(interaction.message.interaction.commandName);
+	  command.button(interaction, client);
+	} else if (interaction.isSelectMenu()) {
+	  const message = `${interaction.user.username} selected option **${interaction.values[0]}** for command **${interaction.message.interaction.commandName}**`;
+	  client.channels.cache.get(chanBotLog).send(message);
+  
+	  command = client.commands.get(interaction.message.interaction.commandName);
+	  command.option(interaction, client);
 	} else {
-		interaction.log(interaction)
-		interaction.reply('I dont know what to do with that')
+	  interaction.log(interaction);
+	  interaction.reply('I dont know what to do with that');
 	}
-})
+  });
+  
 
-client.on('messageReactionAdd', (reaction, user) => {
-	if (reactionroles[reaction.message.channel.name] != undefined){
-		if(reactionroles[reaction.message.channel.name][reaction.emoji.name] != undefined){
-			var reacticon = reactionroles[reaction.message.channel.name][reaction.emoji.name]
-			var role = reaction.message.guild.roles.cache.find(role => role.name === reacticon.name);
-			var userid = user.id
-			client.guilds.fetch(guildId).then(guild => {
-				client.channels.cache.get(chanBotLog).send(user.username + " clicked the " + reacticon.icon + " reaction")
-				guild.members.fetch(userid).then(member => {
-					member.roles.add(role.id)
-					client.channels.cache.get(chanBotLog).send(reacticon.name + " role was added to " + member.user.username)
-				})
-			})
-		}
+  client.on('messageReactionAdd', async (reaction, user) => {
+	const channelName = reaction.message.channel.name;
+	const reactionIcon = reactionroles[channelName]?.[reaction.emoji.name];
+  
+	if (reactionIcon) {
+	  const role = reaction.message.guild.roles.cache.find(role => role.name === reactionIcon.name);
+	  const member = await reaction.message.guild.members.fetch(user.id);
+  
+	  await member.roles.add(role.id);
+  
+	  const logChannel = client.channels.cache.get(chanBotLog);
+	  logChannel.send(`${user.username} clicked the ${reactionIcon.icon} reaction`);
+	  logChannel.send(`${reactionIcon.name} role was added to ${member.user.username}`);
 	}
-})
+  });
+  
 
-client.on('messageReactionRemove', (reaction, user) =>{
-	if (reactionroles[reaction.message.channel.name] != undefined){
-		if(reactionroles[reaction.message.channel.name][reaction.emoji.name] != undefined){
-			var reacticon = reactionroles[reaction.message.channel.name][reaction.emoji.name]
-			var role = reaction.message.guild.roles.cache.find(role => role.name === reacticon.name);
-			var userid = user.id
-			client.guilds.fetch(guildId).then(guild => {
-				client.channels.cache.get(chanBotLog).send(user.username + " clicked the " + reacticon.icon + " reaction")
-				guild.members.fetch(userid).then(member => {
-					member.roles.remove(role.id)
-					client.channels.cache.get(chanBotLog).send(reacticon.name + " role was removed from " + member.user.username)
-				})
-			})
-		}
+  client.on('messageReactionRemove', async (reaction, user) => {
+	const channelName = reaction.message.channel.name;
+	const reactionIcon = reactionroles[channelName]?.[reaction.emoji.name];
+  
+	if (reactionIcon) {
+	  const role = reaction.message.guild.roles.cache.find(role => role.name === reactionIcon.name);
+	  const member = await reaction.message.guild.members.fetch(user.id);
+  
+	  await member.roles.remove(role.id);
+  
+	  const logChannel = client.channels.cache.get(chanBotLog);
+	  logChannel.send(`${user.username} removed the ${reactionIcon.icon} reaction`);
+	  logChannel.send(`${reactionIcon.name} role was removed from ${member.user.username}`);
 	}
-})
+  });
+  
 
 client.on('error', (error) => {
-		client.channels.cache.get(chanBotLog).send('Error: (client)' + error.stack)
-	})
+	client.channels.cache.get(chanBotLog).send('Error: (client)' + error.stack)
+})
 	
 client.on("userUpdate", function(oldMember, newMember){
 	const membername = newMember.nickname
@@ -302,108 +262,89 @@ client.on("userUpdate", function(oldMember, newMember){
 });
 
 // When the client is ready, run this code (only once)
-client.once('ready', () => {
-	console.log('Ready!')
-
-	client.channels._cache.forEach(channel => {
-		if(channel.type == 0){
-			switch(channel.name){
-				case 'star-citizen-news':
-					chanSCNews = channel.id
-					client.chanSCNews = chanSCNews
-					console.log("Channel " + channel.name + " registered.")
-					break;
-				case 'pfc-bot-testing':
-					chanBotTest = channel.id
-					client.chanBotTest = chanBotTest
-					console.log("Channel " + channel.name + " registered.")
-					break;
-				case 'pfc-bot-activity-log':
-					chanBotLog = channel.id
-					client.chanBotLog = chanBotLog
-					console.log("Channel " + channel.name + " registered.")
-					break;
-				case 'music':
-					chanPFCMusic = channel.id
-					client.chanPFCMusic = chanPFCMusic
-					console.log("Channel " + channel.name + " registered.")
-					break;
-				case 'rules':
-					chanPFCRules = channel.id
-					client.chanPFCRules = chanPFCRules
-					console.log("Channel " + channel.name + " registered.")
-					break;
-				default:		
-			}
+client.once('ready', async () => {
+	console.log('Ready!');
+  
+	for (const channel of client.channels.cache.values()) {
+	  if (channel.type == 0) {
+		switch (channel.name) {
+		  case 'star-citizen-news':
+			chanSCNews = channel.id;
+			client.chanSCNews = chanSCNews;
+			console.log(`Channel ${channel.name} registered.`);
+			break;
+		  case 'pfc-bot-testing':
+			chanBotTest = channel.id;
+			client.chanBotTest = chanBotTest;
+			console.log(`Channel ${channel.name} registered.`);
+			break;
+		  case 'pfc-bot-activity-log':
+			chanBotLog = channel.id;
+			client.chanBotLog = chanBotLog;
+			console.log(`Channel ${channel.name} registered.`);
+			break;
+		  case 'music':
+			chanPFCMusic = channel.id;
+			client.chanPFCMusic = chanPFCMusic;
+			console.log(`Channel ${channel.name} registered.`);
+			break;
+		  case 'rules':
+			chanPFCRules = channel.id;
+			client.chanPFCRules = chanPFCRules;
+			console.log(`Channel ${channel.name} registered.`);
+			break;
+		  default:
+			break;
 		}
-	})
-
-	client.channels.cache.get('996129261985480704').messages.fetch({limit: 100}).then(messages => {
-		console.log(`Retrieved ${messages.size} messages from #division-signup.`)
-	})
-
-	client.channels.cache.get(chanBotLog).send('Startup Complete!')
-
-	var rulesChan = ''
-	if (isProduction()){
-		rulesChan = chanPFCRules
-	} else if (isDevelopment()) {
-		rulesChan = chanBotTest
+	  }
 	}
-
-	updaterules(client, rulesChan, chanBotLog).then(() => {
-
-	var twitchans = {}
-	var numchans = Object.keys(twitterchans).length
-	var curchan = 1;
-
-	if (numchans > 1){
-		for(const [key, value] of Object.entries(twitterchans)) {
-			if (curchan == 1){
-				twitchans = 'from:' + value.toString();
-				curchan += 1;
+  
+	const messages = await client.channels.cache.get('996129261985480704').messages.fetch({ limit: 100 });
+	console.log(`Retrieved ${messages.size} messages from #division-signup.`);
+  
+	client.channels.cache.get(chanBotLog).send('Startup Complete!');
+  
+	const rulesChan = isProduction() ? chanPFCRules : chanBotTest;
+  
+	await updaterules(client, rulesChan, chanBotLog);
+  
+	const twitchans = Object.values(twitterchans).join(' OR from:');
+  
+	listenForever(
+	  () =>
+		twitterClient.stream('tweets/search/recent', {
+		  query: `from:${twitchans}`,
+		  start_time: new Date(new Date() - 42000).toISOString(),
+		  end_time: new Date(new Date() - 12000).toISOString(),
+		  expansions: 'author_id',
+		}),
+	  (message) => {
+		getusername(
+		  () => twitterClient.get(`users/${message[0].author_id}`),
+		  (data) => {
+			if (data) {
+			  client.channels.cache.get(chanSCNews).send(
+				`**${data.data.name}** just tweeted this!\n` +
+				`https://twitter.com/${data.data.username}/status/${message[0].id}`
+			  );
 			} else {
-				twitchans = twitchans + ' OR from:' + value.toString() ;
-				curchan += 1;
+			  console.log('data is undefined');
 			}
-		};	
-	} else { 
-		twitchans = Object.values(twitterchans)[0];
-	}
-
-		listenForever(() => twitterClient.stream("tweets/search/recent", {
-					query: twitchans,
-					start_time: new Date(new Date() - 42000).toISOString(),
-					end_time: new Date(new Date() - 12000).toISOString(),
-					expansions: "author_id"
-				}),
-			(message) => {
-				getusername(() => twitterClient.get("users/" + message[0].author_id, {
-				}), (data) => {
-					if (data != undefined){
-						client.channels.cache.get(chanSCNews).send(
-							"**" + data.data.name + "** just tweeted this!\n" +
-							"https://twitter.com/"+ data.data.username + "/status/" + message[0].id
-							)
-					} else {
-						console.log('data is undefined')
-					}
-				})
-			}
+		  }
 		);
-	});
-	
-
-//Set our interval based functions
-// Run checkEvents function every minute
-try {
-    setInterval(checkEvents, 60000);
-	console.log("Check Events interval successfully started");
-  } catch (error) {
-    console.error(`Error setting up interval: ${error}`);
-  }
-
-})
+	  }
+	);
+  
+	// Set our interval based functions
+	// Run checkEvents function every minute
+	try {
+	  setInterval(checkEvents, 60000);
+	  console.log('Check Events interval successfully started');
+	} catch (error) {
+	  console.error(`Error setting up interval: ${error}`);
+	}
+  });
+  
 
 async function checkEvents() {
 
@@ -490,32 +431,18 @@ getvariable(client,'messagecount', function(response){
 var allowmessage = true;
 const countBasedChatter = require('./countBasedChatter.json')
 
-client.on("messageCreate", function(message, interaction){
-    allowmessage = process_messages(message, allowmessage);
-	
-	if (messagecount == undefined){
-		messagecount = {}
-	}
-	if (isProduction()){
-		if(messagecount == undefined || !messagecount[message.channel.id]){
-			messagecount[message.channel.id] = 1
-			setvariable(client, 'messagecount', messagecount)
-		} else {
-			messagecount[message.channel.id] += 1
-			setvariable(client, 'messagecount', messagecount)
-		}
+client.on("messageCreate", function(message) {
+	allowmessage = process_messages(message, allowmessage);
+  
+	if (!messagecount) {
+	  messagecount = {};
 	}
 	
-});
-
-function selectRandomMessage(messageList){
-
-	const keylist = Object.keys(messageList)
-	const keylistlen = keylist.length
-
-	const tmp = messageList[keylist[Math.floor(Math.random() * keylistlen)]] 
-	return tmp
-}
+	if (isProduction()) {
+	  messagecount[message.channel.id] = (messagecount[message.channel.id] || 0) + 1;
+	  setvariable(client, 'messagecount', messagecount);
+	}
+  });
 
 function isProduction(){
 	if (bot_type == "production"){

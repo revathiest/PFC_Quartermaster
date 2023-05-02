@@ -489,11 +489,6 @@ getvariable(client,'messagecount', function(response){
 })
 var allowmessage = true;
 const countBasedChatter = require('./countBasedChatter.json')
-const {countForSpam, timeForSpam} = require('./config.json');
-
-setInterval(() => {
-	allowmessage = true;
-}, timeForSpam);
 
 client.on("messageCreate", function(message, interaction){
     allowmessage = process_messages(message, allowmessage);
@@ -510,18 +505,6 @@ client.on("messageCreate", function(message, interaction){
 			setvariable(client, 'messagecount', messagecount)
 		}
 	}
-
-	if (messagecount[message.channel.id] >= countForSpam){
-		
-		if (isDevelopment()) {
-			client.channels.cache.get(chanBotTest).send(selectRandomMessage(countBasedChatter))
-		} else {
-			client.channels.cache.get(message.channel.id).send(selectRandomMessage(countBasedChatter))
-		
-			messagecount[message.channel.id] = 0
-			setvariable(client, 'messagecount', messagecount)
-		}
-	}
 	
 });
 
@@ -533,15 +516,6 @@ function selectRandomMessage(messageList){
 	const tmp = messageList[keylist[Math.floor(Math.random() * keylistlen)]] 
 	return tmp
 }
-
-//***********************************************************/
-// Here is where we set up the chatter
-//***********************************************************/
-function sendsomeMessage() {
-
-}
-
-setInterval(sendsomeMessage, 1000)
 
 function isProduction(){
 	if (bot_type == "production"){

@@ -125,28 +125,36 @@ const playercommandFiles = fs.readdirSync('./commands/musiccommands').filter(fil
 
 console.log('====Registering Star Citizen Commands: ');
 for (const file of commandFiles) {
-	const command = require('./commands/' + file);
-	try {
-	  client.commands.set(command.data.name, command);
-	  cmdsToRegister.push(command.data.toJSON() || command.data);
-	  console.log(`Registered command ${command.data.name}`);
-	} catch (error) {
-	  console.error(error);
-	}
+  const command = require('./commands/' + file);
+  try {
+    client.commands.set(command.data.name, command);
+    if (typeof command.data === 'object' && command.data !== null) {
+      cmdsToRegister.push(command.data.toJSON ? command.data.toJSON() : command.data);
+    } else {
+      cmdsToRegister.push(command.data);
+    }
+    console.log(`Registered command ${command.data.name}`);
+  } catch (error) {
+    console.error(error);
   }
-  
+}
 
 console.log('====Registering Music Commands: ');
 for (const file of playercommandFiles) {
-	try {
-	  const command = require(`./commands/musiccommands/${file}`);
-	  client.commands.set(command.data.name, command);
-	  cmdsToRegister.push(command.data.toJSON() || command.data);
-	  console.log(`Registered command ${command.data.name}`);
-	} catch (error) {
-	  console.error(error);
-	}
+  try {
+    const command = require(`./commands/musiccommands/${file}`);
+    client.commands.set(command.data.name, command);
+    if (typeof command.data === 'object' && command.data !== null) {
+      cmdsToRegister.push(command.data.toJSON ? command.data.toJSON() : command.data);
+    } else {
+      cmdsToRegister.push(command.data);
+    }
+    console.log(`Registered command ${command.data.name}`);
+  } catch (error) {
+    console.error(error);
   }
+}
+
   
 
 (async () => {

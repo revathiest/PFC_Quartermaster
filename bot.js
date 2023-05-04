@@ -395,7 +395,7 @@ async function checkEvents() {
 		  // Send reminder message to each designated channel
 		  for (const channelId of channelIds) {
 			const channel = client.channels.cache.get(channelId);
-			const message = (interval === "0") ? `Reminder: Event "${event.name}" is starting now!` : `Reminder: Event "${event.name}" starts in ${intervals[interval]}`;
+			const message = (interval === "0") ? `Reminder: Event "${event.name}" is starting now! Join here: ${event.url}` : `Reminder: Event "${event.name}" starts in ${intervals[interval]}. Sign up here: ${event.url}`;
 			await channel.send(message);
 		  }
 		  break;

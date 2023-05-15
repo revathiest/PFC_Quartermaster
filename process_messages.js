@@ -11,7 +11,11 @@ module.exports ={
             if (filter[tmp] && allowmessage) {
                 message.channel.send(filter[tmp]);
                 return false;
-            } 
+            } else if(message.author.bot == false) {
+                return true;
+            } else {
+                return false;
+            }
         }
     },
     test_message: function(string){

@@ -450,6 +450,9 @@ client.on("messageCreate", function(message) {
 	  messagecount[message.channel.id] = (messagecount[message.channel.id] || 0) + 1;
 	  setvariable(client, 'messagecount', messagecount);
 	}
+	setInterval(() => {
+	 allowmessage = true;
+	}, 60000);
   });
 
 function isProduction(){

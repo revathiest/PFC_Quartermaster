@@ -452,6 +452,7 @@ client.on("messageCreate", function(message) {
 	}
 	setInterval(() => {
 	 allowmessage = true;
+	 console.log("Bot Spam Timer elapsed")
 	}, 60000);
   });
 

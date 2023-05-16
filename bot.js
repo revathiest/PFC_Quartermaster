@@ -319,29 +319,39 @@ client.once('ready', async () => {
 	const twitchans = Object.values(twitterchans).join(' OR from:');
   
 	listenForever(
-	  () =>
-		twitterClient.stream('tweets/search/recent', {
-		  query: `from:${twitchans}`,
-		  start_time: new Date(new Date() - 42000).toISOString(),
-		  end_time: new Date(new Date() - 12000).toISOString(),
-		  expansions: 'author_id',
-		}),
-	  (message) => {
-		getusername(
-		  () => twitterClient.get(`users/${message[0].author_id}`),
-		  (data) => {
-			if (data) {
-			  client.channels.cache.get(chanSCNews).send(
-				`**${data.data.name}** just tweeted this!\n` +
-				`https://twitter.com/${data.data.username}/status/${message[0].id}`
-			  );
-			} else {
-			  console.log('data is undefined');
-			}
+		() =>
+		  twitterClient.stream('tweets/search/recent', {
+			query: `from:${twitchans}`,
+			start_time: new Date(new Date() - 42000).toISOString(),
+			end_time: new Date(new Date() - 12000).toISOString(),
+			expansions: 'author_id',
+		  }),
+		(message) => {
+		  if (
+			message[0].referenced_tweets &&
+			message[0].referenced_tweets.some(
+			  (referencedTweet) => referencedTweet.type === 'retweeted'
+			)
+		  ) {
+			return; // Ignore retweets
 		  }
-		);
-	  }
-	);
+	  
+		  getusername(
+			() => twitterClient.get(`users/${message[0].author_id}`),
+			(data) => {
+			  if (data) {
+				client.channels.cache.get(chanSCNews).send(
+				  `**${data.data.name}** just tweeted this!\n` +
+				  `https://twitter.com/${data.data.username}/status/${message[0].id}`
+				);
+			  } else {
+				console.log('data is undefined');
+			  }
+			}
+		  );
+		}
+	  );
+	  
   
 	// Set our interval based functions
 	// Run checkEvents function every minute

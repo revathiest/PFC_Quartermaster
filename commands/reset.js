@@ -1,18 +1,29 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { botPermsReq } = require('./../config.json');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('reset')
     .setDescription('Restarts the Quartermaster (Admin only)'),
 
-  async execute(interaction, client) {
+  async execute(interaction) {
     if (!interaction.member.permissions.has('ADMINISTRATOR')) {
-      return interaction.reply('Only an administrator can do that. Your attempt has been logged.');
+      return interaction.reply({
+        content: 'Only an administrator can do that. Your attempt has been logged.',
+        ephemeral: true
+      });
     }
 
-    interaction.reply('Resetting...').then(() => {
+    const username = interaction.member.user.tag;
+    try {
+      console.log(`Server shut down by: ${username}`);
+      await interaction.reply('Resetting...');
       process.exit(0);
-    });
+    } catch (error) {
+      console.error(`Error occurred while trying to shut down the bot: ${error}`);
+      await interaction.reply({
+        content: 'An error occurred while trying to shut down the bot.',
+        ephemeral: true
+      });
+    }
   }
 };

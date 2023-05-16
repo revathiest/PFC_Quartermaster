@@ -361,6 +361,14 @@ client.once('ready', async () => {
 	} catch (error) {
 	  console.error(`Error setting up interval: ${error}`);
 	}
+
+	try{
+		deleteMessages();
+		setInterval(deleteMessages, 86400000);
+		console.log('Clearing Snap Channels')
+	} catch (error){
+		console.error(`Error setting up interval: ${error}`);
+	}
   });
   
 
@@ -413,9 +421,28 @@ async function checkEvents() {
 	  }
 	}
   }
-  
-  
 
+  async function deleteMessages() {
+	try {
+	  const channelsData = fs.readFileSync('snapchannels.json');
+	  const channels = JSON.parse(channelsData);
+	  
+	  for (const channelId of channels) {
+		const channel = await client.channels.fetch(channelId);
+		
+		if (channel.type === 0) {
+		  const messages = await channel.messages.fetch({ limit: 100 });
+		  await channel.bulkDelete(messages);
+		  console.log(`Deleted messages in channel ${channel.name}`);
+		} else {
+		  console.log(`Invalid channel type. Skipping channel ${channel.name}`);
+		}
+	  }
+	} catch (error) {
+	  console.error('Error deleting messages:', error);
+	}
+  }
+  
 async function getusername(streamFactory, dataConsumer) {
 	try {
 	  	streamFactory().then((response) => {

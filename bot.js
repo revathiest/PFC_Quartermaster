@@ -426,13 +426,21 @@ async function checkEvents() {
 	try {
 	  const channelsData = fs.readFileSync('snapchannels.json');
 	  const channels = JSON.parse(channelsData);
-	  
-	  for (const channelId of channels) {
-		const channel = await client.channels.fetch(channelId);
-		
-		if (channel.type === 0) {
+  
+	  for (const channelInfo of channels) {
+		const channel = await client.channels.fetch(channelInfo.channelId);
+  
+		if (channel.type === 0 || channel.type === 5) {
 		  const messages = await channel.messages.fetch({ limit: 100 });
-		  await channel.bulkDelete(messages);
+  
+		  // Calculate the timestamp for the specified purge time
+		  const purgeTime = new Date();
+		  purgeTime.setDate(purgeTime.getDate() - channelInfo.purgeTimeInDays);
+  
+		  // Filter messages based on their timestamps
+		  const messagesToDelete = messages.filter(msg => msg.createdTimestamp <= purgeTime);
+  
+		  await channel.bulkDelete(messagesToDelete);
 		  console.log(`Deleted messages in channel ${channel.name}`);
 		} else {
 		  console.log(`Invalid channel type. Skipping channel ${channel.name}`);

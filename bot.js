@@ -324,7 +324,7 @@ client.once('ready', async () => {
 			query: `from:${twitchans}`,
 			start_time: new Date(new Date() - 42000).toISOString(),
 			end_time: new Date(new Date() - 12000).toISOString(),
-			expansions: 'author_id',
+			expansions: 'author_id,referenced_tweets.id',
 		  }),
 		(message) => {
 		  if (
@@ -340,7 +340,11 @@ client.once('ready', async () => {
 			() => twitterClient.get(`users/${message[0].author_id}`),
 			(data) => {
 			  if (data) {
-				client.channels.cache.get(chanSCNews).send(
+				let newsChan = chanSCNews
+				if (isDevelopment()){
+					newsChan = chanBotTest
+				}
+				client.channels.cache.get(newsChan).send(
 				  `**${data.data.name}** just tweeted this!\n` +
 				  `https://twitter.com/${data.data.username}/status/${message[0].id}`
 				);

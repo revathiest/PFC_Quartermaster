@@ -373,7 +373,45 @@ client.once('ready', async () => {
 	} catch (error){
 		console.error(`Error setting up interval: ${error}`);
 	}
+
+	remindNewbs();
+
+	remindRecruits();
+
   });
+
+async function remindNewbs() {
+	const newbzone = client.channels.cache.get("1026641140193185842"); 
+	const rules = client.channels.cache.get("818705437973151765");
+	const currentDate = new Date();
+	const dayOfWeek = currentDate.getDay();
+
+	if (dayOfWeek !== 0) {
+		console.log("Day is not Monday.  Newb reminder not sent");
+		return;
+	}
+
+	const ruleslink = rules.toString();
+
+	newbzone.send("If you're seeing this, you havent reacted to our rules yet.  Please go to " + ruleslink + " and react!")
+	.then(() => console.log("Reminder sent to #newb-zone"))
+	.catch(console.error);
+}
+
+async function remindRecruits() {
+	const channel = client.channels.cache.get("992875093325795409");
+	const currentDate = new Date();
+	const dayOfWeek = currentDate.getDay();
+
+	if (dayOfWeek !== 0) {
+		console.log("Day is not Monday.  Recruit reminder not sent");
+		return;
+	}
+
+	channel.send("Please remember to apply for membership on https://robertsspaceindustries.com/orgs/PFCS")
+	.then(() => console.log("Reminder sent to ${channel.name}"))
+	.catch(console.error);
+}
   
 
 async function checkEvents() {
@@ -444,8 +482,29 @@ async function checkEvents() {
 		  // Filter messages based on their timestamps
 		  const messagesToDelete = messages.filter(msg => msg.createdTimestamp <= purgeTime);
   
-		  await channel.bulkDelete(messagesToDelete);
-		  console.log(`Deleted messages in channel ${channel.name}`);
+		  try {
+			await channel.bulkDelete(messagesToDelete);
+			console.log(`Deleted messages in channel ${channel.name}`);
+		  } catch (bulkDeleteError) {
+			console.log(`Bulk delete failed. Attempting to delete messages one at a time in channel ${channel.name}`);
+  
+			let failedMessages = [];
+			for (const messageToDelete of messagesToDelete.values()) {
+			  try {
+				await messageToDelete.delete();
+				console.log(`Deleted message ${messageToDelete.id}`);
+			  } catch (deleteError) {
+				console.error(`Failed to delete message ${messageToDelete.id}:`, deleteError);
+				failedMessages.push(messageToDelete);
+			  }
+			}
+  
+			if (failedMessages.length === 0) {
+			  console.log(`All messages deleted in channel ${channel.name}`);
+			} else {
+			  console.log(`Failed to delete ${failedMessages.length} messages in channel ${channel.name}`);
+			}
+		  }
 		} else {
 		  console.log(`Invalid channel type. Skipping channel ${channel.name}`);
 		}
@@ -454,6 +513,7 @@ async function checkEvents() {
 	  console.error('Error deleting messages:', error);
 	}
   }
+  
   
 async function getusername(streamFactory, dataConsumer) {
 	try {
@@ -486,7 +546,8 @@ getvariable(client,'messagecount', function(response){
 	messagecount = response
 })
 var allowmessage = true;
-const countBasedChatter = require('./countBasedChatter.json')
+const countBasedChatter = require('./countBasedChatter.json');
+const { channel } = require('diagnostics_channel');
 
 client.on("messageCreate", function(message) {
 	allowmessage = process_messages(message, allowmessage);
@@ -502,6 +563,19 @@ client.on("messageCreate", function(message) {
 	setInterval(() => {
 	 allowmessage = true;
 	}, 60000);
+
+	const channel = message.channel;
+	const member = message.member;
+	const rulesChan = message.guild.channels.cache.findKey(c => c.name === 'rules');
+	if (rulesChan){
+		const rulesLink = rulesChan.toString();
+		if (channel.name === 'newb-zone' && !member.roles.cache.size) {
+		channel.send('If you will go to the ' + rulesLink + ' channel and react to the appropriate selection, I will assign you the correct roles.')
+			.then(sentMessage => console.log(`Message sent to channel ${channel.id}: ${sentMessage.content}`))
+			.catch(console.error);
+		}
+}
+
   });
 
 function isProduction(){

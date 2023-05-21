@@ -6,5 +6,17 @@
 	{
 		"channelId": "818924486886817802",
 		"purgeTimeInDays": 7
+	},
+	{
+		"channelId": "992875093325795409",
+		"purgeTimeInDays": 7
+	},
+	{
+		"channelId": "1026641140193185842",
+		"purgeTimeInDays": 7
+	},
+	{
+		"channelId": "907426072700801094",
+		"purgeTimeInDays": 1
 	}
   ]

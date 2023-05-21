@@ -381,7 +381,7 @@ client.once('ready', async () => {
   });
 
 async function remindNewbs() {
-	const newbzone = client.channels.cache.get("1026641140193185842"); 
+	const channel = client.channels.cache.get("1026641140193185842"); 
 	const rules = client.channels.cache.get("818705437973151765");
 	const currentDate = new Date();
 	const dayOfWeek = currentDate.getDay();
@@ -393,8 +393,8 @@ async function remindNewbs() {
 
 	const ruleslink = rules.toString();
 
-	newbzone.send("If you're seeing this, you havent reacted to our rules yet.  Please go to " + ruleslink + " and react!")
-	.then(() => console.log("Reminder sent to #newb-zone"))
+	channel.send("@everyone If you're seeing this, you havent reacted to our rules yet.  Please go to " + ruleslink + " and react!")
+	.then(() => console.log(`Reminder sent to ${channel.name}`))
 	.catch(console.error);
 }
 
@@ -402,16 +402,17 @@ async function remindRecruits() {
 	const channel = client.channels.cache.get("992875093325795409");
 	const currentDate = new Date();
 	const dayOfWeek = currentDate.getDay();
-
+  
 	if (dayOfWeek !== 1) {
-		console.log("Day is not Monday.  Recruit reminder not sent");
-		return;
+	  console.log("Day is not Monday. Recruit reminder not sent");
+	  return;
 	}
-
-	channel.send("Please remember to apply for membership on https://robertsspaceindustries.com/orgs/PFCS")
-	.then(() => console.log("Reminder sent to ${channel.name}"))
-	.catch(console.error);
-}
+  
+	channel.send("@recruit Please remember to apply for membership on https://robertsspaceindustries.com/orgs/PFCS")
+	  .then(() => console.log(`Reminder sent to ${channel.name}`))
+	  .catch(console.error);
+  }
+  
   
 
 async function checkEvents() {

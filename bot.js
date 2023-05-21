@@ -386,7 +386,7 @@ async function remindNewbs() {
 	const currentDate = new Date();
 	const dayOfWeek = currentDate.getDay();
 
-	if (dayOfWeek !== 0) {
+	if (dayOfWeek !== 1) {
 		console.log("Day is not Monday.  Newb reminder not sent");
 		return;
 	}
@@ -403,7 +403,7 @@ async function remindRecruits() {
 	const currentDate = new Date();
 	const dayOfWeek = currentDate.getDay();
 
-	if (dayOfWeek !== 0) {
+	if (dayOfWeek !== 1) {
 		console.log("Day is not Monday.  Recruit reminder not sent");
 		return;
 	}

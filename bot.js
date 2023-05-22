@@ -568,14 +568,16 @@ client.on("messageCreate", function(message) {
 	const channel = message.channel;
 	const member = message.member;
 	
-	const rulesChan = message.guild.channels.cache.findKey(c => c.name === 'rules');
-	if (rulesChan){
-		const rulesLink = rulesChan.toString();
-		if (channel.name === 'newb-zone' && member.roles.cache.size === 1) {
-		channel.send('If you will go to the ' + rulesLink + ' channel and react to the appropriate selection, I will assign you the correct roles.')
-			.then(sentMessage => console.log(`Message sent to channel ${channel.id}: ${sentMessage.content}`))
-			.catch(console.error);
-		}
+	const rulesChan = message.guild.channels.cache.find(c => c.name === 'rules');
+	if (rulesChan) {
+	  const rulesLink = `<#${rulesChan.id}>`;
+	  if (channel.name === 'newb-zone' && member.roles.cache.size === 1) {
+		channel.send('If you go to the ' + rulesLink + ' channel and react to the appropriate selection, I will assign you the correct roles.')
+		  .then(sentMessage => console.log(`Message sent to channel ${channel.id}: ${sentMessage.content}`))
+		  .catch(console.error);
+	  }
+	}
+	
 }
 
   });

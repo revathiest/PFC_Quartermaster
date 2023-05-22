@@ -385,9 +385,10 @@ async function remindNewbs() {
 	const rules = client.channels.cache.get("818705437973151765");
 	const currentDate = new Date();
 	const dayOfWeek = currentDate.getDay();
+	const currentHour = currentDate.getHours();
 
-	if (dayOfWeek !== 1) {
-		console.log("Day is not Monday.  Newb reminder not sent");
+	if (dayOfWeek !== 1 || currentHour >= 1) {
+		console.log("Current time is not between midnight and 1 am on Monday. Newb reminder not sent");
 		return;
 	}
 
@@ -402,13 +403,14 @@ async function remindRecruits() {
 	const channel = client.channels.cache.get("992875093325795409");
 	const currentDate = new Date();
 	const dayOfWeek = currentDate.getDay();
+	const currentHour = currentDate.getHours();
   
-	if (dayOfWeek !== 1) {
-	  console.log("Day is not Monday. Recruit reminder not sent");
+	if (dayOfWeek !== 1 || currentHour >= 1) {
+	  console.log("Current time is not between midnight and 1 am on Monday. Recruit reminder not sent");
 	  return;
 	}
   
-	channel.send("@recruit Please remember to apply for membership on https://robertsspaceindustries.com/orgs/PFCS")
+	channel.send("@Recruit Please remember to apply for membership on https://robertsspaceindustries.com/orgs/PFCS")
 	  .then(() => console.log(`Reminder sent to ${channel.name}`))
 	  .catch(console.error);
   }

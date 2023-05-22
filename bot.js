@@ -577,8 +577,6 @@ client.on("messageCreate", function(message) {
 		  .catch(console.error);
 	  }
 	}
-	
-}
 
   });
 

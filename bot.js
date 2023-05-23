@@ -7,8 +7,9 @@ const fs = require('fs'); // imports the file io library
 const { Player } = require("discord-music-player"); // required for music functionality
 const { bot_type, clientId, guildId, token, dbinfo, twitter, reactionroles} = require('./config.json');
 const rest = new REST({ version: '9' }).setToken(token);
-const{ process_messages } = require("./process_messages");
-const{getvariable, setvariable} = require('./botactions/variablehandler.js');
+const { process_messages } = require("./process_messages");
+const { getvariable, setvariable } = require('./botactions/variablehandler.js');
+const { VoiceConnectionStatus } = require('@discordjs/voice');
 
 //PFC Discord Channel Definitions
 var chanBotLog
@@ -115,7 +116,7 @@ player
     // Emitted when there was an error in runtime
     .on('error', (error, queue) => {
         client.channels.cache.get(chanBotLog).send('Error: (music)' + error.stack)
-    });
+    })
 
 //This creates the commands so that they can be run.
 client.commands = new Collection();
@@ -153,9 +154,7 @@ for (const file of playercommandFiles) {
   } catch (error) {
     console.error(error);
   }
-}
-
-  
+} 
 
 (async () => {
 	try {
@@ -497,13 +496,9 @@ async function checkEvents() {
 	  // Check if time difference is within 60 seconds of the interval or matches the interval
 	  const intervals = {
 		604800000: '1 week',
+		259200000: '3 days',
 		86400000: '1 day',
-		28800000: '8 hours',
-		14400000: '4 hours',
-		7200000: '2 hours',
 		3600000: '1 hour',
-		1800000: '30 minutes',
-		900000: '15 minutes',
 		0: 'starting time',
 	  };
 	

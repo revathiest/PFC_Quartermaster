@@ -95,7 +95,8 @@ async function setmessage(client, embedid, rulesEmbed, ruleschannel){
 		}catch{
 			if (bot_type == "development"){
 				console.log("Development bot.  Sending new message to test channel.");
-				newmessageid = await client.channels.cache.get(ruleschannel).send({embeds: [rulesEmbed]}).then(embedMessage =>{return embedMessage.id})
+				client.channels.cache.get(ruleschannel).send({embeds: [rulesEmbed]}).then(embedMessage =>{return embedMessage.id})
+				newmessageid = embedid
 			} else {
 				newmessageid = await client.channels.cache.get(ruleschannel).send({embeds: [rulesEmbed]}).then(embedMessage =>{return embedMessage.id})
 			}

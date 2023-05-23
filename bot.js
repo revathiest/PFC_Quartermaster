@@ -378,10 +378,7 @@ client.once('ready', async () => {
 
 	remindRecruits();
 
-	console.log("Waiting for 5 seconds before executing...");
-	waitAndExecute(5000).then(() => {
-	  getInactiveUsersWithSingleRole();
-	});
+	getInactiveUsersWithSingleRole();
 
   });
 
@@ -427,11 +424,6 @@ client.once('ready', async () => {
 	}
   }
   
-  
-  
-  
-  
-
   function formatDuration(duration) {
 	const seconds = Math.floor(duration / 1000) % 60;
 	const minutes = Math.floor(duration / 1000 / 60) % 60;
@@ -439,10 +431,6 @@ client.once('ready', async () => {
 	const days = Math.floor(duration / 1000 / 60 / 60 / 24);
 	
 	return `${days}d ${hours}h ${minutes}m ${seconds}s`;
-  }
-  
-  function waitAndExecute(delay) {
-	return new Promise(resolve => setTimeout(resolve, delay));
   }
 
 async function remindNewbs() {

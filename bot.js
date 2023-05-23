@@ -378,7 +378,72 @@ client.once('ready', async () => {
 
 	remindRecruits();
 
+	console.log("Waiting for 5 seconds before executing...");
+	waitAndExecute(5000).then(() => {
+	  getInactiveUsersWithSingleRole();
+	});
+
   });
+
+  async function getInactiveUsersWithSingleRole() {
+	const server = client.guilds.cache.first();
+	const currentTime = new Date(); // Current time
+	const oneWeekInMs = 7 * 24 * 60 * 60 * 1000; // One week in milliseconds
+	const usersWithSingleRole = [];
+  
+	if (!server) {
+	  console.log("No active server found.");
+	  return;
+	}
+  
+	// Fetch offline members with only one role
+	await server.members.fetch({ force: true });
+  
+	server.members.cache.each(member => {
+	  if (member.roles.cache.size === 1 && currentTime - member.joinedAt > oneWeekInMs) {
+		const lastActivity = member.lastMessage ? member.lastMessage.createdAt : member.joinedAt;
+		const inactiveDuration = currentTime - lastActivity;
+		usersWithSingleRole.push({
+		  username: member.user.username,
+		  inactiveDuration: inactiveDuration
+		});
+  
+		member.kick()
+		  .then(kickedMember => console.log(`Kicked user: ${kickedMember.user.username}`))
+		  .catch(console.error);
+	  }
+	});
+  
+	const formattedUsers = usersWithSingleRole.map(user => `${user.username} - ${formatDuration(user.inactiveDuration)}`);
+	const message = `Users with a single role, joined for more than one week, have been kicked from the server:\n\n${formattedUsers.join('\n')}`;
+  
+	const channel = client.channels.cache.get(chanBotLog);
+	if (channel) {
+	  channel.send(message)
+		.then(() => console.log(`Inactive users with single role list sent to channel ${chanBotLog}`))
+		.catch(console.error);
+	} else {
+	  console.log(`Channel ${chanBotLog} not found.`);
+	}
+  }
+  
+  
+  
+  
+  
+
+  function formatDuration(duration) {
+	const seconds = Math.floor(duration / 1000) % 60;
+	const minutes = Math.floor(duration / 1000 / 60) % 60;
+	const hours = Math.floor(duration / 1000 / 60 / 60) % 24;
+	const days = Math.floor(duration / 1000 / 60 / 60 / 24);
+	
+	return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+  }
+  
+  function waitAndExecute(delay) {
+	return new Promise(resolve => setTimeout(resolve, delay));
+  }
 
 async function remindNewbs() {
 	const channel = client.channels.cache.get("1026641140193185842"); 
@@ -395,6 +460,7 @@ async function remindNewbs() {
 	const ruleslink = rules.toString();
 
 	channel.send("@everyone If you're seeing this, you havent reacted to our rules yet.  Please go to " + ruleslink + " and react!")
+	channel.send("@everyone If you do not react to the rules within 2 weeks of joining the server, you will be kicked.")
 	.then(() => console.log(`Reminder sent to ${channel.name}`))
 	.catch(console.error);
 }
@@ -553,6 +619,11 @@ const countBasedChatter = require('./countBasedChatter.json');
 const { channel } = require('diagnostics_channel');
 
 client.on("messageCreate", function(message) {
+	// Check if the message is sent in a guild (server)
+	if (!message.guild) {
+	  return;
+	}
+  
 	allowmessage = process_messages(message, allowmessage);
   
 	if (!messagecount) {
@@ -564,9 +635,9 @@ client.on("messageCreate", function(message) {
 	  setvariable(client, 'messagecount', messagecount);
 	}
 	setInterval(() => {
-	 allowmessage = true;
+	  allowmessage = true;
 	}, 60000);
-
+  
 	const channel = message.channel;
 	const member = message.member;
 	
@@ -579,8 +650,8 @@ client.on("messageCreate", function(message) {
 		  .catch(console.error);
 	  }
 	}
-
   });
+  
 
 function isProduction(){
 	if (bot_type == "production"){

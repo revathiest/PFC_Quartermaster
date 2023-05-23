@@ -394,7 +394,12 @@ client.once('ready', async () => {
   async function getInactiveUsersWithSingleRole() {
 	const server = client.guilds.cache.first();
 	const currentTime = new Date(); // Current time
-	const oneWeekInMs = 7 * 24 * 60 * 60 * 1000; // One week in milliseconds
+	const oneSecondInMs = 1000;
+	const oneMinuteInMs = oneSecondInMs * 60;
+	const oneHourInMs = oneMinuteInMs * 60;
+	const oneDayInMs = oneHourInMs * 24;
+	const oneWeekInMs = oneDayInMs * 7; 
+	const twoWeeksInMs = oneWeekInMs * 2;
 	const usersWithSingleRole = [];
   
 	if (!server) {
@@ -406,7 +411,7 @@ client.once('ready', async () => {
 	await server.members.fetch({ force: true });
   
 	server.members.cache.each(member => {
-	  if (member.roles.cache.size === 1 && currentTime - member.joinedAt > oneWeekInMs) {
+	  if (member.roles.cache.size === 1 && currentTime - member.joinedAt > twoWeeksInMs) {
 		const lastActivity = member.lastMessage ? member.lastMessage.createdAt : member.joinedAt;
 		const inactiveDuration = currentTime - lastActivity;
 		usersWithSingleRole.push({

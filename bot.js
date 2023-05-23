@@ -305,6 +305,12 @@ client.once('ready', async () => {
 		}
 	  }
 	}
+
+	if (isDevelopment){
+		chanSCNews = chanBotLog;
+		chanPFCMusic = chanBotLog;
+		chanPFCRules = chanBotLog;
+	}
   
 	const messages = await client.channels.cache.get('996129261985480704').messages.fetch({ limit: 100 });
 	console.log(`Retrieved ${messages.size} messages from #division-signup.`);

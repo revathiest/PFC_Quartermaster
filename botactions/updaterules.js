@@ -98,6 +98,7 @@ async function setmessage(client, embedid, rulesEmbed, ruleschannel){
 				client.channels.cache.get(ruleschannel).send({embeds: [rulesEmbed]}).then(embedMessage =>{return embedMessage.id})
 				newmessageid = embedid
 			} else {
+				console.log("Production bot.  Sending message to " + ruleschannel)
 				newmessageid = await client.channels.cache.get(ruleschannel).send({embeds: [rulesEmbed]}).then(embedMessage =>{return embedMessage.id})
 			}
 		}

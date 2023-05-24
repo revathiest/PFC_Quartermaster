@@ -88,16 +88,17 @@ async function setmessage(client, embedid, rulesEmbed, ruleschannel){
 			messagetoUpdate = await channel.messages.fetch(embedid)
 			if(messagetoUpdate.author.id == client.user.id){
 				messagetoUpdate.edit({embeds: [rulesEmbed]})
-				return 'success'
+				console.log("Successfully updated Rules Embed")
 			} else {
 				return 'Cannot edit message from another user'
 			}
 		}catch{
-			if (bot_type == "development"){
+			if (bot_type == "production"){
 				console.log("Development bot.  Sending new message to test channel.");
 				client.channels.cache.get(ruleschannel).send({embeds: [rulesEmbed]}).then(embedMessage =>{return embedMessage.id})
 				newmessageid = embedid;
 			} else {
+				console.log("Sending Embed to "+ruleschannel+".")
 				newmessageid = await client.channels.cache.get(ruleschannel).send({embeds: [rulesEmbed]}).then(embedMessage =>{return embedMessage.id})
 			}
 		}
@@ -114,11 +115,11 @@ async function setmessage(client, embedid, rulesEmbed, ruleschannel){
 		try {
 			var querystring = 'DELETE FROM PFC_BOT_RULES_EMBED'
 			database.query(querystring, function (err, result, fields) {
-				if (err) { console.log(err) }
+				if (err) { console.log(err) } else {console.log("Deleted Embed Id from Database")}
 			})
 			querystring = 'INSERT INTO PFC_BOT_RULES_EMBED (Embed_id) VALUES ('+newmessageid+')'
 			database.query(querystring, function (err, result, fields) {
-				if (err) { console.log(err) }
+				if (err) { console.log(err) } else {console.log("Inserted Embed Id into Database")}
 			})
 
 		} catch (error){

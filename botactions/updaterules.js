@@ -76,55 +76,62 @@ module.exports ={
     }
 }
 
-async function setmessage(client, embedid, rulesEmbed, ruleschannel){
-	const mysql = require('mysql')
-	const database = mysql.createConnection(dbinfo)
-
-	var messagetoUpdate
-	var newmessageid
-	var channel = client.channels.cache.get(ruleschannel)
-
-		try{
-			messagetoUpdate = await channel.messages.fetch(embedid)
-			if(messagetoUpdate.author.id == client.user.id){
-				messagetoUpdate.edit({embeds: [rulesEmbed]})
-				console.log("I was able to update the embed")
-				return 'success'
-			} else {
-				console.log("Could not update the embed")
-				return 'Cannot edit message from another user'
-			}
-		}catch{
-			if (bot_type == "development"){
-				console.log("Development bot.  Sending new message to test channel.");
-				client.channels.cache.get(ruleschannel).send({embeds: [rulesEmbed]}).then(embedMessage =>{return embedMessage.id})
-				newmessageid = embedid
-			} else {
-				console.log("Production bot.  Sending message to " + ruleschannel)
-				newmessageid = await client.channels.cache.get(ruleschannel).send({embeds: [rulesEmbed]}).then(embedMessage =>{return embedMessage.id})
-			}
+async function setmessage(client, embedid, rulesEmbed, ruleschannel) {
+	const mysql = require('mysql');
+	const database = mysql.createConnection(dbinfo);
+  
+	var messagetoUpdate;
+	var newmessageid;
+	var channel;
+  
+	try {
+	  channel = await client.channels.fetch(ruleschannel);
+	} catch (error) {
+	  console.log('Error fetching channel:', error);
+	  return;
+	}
+  
+	try {
+	  messagetoUpdate = await channel.messages.fetch(embedid);
+	  if (messagetoUpdate.author.id == client.user.id) {
+		messagetoUpdate.edit({ embeds: [rulesEmbed] });
+		console.log("I was able to update the embed");
+		return 'success';
+	  } else {
+		console.log("Could not update the embed");
+		return 'Cannot edit message from another user';
+	  }
+	} catch {
+	  if (bot_type == "development") {
+		console.log("Development bot. Sending new message to test channel.");
+		channel.send({ embeds: [rulesEmbed] }).then(embedMessage => { return embedMessage.id });
+		newmessageid = embedid;
+	  } else {
+		console.log("Production bot. Sending message to " + ruleschannel);
+		newmessageid = await channel.send({ embeds: [rulesEmbed] }).then(embedMessage => { return embedMessage.id });
+	  }
+	}
+  
+	database.connect(
+	  function (err) {
+		if (err) {
+		  return console.error('Database error: ', err.message);
 		}
-
-		database.connect(
-			function(err){
-				if (err){
-					return console.error('Database error: ', err.message)
-				}
-				console.log('Connected to the MySQL Server')
-			}
-		)
-
-		try {
-			var querystring = 'DELETE FROM PFC_BOT_RULES_EMBED'
-			database.query(querystring, function (err, result, fields) {
-				if (err) { console.log(err) }
-			})
-			querystring = 'INSERT INTO PFC_BOT_RULES_EMBED (Embed_id) VALUES ('+newmessageid+')'
-			database.query(querystring, function (err, result, fields) {
-				if (err) { console.log(err) }
-			})
-
-		} catch (error){
-			console.log(error.stack)
-		}		
-}
+		console.log('Connected to the MySQL Server');
+	  }
+	);
+  
+	try {
+	  var querystring = 'DELETE FROM PFC_BOT_RULES_EMBED';
+	  database.query(querystring, function (err, result, fields) {
+		if (err) { console.log(err); }
+	  });
+	  querystring = 'INSERT INTO PFC_BOT_RULES_EMBED (Embed_id) VALUES (' + newmessageid + ')';
+	  database.query(querystring, function (err, result, fields) {
+		if (err) { console.log(err); }
+	  });
+	} catch (error) {
+	  console.log(error.stack);
+	}
+  }
+	  

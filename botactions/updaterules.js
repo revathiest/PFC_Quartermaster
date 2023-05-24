@@ -82,7 +82,7 @@ async function setmessage(client, embedid, rulesEmbed, ruleschannel, chanBotLog)
 
 	var messagetoUpdate
 	var newmessageid
-	var channel = client.channels.fetch(ruleschannel)
+	var channel = client.channels.cache.get(ruleschannel)
 	var botChan = await client.channels.cache.get(chanBotLog)
 	var rulesChan = await client.channels.cache.get(ruleschannel)
 

@@ -83,6 +83,8 @@ async function setmessage(client, embedid, rulesEmbed, ruleschannel, chanBotLog)
 	var messagetoUpdate
 	var newmessageid
 	var channel = client.channels.fetch(ruleschannel)
+	var botChan = await client.channels.cache.get(chanBotLog)
+	var rulesChan = await client.channels.cache.get(ruleschannel)
 
 		try{
 			messagetoUpdate = await channel.messages.fetch(embedid)
@@ -90,17 +92,18 @@ async function setmessage(client, embedid, rulesEmbed, ruleschannel, chanBotLog)
 				messagetoUpdate.edit({embeds: [rulesEmbed]})
 				console.log("Successfully updated Rules Embed")
 			} else {
+				console.log("Unable to edit message from another user")
 				return 'Cannot edit message from another user'
 			}
 		}catch{
 			if (bot_type == "development"){
-				console.log("Development bot.  Sending new message to test channel.");
+				console.log("Development bot.  Sending new message to "+botChan.name+".");
 				newmessageid = await client.channels.cache.get(chanBotLog).send({embeds: [rulesEmbed]}).then(embedMessage =>{return embedMessage.id})
 				if (embedid !== null){
 					newmessageid = embedid;
 				}
 			} else {
-				console.log("Sending Embed to "+ruleschannel+".")
+				console.log("Sending Embed to "+rulesChan.name+".")
 				newmessageid = await client.channels.cache.get(ruleschannel).send({embeds: [rulesEmbed]}).then(embedMessage =>{return embedMessage.id})
 			}
 		}

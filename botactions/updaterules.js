@@ -88,8 +88,10 @@ async function setmessage(client, embedid, rulesEmbed, ruleschannel){
 			messagetoUpdate = await channel.messages.fetch(embedid)
 			if(messagetoUpdate.author.id == client.user.id){
 				messagetoUpdate.edit({embeds: [rulesEmbed]})
+				console.log("I was able to update the embed")
 				return 'success'
 			} else {
+				console.log("Could not update the embed")
 				return 'Cannot edit message from another user'
 			}
 		}catch{

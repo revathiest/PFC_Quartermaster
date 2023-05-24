@@ -21,9 +21,16 @@ module.exports = {
   
       // Unregister all commands
       const commands = await interaction.client.application.commands.fetch();
-      await Promise.all(commands.map(command => command.delete()));
-  
-      process.exit(0);
+      Promise.all(commands.map(command => command.delete()))
+      .then(() => {
+        console.log('All commands deleted successfully.');
+        process.exit(0);
+      })
+      .catch(err => {
+        console.error('Error occurred while deleting commands:', err);
+        process.exit(1);
+      });
+    
     } catch (error) {
       console.error(`Error occurred while trying to shut down the bot: ${error}`);
       await interaction.reply({

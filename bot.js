@@ -5,7 +5,7 @@ const { Routes } = require('discord-api-types/v9');
 const Twitter = require('twitter-v2'); // Imports the twitter library
 const fs = require('fs'); // imports the file io library
 const { Player } = require("discord-music-player"); // required for music functionality
-const { bot_type, clientId, guildId, token, dbinfo, twitter, reactionroles} = require('./config.json');
+const { bot_type, clientId, guildId, token, dbinfo, twitter} = require('./config.json');
 const rest = new REST({ version: '9' }).setToken(token);
 const { process_messages } = require("./process_messages");
 const { getvariable, setvariable } = require('./botactions/variablehandler.js');
@@ -227,34 +227,43 @@ client.on('interactionCreate', async interaction => {
 
   client.on('messageReactionAdd', async (reaction, user) => {
 	const channelName = reaction.message.channel.name;
-	const reactionIcon = reactionroles[channelName]?.[reaction.emoji.name];
+	const reactionIcon = reactionroles.reactionroles[channelName]?.[reaction.emoji.name];
   
 	if (reactionIcon) {
 	  const role = reaction.message.guild.roles.cache.find(role => role.name === reactionIcon.name);
 	  const member = await reaction.message.guild.members.fetch(user.id);
   
-	  await member.roles.add(role.id);
+	  if (role && member) {
+		await member.roles.add(role.id);
   
-	  const logChannel = client.channels.cache.get(chanBotLog);
-	  logChannel.send(`${user.username} clicked the ${reactionIcon.icon} reaction`);
-	  logChannel.send(`${reactionIcon.name} role was added to ${member.user.username}`);
+		const logChannel = client.channels.cache.get(chanBotLog);
+		logChannel.send(`${user.username} clicked the ${reactionIcon.icon} reaction`);
+		logChannel.send(`${reactionIcon.name} role was added to ${member.user.username}`);
+	  } else {
+		console.log('Role or member not found.');
+	  }
 	}
   });
+  
   
 
   client.on('messageReactionRemove', async (reaction, user) => {
 	const channelName = reaction.message.channel.name;
-	const reactionIcon = reactionroles[channelName]?.[reaction.emoji.name];
+	const reactionIcon = reactionroles.reactionroles[channelName]?.[reaction.emoji.name];
   
 	if (reactionIcon) {
 	  const role = reaction.message.guild.roles.cache.find(role => role.name === reactionIcon.name);
 	  const member = await reaction.message.guild.members.fetch(user.id);
   
-	  await member.roles.remove(role.id);
+	  if (role && member) {
+		await member.roles.remove(role.id);
   
-	  const logChannel = client.channels.cache.get(chanBotLog);
-	  logChannel.send(`${user.username} removed the ${reactionIcon.icon} reaction`);
-	  logChannel.send(`${reactionIcon.name} role was removed from ${member.user.username}`);
+		const logChannel = client.channels.cache.get(chanBotLog);
+		logChannel.send(`${user.username} clicked the ${reactionIcon.icon} reaction`);
+		logChannel.send(`${reactionIcon.name} role was added to ${member.user.username}`);
+	  } else {
+		console.log('Role or member not found.');
+	  }
 	}
   });
   
@@ -388,6 +397,13 @@ client.once('ready', async () => {
 	remindRecruits();
 
 	getInactiveUsersWithSingleRole();
+
+	try {
+		const data = fs.readFileSync('reactionroles.json');
+		reactionroles = JSON.parse(data);
+	  } catch (error) {
+		console.error('Error reading reactionroles.json:', error);
+	  }
 
   });
 

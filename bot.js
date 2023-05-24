@@ -312,7 +312,7 @@ client.once('ready', async () => {
 	  }
 	}
 
-	if (isDevelopment){
+	if (isDevelopment()){
 		chanSCNews = chanBotLog;
 		chanPFCMusic = chanBotLog;
 		chanPFCRules = chanBotLog;

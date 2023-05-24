@@ -120,23 +120,25 @@ async function setmessage(client, embedid, rulesEmbed, ruleschannel, chanBotLog)
 		  }
 		  console.log('Connected to the MySQL Server');
   
-		  var querystring = 'DELETE FROM PFC_BOT_RULES_EMBED';
-		  database.query(querystring, function (err, result, fields) {
-			if (err) {
-			  console.log(err);
-			} else {
-			  console.log("Deleted Embed Id from Database");
+		  if (bot_type == 'production') {
+			var querystring = 'DELETE FROM PFC_BOT_RULES_EMBED';
+			database.query(querystring, function (err, result, fields) {
+				if (err) {
+				console.log(err);
+				} else {
+				console.log("Deleted Embed Id from Database");
+				}
+			});
+	
+			querystring = 'INSERT INTO PFC_BOT_RULES_EMBED (Embed_id) VALUES (' + newmessageid + ')';
+			database.query(querystring, function (err, result, fields) {
+				if (err) {
+				console.log(err);
+				} else {
+				console.log("Inserted Embed Id into Database");
+				}
+			});
 			}
-		  });
-  
-		  querystring = 'INSERT INTO PFC_BOT_RULES_EMBED (Embed_id) VALUES (' + newmessageid + ')';
-		  database.query(querystring, function (err, result, fields) {
-			if (err) {
-			  console.log(err);
-			} else {
-			  console.log("Inserted Embed Id into Database");
-			}
-		  });
 		});
 	  })
 	  .catch((err) => {

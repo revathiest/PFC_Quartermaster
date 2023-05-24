@@ -87,7 +87,7 @@ async function setmessage(client, embedid, rulesEmbed, ruleschannel, chanBotLog)
 	var rulesChan = await client.channels.cache.get(ruleschannel)
 
 		try{
-			messagetoUpdate = await channel.messages.fetch(embedid)
+			messagetoUpdate = await channel.messages.cache.get(embedid)
 			if(messagetoUpdate.author.id == client.user.id){
 				messagetoUpdate.edit({embeds: [rulesEmbed]})
 				console.log("Successfully updated Rules Embed")

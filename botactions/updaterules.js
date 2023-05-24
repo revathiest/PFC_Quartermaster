@@ -65,7 +65,7 @@ module.exports ={
 					rulesEmbed.setTimestamp()
 					rulesEmbed.setFooter({text:'Official PFC Communication', iconURL:'https://i.imgur.com/5sZV5QN.png'})
 
-					setmessage(client, embedid, rulesEmbed, chanPFCRules)
+					setmessage(client, embedid, rulesEmbed, chanPFCRules, chanBotLog)
 
 				})
 
@@ -76,13 +76,13 @@ module.exports ={
     }
 }
 
-async function setmessage(client, embedid, rulesEmbed, ruleschannel){
+async function setmessage(client, embedid, rulesEmbed, ruleschannel, chanBotLog){
 	const mysql = require('mysql')
 	const database = mysql.createConnection(dbinfo)
 
 	var messagetoUpdate
 	var newmessageid
-	var channel = client.channels.cache.get(ruleschannel)
+	var channel = client.channels.fetch(ruleschannel)
 
 		try{
 			messagetoUpdate = await channel.messages.fetch(embedid)
@@ -93,10 +93,12 @@ async function setmessage(client, embedid, rulesEmbed, ruleschannel){
 				return 'Cannot edit message from another user'
 			}
 		}catch{
-			if (bot_type == "production"){
+			if (bot_type == "development"){
 				console.log("Development bot.  Sending new message to test channel.");
-				client.channels.cache.get(ruleschannel).send({embeds: [rulesEmbed]}).then(embedMessage =>{return embedMessage.id})
-				newmessageid = embedid;
+				newmessageid = await client.channels.cache.get(chanBotLog).send({embeds: [rulesEmbed]}).then(embedMessage =>{return embedMessage.id})
+				if (embedid !== null){
+					newmessageid = embedid;
+				}
 			} else {
 				console.log("Sending Embed to "+ruleschannel+".")
 				newmessageid = await client.channels.cache.get(ruleschannel).send({embeds: [rulesEmbed]}).then(embedMessage =>{return embedMessage.id})

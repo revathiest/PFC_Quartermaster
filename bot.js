@@ -68,61 +68,12 @@ async function listenForever(streamFactory, dataConsumer) {
 	  await new Promise(resolve => setTimeout(resolve, 30000));
 	}
   }
-  
 
-//***********************************************************/
-//Music Player Setup
-//***********************************************************/
-
-const player = new Player(client, {
-    leaveOnEmpty: true,
-	leaveOnStop: false,
-	leaveOnEnd: false// This options are optional.
-});
-
-client.player = player;
-
-player
-    // Emitted when channel was empty.
-    .on('channelEmpty',  (queue) =>
-        client.channels.cache.get(chanBotLog).send('Everyone left the Voice Channel, queue ended.'))
-    // Emitted when a song was added to the queue.
-    .on('songAdd',  (queue, song) =>
-        client.channels.cache.get(chanPFCMusic).send('Song ' + song + ' was added to the queue.'))
-    // Emitted when a playlist was added to the queue.
-    .on('playlistAdd',  (queue, playlist) =>
-        client.channels.cache.get(chanPFCMusic).send('Playlist ' + playlist + ' with ' + playlist.songs.length + ' was added to the queue.'))
-    // Emitted when there was no more music to play.
-    .on('queueEnd',  (queue) =>
-		client.channels.cache.get(chanPFCMusic).send('The queue has ended.'))
-    // Emitted when the queue was destroyed (either by ending or stopping).
-    .on('queueDestroyed',  (queue) =>
-		client.channels.cache.get(chanPFCMusic).send('The queue was destroyed.'))
-	//Emitted wahen the queue is cleared.
-	.on('queueCleared', (queue) =>
-		client.channels.cache.get(chanPFCMusic).send('Queue was cleared.'))
-    // Emitted when a song changed.
-    .on('songChanged', (queue, newSong, oldSong) => 
-        client.channels.cache.get(chanPFCMusic).send('**Now Playing:** ' + newSong))
-    // Emitted when a first song in the queue started playing.
-    .on('songFirst',  (queue, song) =>
-        client.channels.cache.get(chanPFCMusic).send('Started playing ' + song + '.'))
-    // Emitted when someone disconnected the bot from the channel.
-    .on('clientDisconnect', (queue) =>
-        client.channels.cache.get(chanBotLog).send('I was kicked from the Voice Channel, queue ended.'))
-    // Emitted when deafenOnJoin is true and the bot was undeafened
-    .on('clientUndeafen', (queue) =>
-        client.channels.cache.get(chanBotLog).send('I got undefeanded.'))
-    // Emitted when there was an error in runtime
-    .on('error', (error, queue) => {
-        client.channels.cache.get(chanBotLog).send('Error: (music)' + error.stack)
-    })
 
 //This creates the commands so that they can be run.
 client.commands = new Collection();
 var cmdsToRegister = [];
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
-const playercommandFiles = fs.readdirSync('./commands/musiccommands').filter(file => file.endsWith('.js'));
 
 console.log('====Registering Star Citizen Commands: ');
 for (const file of commandFiles) {
@@ -139,22 +90,6 @@ for (const file of commandFiles) {
     console.error(error);
   }
 }
-
-console.log('====Registering Music Commands: ');
-for (const file of playercommandFiles) {
-  try {
-    const command = require(`./commands/musiccommands/${file}`);
-    client.commands.set(command.data.name, command);
-    if (typeof command.data === 'object' && command.data !== null) {
-      cmdsToRegister.push(command.data.toJSON ? command.data.toJSON() : command.data);
-    } else {
-      cmdsToRegister.push(command.data);
-    }
-    console.log(`Registered command ${command.data.name}`);
-  } catch (error) {
-    console.error(error);
-  }
-} 
 
 (async () => {
 	try {

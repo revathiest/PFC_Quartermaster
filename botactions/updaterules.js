@@ -111,7 +111,7 @@ async function setmessage(client, embedid, rulesEmbed, ruleschannel, database) {
 	}
   
 	if (bot_type === "development") {
-	  6console.log("Development bot. Sending new message to test channel.");
+	  console.log("Development bot. Sending new message to test channel.");
 	} else {
 	  console.log("Production bot. Sending message to " + ruleschannel);
 	}

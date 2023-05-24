@@ -4,7 +4,6 @@ const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const Twitter = require('twitter-v2'); // Imports the twitter library
 const fs = require('fs'); // imports the file io library
-const { Player } = require("discord-music-player"); // required for music functionality
 const { bot_type, clientId, guildId, token, dbinfo, twitter} = require('./config.json');
 const rest = new REST({ version: '9' }).setToken(token);
 const { process_messages } = require("./process_messages");

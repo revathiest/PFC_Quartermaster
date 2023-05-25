@@ -4,7 +4,7 @@ const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const Twitter = require('twitter-v2'); // Imports the twitter library
 const fs = require('fs'); // imports the file io library
-const { bot_type, clientId, guildId, token, dbinfo, twitter} = require('./config.json');
+const { bot_type, clientId, guildId, token, dbinfo, twitter, countForSpam} = require('./config.json');
 const rest = new REST({ version: '9' }).setToken(token);
 const { process_messages } = require("./process_messages");
 const { getvariable, setvariable, writeVariablesToFile } = require('./botactions/variablehandler.js');
@@ -283,7 +283,7 @@ client.once('ready', async () => {
 		  if (
 			message[0].referenced_tweets &&
 			message[0].referenced_tweets.some(
-			  (referencedTweet) => referencedTweet.type === 'retweeted'
+			  (referencedTweet) => referencedTweet.type === 'retweeted' || referencedTweet.type === 'replied_to'
 			)
 		  ) {
 			return; // Ignore retweets
@@ -582,7 +582,8 @@ client.on("messageCreate", function(message) {
 	if (isProduction() && !message.author.bot) {
 	  messagecount[message.channel.id] = (messagecount[message.channel.id] || 0) + 1;
 	  setvariable(client, 'messagecount', messagecount);
-	  countbasedchatter(client);
+	  countbasedcha
+	  tter(client, countForSpam);
 	  getvariable(client,'messagecount', function(response){
 		messagecount = response
 	})

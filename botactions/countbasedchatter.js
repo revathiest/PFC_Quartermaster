@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 module.exports = {
-  countbasedchatter: function(client) {
+  countbasedchatter: function(client, countForSpam) {
     fs.readFile('./variables.json', 'utf8', function(err, data) {
       if (err) {
         console.log(err);
@@ -14,7 +14,7 @@ module.exports = {
 
         Object.keys(messageCounts).forEach(channelId => {
           const messageCount = messageCounts[channelId];
-          if (messageCount >= 3000) {
+          if (messageCount >= countForSpam) {
             fs.readFile('./countBasedChatter.json', 'utf8', function(err, data) {
               if (err) {
                 console.log(err);

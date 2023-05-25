@@ -7,7 +7,8 @@ const fs = require('fs'); // imports the file io library
 const { bot_type, clientId, guildId, token, dbinfo, twitter} = require('./config.json');
 const rest = new REST({ version: '9' }).setToken(token);
 const { process_messages } = require("./process_messages");
-const { getvariable, setvariable } = require('./botactions/variablehandler.js');
+const { getvariable, setvariable, writeVariablesToFile } = require('./botactions/variablehandler.js');
+const { countbasedchatter } = require('./botactions/countbasedchatter.js')
 const { VoiceConnectionStatus } = require('@discordjs/voice');
 
 //PFC Discord Channel Definitions
@@ -578,9 +579,13 @@ client.on("messageCreate", function(message) {
 	  messagecount = {};
 	}
 	
-	if (isProduction()) {
+	if (isDevelopment() && !message.author.bot) {
 	  messagecount[message.channel.id] = (messagecount[message.channel.id] || 0) + 1;
 	  setvariable(client, 'messagecount', messagecount);
+	  countbasedchatter(client);
+	  getvariable(client,'messagecount', function(response){
+		messagecount = response
+	})
 	}
 	setInterval(() => {
 	  allowmessage = true;

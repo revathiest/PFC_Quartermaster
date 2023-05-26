@@ -2,7 +2,7 @@ const fs = require('fs');
 
 module.exports = {
   getvariable: function(client, key, callback) {
-    fs.readFile('variables.json', 'utf8', function(err, data) {
+    fs.readFile('./variables.json', 'utf8', function(err, data) {
       if (err) {
         console.log(err);
         return callback(undefined);
@@ -23,7 +23,7 @@ module.exports = {
       let variables = {};
       variables[key] = value;
 
-      fs.writeFile('variables.json', JSON.stringify(variables, null, 2), 'utf8', function(err) {
+      fs.writeFile('./variables.json', JSON.stringify(variables, null, 2), 'utf8', function(err) {
         if (err) {
           console.log(err);
         } else {

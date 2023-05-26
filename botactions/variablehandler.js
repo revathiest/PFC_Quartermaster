@@ -20,16 +20,7 @@ module.exports = {
   },
 
   setvariable: function(client, key, value) {
-    fs.readFile('variables.json', 'utf8', function(err, data) {
       let variables = {};
-      if (!err) {
-        try {
-          variables = JSON.parse(data);
-        } catch (error) {
-          console.log(error);
-        }
-      }
-
       variables[key] = value;
 
       fs.writeFile('variables.json', JSON.stringify(variables, null, 2), 'utf8', function(err) {
@@ -39,6 +30,5 @@ module.exports = {
           console.log('Variable updated:', key);
         }
       });
-    });
   },
 };

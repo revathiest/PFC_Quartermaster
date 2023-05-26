@@ -582,8 +582,7 @@ client.on("messageCreate", function(message) {
 	if (isProduction() && !message.author.bot) {
 	  messagecount[message.channel.id] = (messagecount[message.channel.id] || 0) + 1;
 	  setvariable(client, 'messagecount', messagecount);
-	  countbasedcha
-	  tter(client, countForSpam);
+	  countbasedchatter(client, countForSpam);
 	  getvariable(client,'messagecount', function(response){
 		messagecount = response
 	})

@@ -579,7 +579,7 @@ client.on("messageCreate", function(message) {
 	  messagecount = {};
 	}
 	
-	if (isProduction() && !message.author.bot) {
+	if (isDevelopment() && !message.author.bot) {
 	  messagecount[message.channel.id] = (messagecount[message.channel.id] || 0) + 1;
 	  setvariable(client, 'messagecount', messagecount);
 	  countbasedchatter(client, countForSpam);

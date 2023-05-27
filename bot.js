@@ -202,7 +202,7 @@ client.on('interactionCreate', async interaction => {
 
 client.on('messageReactionAdd', async(reaction, user) => {
     const channelName = reaction.message.channel.name;
-    const reactionIcon = reactionroles.reactionroles[channelName] ? .[reaction.emoji.name];
+    const reactionIcon = reactionroles.reactionroles[channelName]?.[reaction.emoji.name];
 
     if (reactionIcon) {
         const role = reaction.message.guild.roles.cache.find(role => role.name === reactionIcon.name);
@@ -222,7 +222,7 @@ client.on('messageReactionAdd', async(reaction, user) => {
 
 client.on('messageReactionRemove', async(reaction, user) => {
     const channelName = reaction.message.channel.name;
-    const reactionIcon = reactionroles.reactionroles[channelName] ? .[reaction.emoji.name];
+    const reactionIcon = reactionroles.reactionroles[channelName]?.[reaction.emoji.name];
 
     if (reactionIcon) {
         const role = reaction.message.guild.roles.cache.find(role => role.name === reactionIcon.name);

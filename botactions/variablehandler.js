@@ -7,10 +7,13 @@ module.exports = {
         console.log(err);
         return callback(undefined);
       }
-
+      console.log("Variables read.")
       try {
+        console.log("Attempting to parse variable json")
         const variables = JSON.parse(data);
+        console.log("Successfully parsed variables json")
         const value = variables[key];
+        console.log("Messagecounts object initialized")
         return callback(value);
       } catch (error) {
         console.log(error);

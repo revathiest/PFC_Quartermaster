@@ -1,5 +1,5 @@
 // Require the necessary discord.js classes
-const { Discord, Client, GatewayIntentBits, Collection, EmbedBuilder, InteractionType, PermissionFlagsBits} = require('discord.js');
+const { Discord, Client, GatewayIntentBits, Collection, EmbedBuilder, InteractionType, PermissionFlagsBits, Partials} = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const Twitter = require('twitter-v2'); // Imports the twitter library
@@ -30,6 +30,11 @@ const client = new Client({
         GatewayIntentBits.GuildPresences,
         GatewayIntentBits.GuildIntegrations,
         GatewayIntentBits.GuildMessageReactions
+    ],
+    partials: [
+        Partials.Message,
+        Partials.Channel,
+        Partials.Reaction
     ]
 });
 
@@ -248,6 +253,7 @@ client.once('ready', async() => {
                 break;
             case 'division-signup':
                 chanDivSignup = channel.id;
+                console.log(`Channel ${channel.name} registered.`);
             default:
                 break;
             }
@@ -583,9 +589,9 @@ client.on("messageCreate", function (message) {
     }
 
     if (isProduction() && !message.author.bot) {
-        messagecount[message.channel.id] = (messagecount[message.channel.id] > 1000) ? 0 : (messagecount[message.channel.id] || 0) + 1;
+        messagecount[message.channel.id] = (messagecount[message.channel.id] > countForSpam) ? 0 : (messagecount[message.channel.id] || 0) + 1;
         setvariable(client, 'messagecount', messagecount)
-        if (messagecount[message.channel.id] == 1000) {
+        if (messagecount[message.channel.id] == countForSpam) {
             channelid = message.channel.id
                 sendMessage(client, channelid)
         }

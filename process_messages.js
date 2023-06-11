@@ -3,28 +3,9 @@ const filter = require('./messages.json');
 module.exports = {
     process_messages: function(message, allowmessage) {
       const content = message.content.toLowerCase();
-
-      // Filter regular expressions
-      for (var regex in filter.regex) {
-        if (filter.regex.hasOwnProperty(regex)) {
-          const regexStr = regex.slice(1, -1);
-          const regexObj = new RegExp(regexStr, "i"); // Use "i" flag for case-insensitive matching
-          if (regexObj.test(content) && allowmessage) {
-            const action = filter.regex[regex].action;
-            if (action === "respond") {
-              message.channel.send(filter.regex[regex].response);
-            } else if (action === "delete") {
-                const response = filter.regex[regex].response;
-                const channelID = "907426072700801094"; // Replace with the actual channel ID
-                const channel = message.client.channels.cache.get(channelID);
-                if (channel && channel.type == 0) {
-                  channel.send(response);
-                }
-              message.delete();
-            }
-            return false;
-          }
-        }
+  
+      if (message.author.bot == true) {
+        return false;
       }
   
       // Filter individual words
@@ -36,6 +17,15 @@ module.exports = {
             if (action === "respond") {
               message.channel.send(filter.words[word].response);
             } else if (action === "delete") {
+              const channelName = message.channel.name;
+              const username = message.author.username;
+              const deletionMessage = `The following message has been deleted from channel ${channelName}. Sender - ${username}`;
+              const responseChannelID = "your-response-channel-id"; // Replace with the actual response channel ID
+              const responseChannel = message.client.channels.cache.get(responseChannelID);
+              if (responseChannel && responseChannel.isText()) {
+                responseChannel.send(deletionMessage);
+                responseChannel.send(message.content);
+              }
               message.delete();
             }
             return false;
@@ -43,10 +33,30 @@ module.exports = {
         }
       }
   
-      if (message.author.bot == false) {
-        return true;
-      } else {
-        return false;
+      // Filter regular expressions
+      for (var regex in filter.regex) {
+        if (filter.regex.hasOwnProperty(regex)) {
+          const regexStr = regex.slice(1, -1);
+          const regexObj = new RegExp(regexStr, "i"); // Use "i" flag for case-insensitive matching
+          if (regexObj.test(content) && allowmessage) {
+            const action = filter.regex[regex].action;
+            if (action === "respond") {
+              message.channel.send(filter.regex[regex].response);
+            } else if (action === "delete") {
+              const channelName = message.channel.name;
+              const username = message.author.username;
+              const deletionMessage = `The following message has been deleted from channel ${channelName}. Sender - ${username}`;
+              const responseChannelID = "907426072700801094"; // Replace with the actual response channel ID
+              const responseChannel = message.client.channels.cache.get(responseChannelID);
+              if (responseChannel && responseChannel.type == 0) {
+                responseChannel.send(deletionMessage);
+                responseChannel.send(message.content);
+              }
+              message.delete();
+            }
+            return false;
+          }
+        }
       }
     },
   

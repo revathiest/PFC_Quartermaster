@@ -2,7 +2,7 @@
 const { Discord, Client, GatewayIntentBits, Collection, EmbedBuilder, InteractionType, PermissionFlagsBits, Partials} = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
-const Twitter = require('twitter-v2'); // Imports the twitter library
+//const Twitter = require('twitter-v2'); // Imports the twitter library
 const fs = require('fs'); // imports the file io library
 const { bot_type, clientId, guildId, token, dbinfo, twitter, countForSpam } = require('./config.json');
 const rest = new REST({ version: '9' }).setToken(token);
@@ -42,6 +42,7 @@ const client = new Client({
 //Twitter setup
 //***********************************************************/
 
+/*
 const twitterClient = new Twitter(twitter);
 const {
     twitterchans
@@ -81,7 +82,7 @@ async function listenForever(streamFactory, dataConsumer) {
         }
         await new Promise(resolve => setTimeout(resolve, 30000));
     }
-}
+}*/
 
 //This creates the commands so that they can be run.
 client.commands = new Collection();
@@ -285,6 +286,8 @@ client.once('ready', async() => {
         messagecount = response
     })
 
+    /*
+
     listenForever(
         () =>
         twitterClient.stream('tweets/search/recent', {
@@ -317,6 +320,8 @@ client.once('ready', async() => {
             }
         });
     });
+
+*/
 
     // Set our interval based functions
     // Run checkEvents function every minute

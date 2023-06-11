@@ -2,7 +2,7 @@
 const { Discord, Client, GatewayIntentBits, Collection, EmbedBuilder, InteractionType, PermissionFlagsBits, Partials} = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
-//const Twitter = require('twitter-v2'); // Imports the twitter library
+const Twitter = require('twitter-v2'); // Imports the twitter library
 const fs = require('fs'); // imports the file io library
 const { bot_type, clientId, guildId, token, dbinfo, twitter, countForSpam } = require('./config.json');
 const rest = new REST({ version: '9' }).setToken(token);

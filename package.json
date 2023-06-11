@@ -1,5 +1,5 @@
 {
-  "name": "PFC_Quartermaster",
+  "name": "pfc_quartermaster",
   "version": "1.0.0",
   "description": "The Pyro Freelancer Corps Discord Bot",
   "main": "bot.js",
@@ -23,5 +23,8 @@
     "tweetnacl": "^1.0.3",
     "twitter-v2": "^1.1.0"
   },
-  "nodeVersion": "17.9.1"
+  "nodeVersion": "17.9.1",
+  "devDependencies": {
+    "@tsconfig/node10": "^1.0.9"
+  }
 }

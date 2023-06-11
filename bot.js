@@ -415,7 +415,7 @@ function formatDuration(duration) {
 
 async function remindNewbs() {
     const channel = client.channels.cache.get("1026641140193185842");
-    const rules = client.channels.cache.get("818705437973151765");
+    const rules = client.channels.cache.get("1110898907082403870");
     const currentDate = new Date();
     const dayOfWeek = currentDate.getDay();
     const currentHour = currentDate.getHours();

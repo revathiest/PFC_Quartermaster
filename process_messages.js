@@ -20,7 +20,7 @@ module.exports = {
               const channelName = message.channel.name;
               const username = message.author.username;
               const deletionMessage = `The following message has been deleted from channel ${channelName}. Sender - ${username}`;
-              const responseChannelID = "your-response-channel-id"; // Replace with the actual response channel ID
+              const responseChannelID = "1115781118180990996"; // Replace with the actual response channel ID
               const responseChannel = message.client.channels.cache.get(responseChannelID);
               if (responseChannel && responseChannel.isText()) {
                 responseChannel.send(deletionMessage);
@@ -46,7 +46,7 @@ module.exports = {
               const channelName = message.channel.name;
               const username = message.author.username;
               const deletionMessage = `The following message has been deleted from channel ${channelName}. Sender - ${username}`;
-              const responseChannelID = "907426072700801094"; // Replace with the actual response channel ID
+              const responseChannelID = "1115781118180990996"; // Replace with the actual response channel ID
               const responseChannel = message.client.channels.cache.get(responseChannelID);
               if (responseChannel && responseChannel.type == 0) {
                 responseChannel.send(deletionMessage);

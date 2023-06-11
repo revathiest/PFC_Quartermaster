@@ -1,5 +1,23 @@
 {
-	"quartermaster": "You called?",
-	"pfc": "Long live the Corps!",
-	"carebear": "I do love me some sweet sweet carebear tears..."
-}
+	"words": {
+	  "quartermaster": {
+		"action": "respond",
+		"response": "You called?"
+	  },
+	  "pfc": {
+		"action": "respond",
+		"response": "Long live the Corps!"
+	  },
+	  "carebear": {
+		"action": "respond",
+		"response": "I love me some carebear tears."
+	  }
+	},
+	"regex": {
+		"/p+\\W*f+\\W*c+\\W*h+\\W*a+\\W*n+\\W*g": {
+		"action": "delete",
+		"response": "Message has been deleted."
+	  }
+	}
+  }
+  

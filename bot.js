@@ -582,7 +582,7 @@ client.on("messageCreate", function (message) {
         return;
     }
 
-    allowmessage = process_messages(message, allowmessage);
+    process_messages(message, allowmessage);
 
     if (!messagecount) {
         messagecount = {};
@@ -596,9 +596,6 @@ client.on("messageCreate", function (message) {
                 sendMessage(client, channelid)
         }
     }
-    setInterval(() => {
-        allowmessage = true;
-    }, 60000);
 
     const channel = message.channel;
     const member = message.member;

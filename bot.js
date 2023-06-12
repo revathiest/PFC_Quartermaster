@@ -15,6 +15,7 @@ var chanBotTest
 var chanSCNews
 var chanPFCMusic
 var chanPFCRules
+var chanProfanityAlert
 
 // Create a new client instance
 const client = new Client({
@@ -208,6 +209,9 @@ client.once('ready', async() => {
             case 'division-signup':
                 chanDivSignup = channel.id;
                 console.log(`Channel ${channel.name} registered.`);
+            case 'profanity-alert':
+                chanProfanityAlert = channel.id;
+                console.log(`Channel ${channel.name} registered.`)
             default:
                 break;
             }
@@ -226,6 +230,7 @@ client.once('ready', async() => {
     client.chanDivSignup = chanDivSignup;
     client.chanBotLog = chanBotLog;
     client.chanBotTest = chanBotTest;
+    client.chanProfanityAlert = chanProfanityAlert;
 
     client.channels.cache.get(chanBotLog).send('Startup Complete!');
 
@@ -503,10 +508,14 @@ client.on("messageCreate", function (message) {
         return;
     }
 
-    process_messages(message, allowmessage);
+    process_messages(message, allowmessage, client.chanProfanityAlert);
 
     if (!messagecount) {
-        messagecount = {};
+        try{
+            messagecount = require('./variables.json');
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     if (isProduction() && !message.author.bot) {

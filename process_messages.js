@@ -1,7 +1,7 @@
 const filter = require('./messages.json');
 
 module.exports = {
-    process_messages: function(message, allowmessage) {
+    process_messages: function(message, allowmessage, responseChannelID) {
       const content = message.content.toLowerCase();
   
       if (message.author.bot == true) {
@@ -20,7 +20,6 @@ module.exports = {
               const channelName = message.channel.name;
               const username = message.author.username;
               const deletionMessage = `The following message has been deleted from channel ${channelName}. Sender - ${username}`;
-              const responseChannelID = "1115781118180990996"; // Replace with the actual response channel ID
               const responseChannel = message.client.channels.cache.get(responseChannelID);
               if (responseChannel && responseChannel.isText()) {
                 responseChannel.send(deletionMessage);
@@ -46,7 +45,6 @@ module.exports = {
               const channelName = message.channel.name;
               const username = message.author.username;
               const deletionMessage = `The following message has been deleted from channel ${channelName}. Sender - ${username}`;
-              const responseChannelID = "1115781118180990996"; // Replace with the actual response channel ID
               const responseChannel = message.client.channels.cache.get(responseChannelID);
               if (responseChannel && responseChannel.type == 0) {
                 responseChannel.send(deletionMessage);

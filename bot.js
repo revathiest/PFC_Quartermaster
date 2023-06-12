@@ -1,13 +1,13 @@
 // Require the necessary discord.js classes
 const { Discord, Client, GatewayIntentBits, Collection, EmbedBuilder, InteractionType, PermissionFlagsBits, Partials} = require('discord.js');
 const { REST } = require('@discordjs/rest');
+const { VoiceConnectionStatus } = require('@discordjs/voice');
 const { Routes } = require('discord-api-types/v9');
-const fs = require('fs'); // imports the file io library
 const { bot_type, clientId, guildId, token, dbinfo, twitter, countForSpam } = require('./config.json');
-const rest = new REST({ version: '9' }).setToken(token);
 const { process_messages } = require("./process_messages");
 const { getvariable, setvariable, writeVariablesToFile } = require('./botactions/variablehandler.js');
-const { VoiceConnectionStatus } = require('@discordjs/voice');
+const fs = require('fs'); // imports the file io library
+const rest = new REST({ version: '9' }).setToken(token);
 
 //PFC Discord Channel Definitions
 var chanBotLog

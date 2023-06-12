@@ -2,7 +2,6 @@
 const { Discord, Client, GatewayIntentBits, Collection, EmbedBuilder, InteractionType, PermissionFlagsBits, Partials} = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
-const Twitter = require('twitter-v2'); // Imports the twitter library
 const fs = require('fs'); // imports the file io library
 const { bot_type, clientId, guildId, token, dbinfo, twitter, countForSpam } = require('./config.json');
 const rest = new REST({ version: '9' }).setToken(token);
@@ -37,52 +36,6 @@ const client = new Client({
         Partials.Reaction
     ]
 });
-
-//***********************************************************/
-//Twitter setup
-//***********************************************************/
-
-
-const twitterClient = new Twitter(twitter);
-const {
-    twitterchans
-} = require('./config.json');
-const {
-    updaterules
-} = require('./botactions/updaterules');
-
-var twitfollow = '';
-
-for (var key in twitterchans) {
-    if (twitterchans.hasOwnProperty(key)) {
-        if (twitfollow == '') {
-            twitfollow = twitterchans[key]
-        } else {
-            twitfollow += ',' + twitterchans[key]
-        }
-    }
-};
-
-async function listenForever(streamFactory, dataConsumer) {
-    while (true) {
-        try {
-            const response = streamFactory();
-            for await(const {
-                meta,
-                data
-            }
-                of response) {
-                if (meta.result_count > 0) {
-                    dataConsumer(data);
-                }
-            }
-            console.log('Stream disconnected healthily. Reconnecting.');
-        } catch (error) {
-            console.warn('Stream disconnected with error. Retrying.', error);
-        }
-        await new Promise(resolve => setTimeout(resolve, 30000));
-    }
-}
 
 //This creates the commands so that they can be run.
 client.commands = new Collection();
@@ -285,43 +238,6 @@ client.once('ready', async() => {
     getvariable(client, 'messagecount', function (response) {
         messagecount = response
     })
-
-
-
-    listenForever(
-        () =>
-        twitterClient.stream('tweets/search/recent', {
-            query: `from:${twitchans}`,
-            start_time: new Date(new Date() - 42000).toISOString(),
-            end_time: new Date(new Date() - 12000).toISOString(),
-            expansions: 'author_id,referenced_tweets.id',
-        }),
-        (message) => {
-        if (
-            message[0].referenced_tweets &&
-            message[0].referenced_tweets.some(
-                (referencedTweet) => referencedTweet.type === 'retweeted' || referencedTweet.type === 'replied_to')) {
-            return; // Ignore retweets
-        }
-
-        getusername(
-            () => twitterClient.get(`users/${message[0].author_id}`),
-            (data) => {
-            if (data) {
-                let newsChan = chanSCNews
-                    if (isDevelopment()) {
-                        newsChan = chanBotTest
-                    }
-                    client.channels.cache.get(newsChan).send(
-                        `**${data.data.name}** just tweeted this!\n` + 
-`https://twitter.com/${data.data.username}/status/${message[0].id}`);
-            } else {
-                console.log('data is undefined');
-            }
-        });
-    });
-
-
 
     // Set our interval based functions
     // Run checkEvents function every minute

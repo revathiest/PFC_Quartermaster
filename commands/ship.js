@@ -70,7 +70,6 @@ module.exports = {
 		//shipPledgeURL = baseURL + shipinfo.name
 		shipManuf = shipinfo.manufacturer.name
 		shipManufCode = shipinfo.manufacturer.code
-		afterburner_speed = shipinfo.speed.afterburner.toString()
 		beam = shipinfo.sizes.beam.toString()
 		height = shipinfo.sizes.height.toString()
 		length = shipinfo.sizes.length.toString()

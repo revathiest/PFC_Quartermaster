@@ -510,18 +510,18 @@ client.on("messageCreate", function (message) {
 
     process_messages(message, allowmessage, client.chanProfanityAlert);
 
-    if (!messagecount) {
+    if (!variables) {
         try{
-            messagecount = require('./variables.json');
+            variables = require('./variables.json');
         } catch (error) {
             console.log(error);
         }
     }
 
-    if (isDevelopment() && !message.author.bot) {
-        messagecount.messagecount[message.channel.id] = (messagecount.messagecount[message.channel.id] > countForSpam) ? 0 : (messagecount.messagecount[message.channel.id] || 0) + 1;
-        setvariable(client, 'messagecount', messagecount.messagecount)
-        if (messagecount.messagecount[message.channel.id] == countForSpam) {
+    if (isProduction() && !message.author.bot) {
+        variables.messagecount[message.channel.id] = (variables.messagecount[message.channel.id] > countForSpam) ? 0 : (variables.messagecount[message.channel.id] || 0) + 1;
+        setvariable(client, 'messagecount', variables.messagecount)
+        if (variables.messagecount[message.channel.id] == countForSpam) {
             channelid = message.channel.id
                 sendMessage(client, channelid)
         }

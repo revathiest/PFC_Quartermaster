@@ -18,7 +18,7 @@
 		"action": "delete",
 		"response": "Message has been deleted."
 	    },
-		"/(?=.*P)(?=.*F)(?=.*C)(?=.*H)(?=.*A)(?=.*N)(?=.*G)[A-Za-z0-9]*$": {
+		"/(?=.*P)(?=.*F)(?=.*C)(?=.*H)(?=.*A)(?=.*N)(?=.*G)[A-Z a-z0-9]*$": {
 		"action": "delete",
 		"response": "Message has been deleted."
 		}

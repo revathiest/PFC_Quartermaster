@@ -36,7 +36,7 @@ module.exports = {
       for (var regex in filter.regex) {
         if (filter.regex.hasOwnProperty(regex)) {
           const regexStr = regex.slice(1, -1);
-          const regexObj = new RegExp(regexStr, "i"); // Use "i" flag for case-insensitive matching
+          const regexObj = new RegExp(regexStr); // Use "i" flag for case-insensitive matching
           if (regexObj.test(content) && allowmessage) {
             const action = filter.regex[regex].action;
             if (action === "respond") {

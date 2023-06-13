@@ -494,7 +494,7 @@ client.login(token)
 //***********************************************************/
 //This is the chat reaction section
 //***********************************************************/
-var messagecount
+var variables
 
 var allowmessage = true;
 const countBasedChatter = require('./countBasedChatter.json');

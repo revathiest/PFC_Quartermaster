@@ -18,7 +18,7 @@ module.exports = {
 
     const username = interaction.member.user.tag;
     try {
-      console.log(`Server shut down by: ${username}`);
+      console.log(`Server shut down initiated by: ${username}`);
       await interaction.reply('Resetting...');
   
       // Unregister all commands
@@ -28,6 +28,7 @@ module.exports = {
       try {
         await Promise.all(guildCommands.map(command => command.delete()));
         console.log('All commands deleted successfully.');
+        console.log('Completing server shutdown.')
         process.exit(0);
       } catch (error) {
         console.error('Error occurred while deleting commands:', error);

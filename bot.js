@@ -6,6 +6,8 @@ const { Routes } = require('discord-api-types/v9');
 const { bot_type, clientId, guildId, token, dbinfo, twitter, countForSpam } = require('./config.json');
 const { process_messages } = require("./process_messages");
 const { getvariable, setvariable, writeVariablesToFile } = require('./botactions/variablehandler.js');
+const { updaterules } = require('./botactions/updaterules.js')
+const reactionroles = require('./reactionroles.json')
 const fs = require('fs'); // imports the file io library
 const rest = new REST({ version: '9' }).setToken(token);
 
@@ -237,8 +239,6 @@ client.once('ready', async() => {
     const rulesChan = isProduction() ? chanPFCRules : chanBotTest;
 
     await updaterules(client, rulesChan, chanBotLog);
-
-    const twitchans = Object.values(twitterchans).join(' OR from:');
 
     getvariable(client, 'messagecount', function (response) {
         messagecount = response

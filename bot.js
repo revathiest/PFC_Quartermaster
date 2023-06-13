@@ -519,7 +519,7 @@ client.on("messageCreate", function (message) {
     }
 
     if (isProduction() && !message.author.bot) {
-        messagecount[message.channel.id] = (messagecount[message.channel.id] > countForSpam) ? 0 : (messagecount[message.channel.id] || 0) + 1;
+        messagecount.messagecount[message.channel.id] = (messagecount.messagecount[message.channel.id] > countForSpam) ? 0 : (messagecount.messagecount[message.channel.id] || 0) + 1;
         setvariable(client, 'messagecount', messagecount)
         if (messagecount[message.channel.id] == countForSpam) {
             channelid = message.channel.id

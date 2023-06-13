@@ -13,11 +13,15 @@
 		"response": "I love me some carebear tears."
 	  }
 	},
-	"regex": {
+	"regex" : {
 		"/p+\\W*f+\\W*c+\\W*h+\\W*a+\\W*n+\\W*g": {
 		"action": "delete",
 		"response": "Message has been deleted."
-	  }
+	    },
+		"/(?=.*P)(?=.*F)(?=.*C)(?=.*H)(?=.*A)(?=.*N)(?=.*G)[A-Za-z0-9]*$": {
+		"action": "delete",
+		"response": "Message has been deleted."
+		}
 	}
   }
   

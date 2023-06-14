@@ -7,7 +7,6 @@ const { bot_type, clientId, guildId, token, dbinfo, twitter, countForSpam } = re
 const { process_messages } = require("./process_messages");
 const { getvariable, setvariable, writeVariablesToFile } = require('./botactions/variablehandler.js');
 const { updaterules } = require('./botactions/updaterules.js')
-const reactionroles = require('./reactionroles.json')
 const fs = require('fs'); // imports the file io library
 const rest = new REST({ version: '9' }).setToken(token);
 
@@ -133,6 +132,7 @@ client.on('interactionCreate', async interaction => {
 });
 
 client.on('messageReactionAdd', async(reaction, user) => {
+    /*
     const channelName = reaction.message.channel.name;
     const reactionIcon = reactionroles.reactionroles[channelName]?.[reaction.emoji.name];
 
@@ -150,9 +150,11 @@ client.on('messageReactionAdd', async(reaction, user) => {
             console.log('Role or member not found.');
         }
     }
+    */
 });
 
 client.on('messageReactionRemove', async(reaction, user) => {
+    /*
     const channelName = reaction.message.channel.name;
     const reactionIcon = reactionroles.reactionroles[channelName]?.[reaction.emoji.name];
 
@@ -170,6 +172,7 @@ client.on('messageReactionRemove', async(reaction, user) => {
             console.log('Role or member not found.');
         }
     }
+    */
 });
 
 client.on('error', (error) => {
@@ -266,14 +269,14 @@ client.once('ready', async() => {
     remindRecruits();
 
     getInactiveUsersWithSingleRole();
-
+/*
     try {
         const data = fs.readFileSync('reactionroles.json');
         reactionroles = JSON.parse(data);
     } catch (error) {
         console.error('Error reading reactionroles.json:', error);
     }
-
+*/
 });
 
 async function getInactiveUsersWithSingleRole() {

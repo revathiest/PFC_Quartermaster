@@ -241,11 +241,11 @@ client.once('ready', async() => {
 
     const rulesChan = isProduction() ? chanPFCRules : chanBotTest;
 
-    await updaterules(client, rulesChan, chanBotLog);
+    //await updaterules(client, rulesChan, chanBotLog);
 
-    getvariable(client, 'messagecount', function (response) {
-        messagecount = response
-    })
+    //getvariable(client, 'messagecount', function (response) {
+    //    messagecount = response
+    //})
 
     // Set our interval based functions
     // Run checkEvents function every minute
@@ -521,14 +521,14 @@ client.on("messageCreate", function (message) {
         }
     }
 
-    if (isProduction() && !message.author.bot) {
-        variables.messagecount[message.channel.id] = (variables.messagecount[message.channel.id] > countForSpam) ? 0 : (variables.messagecount[message.channel.id] || 0) + 1;
-        setvariable(client, 'messagecount', variables.messagecount)
-        if (variables.messagecount[message.channel.id] == countForSpam) {
-            channelid = message.channel.id
-                sendMessage(client, channelid)
-        }
-    }
+    //if (isProduction() && !message.author.bot) {
+    //    variables.messagecount[message.channel.id] = (variables.messagecount[message.channel.id] > countForSpam) ? 0 : (variables.messagecount[message.channel.id] || 0) + 1;
+    //    setvariable(client, 'messagecount', variables.messagecount)
+    //    if (variables.messagecount[message.channel.id] == countForSpam) {
+    //        channelid = message.channel.id
+    //            sendMessage(client, channelid)
+    //    }
+    //}
 
     const channel = message.channel;
     const member = message.member;

@@ -5,8 +5,8 @@ const { VoiceConnectionStatus } = require('@discordjs/voice');
 const { Routes } = require('discord-api-types/v9');
 const { bot_type, clientId, guildId, token, dbinfo, twitter, countForSpam } = require('./config.json');
 const { process_messages } = require("./process_messages");
-const { getvariable, setvariable, writeVariablesToFile } = require('./botactions/variablehandler.js');
-const { updaterules } = require('./botactions/updaterules.js')
+//const { getvariable, setvariable, writeVariablesToFile } = require('./botactions/variablehandler.js');
+//const { updaterules } = require('./botactions/updaterules.js')
 const fs = require('fs'); // imports the file io library
 const rest = new REST({ version: '9' }).setToken(token);
 

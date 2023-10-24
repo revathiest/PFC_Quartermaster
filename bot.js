@@ -513,13 +513,13 @@ client.on("messageCreate", function (message) {
 
     process_messages(message, allowmessage, client.chanProfanityAlert);
 
-    if (!variables) {
-        try{
-            variables = require('./variables.json');
-        } catch (error) {
-            console.log(error);
-        }
-    }
+    //if (!variables) {
+    //    try{
+    //        variables = require('./variables.json');
+   //     } catch (error) {
+    //        console.log(error);
+    //    }
+    //}
 
     //if (isProduction() && !message.author.bot) {
     //    variables.messagecount[message.channel.id] = (variables.messagecount[message.channel.id] > countForSpam) ? 0 : (variables.messagecount[message.channel.id] || 0) + 1;

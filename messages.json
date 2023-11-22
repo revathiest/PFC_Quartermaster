@@ -14,14 +14,6 @@
 	  }
 	},
 	"regex" : {
-		"/[Pp]+\\W*[Ff]+\\W*[Cc]+\\W*[Hh]+\\W*[Aa]+\\W*[Nn]+\\W*[Gg]/": {
-		"action": "delete",
-		"response": "Message has been deleted."
-	    },
-		"/(?=.*P)(?=.*F)(?=.*C)(?=.*H)(?=.*A)(?=.*N)(?=.*G)[A-Z a-z0-9]*$": {
-		"action": "delete",
-		"response": "Message has been deleted."
-		}
 	}
   }
   

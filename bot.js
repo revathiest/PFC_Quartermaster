@@ -435,17 +435,14 @@ client.on("presenceUpdate", function (oldMember, newMember) {
     //console.log(`a guild member's presence changes: ` + tempnewMember);
 });
 
-client.on("guildMemberUpdate", async (oldMember, newMember){
+client.on("guildMemberUpdate", function (oldMember, newMember){
     if (!oldMember.roles.cache.has(roleWatermelon) && newMember.roles.cache.has(roleWatermelon)) {
         console.log(`User ${newMember.user.username} has assigned themselves the watermalon role.`);
         
         // Attempt to ban the user
-        try {
-            await newMember.ban({ reason: 'Automatically banned for self assigning the watermelon role.' });
-            console.log(`Successfully banned ${newMember.user.username}.`);
-        } catch (error) {
-            console.error(`Failed to ban ${newMember.user.username}:`, error);
-        }
+        newMember.ban({ reason: 'Automatically banned for self assigning the specific role.' })
+        .then(() => console.log(`Successfully banned ${newMember.user.tag}.`))
+        .catch(error => console.error(`Failed to ban ${newMember.user.tag}:`, error));
     }
 });
 

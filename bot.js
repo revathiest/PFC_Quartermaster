@@ -435,28 +435,46 @@ client.on("presenceUpdate", function (oldMember, newMember) {
     //console.log(`a guild member's presence changes: ` + tempnewMember);
 });
 
-client.on("guildMemberUpdate", function (oldMember, newMember){
-
+client.on("guildMemberUpdate", async (oldMember, newMember) => {
     const logchannel = client.channels.cache.get(chanBotLog);
 
+    // Send a preliminary log message.
     logchannel.send("Something is happening!");
 
-    if (!oldMember.roles.cache.has(roleWatermelon)){
-        logchannel.send(`${newMember.user.tag} did not have the watermelon role.`)
-    }
-    if (newMember.roles.cache.has(roleWatermelon)){
-        logchannel.send(`${newMember.user.tag} now has the watermelon role.`)
-    }
-
+    // Condition: User didn't have the role before but does now.
     if (!oldMember.roles.cache.has(roleWatermelon) && newMember.roles.cache.has(roleWatermelon)) {
-        logchannel.send(`User ${newMember.user.username} has assigned themselves the watermalon role.`);
-        
-        // Attempt to ban the user
-        newMember.ban({ reason: 'Automatically banned for self assigning the specific role.' })
-        .then(() => logchannel.send(`Successfully banned ${newMember.user.tag}.`))
-        .catch(error => logchannel.send(`Failed to ban ${newMember.user.tag}:`, error));
+        try {
+            // Fetch the guild's audit logs.
+            const fetchedLogs = await newMember.guild.fetchAuditLogs({
+                limit: 1,
+                type: 'MEMBER_ROLE_UPDATE'
+            });
+
+            const roleChangeLog = fetchedLogs.entries.first();
+            if (!roleChangeLog) {
+                logchannel.send("No audit log found for role update.");
+                return;
+            }
+
+            // Check the executor of the role addition.
+            const { executor, target } = roleChangeLog;
+
+            // Ensure the target of the log and the updated member are the same, and the executor is the user themselves.
+            if (target.id === newMember.id && executor.id === newMember.id) {
+                logchannel.send(`User ${newMember.user.username} has assigned themselves the watermelon role.`);
+                
+                // Attempt to ban the user
+                await newMember.ban({ reason: 'Automatically banned for self-assigning the specific role.' });
+                logchannel.send(`Successfully banned ${newMember.user.tag}.`);
+            } else {
+                logchannel.send(`${newMember.user.tag} was given the watermelon role by someone else.`);
+            }
+        } catch (error) {
+            logchannel.send(`An error occurred when checking the audit logs or banning the user: ${error}`);
+        }
     }
 });
+
 
 // Login to Discord with your client's token
 client.login(token)

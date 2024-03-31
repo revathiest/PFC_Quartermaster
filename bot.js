@@ -447,7 +447,7 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
             // Fetch the guild's audit logs.
             const fetchedLogs = await newMember.guild.fetchAuditLogs({
                 limit: 1,
-                type: 'MEMBER_ROLE_UPDATE'
+                type: 25
             });
 
             const roleChangeLog = fetchedLogs.entries.first();

@@ -439,7 +439,7 @@ client.on("guildMemberUpdate", function (oldMember, newMember){
 
     const logchannel = client.channels.cache.get(chanBotLog);
 
-    logchannel.setDefaultAutoArchiveDuration("Something is happening!");
+    logchannel.send("Something is happening!");
 
     if (!oldMember.roles.cache.has(roleWatermelon)){
         logchannel.send(`${newMember.user.tag} did not have the watermelon role.`)

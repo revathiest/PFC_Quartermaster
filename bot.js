@@ -435,7 +435,7 @@ client.on("presenceUpdate", function (oldMember, newMember) {
     //console.log(`a guild member's presence changes: ` + tempnewMember);
 });
 
-client.on("guildMemberUpdate", function(oldMember, newMember){
+client.on("guildMemberUpdate", async (oldMember, newMember){
     if (!oldMember.roles.cache.has(roleWatermelon) && newMember.roles.cache.has(roleWatermelon)) {
         console.log(`User ${newMember.user.username} has assigned themselves the watermalon role.`);
         

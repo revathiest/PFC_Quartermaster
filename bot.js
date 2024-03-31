@@ -444,12 +444,12 @@ client.on("guildMemberUpdate", function (oldMember, newMember){
     if (!oldMember.roles.cache.has(roleWatermelon)){
         logchannel.send(`${newMember.user.tag} did not have the watermelon role.`)
     }
-    if (oldMember.roles.cache.has(roleWatermelon)){
+    if (newMember.roles.cache.has(roleWatermelon)){
         logchannel.send(`${newMember.user.tag} now has the watermelon role.`)
     }
 
     if (!oldMember.roles.cache.has(roleWatermelon) && newMember.roles.cache.has(roleWatermelon)) {
-        console.log(`User ${newMember.user.username} has assigned themselves the watermalon role.`);
+        logchannel.send(`User ${newMember.user.username} has assigned themselves the watermalon role.`);
         
         // Attempt to ban the user
         newMember.ban({ reason: 'Automatically banned for self assigning the specific role.' })

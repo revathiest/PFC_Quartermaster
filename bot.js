@@ -436,13 +436,16 @@ client.on("presenceUpdate", function (oldMember, newMember) {
 });
 
 client.on("guildMemberUpdate", function (oldMember, newMember){
+
+    const logchannel = client.channels.cache.get(chanBotLog);
+
     if (!oldMember.roles.cache.has(roleWatermelon) && newMember.roles.cache.has(roleWatermelon)) {
         console.log(`User ${newMember.user.username} has assigned themselves the watermalon role.`);
         
         // Attempt to ban the user
         newMember.ban({ reason: 'Automatically banned for self assigning the specific role.' })
-        .then(() => console.log(`Successfully banned ${newMember.user.tag}.`))
-        .catch(error => console.error(`Failed to ban ${newMember.user.tag}:`, error));
+        .then(() => logchannel.send(`Successfully banned ${newMember.user.tag}.`))
+        .catch(error => logchannel.send(`Failed to ban ${newMember.user.tag}:`, error));
     }
 });
 

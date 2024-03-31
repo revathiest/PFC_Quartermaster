@@ -18,6 +18,9 @@ var chanPFCMusic
 var chanPFCRules
 var chanProfanityAlert
 
+//PFC Discord Role Definitions
+var roleWatermelon = 999136367554613398
+
 // Create a new client instance
 const client = new Client({
     intents: [
@@ -131,50 +134,6 @@ client.on('interactionCreate', async interaction => {
     }
 });
 
-client.on('messageReactionAdd', async(reaction, user) => {
-    /*
-    const channelName = reaction.message.channel.name;
-    const reactionIcon = reactionroles.reactionroles[channelName]?.[reaction.emoji.name];
-
-    if (reactionIcon) {
-        const role = reaction.message.guild.roles.cache.find(role => role.name === reactionIcon.name);
-        const member = await reaction.message.guild.members.fetch(user.id);
-
-        if (role && member) {
-            await member.roles.add(role.id);
-
-            const logChannel = client.channels.cache.get(chanBotLog);
-            logChannel.send(`${user.username} clicked the ${reactionIcon.icon} reaction`);
-            logChannel.send(`${reactionIcon.name} role was added to ${member.user.username}`);
-        } else {
-            console.log('Role or member not found.');
-        }
-    }
-    */
-});
-
-client.on('messageReactionRemove', async(reaction, user) => {
-    /*
-    const channelName = reaction.message.channel.name;
-    const reactionIcon = reactionroles.reactionroles[channelName]?.[reaction.emoji.name];
-
-    if (reactionIcon) {
-        const role = reaction.message.guild.roles.cache.find(role => role.name === reactionIcon.name);
-        const member = await reaction.message.guild.members.fetch(user.id);
-
-        if (role && member) {
-            await member.roles.remove(role.id);
-
-            const logChannel = client.channels.cache.get(chanBotLog);
-            logChannel.send(`${user.username} clicked the ${reactionIcon.icon} reaction`);
-            logChannel.send(`${reactionIcon.name} role was added to ${member.user.username}`);
-        } else {
-            console.log('Role or member not found.');
-        }
-    }
-    */
-});
-
 client.on('error', (error) => {
     client.channels.cache.get(chanBotLog).send('Error: (client)' + error.stack)
 })
@@ -241,14 +200,6 @@ client.once('ready', async() => {
 
     const rulesChan = isProduction() ? chanPFCRules : chanBotTest;
 
-    //await updaterules(client, rulesChan, chanBotLog);
-
-    //getvariable(client, 'messagecount', function (response) {
-    //    messagecount = response
-    //})
-
-    // Set our interval based functions
-    // Run checkEvents function every minute
     try {
         setInterval(checkEvents, 60000);
         console.log('Check Events interval successfully started');
@@ -269,14 +220,7 @@ client.once('ready', async() => {
     remindRecruits();
 
     getInactiveUsersWithSingleRole();
-/*
-    try {
-        const data = fs.readFileSync('reactionroles.json');
-        reactionroles = JSON.parse(data);
-    } catch (error) {
-        console.error('Error reading reactionroles.json:', error);
-    }
-*/
+
 });
 
 async function getInactiveUsersWithSingleRole() {
@@ -491,6 +435,20 @@ client.on("presenceUpdate", function (oldMember, newMember) {
     //console.log(`a guild member's presence changes: ` + tempnewMember);
 });
 
+client.on("guildMemberUpdate", function(oldMember, newMember){
+    if (!oldMember.roles.cache.has(roleWatermelon) && newMember.roles.cache.has(roleWatermelon)) {
+        console.log(`User ${newMember.user.username} has assigned themselves the watermalon role.`);
+        
+        // Attempt to ban the user
+        try {
+            await newMember.ban({ reason: 'Automatically banned for self assigning the watermelon role.' });
+            console.log(`Successfully banned ${newMember.user.username}.`);
+        } catch (error) {
+            console.error(`Failed to ban ${newMember.user.username}:`, error);
+        }
+    }
+});
+
 // Login to Discord with your client's token
 client.login(token)
 
@@ -513,23 +471,6 @@ client.on("messageCreate", function (message) {
 
     process_messages(message, allowmessage, client.chanProfanityAlert);
 
-    //if (!variables) {
-    //    try{
-    //        variables = require('./variables.json');
-   //     } catch (error) {
-    //        console.log(error);
-    //    }
-    //}
-
-    //if (isProduction() && !message.author.bot) {
-    //    variables.messagecount[message.channel.id] = (variables.messagecount[message.channel.id] > countForSpam) ? 0 : (variables.messagecount[message.channel.id] || 0) + 1;
-    //    setvariable(client, 'messagecount', variables.messagecount)
-    //    if (variables.messagecount[message.channel.id] == countForSpam) {
-    //        channelid = message.channel.id
-    //            sendMessage(client, channelid)
-    //    }
-    //}
-
     const channel = message.channel;
     const member = message.member;
 
@@ -543,40 +484,6 @@ client.on("messageCreate", function (message) {
         }
     }
 });
-
-async function sendMessage(client, channelId) {
-    try {
-        const data = await fs.promises.readFile('./countBasedChatter.json', 'utf8');
-        console.log("Read random messages json");
-
-        const statements = JSON.parse(data);
-        console.log("Parsed data into Statements");
-        const randomStatementKey = getRandomStatementKey(statements);
-        console.log("Selected random statement key");
-        const randomStatement = statements[randomStatementKey];
-        console.log("Found random statement");
-        const channel = client.channels.cache.get(channelId);
-        console.log("Found channel");
-
-        if (channel && channel.send) {
-            console.log("Sending message");
-            try {
-                await channel.send(randomStatement);
-                console.log("Message sent to channel: " + channel.toString());
-            } catch (err) {
-                console.log('Error sending message:', err);
-            }
-        }
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-function getRandomStatementKey(statements) {
-    const keys = Object.keys(statements);
-    const randomIndex = Math.floor(Math.random() * keys.length);
-    return keys[randomIndex];
-}
 
 function isProduction() {
     if (bot_type == "production") {
@@ -592,8 +499,4 @@ function isDevelopment() {
     } else {
         return false;
     }
-}
-
-function getBotType() {
-    return bot_type
 }

@@ -19,7 +19,7 @@ var chanPFCRules
 var chanProfanityAlert
 
 //PFC Discord Role Definitions
-var roleWatermelon = 999136367554613398
+var roleWatermelon = '999136367554613398'
 
 // Create a new client instance
 const client = new Client({

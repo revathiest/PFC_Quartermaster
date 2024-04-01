@@ -438,9 +438,6 @@ client.on("presenceUpdate", function (oldMember, newMember) {
 client.on("guildMemberUpdate", async (oldMember, newMember) => {
     const logchannel = client.channels.cache.get(chanBotLog);
 
-    // Send a preliminary log message.
-    logchannel.send("Something is happening!");
-
     // Condition: User didn't have the role before but does now.
     if (!oldMember.roles.cache.has(roleWatermelon) && newMember.roles.cache.has(roleWatermelon)) {
         try {
@@ -464,8 +461,8 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
                 logchannel.send(`User ${newMember.user.username} has assigned themselves the watermelon role.`);
                 
                 // Attempt to ban the user
-                await newMember.ban({ reason: 'Automatically banned for self-assigning the specific role.' });
-                logchannel.send(`Successfully banned ${newMember.user.tag}.`);
+                await newMember.ban({ reason: 'Automatically banned for self-assigning the watermelon role.' });
+                logchannel.send(`Automatically banned ${newMember.user.tag}.`);
             } else {
                 logchannel.send(`${newMember.user.tag} was given the watermelon role by someone else.`);
             }

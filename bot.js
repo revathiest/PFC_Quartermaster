@@ -5,10 +5,11 @@ const { VoiceConnectionStatus } = require('@discordjs/voice');
 const { Routes } = require('discord-api-types/v9');
 const { bot_type, clientId, guildId, token, dbinfo, twitter, countForSpam } = require('./config.json');
 const { process_messages } = require("./process_messages");
-//const { getvariable, setvariable, writeVariablesToFile } = require('./botactions/variablehandler.js');
-//const { updaterules } = require('./botactions/updaterules.js')
 const fs = require('fs'); // imports the file io library
 const rest = new REST({ version: '9' }).setToken(token);
+const { initClient } = require('./botactions/initClient')
+
+const client = initClient();
 
 //PFC Discord Channel Definitions
 var chanBotLog
@@ -20,27 +21,6 @@ var chanProfanityAlert
 
 //PFC Discord Role Definitions
 var roleWatermelon = '999136367554613398'
-
-// Create a new client instance
-const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.GuildVoiceStates,
-        GatewayIntentBits.DirectMessages,
-        GatewayIntentBits.MessageContent,
-        GatewayIntentBits.GuildScheduledEvents,
-        GatewayIntentBits.GuildPresences,
-        GatewayIntentBits.GuildIntegrations,
-        GatewayIntentBits.GuildMessageReactions
-    ],
-    partials: [
-        Partials.Message,
-        Partials.Channel,
-        Partials.Reaction
-    ]
-});
 
 //This creates the commands so that they can be run.
 client.commands = new Collection();

@@ -6,7 +6,8 @@ module.exports = {
             'pfc-bot-testing': 'chanBotTest',
             'pfc-bot-activity-log': 'chanBotLog',
             'profanity-alert': 'chanProfanityAlert',
-            'division-signup': 'chanDivSignup'
+            'division-signup': 'chanDivSignup',
+            '🔥-pfc-lobby': 'chanLobby'
         };
 
         let allChannelsRegistered = true;

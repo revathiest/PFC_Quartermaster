@@ -194,52 +194,6 @@ async function remindNewbs() {
     .catch(console.error);
 }
 
-async function checkEvents() {
-
-    // Get the server's Guild object
-    const guild = client.guilds.cache.get('818666637858177046');
-
-    // Get the events Map object for the server
-    //const eventsMap = guild.scheduledEvents;
-
-    // Get the values of the events Map object and convert them to an array
-    const events = Array.from(guild.scheduledEvents.cache.values());
-
-    // Get an array of channel IDs to send the message to
-    const channelIds = [
-        '818880051486916609', //pfc-lobby
-        //'818924486886817802', //pfc-events
-        //'818667376824287242' //corpsmen-chat
-    ];
-
-    // Send reminders for each event to each channel
-    for (const event of events) {
-        // Calculate time difference between current time and event start time
-        const timeDiff = event.scheduledStartTimestamp - Date.now();
-
-        // Check if time difference is within 60 seconds of the interval or matches the interval
-        const intervals = {
-            604800000: '1 week',
-            259200000: '3 days',
-            86400000: '1 day',
-            3600000: '1 hour',
-            0: 'starting time',
-        };
-
-        for (const interval in intervals) {
-            if (timeDiff <= interval && timeDiff >= interval - 60000) {
-                // Send reminder message to each designated channel
-                for (const channelId of channelIds) {
-                    const channel = client.channels.cache.get(channelId);
-                    const message = (interval === "0") ? `Reminder: Event "${event.name}" is starting now! Join here: ${event.url}` : `Reminder: Event "${event.name}" starts in ${intervals[interval]}. Sign up here: ${event.url}`;
-                    await channel.send(message);
-                }
-                break;
-            }
-        }
-    }
-}
-
 async function deleteMessages() {
     try {
         const channelsData = fs.readFileSync('snapchannels.json');

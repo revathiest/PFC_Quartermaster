@@ -11,6 +11,7 @@ const { handleMessageCreate } = require('./botactions/messageEvents');
 const { registerChannels } = require('./botactions/channelRegistry');
 const { deleteMessages } = require('./botactions/messageCleanup');
 const { checkEvents } = require('./botactions/eventReminder');
+const { handleRoleAssignment } = require('./botactions/autoBanModule');
 
 
 const client = initClient();
@@ -20,9 +21,6 @@ client.on('interactionCreate', async interaction => {
 });
 
 client.on("messageCreate", message => handleMessageCreate(message, client));
-
-//PFC Discord Role Definitions
-var roleWatermelon = '999136367554613398'
 
 //This creates the commands so that they can be run.
 client.commands = new Collection();
@@ -206,40 +204,7 @@ client.on("presenceUpdate", function (oldMember, newMember) {
 });
 
 client.on("guildMemberUpdate", async (oldMember, newMember) => {
-    const logchannel = client.channels.cache.get(client.chanBotLog);
-
-    // Condition: User didn't have the role before but does now.
-    if (!oldMember.roles.cache.has(roleWatermelon) && newMember.roles.cache.has(roleWatermelon)) {
-        try {
-            // Fetch the guild's audit logs.
-            const fetchedLogs = await newMember.guild.fetchAuditLogs({
-                limit: 1,
-                type: 25
-            });
-
-            const roleChangeLog = fetchedLogs.entries.first();
-            if (!roleChangeLog) {
-                logchannel.send("No audit log found for role update.");
-                return;
-            }
-
-            // Check the executor of the role addition.
-            const { executor, target } = roleChangeLog;
-
-            // Ensure the target of the log and the updated member are the same, and the executor is the user themselves.
-            if (target.id === newMember.id && executor.id === newMember.id) {
-                logchannel.send(`User ${newMember.user.username} has assigned themselves the watermelon role.`);
-                
-                // Attempt to ban the user
-                await newMember.ban({ reason: 'Automatically banned for self-assigning the watermelon role.' });
-                logchannel.send(`Automatically banned ${newMember.user.tag}.`);
-            } else {
-                logchannel.send(`${newMember.user.tag} was given the watermelon role by someone else.`);
-            }
-        } catch (error) {
-            logchannel.send(`An error occurred when checking the audit logs or banning the user: ${error}`);
-        }
-    }
+    await handleRoleAssignment(oldMember, newMember, client);
 });
 
 

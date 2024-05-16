@@ -7,14 +7,17 @@ const { bot_type, clientId, guildId, token, dbinfo, twitter, countForSpam } = re
 const { process_messages } = require("./process_messages");
 const fs = require('fs'); // imports the file io library
 const rest = new REST({ version: '9' }).setToken(token);
-const { initClient } = require('./botactions/initClient')
-const interactionHandler = require('./botactions/interactionEvents')
+const { initClient } = require('./botactions/initClient');
+const interactionHandler = require('./botactions/interactionEvents');;
+const { handleMessageCreate }= require('./botactions/messageEvents');
 
 const client = initClient();
 
 client.on('interactionCreate', async interaction => {
     await interactionHandler.handleInteraction(interaction, client);
 });
+
+client.on("messageCreate", message => handleMessageCreate(message, client));
 
 //PFC Discord Channel Definitions
 var chanBotLog
@@ -377,23 +380,6 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
 
 // Login to Discord with your client's token
 client.login(token)
-
-//***********************************************************/
-//This is the chat reaction section
-//***********************************************************/
-var variables
-
-var allowmessage = true;
-
-client.on("messageCreate", function (message) {
-    // Check if the message is sent in a guild (server)
-    if (!message.guild) {
-        return;
-    }
-
-    process_messages(message, allowmessage, client.chanProfanityAlert);
-
-});
 
 function isProduction() {
     if (bot_type == "production") {

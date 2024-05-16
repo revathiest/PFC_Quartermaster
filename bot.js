@@ -11,7 +11,7 @@ const { checkEvents } = require('./botactions/eventReminder');
 const { handleRoleAssignment } = require('./botactions/autoBanModule');
 const { registerCommands } = require('./botactions/commandRegistration');
 const { getInactiveUsersWithSingleRole } = require('./botactions/inactiveUsersModule');
-const { sequelize, Transaction, Configuration } = require('/config/database');
+const { sequelize, Transaction, Configuration } = require('./config/database');
 
 const client = initClient();
 

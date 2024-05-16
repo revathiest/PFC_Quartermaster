@@ -8,8 +8,10 @@ const { process_messages } = require("./process_messages");
 const fs = require('fs'); // imports the file io library
 const rest = new REST({ version: '9' }).setToken(token);
 const { initClient } = require('./botactions/initClient');
-const interactionHandler = require('./botactions/interactionEvents');;
-const { handleMessageCreate }= require('./botactions/messageEvents');
+const interactionHandler = require('./botactions/interactionEvents');
+const { handleMessageCreate } = require('./botactions/messageEvents');
+const { registerChannels } = require('./botactions/channelRegistry');
+
 
 const client = initClient();
 
@@ -78,45 +80,21 @@ client.on("userUpdate", function (oldMember, newMember) {
 });
 
 // When the client is ready, run this code (only once)
-client.once('ready', async() => {
-    console.log('Ready!');
+client.once('ready', async () => {
+    console.log('Discord client is ready!');
 
-    for (const channel of client.channels.cache.values()) {
-        if (channel.type == 0) {
-            switch (channel.name) {
-            case 'star-citizen-news':
-                chanSCNews = channel.id;
-                console.log(`Channel ${channel.name} registered.`);
-                break;
-            case 'pfc-bot-testing':
-                chanBotTest = channel.id;
-                console.log(`Channel ${channel.name} registered.`);
-                break;
-            case 'pfc-bot-activity-log':
-                chanBotLog = channel.id;
-                console.log(`Channel ${channel.name} registered.`);
-                break;
-            case 'division-signup':
-                chanDivSignup = channel.id;
-                console.log(`Channel ${channel.name} registered.`);
-            case 'profanity-alert':
-                chanProfanityAlert = channel.id;
-                console.log(`Channel ${channel.name} registered.`)
-            default:
-                break;
-            }
-        }
-    }
+    // Register channels directly on the client object
+    registerChannels(client);
+
+    // Now the client object directly has all channel IDs set up
+    client.channels.cache.get(client.chanBotLog).send('Startup Complete!');
+
+    console.log('Bot setup complete and ready to go!');
+});
 
     if (isDevelopment()) {
         chanSCNews = chanBotLog;
     }
-
-    client.chanSCNews = chanSCNews;
-    client.chanDivSignup = chanDivSignup;
-    client.chanBotLog = chanBotLog;
-    client.chanBotTest = chanBotTest;
-    client.chanProfanityAlert = chanProfanityAlert;
 
     client.channels.cache.get(chanBotLog).send('Startup Complete!');
 

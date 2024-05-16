@@ -10,6 +10,7 @@ const interactionHandler = require('./botactions/interactionEvents');
 const { handleMessageCreate } = require('./botactions/messageEvents');
 const { registerChannels } = require('./botactions/channelRegistry');
 const { deleteMessages } = require('./botactions/messageCleanup');
+const { checkEvents } = require('./botactions/eventReminder');
 
 
 const client = initClient();

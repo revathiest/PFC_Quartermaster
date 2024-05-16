@@ -7,8 +7,7 @@ module.exports = {
             'star-citizen-news': 'chanSCNews',
             'pfc-bot-testing': 'chanBotTest',
             'pfc-bot-activity-log': 'chanBotLog',
-            'profanity-alert': 'chanProfanityAlert',
-            'division-signup': 'chanDivSignup'
+            'profanity-alert': 'chanProfanityAlert'
         };
 
         // Ensure all channels are fetched

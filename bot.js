@@ -93,7 +93,6 @@ client.once('ready', async () => {
     getInactiveUsersWithSingleRole();
     
     client.channels.cache.get(client.chanBotLog).send('Startup Complete!');
-});
 
     if (isDevelopment()) {
         client.chanSCNews = client.chanBotLog;
@@ -114,7 +113,9 @@ client.once('ready', async () => {
     } catch (error) {
         console.error(`Error setting up interval: ${error}`);
     }
-    
+});
+
+
 async function getInactiveUsersWithSingleRole() {
     const server = client.guilds.cache.first();
     const currentTime = new Date(); // Current time

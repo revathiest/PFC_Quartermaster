@@ -88,13 +88,13 @@ client.once('ready', async () => {
     } catch (error) {
         console.error('Error during channel registration:', error);
     }
+    client.channels.cache.get(client.chanBotLog).send('Startup Complete!');
 });
 
     if (isDevelopment()) {
         client.chanSCNews = client.chanBotLog;
     }
 
-    client.channels.cache.get(client.chanBotLog).send('Startup Complete!');
 
     try {
         setInterval(checkEvents, 60000);

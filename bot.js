@@ -88,6 +88,10 @@ client.once('ready', async () => {
         console.error('Error during channel registration:', error);
     }
 
+    remindNewbs();
+
+    getInactiveUsersWithSingleRole();
+    
     client.channels.cache.get(client.chanBotLog).send('Startup Complete!');
 });
 
@@ -110,11 +114,7 @@ client.once('ready', async () => {
     } catch (error) {
         console.error(`Error setting up interval: ${error}`);
     }
-
-    remindNewbs();
-
-    getInactiveUsersWithSingleRole();
-
+    
 async function getInactiveUsersWithSingleRole() {
     const server = client.guilds.cache.first();
     const currentTime = new Date(); // Current time

@@ -21,12 +21,6 @@ client.on('interactionCreate', async interaction => {
 
 client.on("messageCreate", message => handleMessageCreate(message, client));
 
-//PFC Discord Channel Definitions
-var chanBotLog
-var chanBotTest
-var chanSCNews
-var chanProfanityAlert
-
 //PFC Discord Role Definitions
 var roleWatermelon = '999136367554613398'
 
@@ -71,7 +65,7 @@ for (const file of commandFiles) {
 //***********************************************************/
 
 client.on('error', (error) => {
-    client.channels.cache.get(chanBotLog).send('Error: (client)' + error.stack)
+    client.channels.cache.get(client.chanBotLog).send('Error: (client)' + error.stack)
 })
 
 client.on("userUpdate", function (oldMember, newMember) {
@@ -93,10 +87,10 @@ client.once('ready', async () => {
 });
 
     if (isDevelopment()) {
-        chanSCNews = chanBotLog;
+        client.chanSCNews = client.chanBotLog;
     }
 
-    client.channels.cache.get(chanBotLog).send('Startup Complete!');
+    client.channels.cache.get(client.chanBotLog).send('Startup Complete!');
 
     try {
         setInterval(checkEvents, 60000);
@@ -156,13 +150,13 @@ async function getInactiveUsersWithSingleRole() {
     const formattedUsers = usersWithSingleRole.map(user => `${user.username} - ${formatDuration(user.inactiveDuration)}`);
     const message = `Users with a single role, joined for more than one week, have been kicked from the server:\n\n${formattedUsers.join('\n')}`;
 
-    const channel = client.channels.cache.get(chanBotLog);
+    const channel = client.channels.cache.get(client.chanBotLog);
     if (channel) {
         channel.send(message)
         .then(() => console.log(`Inactive users with single role list sent to channel ${channel.name}`))
         .catch(console.error);
     } else {
-        console.log(`Channel ${chanBotLog} not found.`);
+        console.log(`Channel ${client.chanBotLog} not found.`);
     }
 }
 
@@ -317,7 +311,7 @@ client.on("presenceUpdate", function (oldMember, newMember) {
 });
 
 client.on("guildMemberUpdate", async (oldMember, newMember) => {
-    const logchannel = client.channels.cache.get(chanBotLog);
+    const logchannel = client.channels.cache.get(client.chanBotLog);
 
     // Condition: User didn't have the role before but does now.
     if (!oldMember.roles.cache.has(roleWatermelon) && newMember.roles.cache.has(roleWatermelon)) {

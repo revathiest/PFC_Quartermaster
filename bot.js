@@ -1,10 +1,7 @@
 // Require the necessary discord.js classes
 const {Collection} = require('discord.js');
-const { REST } = require('@discordjs/rest');
-const { Routes } = require('discord-api-types/v9');
 const { bot_type, clientId, guildId, token } = require('./config.json');
 const fs = require('fs'); // imports the file io library
-const rest = new REST({ version: '9' }).setToken(token);
 const { initClient } = require('./botactions/initClient');
 const interactionHandler = require('./botactions/interactionEvents');
 const { handleMessageCreate } = require('./botactions/messageEvents');
@@ -47,28 +44,21 @@ client.once('ready', async () => {
         await registerChannels(client);  // Register channels
         await registerCommands(client);
         await getInactiveUsersWithSingleRole(client);
-        const logChannel = client.channels.cache.get(client.chanBotLog);
-        if (logChannel) {
-            logChannel.send('Startup Complete!');
-            console.log('Bot setup complete and ready to go!');
-        } else {
-            console.error('Log channel not found.');
-        }
+        console.log('Bot setup complete and ready to go!');
     } catch (error) {
         console.error('Error during channel registration:', error);
     }
-    
-    client.channels.cache.get(client.chanBotLog).send('Startup Complete!');
+
+    const logChannel = client.channels.cache.get(client.chanBotLog);
+    if (logChannel) {
+        logChannel.send('Startup Complete!');
+    } else {
+        console.error('Log channel not found.');
+    }
 
     try {
         setInterval(() => checkEvents(client), 60000);
         console.log('Check Events interval successfully started');
-    } catch (error) {
-        console.error(`Error setting up interval: ${error}`);
-    }
-
-    try {
-        deleteMessages(client);
         setInterval(() => deleteMessages(client), 86400000);
         console.log('Delete Messages interval successfully started')
     } catch (error) {

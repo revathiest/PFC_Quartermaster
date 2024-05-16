@@ -10,9 +10,9 @@ const rest = new REST({ version: '9' }).setToken(token);
 async function registerCommands(client) {
     client.commands = new Map();
     var cmdsToRegister = [];
-
+    
     // Adjust the path to point to the commands directory correctly from botactions
-    const commandsPath = path.join(__dirname, '..', 'commands');
+    const commandsPath = path.join(__dirname, '..', '..', 'commands');
     const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
     console.log('Registering commands:');

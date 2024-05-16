@@ -262,8 +262,10 @@ function formatDuration(duration) {
 }
 
 async function remindNewbs() {
-    const channel = client.channels.cache.get("1026641140193185842");
-    const rules = client.channels.cache.get("1110719388723707914");
+    // const channel = client.channels.cache.get("1026641140193185842");
+    // const rules = client.channels.cache.get("1110719388723707914");
+    const channel = await client.channels.fetch("1026641140193185842"); // Replace "channel_id_here" with the actual ID
+    const rules = await client.channels.fetch("1110719388723707914"); // Replace "rules_channel_id_here" with the actual ID
     const currentDate = new Date();
     const dayOfWeek = currentDate.getDay();
     const currentHour = currentDate.getHours();
@@ -449,11 +451,7 @@ client.login(token)
 var variables
 
 var allowmessage = true;
-const countBasedChatter = require('./countBasedChatter.json');
-const {
-    channel
-} = require('diagnostics_channel');
-var channelid
+
 client.on("messageCreate", function (message) {
     // Check if the message is sent in a guild (server)
     if (!message.guild) {
@@ -462,18 +460,6 @@ client.on("messageCreate", function (message) {
 
     process_messages(message, allowmessage, client.chanProfanityAlert);
 
-    const channel = message.channel;
-    const member = message.member;
-
-    const rulesChan = message.guild.channels.cache.find(c => c.name === 'rules');
-    if (rulesChan) {
-        const rulesLink = `<#${rulesChan.id}>`;
-        if (channel.name === 'newb-zone' && member.roles.cache.size === 1) {
-            channel.send('If you go to the ' + rulesLink + ' channel and react to the appropriate selection, I will assign you the correct roles.')
-            .then(sentMessage => console.log(`Message sent to channel ${channel.id}: ${sentMessage.content}`))
-            .catch(console.error);
-        }
-    }
 });
 
 function isProduction() {

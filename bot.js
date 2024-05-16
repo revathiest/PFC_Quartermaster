@@ -117,8 +117,6 @@ client.once('ready', async () => {
 
     getInactiveUsersWithSingleRole();
 
-});
-
 async function getInactiveUsersWithSingleRole() {
     const server = client.guilds.cache.first();
     const currentTime = new Date(); // Current time

@@ -12,6 +12,7 @@ const { registerChannels } = require('./botactions/channelRegistry');
 const { deleteMessages } = require('./botactions/messageCleanup');
 const { checkEvents } = require('./botactions/eventReminder');
 const { handleRoleAssignment } = require('./botactions/autoBanModule');
+const { registerCommands } = require('./botactions/commandRegistration');
 
 
 const client = initClient();
@@ -21,42 +22,6 @@ client.on('interactionCreate', async interaction => {
 });
 
 client.on("messageCreate", message => handleMessageCreate(message, client));
-
-//This creates the commands so that they can be run.
-client.commands = new Collection();
-var cmdsToRegister = [];
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
-
-console.log('====Registering Star Citizen Commands: ');
-for (const file of commandFiles) {
-    const command = require('./commands/' + file);
-    try {
-        client.commands.set(command.data.name, command);
-        if (typeof command.data === 'object' && command.data !== null) {
-            cmdsToRegister.push(command.data.toJSON ? command.data.toJSON() : command.data);
-        } else {
-            cmdsToRegister.push(command.data);
-        }
-        console.log(`Registered command ${command.data.name}`);
-    } catch (error) {
-        console.error(error);
-    }
-}
-
-(async() => {
-    try {
-        console.log('Started refreshing application (/) commands.');
-
-        await rest.put(
-            Routes.applicationGuildCommands(clientId, guildId), {
-            body: cmdsToRegister
-        }, )
-
-        console.log('Successfully reloaded application (/) commands.');
-    } catch (error) {
-        console.error(error);
-    }
-})();
 
 //***********************************************************/
 //Client Setup
@@ -76,6 +41,7 @@ client.once('ready', async () => {
     console.log('Discord client is ready!');
     try {
         await registerChannels(client);  // Register channels
+        await registerCommands(client);
         const logChannel = client.channels.cache.get(client.chanBotLog);
         if (logChannel) {
             logChannel.send('Startup Complete!');

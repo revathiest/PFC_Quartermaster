@@ -1,6 +1,7 @@
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const fs = require('fs');
+const path = require('path');
 
 // Assuming config.json is in the root, adjust the path to go up one level from botactions
 const { clientId, guildId, token } = require('../config.json');

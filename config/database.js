@@ -11,34 +11,6 @@ const sequelize = new Sequelize(config.database, config.username, config.passwor
     dialect: config.dialect
 });
 
-// Define models
-const Transaction = sequelize.define('Transaction', {
-    userId: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    amount: {
-        type: DataTypes.FLOAT,
-        allowNull: false
-    },
-    timestamp: {
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW
-    }
-});
-
-const Configuration = sequelize.define('Configuration', {
-    key: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
-    },
-    value: {
-        type: DataTypes.STRING,
-        allowNull: false
-    }
-});
-
 module.exports = {
     sequelize,
     Transaction,

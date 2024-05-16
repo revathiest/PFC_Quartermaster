@@ -54,15 +54,8 @@ client.once('ready', async () => {
     } catch (error) {
         console.error('Error during channel registration:', error);
     }
-
-    remindNewbs();
     
     client.channels.cache.get(client.chanBotLog).send('Startup Complete!');
-
-    if (isDevelopment()) {
-        client.chanSCNews = client.chanBotLog;
-    }
-
 
     try {
         setInterval(() => checkEvents(client), 60000);
@@ -79,28 +72,6 @@ client.once('ready', async () => {
         console.error(`Error setting up interval: ${error}`);
     }
 });
-
-
-
-async function remindNewbs() {
-    const channel = await client.channels.fetch("1026641140193185842");
-    const rules = await client.channels.fetch("1110719388723707914");
-    const currentDate = new Date();
-    const dayOfWeek = currentDate.getDay();
-    const currentHour = currentDate.getHours();
-
-    if (dayOfWeek !== 1 || currentHour >= 1) {
-        console.log("Current time is not between midnight and 1 am on Monday. Newb reminder not sent");
-        return;
-    }
-
-    const ruleslink = rules.toString();
-
-    channel.send("@everyone If you're seeing this, you havent reacted to our rules yet.  Please go to " + ruleslink + " and react!")
-    channel.send("@everyone If you do not react to the rules within 2 weeks of joining the server, you will be kicked.")
-    .then(() => console.log(`Reminder sent to ${channel.name}`))
-    .catch(console.error);
-}
 
 // presenceUpdate
 /* Emitted whenever a guild member's presence changes, or they change one of their details.
@@ -119,19 +90,3 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
 
 // Login to Discord with your client's token
 client.login(token)
-
-function isProduction() {
-    if (bot_type == "production") {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-function isDevelopment() {
-    if (bot_type == "development") {
-        return true;
-    } else {
-        return false;
-    }
-}

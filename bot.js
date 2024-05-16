@@ -349,45 +349,48 @@ async function deleteMessages() {
         const channels = JSON.parse(channelsData);
 
         for (const channelInfo of channels) {
-            const channel = await client.channels.fetch(channelInfo.channelId);
+            try {
+                const channel = await client.channels.fetch(channelInfo.channelId);
 
-            if (channel.type === 0 || channel.type === 5) {
-                const messages = await channel.messages.fetch({
-                    limit: 100
-                });
+                if (channel && (channel.type === 0 || channel.type === 5)) {
+                    const messages = await channel.messages.fetch({
+                        limit: 100
+                    });
+                    const purgeTime = new Date();
+                    purgeTime.setDate(purgeTime.getDate() - channelInfo.purgeTimeInDays);
 
-                // Calculate the timestamp for the specified purge time
-                const purgeTime = new Date();
-                purgeTime.setDate(purgeTime.getDate() - channelInfo.purgeTimeInDays);
+                    // Filter messages based on their timestamps
+                    const messagesToDelete = messages.filter(msg => msg.createdTimestamp <= purgeTime.getTime());
 
-                // Filter messages based on their timestamps
-                const messagesToDelete = messages.filter(msg => msg.createdTimestamp <= purgeTime);
-
-                try {
-                    await channel.bulkDelete(messagesToDelete);
-                    console.log(`Deleted messages in channel ${channel.name}`);
-                } catch (bulkDeleteError) {
-                    console.log(`Bulk delete failed. Attempting to delete messages one at a time in channel ${channel.name}`);
-
-                    let failedMessages = [];
-                    for (const messageToDelete of messagesToDelete.values()) {
-                        try {
-                            await messageToDelete.delete();
-                            console.log(`Deleted message ${messageToDelete.id}`);
-                        } catch (deleteError) {
-                            console.error(`Failed to delete message ${messageToDelete.id}:`, deleteError);
-                            failedMessages.push(messageToDelete);
+                    try {
+                        // Bulk delete messages and log the action
+                        if (messagesToDelete.size > 0) {
+                            await channel.bulkDelete(messagesToDelete, true);
+                            console.log(`Deleted ${messagesToDelete.size} messages in channel ${channel.name}`);
+                        } else {
+                            console.log(`No messages to delete in channel ${channel.name}`);
+                        }
+                    } catch (bulkDeleteError) {
+                        console.log(`Bulk delete failed. Attempting to delete messages one at a time in channel ${channel.name}`);
+                        // Attempt to delete messages one by one
+                        for (const message of messagesToDelete.values()) {
+                            try {
+                                await message.delete();
+                                console.log(`Deleted message ${message.id} individually`);
+                            } catch (deleteError) {
+                                console.error(`Failed to delete message ${message.id}: ${deleteError}`);
+                            }
                         }
                     }
-
-                    if (failedMessages.length === 0) {
-                        console.log(`All messages deleted in channel ${channel.name}`);
-                    } else {
-                        console.log(`Failed to delete ${failedMessages.length} messages in channel ${channel.name}`);
-                    }
+                } else {
+                    console.log(`Invalid channel type or channel does not exist: ${channelInfo.channelId}`);
                 }
-            } else {
-                console.log(`Invalid channel type. Skipping channel ${channel.name}`);
+            } catch (error) {
+                if (error.code === 10003) {
+                    console.error(`Error: Unknown Channel with ID ${channelInfo.channelId}`);
+                } else {
+                    console.error(`Error handling channel ${channelInfo.channelId}: ${error}`);
+                }
             }
         }
     } catch (error) {

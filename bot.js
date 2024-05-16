@@ -197,8 +197,6 @@ client.once('ready', async() => {
 
     remindNewbs();
 
-    remindRecruits();
-
     getInactiveUsersWithSingleRole();
 
 });

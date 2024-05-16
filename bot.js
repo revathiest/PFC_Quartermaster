@@ -1,7 +1,6 @@
 // Require the necessary discord.js classes
-const { Discord, Client, GatewayIntentBits, Collection, EmbedBuilder, InteractionType, PermissionFlagsBits, Partials} = require('discord.js');
+const {Collection} = require('discord.js');
 const { REST } = require('@discordjs/rest');
-const { VoiceConnectionStatus } = require('@discordjs/voice');
 const { Routes } = require('discord-api-types/v9');
 const { bot_type, clientId, guildId, token } = require('./config.json');
 const fs = require('fs'); // imports the file io library
@@ -10,6 +9,7 @@ const { initClient } = require('./botactions/initClient');
 const interactionHandler = require('./botactions/interactionEvents');
 const { handleMessageCreate } = require('./botactions/messageEvents');
 const { registerChannels } = require('./botactions/channelRegistry');
+const { deleteMessages } = require('./botactions/messageCleanup');
 
 
 const client = initClient();
@@ -192,71 +192,6 @@ async function remindNewbs() {
     channel.send("@everyone If you do not react to the rules within 2 weeks of joining the server, you will be kicked.")
     .then(() => console.log(`Reminder sent to ${channel.name}`))
     .catch(console.error);
-}
-
-async function deleteMessages() {
-    try {
-        const channelsData = fs.readFileSync('snapchannels.json');
-        const channels = JSON.parse(channelsData);
-
-        for (const channelInfo of channels) {
-            try {
-                const channel = await client.channels.fetch(channelInfo.channelId);
-
-                if (channel && (channel.type === 0 || channel.type === 5)) {
-                    const messages = await channel.messages.fetch({
-                        limit: 100
-                    });
-                    const purgeTime = new Date();
-                    purgeTime.setDate(purgeTime.getDate() - channelInfo.purgeTimeInDays);
-
-                    // Filter messages based on their timestamps
-                    const messagesToDelete = messages.filter(msg => msg.createdTimestamp <= purgeTime.getTime());
-
-                    try {
-                        // Bulk delete messages and log the action
-                        if (messagesToDelete.size > 0) {
-                            await channel.bulkDelete(messagesToDelete, true);
-                            console.log(`Deleted ${messagesToDelete.size} messages in channel ${channel.name}`);
-                        } else {
-                            console.log(`No messages to delete in channel ${channel.name}`);
-                        }
-                    } catch (bulkDeleteError) {
-                        console.log(`Bulk delete failed. Attempting to delete messages one at a time in channel ${channel.name}`);
-                        // Attempt to delete messages one by one
-                        for (const message of messagesToDelete.values()) {
-                            try {
-                                await message.delete();
-                                console.log(`Deleted message ${message.id} individually`);
-                            } catch (deleteError) {
-                                console.error(`Failed to delete message ${message.id}: ${deleteError}`);
-                            }
-                        }
-                    }
-                } else {
-                    console.log(`Invalid channel type or channel does not exist: ${channelInfo.channelId}`);
-                }
-            } catch (error) {
-                if (error.code === 10003) {
-                    console.error(`Error: Unknown Channel with ID ${channelInfo.channelId}`);
-                } else {
-                    console.error(`Error handling channel ${channelInfo.channelId}: ${error}`);
-                }
-            }
-        }
-    } catch (error) {
-        console.error('Error deleting messages:', error);
-    }
-}
-
-async function getusername(streamFactory, dataConsumer) {
-    try {
-        streamFactory().then((response) => {
-            dataConsumer(response)
-        });
-    } catch (error) {
-        console.warn('Stream disconnected with error: ', error.stack);
-    }
 }
 
 // presenceUpdate

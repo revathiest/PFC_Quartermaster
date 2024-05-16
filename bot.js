@@ -243,7 +243,7 @@ async function getInactiveUsersWithSingleRole() {
     const channel = client.channels.cache.get(chanBotLog);
     if (channel) {
         channel.send(message)
-        .then(() => console.log(`Inactive users with single role list sent to channel ${chanBotLog}`))
+        .then(() => console.log(`Inactive users with single role list sent to channel ${channel.name}`))
         .catch(console.error);
     } else {
         console.log(`Channel ${chanBotLog} not found.`);

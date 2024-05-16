@@ -26,11 +26,6 @@ function initClient() {
         ]
     });
 
-    // Event to log when the client is ready
-    client.once('ready', () => {
-        console.log('Discord client is ready!');
-    });
-
     return client;
 }
 

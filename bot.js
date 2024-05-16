@@ -101,7 +101,7 @@ client.once('ready', async () => {
 
 
     try {
-        setInterval(checkEvents(client), 60000);
+        setInterval(() => checkEvents(client), 60000);
         console.log('Check Events interval successfully started');
     } catch (error) {
         console.error(`Error setting up interval: ${error}`);

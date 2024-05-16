@@ -1,13 +1,5 @@
 module.exports = {
     registerChannels: function (client) {
-        // Print all channels for debugging
-        client.channels.cache.each(channel => {
-            if (channel.type === 0) {
-                console.log(`Found channel: ${channel.name} with ID: ${channel.id}`);
-            } else {
-                console.log(`Channel found of type: ${channel.type} `)
-            }
-        });
 
         const channelMappings = {
             'star-citizen-news': 'chanSCNews',

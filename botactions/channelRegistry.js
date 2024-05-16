@@ -4,6 +4,8 @@ module.exports = {
         client.channels.cache.each(channel => {
             if (channel.type === 'GUILD_TEXT') {
                 console.log(`Found channel: ${channel.name} with ID: ${channel.id}`);
+            } else {
+                console.log(`Channel found of type: ${channel.type} `)
             }
         });
 

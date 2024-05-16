@@ -11,6 +11,7 @@ const { checkEvents } = require('./botactions/eventReminder');
 const { handleRoleAssignment } = require('./botactions/autoBanModule');
 const { registerCommands } = require('./botactions/commandRegistration');
 const { getInactiveUsersWithSingleRole } = require('./botactions/inactiveUsersModule');
+const { sequelize, Transaction, Configuration } = require('/config/database');
 
 const client = initClient();
 
@@ -45,6 +46,10 @@ client.once('ready', async () => {
         await registerCommands(client);
         await getInactiveUsersWithSingleRole(client);
         console.log('Bot setup complete and ready to go!');
+
+        await sequelize.sync();
+        console.log('Database synced');
+
     } catch (error) {
         console.error('Error during channel registration:', error);
     }

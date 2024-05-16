@@ -3,8 +3,7 @@ const { Discord, Client, GatewayIntentBits, Collection, EmbedBuilder, Interactio
 const { REST } = require('@discordjs/rest');
 const { VoiceConnectionStatus } = require('@discordjs/voice');
 const { Routes } = require('discord-api-types/v9');
-const { bot_type, clientId, guildId, token, dbinfo, twitter, countForSpam } = require('./config.json');
-const { process_messages } = require("./process_messages");
+const { bot_type, clientId, guildId, token } = require('./config.json');
 const fs = require('fs'); // imports the file io library
 const rest = new REST({ version: '9' }).setToken(token);
 const { initClient } = require('./botactions/initClient');

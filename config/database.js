@@ -11,17 +11,11 @@ const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.p
 });
 
 // Define models
-const BotSettings = require('../models/bot_settings')(sequelize, DataTypes);
-const GuildSettings = require('../models/guild_settings')(sequelize, DataTypes);
-const UserSettings = require('../models/user_settings')(sequelize, DataTypes);
-const CommandPermissions = require('../models/command_permissions')(sequelize, DataTypes);
+
 
 // Export models and sequelize instance
 const models = {
-  BotSettings,
-  GuildSettings,
-  UserSettings,
-  CommandPermissions,
+
 };
 
 const initializeDatabase = async () => {

@@ -2,7 +2,7 @@ module.exports = {
     registerChannels: function (client) {
         // Print all channels for debugging
         client.channels.cache.each(channel => {
-            if (channel.type === 'GUILD_TEXT') {
+            if (channel.type === 0) {
                 console.log(`Found channel: ${channel.name} with ID: ${channel.id}`);
             } else {
                 console.log(`Channel found of type: ${channel.type} `)
@@ -20,7 +20,7 @@ module.exports = {
         let allChannelsRegistered = true;
 
         client.channels.cache.each(channel => {
-            if (channel.type === 'GUILD_TEXT' && channelMappings[channel.name]) {
+            if (channel.type === 0 && channelMappings[channel.name]) {
                 client[channelMappings[channel.name]] = channel.id;
                 console.log(`Channel ${channel.name} registered with ID ${channel.id}.`);
             }

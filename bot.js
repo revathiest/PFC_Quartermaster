@@ -13,6 +13,7 @@ const { deleteMessages } = require('./botactions/messageCleanup');
 const { checkEvents } = require('./botactions/eventReminder');
 const { handleRoleAssignment } = require('./botactions/autoBanModule');
 const { registerCommands } = require('./botactions/commandRegistration');
+const { getInactiveUsersWithSingleRole } = require('./botactions/inactiveUsersModule');
 
 
 const client = initClient();
@@ -42,6 +43,7 @@ client.once('ready', async () => {
     try {
         await registerChannels(client);  // Register channels
         await registerCommands(client);
+        await getInactiveUsersWithSingleRole(client);
         const logChannel = client.channels.cache.get(client.chanBotLog);
         if (logChannel) {
             logChannel.send('Startup Complete!');
@@ -54,8 +56,6 @@ client.once('ready', async () => {
     }
 
     remindNewbs();
-
-    getInactiveUsersWithSingleRole();
     
     client.channels.cache.get(client.chanBotLog).send('Startup Complete!');
 
@@ -81,63 +81,6 @@ client.once('ready', async () => {
 });
 
 
-async function getInactiveUsersWithSingleRole() {
-    const server = client.guilds.cache.first();
-    const currentTime = new Date(); // Current time
-    const oneSecondInMs = 1000;
-    const oneMinuteInMs = oneSecondInMs * 60;
-    const oneHourInMs = oneMinuteInMs * 60;
-    const oneDayInMs = oneHourInMs * 24;
-    const oneWeekInMs = oneDayInMs * 7;
-    const twoWeeksInMs = oneWeekInMs * 2;
-    const usersWithSingleRole = [];
-
-    if (!server) {
-        console.log("No active server found.");
-        return;
-    }
-
-    // Fetch offline members with only one role
-    await server.members.fetch({
-        force: true
-    });
-
-    server.members.cache.each(member => {
-        if (member.roles.cache.size === 1 && currentTime - member.joinedAt > twoWeeksInMs) {
-            const lastActivity = member.lastMessage ? member.lastMessage.createdAt : member.joinedAt;
-            const inactiveDuration = currentTime - lastActivity;
-            usersWithSingleRole.push({
-                username: member.user.username,
-                inactiveDuration: inactiveDuration
-            });
-
-            member.kick()
-            .then(kickedMember => console.log(`Kicked user: ${kickedMember.user.username}`))
-            .catch(console.error);
-        }
-    });
-
-    const formattedUsers = usersWithSingleRole.map(user => `${user.username} - ${formatDuration(user.inactiveDuration)}`);
-    const message = `Users with a single role, joined for more than one week, have been kicked from the server:\n\n${formattedUsers.join('\n')}`;
-
-    const channel = client.channels.cache.get(client.chanBotLog);
-    if (channel) {
-        channel.send(message)
-        .then(() => console.log(`Inactive users with single role list sent to channel ${channel.name}`))
-        .catch(console.error);
-    } else {
-        console.log(`Channel ${client.chanBotLog} not found.`);
-    }
-}
-
-function formatDuration(duration) {
-    const seconds = Math.floor(duration / 1000) % 60;
-    const minutes = Math.floor(duration / 1000 / 60) % 60;
-    const hours = Math.floor(duration / 1000 / 60 / 60) % 24;
-    const days = Math.floor(duration / 1000 / 60 / 60 / 24);
-
-    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
-}
 
 async function remindNewbs() {
     const channel = await client.channels.fetch("1026641140193185842");

@@ -109,7 +109,7 @@ client.once('ready', async () => {
 
     try {
         deleteMessages(client);
-        setInterval(deleteMessages(client), 86400000);
+        setInterval(() => deleteMessages(client), 86400000);
         console.log('Clearing Snap Channels')
     } catch (error) {
         console.error(`Error setting up interval: ${error}`);

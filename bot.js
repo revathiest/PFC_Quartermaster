@@ -281,22 +281,6 @@ async function remindNewbs() {
     .catch(console.error);
 }
 
-async function remindRecruits() {
-    const channel = client.channels.cache.get("992875093325795409");
-    const currentDate = new Date();
-    const dayOfWeek = currentDate.getDay();
-    const currentHour = currentDate.getHours();
-
-    if (dayOfWeek !== 1 || currentHour >= 1) {
-        console.log("Current time is not between midnight and 1 am on Monday. Recruit reminder not sent");
-        return;
-    }
-
-    channel.send("@Recruit Please remember to apply for membership on https://robertsspaceindustries.com/orgs/PFCS")
-    .then(() => console.log(`Reminder sent to ${channel.name}`))
-    .catch(console.error);
-}
-
 async function checkEvents() {
 
     // Get the server's Guild object

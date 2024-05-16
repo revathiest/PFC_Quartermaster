@@ -15,8 +15,6 @@ const client = initClient();
 var chanBotLog
 var chanBotTest
 var chanSCNews
-var chanPFCMusic
-var chanPFCRules
 var chanProfanityAlert
 
 //PFC Discord Role Definitions
@@ -142,14 +140,6 @@ client.once('ready', async() => {
                 chanBotLog = channel.id;
                 console.log(`Channel ${channel.name} registered.`);
                 break;
-            case 'music':
-                chanPFCMusic = channel.id;
-                console.log(`Channel ${channel.name} registered.`);
-                break;
-            case 'rules':
-                chanPFCRules = channel.id;
-                console.log(`Channel ${channel.name} registered.`);
-                break;
             case 'division-signup':
                 chanDivSignup = channel.id;
                 console.log(`Channel ${channel.name} registered.`);
@@ -164,21 +154,15 @@ client.once('ready', async() => {
 
     if (isDevelopment()) {
         chanSCNews = chanBotLog;
-        chanPFCMusic = chanBotLog;
-        chanPFCRules = chanBotLog;
     }
 
     client.chanSCNews = chanSCNews;
-    client.chanPFCMusic = chanPFCMusic;
-    client.chanPFCRules = chanPFCRules;
     client.chanDivSignup = chanDivSignup;
     client.chanBotLog = chanBotLog;
     client.chanBotTest = chanBotTest;
     client.chanProfanityAlert = chanProfanityAlert;
 
     client.channels.cache.get(chanBotLog).send('Startup Complete!');
-
-    const rulesChan = isProduction() ? chanPFCRules : chanBotTest;
 
     try {
         setInterval(checkEvents, 60000);
@@ -260,10 +244,8 @@ function formatDuration(duration) {
 }
 
 async function remindNewbs() {
-    // const channel = client.channels.cache.get("1026641140193185842");
-    // const rules = client.channels.cache.get("1110719388723707914");
-    const channel = await client.channels.fetch("1026641140193185842"); // Replace "channel_id_here" with the actual ID
-    const rules = await client.channels.fetch("1110719388723707914"); // Replace "rules_channel_id_here" with the actual ID
+    const channel = await client.channels.fetch("1026641140193185842");
+    const rules = await client.channels.fetch("1110719388723707914");
     const currentDate = new Date();
     const dayOfWeek = currentDate.getDay();
     const currentHour = currentDate.getHours();

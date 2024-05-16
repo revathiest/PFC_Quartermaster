@@ -57,9 +57,5 @@ module.exports = {
         }
       }
     },
-  
-    test_message: function(string) {
-      // This isn't being used.
-    },
   };
   

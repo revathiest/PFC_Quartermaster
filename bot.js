@@ -76,14 +76,18 @@ client.on("userUpdate", function (oldMember, newMember) {
 // When the client is ready, run this code (only once)
 client.once('ready', async () => {
     console.log('Discord client is ready!');
-
-    // Register channels directly on the client object
-    registerChannels(client);
-
-    // Now the client object directly has all channel IDs set up
-    client.channels.cache.get(client.chanBotLog).send('Startup Complete!');
-
-    console.log('Bot setup complete and ready to go!');
+    try {
+        await registerChannels(client);  // Register channels
+        const logChannel = client.channels.cache.get(client.chanBotLog);
+        if (logChannel) {
+            logChannel.send('Startup Complete!');
+            console.log('Bot setup complete and ready to go!');
+        } else {
+            console.error('Log channel not found.');
+        }
+    } catch (error) {
+        console.error('Error during channel registration:', error);
+    }
 });
 
     if (isDevelopment()) {

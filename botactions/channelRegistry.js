@@ -1,6 +1,8 @@
+// channelRegistry.js
+const { Client } = require('discord.js');
+
 module.exports = {
-    registerChannels: function (client) {
-        // Define all the channel names and their corresponding property names on the client object
+    registerChannels: async function (client) {
         const channelMappings = {
             'star-citizen-news': 'chanSCNews',
             'pfc-bot-testing': 'chanBotTest',
@@ -9,13 +11,14 @@ module.exports = {
             'division-signup': 'chanDivSignup'
         };
 
-        // Iterate through all channels in the guild's cache
+        // Ensure all channels are fetched
+        await client.channels.fetch();
+
+        // Register each channel based on mappings
         for (const channel of client.channels.cache.values()) {
-            if (channel.type === 'GUILD_TEXT') { // Make sure it's a text channel
-                if (channelMappings[channel.name]) {
-                    client[channelMappings[channel.name]] = channel.id;
-                    console.log(`Channel ${channel.name} registered with ID ${channel.id}.`);
-                }
+            if (channel.type === 'GUILD_TEXT' && channelMappings[channel.name]) {
+                client[channelMappings[channel.name]] = channel.id;
+                console.log(`Channel ${channel.name} registered with ID ${channel.id}.`);
             }
         }
 

@@ -6,7 +6,7 @@ const fs = require('fs');
  */
 async function deleteMessages(client) {
     try {
-        const channelsData = fs.readFileSync('snapchannels.json');
+        const channelsData = fs.readFileSync('../snapchannels.json');
         const channels = JSON.parse(channelsData);
 
         for (const channelInfo of channels) {

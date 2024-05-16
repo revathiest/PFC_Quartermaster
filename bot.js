@@ -88,10 +88,6 @@ client.once('ready', async () => {
         console.error('Error during channel registration:', error);
     }
 
-    remindNewbs();
-
-    getInactiveUsersWithSingleRole();
-    
     client.channels.cache.get(client.chanBotLog).send('Startup Complete!');
 });
 

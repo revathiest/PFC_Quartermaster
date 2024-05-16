@@ -8,8 +8,13 @@ const { process_messages } = require("./process_messages");
 const fs = require('fs'); // imports the file io library
 const rest = new REST({ version: '9' }).setToken(token);
 const { initClient } = require('./botactions/initClient')
+const interactionHandler = require('./botactions/interactionEvents')
 
 const client = initClient();
+
+client.on('interactionCreate', async interaction => {
+    await interactionHandler.handleInteraction(interaction, client);
+});
 
 //PFC Discord Channel Definitions
 var chanBotLog
@@ -59,58 +64,6 @@ for (const file of commandFiles) {
 //***********************************************************/
 //Client Setup
 //***********************************************************/
-
-client.on('interactionCreate', async interaction => {
-    const roles = interaction.member._roles;
-    const command = client.commands.get(interaction.commandName);
-
-    if (interaction.isCommand()) {
-        let message = `${interaction.user.username} used command **${interaction.commandName}**`;
-        if (interaction.options._hoistedOptions[0]) {
-            message += ` with options **${interaction.options._hoistedOptions[0].value}**`;
-        }
-        client.channels.cache.get(chanBotLog).send(message);
-
-        if (command && command.role && !roles.includes(command.role)) {
-            await interaction.reply("You're not authorized to use that command");
-            return;
-        }
-
-        if (!command) {
-            await interaction.reply('Unable to find command...');
-            return;
-        }
-
-        try {
-            if (typeof command.execute === 'function') {
-                await command.execute(interaction, client);
-            } else {
-                command(interaction);
-            }
-        } catch (error) {
-            console.error(error);
-            await interaction.reply({
-                content: 'There was an error while executing this command!',
-                ephemeral: true
-            });
-        }
-    } else if (interaction.isButton()) {
-        const message = `${interaction.user.username} clicked button **${interaction.customId}** for command **${interaction.message.interaction.commandName}**`;
-        client.channels.cache.get(chanBotLog).send(message);
-
-        command = client.commands.get(interaction.message.interaction.commandName);
-        command.button(interaction, client);
-    } else if (interaction.isSelectMenu()) {
-        const message = `${interaction.user.username} selected option **${interaction.values[0]}** for command **${interaction.message.interaction.commandName}**`;
-        client.channels.cache.get(chanBotLog).send(message);
-
-        command = client.commands.get(interaction.message.interaction.commandName);
-        command.option(interaction, client);
-    } else {
-        interaction.log(interaction);
-        interaction.reply('I dont know what to do with that');
-    }
-});
 
 client.on('error', (error) => {
     client.channels.cache.get(chanBotLog).send('Error: (client)' + error.stack)

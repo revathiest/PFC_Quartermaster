@@ -15,7 +15,6 @@ const { handleRoleAssignment } = require('./botactions/autoBanModule');
 const { registerCommands } = require('./botactions/commandRegistration');
 const { getInactiveUsersWithSingleRole } = require('./botactions/inactiveUsersModule');
 
-
 const client = initClient();
 
 client.on('interactionCreate', async interaction => {
@@ -35,6 +34,10 @@ client.on('error', (error) => {
 client.on("userUpdate", function (oldMember, newMember) {
     const membername = newMember.nickname
         console.log(`a guild member's presence changes`);
+});
+
+client.on("guildMemberUpdate", async (oldMember, newMember) => {
+    await handleRoleAssignment(oldMember, newMember, client);
 });
 
 // When the client is ready, run this code (only once)
@@ -72,21 +75,6 @@ client.once('ready', async () => {
         console.error(`Error setting up interval: ${error}`);
     }
 });
-
-// presenceUpdate
-/* Emitted whenever a guild member's presence changes, or they change one of their details.
-PARAMETER    TYPE               DESCRIPTION
-oldMember    GuildMember        The member before the presence update
-newMember    GuildMember        The member after the presence update    */
-client.on("presenceUpdate", function (oldMember, newMember) {
-    //var tempnewMember = newMember.member.displayName
-    //console.log(`a guild member's presence changes: ` + tempnewMember);
-});
-
-client.on("guildMemberUpdate", async (oldMember, newMember) => {
-    await handleRoleAssignment(oldMember, newMember, client);
-});
-
 
 // Login to Discord with your client's token
 client.login(token)

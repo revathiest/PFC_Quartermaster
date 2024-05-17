@@ -8,7 +8,7 @@ module.exports = {
         .setDescription('Schedules an announcement')
         .addStringOption(option => 
             option.setName('channel')
-                .setDescription('The channel ID to send the announcement to')
+                .setDescription('The channel name to send the announcement to')
                 .setRequired(true))
         .addStringOption(option => 
             option.setName('message')
@@ -19,7 +19,7 @@ module.exports = {
                 .setDescription('The time to send the message (YYYY-MM-DD HH:mm:ss)')
                 .setRequired(true)),
     async execute(interaction) {
-        const channelId = interaction.options.getString('channel');
+        const channelName = interaction.options.getString('channel');
         const message = interaction.options.getString('message');
         const time = interaction.options.getString('time');
 
@@ -29,9 +29,18 @@ module.exports = {
             return;
         }
 
-        // Save the announcement to the database
-        await saveAnnouncementToDatabase(channelId, message, time);
+        // Fetch the channel by name
+        const guild = interaction.guild;
+        const channel = guild.channels.cache.find(ch => ch.name === channelName);
 
-        await interaction.reply(`Announcement scheduled for ${time} in channel ${channelId}`);
+        if (!channel) {
+            await interaction.reply(`Channel "${channelName}" not found.`);
+            return;
+        }
+
+        // Save the announcement to the database using the channel ID
+        await saveAnnouncementToDatabase(channel.id, message, time);
+
+        await interaction.reply(`Announcement scheduled for ${time} in channel ${channelName}`);
     },
 };

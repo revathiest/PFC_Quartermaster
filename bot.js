@@ -1,4 +1,5 @@
 // Require the necessary discord.js classes
+require('dotenv').config();
 const { Collection } = require('discord.js');
 const fs = require('fs'); // imports the file io library
 const { initClient } = require('./botactions/initClient');
@@ -11,42 +12,14 @@ const { handleRoleAssignment } = require('./botactions/autoBanModule');
 const { registerCommands } = require('./botactions/commandRegistration');
 const { getInactiveUsersWithSingleRole } = require('./botactions/inactiveUsersModule');
 const { initializeDatabase } = require('./config/database');
-const { getConfigFromDatabase, saveConfigToDatabase } = require('./botactions/databaseHandler');
+const { loadConfiguration } = require('./botactions/configLoader');
 const scheduleAnnouncements = require('./botactions/announcementScheduler');
 
-// Function to load config from file (fallback)
-const loadConfigFromFile = () => {
-    console.log('Loading configuration from file...');
-    const rawData = fs.readFileSync('./config.json');
-    const configFile = JSON.parse(rawData);
-    console.log('Configuration successfully loaded from file');
-    return configFile;
-};
-
-const loadConfiguration = async () => {
-    // Load configuration from database
-    let config;
-    try {
-        console.log('Attempting to load configuration from database...');
-        config = await getConfigFromDatabase();
-        if (Object.keys(config).length === 0) {
-            console.log('No configuration found in database, loading from file...');
-            config = loadConfigFromFile();
-            await saveConfigToDatabase(config);
-        } else {
-            console.log('Configuration successfully loaded from database');
-        }
-    } catch (error) {
-        console.error('Error loading configuration from database, falling back to file...');
-        config = loadConfigFromFile();
-        await saveConfigToDatabase(config);
-    }
-    return config;
-};
+const botType = process.env.BOT_TYPE;
 
 // Load configuration before initializing the client
 const initializeBot = async () => {
-    const config = await loadConfiguration();
+    const config = await loadConfiguration(botType);
 
     // Extract the token from the loaded config
     const token = config.token || fileToken;

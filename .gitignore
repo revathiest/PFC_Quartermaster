@@ -2,3 +2,4 @@ runbot.cmd
 config.json
 .vscode/launch.json
 variables.json
+*.zip

@@ -1,9 +1,9 @@
 const Config = require('../models/configModel');
 
-const saveConfigToDatabase = async (config) => {
+const saveConfigToDatabase = async (config, botType) => {
   try {
     for (const key in config) {
-      await Config.upsert({ key, value: JSON.stringify(config[key]) });
+      await Config.upsert({ key, value: JSON.stringify(config[key]), botType });
     }
     console.log('Configuration saved to database');
   } catch (error) {
@@ -11,9 +11,9 @@ const saveConfigToDatabase = async (config) => {
   }
 };
 
-const getConfigFromDatabase = async () => {
+const getConfigFromDatabase = async (botType) => {
   try {
-    const configs = await Config.findAll();
+    const configs = await Config.findAll({ where: { botType } });
     const config = {};
     configs.forEach(c => {
       config[c.key] = JSON.parse(c.value);

@@ -66,40 +66,38 @@ async function handleButton(interaction, client) {
 }
 
 async function handleSelectMenu(interaction, client) {
-    if (interaction.customId === 'selectChannel') {
-        const selectedChannelId = interaction.values[0];
-        const selectedChannel = interaction.guild.channels.cache.get(selectedChannelId);
-        const message = `${interaction.user.username} selected channel **${selectedChannel.name}**`;
-        client.channels.cache.get(client.chanBotLog).send(message);
-
-        // Retrieve the pending data for this interaction
-        const pendingData = pendingChannelSelection[interaction.user.id];
-        if (pendingData) {
-            const { title, description, author, time } = pendingData;
-
-            // Save the announcement to the database
-            const embedData = { title, description, author };
-            await saveAnnouncementToDatabase(selectedChannelId, embedData, time);
-
-            await interaction.update({ content: `Announcement scheduled for ${time} in channel ${selectedChannel.name}`, components: [] });
-
-            // Clean up the pending data
-            delete pendingChannelSelection[interaction.user.id];
-        } else {
-            await interaction.update({ content: `Channel selected: ${selectedChannel.name}`, components: [] });
-        }
+    const selectedChannelId = interaction.values[0];
+    const selectedChannel = await interaction.guild.channels.fetch(selectedChannelId);
+    const userSelection = pendingChannelSelection[interaction.user.id];
+  
+    if (userSelection) {
+      const embedData = {
+        title: userSelection.title,
+        description: userSelection.description,
+        author: userSelection.author
+      };
+      const time = userSelection.time;
+  
+      // Ensure time is formatted correctly
+      const formattedTime = moment(time, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+  
+      await saveAnnouncementToDatabase(selectedChannelId, interaction.guild.id, embedData, formattedTime);
+  
+      await interaction.update({ content: `Announcement scheduled for ${formattedTime} in channel ${selectedChannel.name}`, components: [] });
+  
+      delete pendingChannelSelection[interaction.user.id];
     } else {
-        const command = client.commands.get(interaction.message.interaction.commandName);
-        const message = `${interaction.user.username} selected option **${interaction.values[0]}** for command **${interaction.message.interaction.commandName}**`;
-        client.channels.cache.get(client.chanBotLog).send(message);
-
-        if (command && command.option) {
-            await command.option(interaction, client);
-        } else {
-            console.error('Select menu handler not found.');
-        }
+      const command = client.commands.get(interaction.message.interaction.commandName);
+      const message = `${interaction.user.username} selected option **${interaction.values[0]}** for command **${interaction.message.interaction.commandName}**`;
+      client.channels.cache.get(client.chanBotLog).send(message);
+  
+      if (command && command.option) {
+        await command.option(interaction, client);
+      } else {
+        console.error('Select menu handler not found.');
+      }
     }
-}
+  }
 
 async function handleModalSubmit(interaction, client) {
     if (interaction.customId === 'scheduleModal') {

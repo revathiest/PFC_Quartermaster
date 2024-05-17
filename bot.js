@@ -13,8 +13,6 @@ const { getInactiveUsersWithSingleRole } = require('./botactions/inactiveUsersMo
 const { sequelize, initializeDatabase } = require('./config/database');
 const { getConfigFromDatabase } = require('./botactions/databaseHandler');
 
-const client = initClient();
-
 // Function to load config from file (fallback)
 const loadConfigFromFile = () => {
     console.log('Loading configuration from file...');
@@ -23,6 +21,8 @@ const loadConfigFromFile = () => {
     console.log('Configuration loaded from file:', configFile);
     return configFile;
 };
+
+const client = initClient();
 
 client.on('interactionCreate', async interaction => {
     await interactionHandler.handleInteraction(interaction, client);

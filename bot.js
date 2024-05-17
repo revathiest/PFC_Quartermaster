@@ -1,4 +1,5 @@
 // Require the necessary discord.js classes
+require('dotenv').config();
 const { Collection } = require('discord.js');
 const fs = require('fs'); // imports the file io library
 const { initClient } = require('./botactions/initClient');

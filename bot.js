@@ -1,5 +1,6 @@
 // Require the necessary discord.js classes
 const { Collection } = require('discord.js');
+const token = require('./config.json')
 const fs = require('fs'); // imports the file io library
 const { initClient } = require('./botactions/initClient');
 const interactionHandler = require('./botactions/interactionEvents');
@@ -104,7 +105,7 @@ client.once('ready', async () => {
 
 // Login to Discord with your client's token
 try {
-    const token = client.config.token || loadConfigFromFile().token;
+    //const token = client.config.token || loadConfigFromFile().token;
     console.log('Attempting to login with token:', token);
     client.login(token);
 } catch (error) {

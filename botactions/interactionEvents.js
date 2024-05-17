@@ -103,7 +103,7 @@ async function handleSelectMenu(interaction, client) {
 
 async function handleModalSubmit(interaction, client) {
     if (interaction.customId === 'scheduleModal') {
-d        const title = interaction.fields.getTextInputValue('title');
+        const title = interaction.fields.getTextInputValue('title');
         const description = interaction.fields.getTextInputValue('description');
         const author = 'PFC Quartermaster';
         const time = interaction.fields.getTextInputValue('time');

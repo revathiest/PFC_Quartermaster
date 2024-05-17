@@ -1,26 +1,30 @@
-const { Transaction, Configuration } = require('../config/database'); // Import models
+const Config = require('../models/configModel');
 
-// Function to store a transaction
-async function storeTransaction(userId, amount) {
-    try {
-        const transaction = await Transaction.create({ userId, amount });
-        console.log('Transaction stored:', transaction);
-    } catch (error) {
-        console.error('Error storing transaction:', error);
+const saveConfigToDatabase = async (config) => {
+  try {
+    for (const key in config) {
+      await Config.upsert({ key, value: JSON.stringify(config[key]) });
     }
-}
+    console.log('Configuration saved to database');
+  } catch (error) {
+    console.error('Error saving configuration to database:', error);
+  }
+};
 
-// Function to get a configuration value
-async function getConfig(key) {
-    try {
-        const config = await Configuration.findOne({ where: { key } });
-        return config ? config.value : null;
-    } catch (error) {
-        console.error('Error fetching configuration:', error);
-    }
-}
+const getConfigFromDatabase = async () => {
+  try {
+    const configs = await Config.findAll();
+    const config = {};
+    configs.forEach(c => {
+      config[c.key] = JSON.parse(c.value);
+    });
+    return config;
+  } catch (error) {
+    console.error('Error retrieving configuration from database:', error);
+  }
+};
 
 module.exports = {
-    storeTransaction,
-    getConfig
+  saveConfigToDatabase,
+  getConfigFromDatabase,
 };

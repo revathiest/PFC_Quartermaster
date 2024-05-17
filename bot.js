@@ -1,6 +1,5 @@
 // Require the necessary discord.js classes
-const {Collection} = require('discord.js');
-const { bot_type, clientId, guildId, token } = require('./config.json');
+const { Collection } = require('discord.js');
 const fs = require('fs'); // imports the file io library
 const { initClient } = require('./botactions/initClient');
 const interactionHandler = require('./botactions/interactionEvents');
@@ -11,9 +10,16 @@ const { checkEvents } = require('./botactions/eventReminder');
 const { handleRoleAssignment } = require('./botactions/autoBanModule');
 const { registerCommands } = require('./botactions/commandRegistration');
 const { getInactiveUsersWithSingleRole } = require('./botactions/inactiveUsersModule');
-const { sequelize, Transaction, Configuration } = require('./config/database');
+const { sequelize } = require('./config/database');
+const { getConfigFromDatabase } = require('./botactions/databaseHandler');
 
 const client = initClient();
+
+// Function to load config from file (fallback)
+const loadConfigFromFile = () => {
+  const rawData = fs.readFileSync('./config.json');
+  return JSON.parse(rawData);
+};
 
 client.on('interactionCreate', async interaction => {
     await interactionHandler.handleInteraction(interaction, client);
@@ -21,17 +27,12 @@ client.on('interactionCreate', async interaction => {
 
 client.on("messageCreate", message => handleMessageCreate(message, client));
 
-//***********************************************************/
-//Client Setup
-//***********************************************************/
-
 client.on('error', (error) => {
     client.channels.cache.get(client.chanBotLog).send('Error: (client)' + error.stack)
-})
+});
 
 client.on("userUpdate", function (oldMember, newMember) {
-    const membername = newMember.nickname
-        console.log(`a guild member's presence changes`);
+    console.log(`a guild member's presence changes`);
 });
 
 client.on("guildMemberUpdate", async (oldMember, newMember) => {
@@ -50,26 +51,44 @@ client.once('ready', async () => {
         await sequelize.sync();
         console.log('Database synced');
 
+        // Load configuration from database
+        let config;
+        try {
+            config = await getConfigFromDatabase();
+            if (Object.keys(config).length === 0) {
+                console.log('No configuration found in database, loading from file.');
+                config = loadConfigFromFile();
+            } else {
+                console.log('Configuration loaded from database.');
+            }
+        } catch (error) {
+            console.error('Error loading configuration from database, falling back to file:', error);
+            config = loadConfigFromFile();
+        }
+
+        // Update client configuration with loaded config
+        client.config = config;
+
+        const logChannel = client.channels.cache.get(client.chanBotLog);
+        if (logChannel) {
+            logChannel.send('Startup Complete!');
+        } else {
+            console.error('Log channel not found.');
+        }
+
+        try {
+            setInterval(() => checkEvents(client), 60000);
+            console.log('Check Events interval successfully started');
+            setInterval(() => deleteMessages(client), 86400000);
+            console.log('Delete Messages interval successfully started')
+        } catch (error) {
+            console.error(`Error setting up interval: ${error}`);
+        }
+
     } catch (error) {
         console.error('Error during channel registration:', error);
-    }
-
-    const logChannel = client.channels.cache.get(client.chanBotLog);
-    if (logChannel) {
-        logChannel.send('Startup Complete!');
-    } else {
-        console.error('Log channel not found.');
-    }
-
-    try {
-        setInterval(() => checkEvents(client), 60000);
-        console.log('Check Events interval successfully started');
-        setInterval(() => deleteMessages(client), 86400000);
-        console.log('Delete Messages interval successfully started')
-    } catch (error) {
-        console.error(`Error setting up interval: ${error}`);
     }
 });
 
 // Login to Discord with your client's token
-client.login(token)
+client.login(client.config.token || token);

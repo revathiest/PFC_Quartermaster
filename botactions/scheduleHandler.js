@@ -11,7 +11,10 @@ const saveAnnouncementToDatabase = async (channelId, message, time) => {
 
 const getScheduledAnnouncements = async () => {
     try {
-        return await ScheduledAnnouncement.findAll();
+        console.log('Attempting to retrieve announcements from database');
+        const announcements = await ScheduledAnnouncement.findAll();
+        console.log(`Retrieved ${announcements.length} scheduled announcements from database`);
+        return announcements
     } catch (error) {
         console.error('Error retrieving scheduled announcements from database:', error);
         return [];  // Return an empty array in case of error

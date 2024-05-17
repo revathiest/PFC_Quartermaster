@@ -10,12 +10,11 @@ const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.p
   logging: dbConfig.logging || false,
 });
 
-const models = {
-  Config: require('../models/configModel')
-};
-
 const initializeDatabase = async () => {
   try {
+    // Import models here to ensure they are defined before syncing
+    require('../models/configModel');
+    
     await sequelize.sync({ force: false });  // Set to true only if you want to drop and recreate tables
     console.log('Database synchronized');
   } catch (error) {

@@ -5,7 +5,9 @@ async function createChannelSelectMenu(guild) {
     const role = guild.roles.cache.find(r => r.name === "Pyro Freelancer Corps");
     
     if (!role) {
-        throw new Error("Role 'PyroFreelancerCorps' not found.");
+        throw new Error("Role 'Pyro Freelancer Corps' not found.");
+    } else {
+        console.log('Role found');
     }
 
     // Fetch all channels in the guild

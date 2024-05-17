@@ -1,7 +1,6 @@
 // Require the necessary discord.js classes
 const { Collection } = require('discord.js');
 const fs = require('fs'); // imports the file io library
-const { token: fileToken } = require('./config.json'); // Directly read the token from the config file as fallback
 const { initClient } = require('./botactions/initClient');
 const interactionHandler = require('./botactions/interactionEvents');
 const { handleMessageCreate } = require('./botactions/messageEvents');
@@ -32,12 +31,14 @@ const loadConfiguration = async () => {
         if (Object.keys(config).length === 0) {
             console.log('No configuration found in database, loading from file...');
             config = loadConfigFromFile();
+            await saveConfigToDatabase(config);
         } else {
             console.log('Configuration loaded from database:', config);
         }
     } catch (error) {
         console.error('Error loading configuration from database, falling back to file:', error);
         config = loadConfigFromFile();
+        await saveConfigToDatabase(config);
     }
     return config;
 };

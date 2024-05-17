@@ -18,7 +18,7 @@ const loadConfigFromFile = () => {
     console.log('Loading configuration from file...');
     const rawData = fs.readFileSync('./config.json');
     const configFile = JSON.parse(rawData);
-    console.log('Configuration successfully loaded from file:');
+    console.log('Configuration successfully loaded from file');
     return configFile;
 };
 
@@ -33,10 +33,10 @@ const loadConfiguration = async () => {
             config = loadConfigFromFile();
             await saveConfigToDatabase(config);
         } else {
-            console.log('Configuration successfully loaded from database:');
+            console.log('Configuration successfully loaded from database');
         }
     } catch (error) {
-        console.error('Error loading configuration from database, falling back to file:', error);
+        console.error('Error loading configuration from database, falling back to file...');
         config = loadConfigFromFile();
         await saveConfigToDatabase(config);
     }

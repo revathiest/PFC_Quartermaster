@@ -1,58 +1,73 @@
-const { SlashCommandBuilder } = require('@discordjs/builders');
-const { saveAnnouncementToDatabase } = require('../botactions/scheduleHandler');
-const moment = require('moment');
+const { SlashCommandBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('schedule')
-        .setDescription('Schedules an announcement as an embed')
-        .addChannelOption(option => 
-            option.setName('channel')
-                .setDescription('The channel to send the announcement to')
-                .setRequired(true))
-        .addStringOption(option => 
-            option.setName('title')
-                .setDescription('The title of the embed')
-                .setRequired(true))
-        .addStringOption(option => 
-            option.setName('description')
-                .setDescription('The description of the embed')
-                .setRequired(true))
-        .addStringOption(option => 
-            option.setName('time')
-                .setDescription('The time to send the message (YYYY-MM-DD HH:mm:ss)')
-                .setRequired(true))
-        .addStringOption(option => 
-            option.setName('color')
-                .setDescription('The color of the embed (in hex, e.g., #0099ff)')
-                .setRequired(false))
-        .addStringOption(option => 
-            option.setName('author')
-                .setDescription('The author of the embed')
-                .setRequired(false))
-        .addStringOption(option => 
-            option.setName('footer')
-                .setDescription('The footer text of the embed')
-                .setRequired(false)),
+        .setDescription('Schedules an announcement as an embed'),
     async execute(interaction) {
-        const channel = interaction.options.getChannel('channel');
-        const title = interaction.options.getString('title');
-        const description = interaction.options.getString('description');
-        const color = interaction.options.getString('color') || '#0099ff';
-        const author = interaction.options.getString('author') || 'Official PFC Communication';
-        const footer = interaction.options.getString('footer') || 'Official PFC Communication';
-        const time = interaction.options.getString('time');
+        const modal = new ModalBuilder()
+            .setCustomId('scheduleModal')
+            .setTitle('Schedule Announcement');
 
-        // Validate the time format
-        if (!moment(time, 'YYYY-MM-DD HH:mm:ss', true).isValid()) {
-            await interaction.reply('Invalid time format. Please use YYYY-MM-DD HH:mm:ss');
-            return;
-        }
+        const channelInput = new TextInputBuilder()
+            .setCustomId('channel')
+            .setLabel('Channel ID')
+            .setStyle(TextInputStyle.Short)
+            .setPlaceholder('Enter the channel ID')
+            .setRequired(true);
 
-        // Save the announcement to the database using the channel ID
-        const embedData = { title, description, color, author, footer };
-        await saveAnnouncementToDatabase(channel.id, embedData, time);
+        const titleInput = new TextInputBuilder()
+            .setCustomId('title')
+            .setLabel('Embed Title')
+            .setStyle(TextInputStyle.Short)
+            .setPlaceholder('Enter the embed title')
+            .setRequired(true);
 
-        await interaction.reply(`Announcement scheduled for ${time} in channel ${channel.name}`);
+        const descriptionInput = new TextInputBuilder()
+            .setCustomId('description')
+            .setLabel('Embed Description')
+            .setStyle(TextInputStyle.Paragraph)
+            .setPlaceholder('Enter the embed description')
+            .setRequired(true);
+
+        const colorInput = new TextInputBuilder()
+            .setCustomId('color')
+            .setLabel('Embed Color (Hex)')
+            .setStyle(TextInputStyle.Short)
+            .setPlaceholder('#0099ff')
+            .setRequired(false);
+
+        const authorInput = new TextInputBuilder()
+            .setCustomId('author')
+            .setLabel('Author')
+            .setStyle(TextInputStyle.Short)
+            .setPlaceholder('Author name')
+            .setRequired(false);
+
+        const footerInput = new TextInputBuilder()
+            .setCustomId('footer')
+            .setLabel('Footer')
+            .setStyle(TextInputStyle.Short)
+            .setPlaceholder('Footer text')
+            .setRequired(false);
+
+        const timeInput = new TextInputBuilder()
+            .setCustomId('time')
+            .setLabel('Schedule Time (YYYY-MM-DD HH:mm:ss)')
+            .setStyle(TextInputStyle.Short)
+            .setPlaceholder('Enter the time')
+            .setRequired(true);
+
+        modal.addComponents(
+            new ActionRowBuilder().addComponents(channelInput),
+            new ActionRowBuilder().addComponents(titleInput),
+            new ActionRowBuilder().addComponents(descriptionInput),
+            new ActionRowBuilder().addComponents(colorInput),
+            new ActionRowBuilder().addComponents(authorInput),
+            new ActionRowBuilder().addComponents(footerInput),
+            new ActionRowBuilder().addComponents(timeInput)
+        );
+
+        await interaction.showModal(modal);
     },
 };

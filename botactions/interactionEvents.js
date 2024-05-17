@@ -10,7 +10,7 @@ module.exports = {
             await handleCommand(interaction, client);
         } else if (interaction.isButton()) {
             await handleButton(interaction, client);
-        } else if (interaction.isSelectMenu()) {
+        } else if (interaction.isStringSelectMenu()) {
             await handleSelectMenu(interaction, client);
         } else if (interaction.isModalSubmit()) {
             await handleModalSubmit(interaction, client);

@@ -11,7 +11,7 @@ const { handleRoleAssignment } = require('./botactions/autoBanModule');
 const { registerCommands } = require('./botactions/commandRegistration');
 const { getInactiveUsersWithSingleRole } = require('./botactions/inactiveUsersModule');
 const { sequelize, initializeDatabase } = require('./config/database');
-const { getConfigFromDatabase } = require('./botactions/databaseHandler');
+const { getConfigFromDatabase, saveConfigToDatabase } = require('./botactions/databaseHandler');
 
 // Function to load config from file (fallback)
 const loadConfigFromFile = () => {

@@ -14,6 +14,7 @@ const initializeDatabase = async () => {
   try {
     // Import models here to ensure they are defined before syncing
     require('../models/configModel');
+    require('../models/scheduledAnnouncementModel');
     
     await sequelize.sync({ force: false });  // Set to true only if you want to drop and recreate tables
     console.log('Database synchronized');

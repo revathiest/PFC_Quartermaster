@@ -24,13 +24,23 @@ module.exports = {
                 .setRequired(true))
         .addStringOption(option => 
             option.setName('color')
-                .setDescription('The color of the embed (in hex, e.g., #00FF00)')
+                .setDescription('The color of the embed (in hex, e.g., #0099ff)')
+                .setRequired(false))
+        .addStringOption(option => 
+            option.setName('author')
+                .setDescription('The author of the embed')
+                .setRequired(false))
+        .addStringOption(option => 
+            option.setName('footer')
+                .setDescription('The footer text of the embed')
                 .setRequired(false)),
     async execute(interaction) {
         const channel = interaction.options.getChannel('channel');
         const title = interaction.options.getString('title');
         const description = interaction.options.getString('description');
-        const color = interaction.options.getString('color') || '#FFFFFF';
+        const color = interaction.options.getString('color') || '#0099ff';
+        const author = interaction.options.getString('author') || 'Official PFC Communication';
+        const footer = interaction.options.getString('footer') || 'Official PFC Communication';
         const time = interaction.options.getString('time');
 
         // Validate the time format
@@ -40,9 +50,10 @@ module.exports = {
         }
 
         // Save the announcement to the database using the channel ID
-        const embedData = { title, description, color };
+        const embedData = { title, description, color, author, footer };
         await saveAnnouncementToDatabase(channel.id, embedData, time);
 
         await interaction.reply(`Announcement scheduled for ${time} in channel ${channel.name}`);
     },
 };
+v

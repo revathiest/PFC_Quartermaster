@@ -2,7 +2,7 @@ const { ActionRowBuilder, StringSelectMenuBuilder, ChannelType, PermissionFlagsB
 
 async function createChannelSelectMenu(guild) {
     // Fetch the PyroFreelancerCorps role
-    const role = guild.roles.cache.find(r => r.name === "PyroFreelancerCorps");
+    const role = guild.roles.cache.find(r => r.name === "Pyro Freelancer Corps");
     
     if (!role) {
         throw new Error("Role 'PyroFreelancerCorps' not found.");

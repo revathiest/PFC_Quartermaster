@@ -14,6 +14,8 @@ const { initializeDatabase } = require('./config/database');
 const { loadConfiguration } = require('./botactions/configLoader');
 const scheduleAnnouncements = require('./botactions/announcementScheduler');
 
+const botType = process.env.BOT_TYPE;
+
 // Load configuration before initializing the client
 const initializeBot = async () => {
     const config = await loadConfiguration();

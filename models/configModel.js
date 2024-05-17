@@ -1,17 +1,25 @@
-// models/configModel.js
 const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/database');  // Ensure sequelize is imported correctly
+const { sequelize } = require('../config/database');
 
 const Config = sequelize.define('Config', {
   key: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true,
   },
   value: {
     type: DataTypes.TEXT,
     allowNull: false,
   },
+  botType: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  }
+}, {
+  uniqueKeys: {
+    unique_key: {
+      fields: ['key', 'botType']
+    }
+  }
 });
 
 module.exports = Config;

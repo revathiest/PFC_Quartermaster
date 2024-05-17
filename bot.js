@@ -28,7 +28,7 @@ client.on('interactionCreate', async interaction => {
 client.on("messageCreate", message => handleMessageCreate(message, client));
 
 client.on('error', (error) => {
-    client.channels.cache.get(client.chanBotLog).send('Error: (client)' + error.stack)
+    client.channels.cache.get(client.chanBotLog).send('Error: (client)' + error.stack);
 });
 
 client.on("userUpdate", function (oldMember, newMember) {
@@ -80,7 +80,7 @@ client.once('ready', async () => {
             setInterval(() => checkEvents(client), 60000);
             console.log('Check Events interval successfully started');
             setInterval(() => deleteMessages(client), 86400000);
-            console.log('Delete Messages interval successfully started')
+            console.log('Delete Messages interval successfully started');
         } catch (error) {
             console.error(`Error setting up interval: ${error}`);
         }

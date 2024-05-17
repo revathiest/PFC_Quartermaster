@@ -1,5 +1,6 @@
-const { Sequelize, DataTypes } = require('sequelize');
-const sequelize = require('../config/database').sequelize;
+// models/configModel.js
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');  // Ensure sequelize is imported correctly
 
 const Config = sequelize.define('Config', {
   key: {

@@ -24,10 +24,10 @@ const checkScheduledAnnouncements = async (client) => {
                     const embed = new EmbedBuilder()
                         .setTitle(embedData.title)
                         .setDescription(embedData.description)
-                        .setColor(embedData.color)
-                        .setAuthor({ name: embedData.author })
+                        .setColor('#0099ff')
+                        .setAuthor({ name: 'Pyro Freelancer Corps' })
                         .setTimestamp()
-                        .setFooter({ text: embedData.footer, iconURL: 'https://i.imgur.com/5sZV5QN.png' });
+                        .setFooter({ text: 'Official PFC Communication', iconURL: 'https://i.imgur.com/5sZV5QN.png' });
                     console.log(`Sending announcement to channel ${announcement.channelId}: ${JSON.stringify(embedData)}`);
                     await channel.send({ embeds: [embed] });
                     await deleteScheduledAnnouncement(announcement.id);

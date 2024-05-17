@@ -1,4 +1,3 @@
-const { InteractionType } = require('discord.js');
 const { saveAnnouncementToDatabase } = require('./scheduleHandler');
 const moment = require('moment');
 
@@ -80,9 +79,7 @@ async function handleModalSubmit(interaction, client) {
         const channelId = interaction.fields.getTextInputValue('channel');
         const title = interaction.fields.getTextInputValue('title');
         const description = interaction.fields.getTextInputValue('description');
-        const color = interaction.fields.getTextInputValue('color') || '#0099ff';
         const author = interaction.fields.getTextInputValue('author') || 'Official PFC Communication';
-        const footer = interaction.fields.getTextInputValue('footer') || 'Official PFC Communication';
         const time = interaction.fields.getTextInputValue('time');
 
         // Validate the time format
@@ -92,7 +89,7 @@ async function handleModalSubmit(interaction, client) {
         }
 
         // Save the announcement to the database
-        const embedData = { title, description, color, author, footer };
+        const embedData = { title, description, author };
         await saveAnnouncementToDatabase(channelId, embedData, time);
 
         await interaction.reply({ content: `Announcement scheduled for ${time} in channel ${channelId}`, ephemeral: true });

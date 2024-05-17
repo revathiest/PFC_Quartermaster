@@ -30,27 +30,6 @@ module.exports = {
             .setPlaceholder('Enter the embed description')
             .setRequired(true);
 
-        const colorInput = new TextInputBuilder()
-            .setCustomId('color')
-            .setLabel('Embed Color (Hex)')
-            .setStyle(TextInputStyle.Short)
-            .setPlaceholder('#0099ff')
-            .setRequired(false);
-
-        const authorInput = new TextInputBuilder()
-            .setCustomId('author')
-            .setLabel('Author')
-            .setStyle(TextInputStyle.Short)
-            .setPlaceholder('Author name')
-            .setRequired(false);
-
-        const footerInput = new TextInputBuilder()
-            .setCustomId('footer')
-            .setLabel('Footer')
-            .setStyle(TextInputStyle.Short)
-            .setPlaceholder('Footer text')
-            .setRequired(false);
-
         const timeInput = new TextInputBuilder()
             .setCustomId('time')
             .setLabel('Schedule Time (YYYY-MM-DD HH:mm:ss)')
@@ -62,9 +41,6 @@ module.exports = {
             new ActionRowBuilder().addComponents(channelInput),
             new ActionRowBuilder().addComponents(titleInput),
             new ActionRowBuilder().addComponents(descriptionInput),
-            new ActionRowBuilder().addComponents(colorInput),
-            new ActionRowBuilder().addComponents(authorInput),
-            new ActionRowBuilder().addComponents(footerInput),
             new ActionRowBuilder().addComponents(timeInput)
         );
 

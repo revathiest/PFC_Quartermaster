@@ -9,13 +9,6 @@ module.exports = {
             .setCustomId('scheduleModal')
             .setTitle('Schedule Announcement');
 
-        const channelInput = new TextInputBuilder()
-            .setCustomId('channel')
-            .setLabel('Channel ID')
-            .setStyle(TextInputStyle.Short)
-            .setPlaceholder('Enter the channel ID')
-            .setRequired(true);
-
         const titleInput = new TextInputBuilder()
             .setCustomId('title')
             .setLabel('Embed Title')
@@ -38,7 +31,6 @@ module.exports = {
             .setRequired(true);
 
         modal.addComponents(
-            new ActionRowBuilder().addComponents(channelInput),
             new ActionRowBuilder().addComponents(titleInput),
             new ActionRowBuilder().addComponents(descriptionInput),
             new ActionRowBuilder().addComponents(timeInput)

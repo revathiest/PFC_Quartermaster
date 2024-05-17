@@ -79,7 +79,7 @@ async function handleModalSubmit(interaction, client) {
         const channelId = interaction.fields.getTextInputValue('channel');
         const title = interaction.fields.getTextInputValue('title');
         const description = interaction.fields.getTextInputValue('description');
-        const author = interaction.fields.getTextInputValue('author') || 'Official PFC Communication';
+        const author = 'PFC Quartermaster';
         const time = interaction.fields.getTextInputValue('time');
 
         // Validate the time format

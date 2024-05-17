@@ -1,5 +1,8 @@
 const { saveAnnouncementToDatabase } = require('./scheduleHandler');
+const { createChannelSelectMenu } = require('./channelSelector');
 const moment = require('moment');
+
+let pendingChannelSelection = {};
 
 module.exports = {
     handleInteraction: async function(interaction, client) {
@@ -63,21 +66,44 @@ async function handleButton(interaction, client) {
 }
 
 async function handleSelectMenu(interaction, client) {
-    const command = client.commands.get(interaction.message.interaction.commandName);
-    const message = `${interaction.user.username} selected option **${interaction.values[0]}** for command **${interaction.message.interaction.commandName}**`;
-    client.channels.cache.get(client.chanBotLog).send(message);
+    if (interaction.customId === 'selectChannel') {
+        const selectedChannelId = interaction.values[0];
+        const selectedChannel = interaction.guild.channels.cache.get(selectedChannelId);
+        const message = `${interaction.user.username} selected channel **${selectedChannel.name}**`;
+        client.channels.cache.get(client.chanBotLog).send(message);
 
-    if (command && command.option) {
-        await command.option(interaction, client);
+        // Retrieve the pending data for this interaction
+        const pendingData = pendingChannelSelection[interaction.user.id];
+        if (pendingData) {
+            const { title, description, author, time } = pendingData;
+
+            // Save the announcement to the database
+            const embedData = { title, description, author };
+            await saveAnnouncementToDatabase(selectedChannelId, embedData, time);
+
+            await interaction.update({ content: `Announcement scheduled for ${time} in channel ${selectedChannel.name}`, components: [] });
+
+            // Clean up the pending data
+            delete pendingChannelSelection[interaction.user.id];
+        } else {
+            await interaction.update({ content: `Channel selected: ${selectedChannel.name}`, components: [] });
+        }
     } else {
-        console.error('Select menu handler not found.');
+        const command = client.commands.get(interaction.message.interaction.commandName);
+        const message = `${interaction.user.username} selected option **${interaction.values[0]}** for command **${interaction.message.interaction.commandName}**`;
+        client.channels.cache.get(client.chanBotLog).send(message);
+
+        if (command && command.option) {
+            await command.option(interaction, client);
+        } else {
+            console.error('Select menu handler not found.');
+        }
     }
 }
 
 async function handleModalSubmit(interaction, client) {
     if (interaction.customId === 'scheduleModal') {
-        const channelId = interaction.fields.getTextInputValue('channel');
-        const title = interaction.fields.getTextInputValue('title');
+d        const title = interaction.fields.getTextInputValue('title');
         const description = interaction.fields.getTextInputValue('description');
         const author = 'PFC Quartermaster';
         const time = interaction.fields.getTextInputValue('time');
@@ -88,10 +114,11 @@ async function handleModalSubmit(interaction, client) {
             return;
         }
 
-        // Save the announcement to the database
-        const embedData = { title, description, author };
-        await saveAnnouncementToDatabase(channelId, embedData, time);
+        // Store the pending data to use after channel selection
+        pendingChannelSelection[interaction.user.id] = { title, description, author, time };
 
-        await interaction.reply({ content: `Announcement scheduled for ${time} in channel ${channelId}`, ephemeral: true });
+        // Create and send the select menu for channel selection
+        const selectMenu = await createChannelSelectMenu(interaction.guild);
+        await interaction.reply({ content: 'Please select a channel:', components: [selectMenu], ephemeral: true });
     }
 }

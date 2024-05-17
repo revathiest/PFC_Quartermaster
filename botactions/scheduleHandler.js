@@ -1,4 +1,4 @@
-const { ScheduledAnnouncement } = require('../models/scheduledAnnouncementModel');
+const ScheduledAnnouncement = require('../models/scheduledAnnouncementModel');
 
 const saveAnnouncementToDatabase = async (channelId, message, time) => {
     try {
@@ -14,6 +14,7 @@ const getScheduledAnnouncements = async () => {
         return await ScheduledAnnouncement.findAll();
     } catch (error) {
         console.error('Error retrieving scheduled announcements from database:', error);
+        return [];  // Return an empty array in case of error
     }
 };
 

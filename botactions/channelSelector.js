@@ -1,9 +1,11 @@
-const { MessageActionRow, MessageSelectMenu } = require('discord.js');
+const { MessageActionRow, MessageSelectMenu, ChannelType } = require('discord.js');
 
 async function createChannelSelectMenu(guild) {
     const channels = await guild.channels.fetch();
     const options = channels
-        .filter(channel => channel.isText())
+        .filter(channel => 
+            channel.type === ChannelType.GuildText || 
+            channel.type === ChannelType.GuildNews)
         .map(channel => ({
             label: channel.name,
             value: channel.id,

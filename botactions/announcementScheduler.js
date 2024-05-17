@@ -15,11 +15,11 @@ const checkScheduledAnnouncements = async (client) => {
     for (const announcement of announcements) {
         const announcementTime = moment(announcement.time, 'YYYY-MM-DD HH:mm:ss');
         console.log(`Announcement time: ${announcementTime.format('YYYY-MM-DD HH:mm:ss')}, Now: ${now.format('YYYY-MM-DD HH:mm:ss')}`);
-        
+
         if (announcementTime.isSameOrBefore(now)) {
             try {
                 const channel = await client.channels.fetch(announcement.channelId);
-                if (channel) {
+                if (channel && channel.guild.id === announcement.guildId) {
                     const embedData = JSON.parse(announcement.embedData);
                     const embed = new EmbedBuilder()
                         .setTitle(embedData.title)
@@ -32,7 +32,7 @@ const checkScheduledAnnouncements = async (client) => {
                     await channel.send({ embeds: [embed] });
                     await deleteScheduledAnnouncement(announcement.id);
                 } else {
-                    console.error(`Channel with ID ${announcement.channelId} not found`);
+                    console.error(`Channel with ID ${announcement.channelId} not found or guild ID mismatch`);
                 }
             } catch (error) {
                 console.error('Error sending scheduled announcement:', error);

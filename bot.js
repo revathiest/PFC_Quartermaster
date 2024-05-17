@@ -10,15 +10,18 @@ const { checkEvents } = require('./botactions/eventReminder');
 const { handleRoleAssignment } = require('./botactions/autoBanModule');
 const { registerCommands } = require('./botactions/commandRegistration');
 const { getInactiveUsersWithSingleRole } = require('./botactions/inactiveUsersModule');
-const { initializeDatabase } = require('./config/database');
+const { sequelize, initializeDatabase } = require('./config/database');
 const { getConfigFromDatabase } = require('./botactions/databaseHandler');
 
 const client = initClient();
 
 // Function to load config from file (fallback)
 const loadConfigFromFile = () => {
-  const rawData = fs.readFileSync('./config.json');
-  return JSON.parse(rawData);
+    console.log('Loading configuration from file...');
+    const rawData = fs.readFileSync('./config.json');
+    const configFile = JSON.parse(rawData);
+    console.log('Configuration loaded from file:', configFile);
+    return configFile;
 };
 
 client.on('interactionCreate', async interaction => {
@@ -27,12 +30,20 @@ client.on('interactionCreate', async interaction => {
 
 client.on("messageCreate", message => handleMessageCreate(message, client));
 
+//***********************************************************/
+//Client Setup
+//***********************************************************/
+
 client.on('error', (error) => {
-    client.channels.cache.get(client.chanBotLog).send('Error: (client)' + error.stack);
+    const logChannel = client.channels.cache.get(client.chanBotLog);
+    if (logChannel) {
+        logChannel.send('Error: (client)' + error.stack);
+    }
+    console.error('Error event:', error);
 });
 
 client.on("userUpdate", function (oldMember, newMember) {
-    console.log(`a guild member's presence changes`);
+    console.log(`A guild member's presence changes`);
 });
 
 client.on("guildMemberUpdate", async (oldMember, newMember) => {
@@ -54,12 +65,13 @@ client.once('ready', async () => {
         // Load configuration from database
         let config;
         try {
+            console.log('Attempting to load configuration from database...');
             config = await getConfigFromDatabase();
             if (Object.keys(config).length === 0) {
-                console.log('No configuration found in database, loading from file.');
+                console.log('No configuration found in database, loading from file...');
                 config = loadConfigFromFile();
             } else {
-                console.log('Configuration loaded from database.');
+                console.log('Configuration loaded from database:', config);
             }
         } catch (error) {
             console.error('Error loading configuration from database, falling back to file:', error);
@@ -91,4 +103,10 @@ client.once('ready', async () => {
 });
 
 // Login to Discord with your client's token
-client.login(client.config.token || token);
+try {
+    const token = client.config.token || loadConfigFromFile().token;
+    console.log('Attempting to login with token:', token);
+    client.login(token);
+} catch (error) {
+    console.error('Failed to login:', error);
+}

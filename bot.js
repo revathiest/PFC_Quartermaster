@@ -1,6 +1,6 @@
 // Require the necessary discord.js classes
 const { Collection } = require('discord.js');
-const token = require('./config.json')
+const { token } = require('./config.json')
 const fs = require('fs'); // imports the file io library
 const { initClient } = require('./botactions/initClient');
 const interactionHandler = require('./botactions/interactionEvents');

@@ -19,13 +19,13 @@ module.exports = {
                 .setDescription('The description of the embed')
                 .setRequired(true))
         .addStringOption(option => 
-            option.setName('color')
-                .setDescription('The color of the embed (in hex, e.g., #00FF00)')
-                .setRequired(false))
-        .addStringOption(option => 
             option.setName('time')
                 .setDescription('The time to send the message (YYYY-MM-DD HH:mm:ss)')
-                .setRequired(true)),
+                .setRequired(true))
+        .addStringOption(option => 
+            option.setName('color')
+                .setDescription('The color of the embed (in hex, e.g., #00FF00)')
+                .setRequired(false)),
     async execute(interaction) {
         const channel = interaction.options.getChannel('channel');
         const title = interaction.options.getString('title');

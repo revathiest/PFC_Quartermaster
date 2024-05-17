@@ -10,7 +10,7 @@ const { checkEvents } = require('./botactions/eventReminder');
 const { handleRoleAssignment } = require('./botactions/autoBanModule');
 const { registerCommands } = require('./botactions/commandRegistration');
 const { getInactiveUsersWithSingleRole } = require('./botactions/inactiveUsersModule');
-const { sequelize } = require('./config/database');
+const { initializeDatabase } = require('./config/database');
 const { getConfigFromDatabase } = require('./botactions/databaseHandler');
 
 const client = initClient();
@@ -48,7 +48,7 @@ client.once('ready', async () => {
         await getInactiveUsersWithSingleRole(client);
         console.log('Bot setup complete and ready to go!');
 
-        await sequelize.sync();
+        await initializeDatabase();  // Initialize and sync database
         console.log('Database synced');
 
         // Load configuration from database

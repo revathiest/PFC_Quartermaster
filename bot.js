@@ -19,7 +19,7 @@ const botType = process.env.BOT_TYPE;
 
 // Load configuration before initializing the client
 const initializeBot = async () => {
-    const config = await loadConfiguration();
+    const config = await loadConfiguration(botType);
 
     // Extract the token from the loaded config
     const token = config.token || fileToken;

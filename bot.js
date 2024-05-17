@@ -10,8 +10,9 @@ const { checkEvents } = require('./botactions/eventReminder');
 const { handleRoleAssignment } = require('./botactions/autoBanModule');
 const { registerCommands } = require('./botactions/commandRegistration');
 const { getInactiveUsersWithSingleRole } = require('./botactions/inactiveUsersModule');
-const { sequelize, initializeDatabase } = require('./config/database');
+const { initializeDatabase } = require('./config/database');
 const { getConfigFromDatabase, saveConfigToDatabase } = require('./botactions/databaseHandler');
+const scheduleAnnouncements = require('./botactions/announcementScheduler');
 
 // Function to load config from file (fallback)
 const loadConfigFromFile = () => {
@@ -93,6 +94,7 @@ const initializeBot = async () => {
             await registerChannels(client);  // Register channels
             await registerCommands(client);
             await getInactiveUsersWithSingleRole(client);
+            scheduleAnnouncements(client);
             console.log('Bot setup complete and ready to go!');
 
             await initializeDatabase();  // Initialize and sync database

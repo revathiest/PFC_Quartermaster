@@ -18,7 +18,7 @@ const loadConfigFromFile = () => {
     console.log('Loading configuration from file...');
     const rawData = fs.readFileSync('./config.json');
     const configFile = JSON.parse(rawData);
-    console.log('Configuration loaded from file:', configFile);
+    console.log('Configuration successfully loaded from file:');
     return configFile;
 };
 
@@ -33,7 +33,7 @@ const loadConfiguration = async () => {
             config = loadConfigFromFile();
             await saveConfigToDatabase(config);
         } else {
-            console.log('Configuration loaded from database:', config);
+            console.log('Configuration successfully loaded from database:');
         }
     } catch (error) {
         console.error('Error loading configuration from database, falling back to file:', error);
@@ -121,7 +121,6 @@ const initializeBot = async () => {
 
     // Login to Discord with your client's token
     try {
-        console.log('Attempting to login with token:', token);
         await client.login(token);
     } catch (error) {
         console.error('Failed to login:', error);

@@ -24,7 +24,10 @@ const checkScheduledAnnouncements = async (client) => {
                     const embed = new EmbedBuilder()
                         .setTitle(embedData.title)
                         .setDescription(embedData.description)
-                        .setColor(embedData.color);
+                        .setColor(embedData.color)
+                        .setAuthor({ name: embedData.author })
+                        .setTimestamp()
+                        .setFooter({ text: embedData.footer, iconURL: 'https://i.imgur.com/5sZV5QN.png' });
                     console.log(`Sending announcement to channel ${announcement.channelId}: ${JSON.stringify(embedData)}`);
                     await channel.send({ embeds: [embed] });
                     await deleteScheduledAnnouncement(announcement.id);

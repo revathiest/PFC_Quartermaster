@@ -42,84 +42,90 @@ const loadConfiguration = async () => {
     return config;
 };
 
-const config = await loadConfiguration();
+// Load configuration before initializing the client
+const initializeBot = async () => {
+    const config = await loadConfiguration();
 
-// Extract the token from the loaded config
-const token = config.token || fileToken;
-if (!token) {
-    console.error('No token found in configuration.');
-    return;
-}
-
-// Initialize the client with the loaded config
-const client = initClient();
-
-// Update client configuration with loaded config
-client.config = config;
-
-client.on('interactionCreate', async interaction => {
-    await interactionHandler.handleInteraction(interaction, client);
-});
-
-client.on("messageCreate", message => handleMessageCreate(message, client));
-
-//***********************************************************/
-//Client Setup
-//***********************************************************/
-
-client.on('error', (error) => {
-    const logChannel = client.channels.cache.get(client.chanBotLog);
-    if (logChannel) {
-        logChannel.send('Error: (client)' + error.stack);
+    // Extract the token from the loaded config
+    const token = config.token || fileToken;
+    if (!token) {
+        console.error('No token found in configuration.');
+        return;
     }
-    console.error('Error event:', error);
-});
 
-client.on("userUpdate", function (oldMember, newMember) {
-    console.log(`A guild member's presence changes`);
-});
+    // Initialize the client with the loaded config
+    const client = initClient();
 
-client.on("guildMemberUpdate", async (oldMember, newMember) => {
-    await handleRoleAssignment(oldMember, newMember, client);
-});
+    // Update client configuration with loaded config
+    client.config = config;
 
-// When the client is ready, run this code (only once)
-client.once('ready', async () => {
-    console.log('Discord client is ready!');
-    try {
-        await registerChannels(client);  // Register channels
-        await registerCommands(client);
-        await getInactiveUsersWithSingleRole(client);
-        console.log('Bot setup complete and ready to go!');
+    client.on('interactionCreate', async interaction => {
+        await interactionHandler.handleInteraction(interaction, client);
+    });
 
-        await initializeDatabase();  // Initialize and sync database
-        console.log('Database synced');
+    client.on("messageCreate", message => handleMessageCreate(message, client));
 
+    //***********************************************************/
+    //Client Setup
+    //***********************************************************/
+
+    client.on('error', (error) => {
         const logChannel = client.channels.cache.get(client.chanBotLog);
         if (logChannel) {
-            logChannel.send('Startup Complete!');
-        } else {
-            console.error('Log channel not found.');
+            logChannel.send('Error: (client)' + error.stack);
         }
+        console.error('Error event:', error);
+    });
 
+    client.on("userUpdate", function (oldMember, newMember) {
+        console.log(`A guild member's presence changes`);
+    });
+
+    client.on("guildMemberUpdate", async (oldMember, newMember) => {
+        await handleRoleAssignment(oldMember, newMember, client);
+    });
+
+    // When the client is ready, run this code (only once)
+    client.once('ready', async () => {
+        console.log('Discord client is ready!');
         try {
-            setInterval(() => checkEvents(client), 60000);
-            console.log('Check Events interval successfully started');
-            setInterval(() => deleteMessages(client), 86400000);
-            console.log('Delete Messages interval successfully started');
+            await registerChannels(client);  // Register channels
+            await registerCommands(client);
+            await getInactiveUsersWithSingleRole(client);
+            console.log('Bot setup complete and ready to go!');
+
+            await initializeDatabase();  // Initialize and sync database
+            console.log('Database synced');
+
+            const logChannel = client.channels.cache.get(client.chanBotLog);
+            if (logChannel) {
+                logChannel.send('Startup Complete!');
+            } else {
+                console.error('Log channel not found.');
+            }
+
+            try {
+                setInterval(() => checkEvents(client), 60000);
+                console.log('Check Events interval successfully started');
+                setInterval(() => deleteMessages(client), 86400000);
+                console.log('Delete Messages interval successfully started');
+            } catch (error) {
+                console.error(`Error setting up interval: ${error}`);
+            }
+
         } catch (error) {
-            console.error(`Error setting up interval: ${error}`);
+            console.error('Error during channel registration:', error);
         }
+    });
 
+    // Login to Discord with your client's token
+    try {
+        console.log('Attempting to login with token:', token);
+        await client.login(token);
     } catch (error) {
-        console.error('Error during channel registration:', error);
+        console.error('Failed to login:', error);
     }
-});
-
-// Login to Discord with your client's token
-try {
-    console.log('Attempting to login with token:', token);
-    await client.login(token);
-} catch (error) {
-    console.error('Failed to login:', error);
 };
+
+// Start the bot
+initializeBot();

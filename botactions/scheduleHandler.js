@@ -1,9 +1,9 @@
 const ScheduledAnnouncement = require('../models/scheduledAnnouncementModel');
 
-const saveAnnouncementToDatabase = async (channelId, message, time) => {
+const saveAnnouncementToDatabase = async (channelId, embedData, time) => {
     try {
-        await ScheduledAnnouncement.create({ channelId, message, time });
-        console.log('Announcement saved to database.');
+        await ScheduledAnnouncement.create({ channelId, embedData: JSON.stringify(embedData), time });
+        console.log(`Announcement saved to database: channelId=${channelId}, embedData=${JSON.stringify(embedData)}, time=${time}`);
     } catch (error) {
         console.error('Error saving announcement to database:', error);
     }
@@ -11,20 +11,19 @@ const saveAnnouncementToDatabase = async (channelId, message, time) => {
 
 const getScheduledAnnouncements = async () => {
     try {
-        console.log('Attempting to retrieve announcements from database');
         const announcements = await ScheduledAnnouncement.findAll();
         console.log(`Retrieved ${announcements.length} scheduled announcements from database`);
-        return announcements
+        return announcements;
     } catch (error) {
         console.error('Error retrieving scheduled announcements from database:', error);
-        return [];  // Return an empty array in case of error
+        return [];
     }
 };
 
 const deleteScheduledAnnouncement = async (id) => {
     try {
         await ScheduledAnnouncement.destroy({ where: { id } });
-        console.log('Announcement deleted from database.');
+        console.log(`Announcement with id=${id} deleted from database.`);
     } catch (error) {
         console.error('Error deleting scheduled announcement from database:', error);
     }

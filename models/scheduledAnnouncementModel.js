@@ -6,7 +6,7 @@ const ScheduledAnnouncement = sequelize.define('ScheduledAnnouncement', {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    message: {
+    embedData: {
         type: DataTypes.TEXT,
         allowNull: false,
     },

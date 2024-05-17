@@ -1,4 +1,5 @@
 const { getScheduledAnnouncements, deleteScheduledAnnouncement } = require('./scheduleHandler');
+const { EmbedBuilder } = require('discord.js');
 const moment = require('moment');
 
 const checkScheduledAnnouncements = async (client) => {
@@ -19,8 +20,13 @@ const checkScheduledAnnouncements = async (client) => {
             try {
                 const channel = await client.channels.fetch(announcement.channelId);
                 if (channel) {
-                    console.log(`Sending announcement to channel ${announcement.channelId}: ${announcement.message}`);
-                    await channel.send(announcement.message);
+                    const embedData = JSON.parse(announcement.embedData);
+                    const embed = new EmbedBuilder()
+                        .setTitle(embedData.title)
+                        .setDescription(embedData.description)
+                        .setColor(embedData.color);
+                    console.log(`Sending announcement to channel ${announcement.channelId}: ${JSON.stringify(embedData)}`);
+                    await channel.send({ embeds: [embed] });
                     await deleteScheduledAnnouncement(announcement.id);
                 } else {
                     console.error(`Channel with ID ${announcement.channelId} not found`);

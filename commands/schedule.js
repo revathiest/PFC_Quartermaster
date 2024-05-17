@@ -56,4 +56,3 @@ module.exports = {
         await interaction.reply(`Announcement scheduled for ${time} in channel ${channel.name}`);
     },
 };
-v

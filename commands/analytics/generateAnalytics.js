@@ -41,20 +41,8 @@ async function generateReportByChannel() {
     return results.map(result => result.get());
 }
 
-async function generateReportByRole() {
-    const results = await sequelize.query(`
-        SELECT role_id, COUNT(*) as event_count
-        FROM user_roles 
-        JOIN usage_logs ON user_roles.user_id = usage_logs.user_id
-        GROUP BY role_id
-        ORDER BY event_count DESC
-    `);
-    return results[0];
-}
-
 module.exports = {
     generateUsageReport,
     generateVoiceActivityReport,
-    generateReportByChannel,
-    generateReportByRole
+    generateReportByChannel
 };

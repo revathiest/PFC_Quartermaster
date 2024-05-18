@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder } = require('discord.js');
-const { generateUsageReport, generateVoiceActivityReport, generateReportByChannel, generateReportByRole } = require('./analytics/generateAnalytics');
+const { generateUsageReport, generateVoiceActivityReport, generateReportByChannel } = require('./analytics/generateAnalytics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -13,8 +13,7 @@ module.exports = {
                 .addChoices(
                     { name: 'usage', value: 'usage' },
                     { name: 'voice', value: 'voice' },
-                    { name: 'channel', value: 'channel' },
-                    { name: 'role', value: 'role' }
+                    { name: 'channel', value: 'channel' }
                 )),
     async execute(interaction, client) {
         const reportType = interaction.options.getString('type');
@@ -34,9 +33,6 @@ module.exports = {
                     break;
                 case 'channel':
                     report = await generateReportByChannel();
-                    break;
-                case 'role':
-                    report = await generateReportByRole();
                     break;
                 default:
                     return interaction.editReply('Invalid report type.');
@@ -66,10 +62,6 @@ module.exports = {
                             const channel = await client.channels.fetch(value).catch(() => null);
                             value = channel ? channel.name : 'Unknown Channel';
                             key = 'Channel';
-                        } else if (key === 'role_id') {
-                            const role = await interaction.guild.roles.fetch(value).catch(() => null);
-                            value = role ? role.name : 'Unknown Role';
-                            key = 'Role';
                         } else if (key === 'server_id') {
                             const server = await client.guilds.fetch(value).catch(() => null);
                             value = server ? server.name : 'Unknown Server';

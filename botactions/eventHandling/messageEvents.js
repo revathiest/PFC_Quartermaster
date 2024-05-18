@@ -1,10 +1,18 @@
+const { usageLog } = require('../../models');
 const filter = require('../../messages.json'); // Assumes messages.json contains both words and regex patterns
 
 module.exports = {
-    handleMessageCreate: function(message, client) {
+    handleMessageCreate: async function(message, client) {
         if (!message.guild || message.author.bot) {
             return;
         }
+
+        // Log the message event to the database
+        await usageLog.create({
+            user_id: message.author.id,
+            event_type: 'message_create',
+            event_data: JSON.stringify({ content: message.content, channel_id: message.channel.id }),
+        });
 
         // Process the message content
         const content = message.content;

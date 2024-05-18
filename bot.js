@@ -40,6 +40,8 @@ const initializeBot = async () => {
 
     client.on("messageCreate", message => handleMessageCreate(message, client));
 
+    client.on("voiceStateUpdate", (oldState, newState) => handleVoiceStateUpdate(oldState, newState));
+
     //***********************************************************/
     //Client Setup
     //***********************************************************/

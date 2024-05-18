@@ -1,13 +1,13 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { listScheduledAnnouncements } = require('../botactions/announcementScheduler');
+const { getScheduledAnnouncements } = require('../botactions/scheduleHandler');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('listannouncements')
         .setDescription('List all scheduled announcements'),
     async execute(interaction) {
-        const announcements = await listScheduledAnnouncements();
-        if (announcements.length === 0) {
+        const announcements = await getScheduledAnnouncements();
+        if (!announcements.length) {
             await interaction.reply('There are no scheduled announcements.');
             return;
         }

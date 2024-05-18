@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { deleteScheduledAnnouncement } = require('../botactions/announcementScheduler');
+const { deleteScheduledAnnouncement } = require('../botactions/scheduleHandler');
 
 module.exports = {
     data: new SlashCommandBuilder()

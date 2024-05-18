@@ -14,10 +14,16 @@ module.exports = {
                     { name: 'usage', value: 'usage' },
                     { name: 'voice', value: 'voice' },
                     { name: 'channel', value: 'channel' }
-                )),
+                ))
+        .addChannelOption(option =>
+            option.setName('channel')
+                .setDescription('Channel for channel report')
+                .setRequired(false)
+        ),
     async execute(interaction, client) {
         const reportType = interaction.options.getString('type');
         const serverId = interaction.guild.id;
+        const channelOption = interaction.options.getChannel('channel');
         let report;
         let title = `Report for ${reportType.charAt(0).toUpperCase() + reportType.slice(1)}`;
         let description;
@@ -35,7 +41,6 @@ module.exports = {
                     description = "This report shows the voice activity in each channel over the past 7 days, including the peak number of users and the total time logged.";
                     break;
                 case 'channel':
-                    const channelOption = interaction.options.getChannel('channel');
                     if (!channelOption) {
                         return interaction.editReply('You need to specify a channel for the channel report.');
                     }

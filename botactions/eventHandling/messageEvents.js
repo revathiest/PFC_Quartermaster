@@ -7,12 +7,23 @@ module.exports = {
             return;
         }
 
-        // Log the message event to the database
-        await usageLog.create({
-            user_id: message.author.id,
-            event_type: 'message_create',
-            event_data: JSON.stringify({ content: message.content, channel_id: message.channel.id }),
-        });
+        // Debug: Check if usageLog is defined
+        if (!usageLog) {
+            console.error('Error: usageLog is not defined');
+            return;
+        }
+
+        try {
+            // Log the message event to the database
+            await usageLog.create({
+                user_id: message.author.id,
+                event_type: 'message_create',
+                event_data: JSON.stringify({ content: message.content, channel_id: message.channel.id }),
+            });
+            console.log('Message logged successfully');
+        } catch (error) {
+            console.error('Error logging message:', error);
+        }
 
         // Process the message content
         const content = message.content;
@@ -20,7 +31,7 @@ module.exports = {
         let allowMessage = true; // Placeholder for any additional conditions to allow message processing
 
         // Filter based on individual words
-        for (var word in filter.words) {
+        for (const word in filter.words) {
             if (filter.words.hasOwnProperty(word) && words.includes(word) && allowMessage) {
                 module.exports.performAction(message, client, filter.words[word]); // Use module.exports to reference performAction
                 return; // Stop processing after an action is performed
@@ -28,7 +39,7 @@ module.exports = {
         }
 
         // Filter based on regular expressions
-        for (var regex in filter.regex) {
+        for (const regex in filter.regex) {
             if (filter.regex.hasOwnProperty(regex)) {
                 const regexObj = new RegExp(regex, "i"); // Example assumes regex patterns are stored directly and "i" flag for case-insensitivity
                 if (regexObj.test(content) && allowMessage) {

@@ -32,10 +32,10 @@ async function generateVoiceActivityReport() {
 async function generateReportByChannel() {
     const results = await UsageLog.findAll({
         attributes: [
-            [sequelize.fn('JSON_UNQUOTE', sequelize.fn('JSON_EXTRACT', sequelize.col('event_data'), '$.channel_id')), 'channel_id'],
+            'channel_id',
             [sequelize.fn('COUNT', sequelize.col('event_type')), 'event_count']
         ],
-        group: [[sequelize.fn('JSON_UNQUOTE', sequelize.fn('JSON_EXTRACT', sequelize.col('event_data'), '$.channel_id'))]],
+        group: ['channel_id'],
         order: [[sequelize.fn('COUNT', sequelize.col('event_type')), 'DESC']],
     });
     return results.map(result => result.get());

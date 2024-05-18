@@ -1,5 +1,4 @@
-const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageEmbed } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require('@discordjs/builders');
 const { generateUsageReport, generateVoiceActivityReport, generateReportByChannel, generateReportByRole } = require('./analytics/generateAnalytics');
 
 module.exports = {
@@ -39,7 +38,7 @@ module.exports = {
                     return interaction.reply('Invalid report type.');
             }
 
-            const embed = new MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setTitle(title)
                 .setColor('#0099ff')
                 .setTimestamp();
@@ -62,7 +61,7 @@ module.exports = {
                     }
                     description += `**${key.replace('_', ' ').toUpperCase()}:** ${value}\n`;
                 }
-                embed.addField('\u200B', description, false); // Use \u200B for a blank field name to avoid clutter
+                embed.addFields({ name: '\u200B', value: description, inline: false }); // Use \u200B for a blank field name to avoid clutter
             }
 
             await interaction.reply({ embeds: [embed] });

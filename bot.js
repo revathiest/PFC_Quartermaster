@@ -66,13 +66,13 @@ const initializeBot = async () => {
     client.once('ready', async () => {
         console.log('Discord client is ready!');
         try {
+
+            await initializeDatabase();  // Initialize and sync database
             await registerChannels(client);  // Register channels
             await registerCommands(client);
             await getInactiveUsersWithSingleRole(client);
             scheduleAnnouncements(client);
             console.log('Bot setup complete and ready to go!');
-
-            await initializeDatabase();  // Initialize and sync database
             console.log('Database synced');
 
             const logChannel = client.channels.cache.get(client.chanBotLog);

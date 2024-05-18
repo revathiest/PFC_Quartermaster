@@ -39,7 +39,6 @@ async function generateReportByChannel() {
 }
 
 async function generateReportByRole() {
-    // Assuming you have a way to get user roles, this is a placeholder query
     const results = await sequelize.query(`
         SELECT role_id, COUNT(*) as event_count
         FROM user_roles 
@@ -76,6 +75,4 @@ async function main() {
     });
 }
 
-main().catch(err => {
-    console.error('Error generating reports:', err);
-});
+module.exports = main;

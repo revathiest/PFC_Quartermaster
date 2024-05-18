@@ -17,22 +17,22 @@ module.exports = {
                 )),
     async execute(interaction, client) {
         const reportType = interaction.options.getString('type');
+        const serverId = interaction.guild.id;
         let report;
         let title = `Report for ${reportType.charAt(0).toUpperCase() + reportType.slice(1)}`;
 
         try {
-            // Defer the reply to give time for generating the report
             await interaction.deferReply();
 
             switch (reportType) {
                 case 'usage':
-                    report = await generateUsageReport();
+                    report = await generateUsageReport(serverId);
                     break;
                 case 'voice':
-                    report = await generateVoiceActivityReport();
+                    report = await generateVoiceActivityReport(serverId);
                     break;
                 case 'channel':
-                    report = await generateReportByChannel();
+                    report = await generateReportByChannel(serverId);
                     break;
                 default:
                     return interaction.editReply('Invalid report type.');
@@ -42,34 +42,25 @@ module.exports = {
                 return interaction.editReply(`No data found for ${reportType} report.`);
             }
 
-            // Split the report into chunks of 10 items to avoid overwhelming the message
             const chunks = chunkArray(report, 10);
 
             for (const [index, chunk] of chunks.entries()) {
                 const embed = new EmbedBuilder()
                     .setTitle(`${title} (Page ${index + 1}/${chunks.length})`)
-                    .setColor(0x0099ff)  // Use numeric color value
+                    .setColor(0x0099ff)
                     .setTimestamp();
 
                 for (const row of chunk) {
                     let description = '';
                     for (let [key, value] of Object.entries(row)) {
-                        if (key === 'user_id') {
-                            const user = await client.users.fetch(value).catch(() => null);
-                            value = user ? user.username : 'Unknown User';
-                            key = 'User';
-                        } else if (key === 'channel_id') {
+                        if (key === 'channel_id') {
                             const channel = await client.channels.fetch(value).catch(() => null);
                             value = channel ? channel.name : 'Unknown Channel';
                             key = 'Channel';
-                        } else if (key === 'server_id') {
-                            const server = await client.guilds.fetch(value).catch(() => null);
-                            value = server ? server.name : 'Unknown Server';
-                            key = 'Server';
                         }
                         description += `**${key.replace('_', ' ').toUpperCase()}:** ${value}\n`;
                     }
-                    embed.addFields({ name: '\u200B', value: description, inline: false }); // Use \u200B for a blank field name to avoid clutter
+                    embed.addFields({ name: '\u200B', value: description, inline: false });
                 }
 
                 if (index === 0) {
@@ -88,7 +79,6 @@ module.exports = {
     },
 };
 
-// Helper function to chunk an array into smaller arrays of a specified size
 function chunkArray(array, size) {
     const chunkedArray = [];
     for (let i = 0; i < array.length; i += size) {

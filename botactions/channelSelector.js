@@ -4,7 +4,7 @@ const { ActionRowBuilder, StringSelectMenuBuilder, PermissionsBitField } = requi
 const roleNames = ['Pyro Freelancer Corps']; // Add your roles here
 
 /**
- * Fetch channels that are visible to any of the specified roles.
+ * Fetch channels that have explicit permission overwrites for the specified roles.
  * @param {Guild} guild - The guild object.
  * @returns {Collection<Snowflake, Channel>} - Collection of channels.
  */
@@ -14,13 +14,12 @@ async function fetchChannelsForRoles(guild) {
         throw new Error(`None of the roles ${roleNames.join(', ')} found`);
     }
 
-    // Fetch all channels and filter those that any of the roles can access
-    const channels = guild.channels.cache.filter(channel => {
-        return roles.some(role => {
-            const permissions = channel.permissionsFor(role);
-            return permissions && permissions.has(PermissionsBitField.Flags.ViewChannel);
-        });
-    });
+    // Fetch all channels and filter those that have the specified roles in permission overwrites
+    const channels = guild.channels.cache.filter(channel =>
+        channel.permissionOverwrites.cache.some(perm => 
+            roles.has(perm.id) && perm.allow.has(PermissionsBitField.Flags.ViewChannel)
+        )
+    );
 
     return channels;
 }

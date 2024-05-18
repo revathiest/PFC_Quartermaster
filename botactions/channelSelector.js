@@ -1,4 +1,4 @@
-const { ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
+const { ActionRowBuilder, StringSelectMenuBuilder, Permissions } = require('discord.js');
 
 // Define the roles that can see the channels
 const roleNames = ['Pyro Freelancer Corps']; // Add your roles here
@@ -16,7 +16,7 @@ async function fetchChannelsForRoles(guild) {
 
     // Fetch all channels and filter those that any of the roles can access
     const channels = guild.channels.cache.filter(channel =>
-        roles.some(role => channel.permissionsFor(role).has('VIEW_CHANNEL'))
+        roles.some(role => channel.permissionsFor(role).has(Permissions.FLAGS.VIEW_CHANNEL))
     );
 
     return channels;

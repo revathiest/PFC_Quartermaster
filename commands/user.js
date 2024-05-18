@@ -27,75 +27,86 @@ module.exports = {
 
         const fetch = require('node-fetch'); // required to call the Star Citizen API
 
-        const username = interaction.options._hoistedOptions[0].value;
+        const username = interaction.options.getString('name');
+        console.log('Username:', username); // Debug statement
 
-        var answer = await fetch(SCApiEagerUser + username).then(response => response.text());
-        var user = JSON.parse(answer);
+        const apiUrl = SCApiEagerUser + username;
+        console.log('API URL:', apiUrl); // Debug statement
 
-        if (user.data == null) {
-            interaction.reply({ content: user.message, ephemeral: true });
-            console.log('User not found:', user.message); // Debug statement
-            return;
-        }
+        try {
+            const answer = await fetch(apiUrl).then(response => response.text());
+            console.log('API response:', answer); // Debug statement
+            const user = JSON.parse(answer);
+            console.log('Parsed user data:', user); // Debug statement
 
-        if (user.data.profile != undefined) {
-            const userName = user.data.profile.display;
-            const userURL = user.data.profile.page.url;
-            const userImg = user.data.profile.image;
-            var userBio = 'This user has no biographical information';
-            if (user.data.profile.bio != null && user.data.profile.bio != '') {
-                userBio = user.data.profile.bio;
-            }
-            var userOrg = 'Organization Redacted';
-            if (user.data.organization.name != null && user.data.organization.name != '') {
-                userOrg = user.data.organization.name;
-            }
-            var userOrgRank = 'Rank Unknown';
-            if (user.data.organization.rank != null && user.data.organization.rank != '') {
-                userOrgRank = user.data.organization.rank;
-            }
-            const userOrgImg = user.data.organization.image;
-            const userOrgSID = user.data.organization.sid;
-
-            const responseEmbed = new EmbedBuilder()
-                .setColor('#0099ff')
-                .setTitle(userOrgRank + ' - ' + userName)
-                .setURL(userURL)
-                .setAuthor({ name: userOrg, iconURL: userOrgImg, url: 'https://robertsspaceindustries.com/orgs/' + userOrgSID })
-                .setThumbnail(userImg)
-                .setTimestamp()
-                .setFooter({ text: 'Official PFC Communication', iconURL: 'https://i.imgur.com/5sZV5QN.png' });
-
-            if (user.data.profile.website != undefined) {
-                userBio = userBio + '\n' + user.data.profile.website;
+            if (user.data == null) {
+                interaction.reply({ content: user.message, ephemeral: true });
+                console.log('User not found:', user.message); // Debug statement
+                return;
             }
 
-            responseEmbed.setDescription(userBio);
+            if (user.data.profile != undefined) {
+                const userName = user.data.profile.display;
+                const userURL = user.data.profile.page.url;
+                const userImg = user.data.profile.image;
+                let userBio = 'This user has no biographical information';
+                if (user.data.profile.bio != null && user.data.profile.bio != '') {
+                    userBio = user.data.profile.bio;
+                }
+                let userOrg = 'Organization Redacted';
+                if (user.data.organization.name != null && user.data.organization.name != '') {
+                    userOrg = user.data.organization.name;
+                }
+                let userOrgRank = 'Rank Unknown';
+                if (user.data.organization.rank != null && user.data.organization.rank != '') {
+                    userOrgRank = user.data.organization.rank;
+                }
+                const userOrgImg = user.data.organization.image;
+                const userOrgSID = user.data.organization.sid;
 
-            if (user.data.affiliation != null && user.data.affiliation != '') {
-                const affil = user.data.affiliation;
-                var afflist = null;
+                const responseEmbed = new EmbedBuilder()
+                    .setColor('#0099ff')
+                    .setTitle(userOrgRank + ' - ' + userName)
+                    .setURL(userURL)
+                    .setAuthor({ name: userOrg, iconURL: userOrgImg, url: 'https://robertsspaceindustries.com/orgs/' + userOrgSID })
+                    .setThumbnail(userImg)
+                    .setTimestamp()
+                    .setFooter({ text: 'Official PFC Communication', iconURL: 'https://i.imgur.com/5sZV5QN.png' });
 
-                affil.forEach(aff => {
-                    if (aff.name == null || aff.name == '') {
-                        aff.name = 'Redacted';
-                        aff.rank = 'Unknown';
-                    }
-                    if (afflist == null) {
-                        afflist = aff.name + ' - ' + aff.rank;
-                    } else {
-                        afflist = afflist + '\n' + aff.name + ' - ' + aff.rank;
-                    }
-                });
+                if (user.data.profile.website != undefined) {
+                    userBio = userBio + '\n' + user.data.profile.website;
+                }
 
-                responseEmbed.addFields({ name: 'Organization Affiliations', value: afflist });
+                responseEmbed.setDescription(userBio);
+
+                if (user.data.affiliation != null && user.data.affiliation != '') {
+                    const affil = user.data.affiliation;
+                    let afflist = null;
+
+                    affil.forEach(aff => {
+                        if (aff.name == null || aff.name == '') {
+                            aff.name = 'Redacted';
+                            aff.rank = 'Unknown';
+                        }
+                        if (afflist == null) {
+                            afflist = aff.name + ' - ' + aff.rank;
+                        } else {
+                            afflist = afflist + '\n' + aff.name + ' - ' + aff.rank;
+                        }
+                    });
+
+                    responseEmbed.addFields({ name: 'Organization Affiliations', value: afflist });
+                }
+
+                await interaction.reply({ embeds: [responseEmbed], ephemeral: true });
+                console.log('Successfully sent user info'); // Debug statement
+            } else {
+                await interaction.reply({ content: 'That user does not exist.', ephemeral: true });
+                console.log('User does not exist'); // Debug statement
             }
-
-            await interaction.reply({ embeds: [responseEmbed], ephemeral: true });
-            console.log('Successfully sent user info'); // Debug statement
-        } else {
-            await interaction.reply({ content: 'That user does not exist.', ephemeral: true });
-            console.log('User does not exist'); // Debug statement
+        } catch (error) {
+            console.error('Error executing user command:', error); // Debug statement
+            await interaction.reply({ content: 'There was an error executing the user command.', ephemeral: true });
         }
     }
 };

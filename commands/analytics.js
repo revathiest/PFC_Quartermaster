@@ -22,6 +22,9 @@ module.exports = {
         let title = `Report for ${reportType.charAt(0).toUpperCase() + reportType.slice(1)}`;
 
         try {
+            // Defer the reply to give time for generating the report
+            await interaction.deferReply();
+
             switch (reportType) {
                 case 'usage':
                     report = await generateUsageReport();
@@ -36,7 +39,7 @@ module.exports = {
                     report = await generateReportByRole();
                     break;
                 default:
-                    return interaction.reply('Invalid report type.');
+                    return interaction.editReply('Invalid report type.');
             }
 
             // Split the report into chunks of 10 items to avoid overwhelming the message
@@ -69,12 +72,15 @@ module.exports = {
                     embed.addFields({ name: '\u200B', value: description, inline: false }); // Use \u200B for a blank field name to avoid clutter
                 }
 
-                // Send each chunk as a separate message
-                await interaction.followUp({ embeds: [embed] });
+                if (index === 0) {
+                    await interaction.editReply({ embeds: [embed] });
+                } else {
+                    await interaction.followUp({ embeds: [embed] });
+                }
             }
         } catch (error) {
             console.error('Error generating report:', error);
-            await interaction.reply({
+            await interaction.editReply({
                 content: 'There was an error while generating the report. Please try again later.',
                 ephemeral: true
             });

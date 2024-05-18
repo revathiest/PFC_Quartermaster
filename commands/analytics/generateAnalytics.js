@@ -49,30 +49,9 @@ async function generateReportByRole() {
     return results[0];
 }
 
-async function main() {
-    const usageReport = await generateUsageReport();
-    console.log('Usage Report:');
-    usageReport.forEach(row => {
-        console.log(`User ID: ${row.user_id}, Event: ${row.event_type}, Count: ${row.event_count}`);
-    });
-
-    const voiceReport = await generateVoiceActivityReport();
-    console.log('Voice Activity Report:');
-    voiceReport.forEach(row => {
-        console.log(`User ID: ${row.user_id}, Total Duration in Voice (seconds): ${row.total_duration}`);
-    });
-
-    const channelReport = await generateReportByChannel();
-    console.log('Channel Activity Report:');
-    channelReport.forEach(row => {
-        console.log(`Channel ID: ${row.channel_id}, Event Count: ${row.event_count}`);
-    });
-
-    const roleReport = await generateReportByRole();
-    console.log('Role Activity Report:');
-    roleReport.forEach(row => {
-        console.log(`Role ID: ${row.role_id}, Event Count: ${row.event_count}`);
-    });
-}
-
-module.exports = main;
+module.exports = {
+    generateUsageReport,
+    generateVoiceActivityReport,
+    generateReportByChannel,
+    generateReportByRole
+};

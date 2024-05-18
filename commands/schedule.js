@@ -4,6 +4,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('schedule')
         .setDescription('Schedules an announcement as an embed'),
+    roles: ['Fleet Admiral', 'Admiral'],
     async execute(interaction) {
         const modal = new ModalBuilder()
             .setCustomId('scheduleModal')

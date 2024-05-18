@@ -28,9 +28,16 @@ async function handleCommand(interaction, client) {
     }
     client.channels.cache.get(client.chanBotLog).send(message);
 
-    if (command && command.role && !interaction.member.roles.cache.has(command.role)) {
-        await interaction.reply("You're not authorized to use that command");
-        return;
+    // Check if the command requires specific roles
+    if (command && command.roles) {
+        const hasRole = interaction.member.roles.cache.some(role => command.roles.includes(role.name));
+        if (!hasRole) {
+            await interaction.reply({
+                content: "You don't have the required role to use this command.",
+                ephemeral: true
+            });
+            return;
+        }
     }
 
     if (!command) {
@@ -52,6 +59,7 @@ async function handleCommand(interaction, client) {
         });
     }
 }
+
 
 async function handleButton(interaction, client) {
     const command = client.commands.get(interaction.message.interaction.commandName);

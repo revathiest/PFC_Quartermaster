@@ -44,6 +44,7 @@ async function generateVoiceActivityReport(serverId) {
         order: [['timestamp', 'ASC']]
     });
 
+    const currentTime = new Date();
     const channelData = {};
 
     for (const join of joins) {
@@ -65,6 +66,14 @@ async function generateVoiceActivityReport(serverId) {
             channelData[leave.channel_id].activeDuration += duration;
             channelData[leave.channel_id].users.delete(leave.user_id);
             channelData[leave.channel_id].lastTimestamp = leave.timestamp;
+        }
+    }
+
+    // Handle users still in voice chat
+    for (const channelId in channelData) {
+        if (channelData[channelId].users.size > 0) {
+            const duration = (currentTime - new Date(channelData[channelId].lastTimestamp)) / 1000;
+            channelData[channelId].activeDuration += duration;
         }
     }
 

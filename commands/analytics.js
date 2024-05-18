@@ -2,6 +2,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder } = require('discord.js');
 const { generateUsageReport, generateVoiceActivityReport, generateReportByChannel, generateReportByRole } = require('./analytics/generateAnalytics');
 
+const allowedRoles = ['Admiral', 'Fleet Admiral'];
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('analytics')
@@ -17,6 +18,12 @@ module.exports = {
                     { name: 'role', value: 'role' }
                 )),
     async execute(interaction, client) {
+        const memberRoles = interaction.member.roles.cache.map(role => role.name);
+        if (!allowedRoles.some(role => memberRoles.includes(role))) {
+            await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+            return;
+        }
+
         const reportType = interaction.options.getString('type');
         let report;
         let title = `Report for ${reportType.charAt(0).toUpperCase() + reportType.slice(1)}`;

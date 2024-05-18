@@ -31,6 +31,6 @@ const initializeDatabase = async () => {
 module.exports = {
   sequelize,
   initializeDatabase,
-  useageLog,
+  usageLog,
   voiceLog
 };

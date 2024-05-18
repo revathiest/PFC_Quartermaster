@@ -1,5 +1,7 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { botPermsReq } = require('./../config.json');
+const { EmbedBuilder } = require('discord.js');
+
 const Builder = new SlashCommandBuilder();
 
 Builder.type = 1;
@@ -10,14 +12,7 @@ Builder.setName('help')
 module.exports = {
     data: Builder,
 
-    //============================================================================
-    // 20211109 krh Initial Coding
-    // 20211112 krh Moved function to its own file
-    //============================================================================
-
     async execute(interaction, client) {
-        const { EmbedBuilder } = require('discord.js');
-
         // Get all registered commands
         const commands = client.commands;
         let helpText = '';
@@ -33,7 +28,9 @@ module.exports = {
             .setTitle('PFC Quartermaster Help')
             .setDescription(helpText);
 
+        // Send the help text as a direct message to the user
         await interaction.user.send({ embeds: [responseEmbed] });
+        // Reply to the interaction to let the user know the help text was sent
         await interaction.reply({ content: 'Check your DMs', ephemeral: true });
     }
 };

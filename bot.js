@@ -3,17 +3,17 @@ require('dotenv').config();
 const { Collection } = require('discord.js');
 const fs = require('fs'); // imports the file io library
 const { initClient } = require('./botactions/initClient');
-const interactionHandler = require('./botactions/interactionEvents');
-const { handleMessageCreate } = require('./botactions/messageEvents');
-const { registerChannels } = require('./botactions/channelRegistry');
-const { deleteMessages } = require('./botactions/messageCleanup');
-const { checkEvents } = require('./botactions/eventReminder');
-const { handleRoleAssignment } = require('./botactions/autoBanModule');
-const { registerCommands } = require('./botactions/commandRegistration');
-const { getInactiveUsersWithSingleRole } = require('./botactions/inactiveUsersModule');
+const interactionHandler = require('./botactions/eventHandling/interactionEvents');
+const { handleMessageCreate } = require('./botactions/eventHandling/messageEvents');
+const { registerChannels } = require('./botactions/channelHandling/channelRegistry');
+const { deleteMessages } = require('./botactions/channelHandling/messageCleanup');
+const { checkEvents } = require('./botactions/scheduling/eventReminder');
+const { handleRoleAssignment } = require('./botactions/userManagement/autoBanModule');
+const { registerCommands } = require('./botactions/commandHandling/commandRegistration');
+const { getInactiveUsersWithSingleRole } = require('./botactions/userMangement/inactiveUsersModule');
 const { initializeDatabase } = require('./config/database');
 const { loadConfiguration } = require('./botactions/configLoader');
-const scheduleAnnouncements = require('./botactions/announcementScheduler');
+const scheduleAnnouncements = require('./botactions/scheduling/announcementScheduler');
 
 const botType = process.env.BOT_TYPE;
 

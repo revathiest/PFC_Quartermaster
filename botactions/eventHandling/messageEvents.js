@@ -1,4 +1,4 @@
-const filter = require('../messages.json'); // Assumes messages.json contains both words and regex patterns
+const filter = require('../../messages.json'); // Assumes messages.json contains both words and regex patterns
 
 module.exports = {
     handleMessageCreate: function(message, client) {

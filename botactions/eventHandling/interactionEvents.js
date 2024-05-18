@@ -1,4 +1,4 @@
-const { saveAnnouncementToDatabase } = require('./scheduleHandler');
+const { saveAnnouncementToDatabase } = require('../scheduleHandler');
 const { createChannelSelectMenu } = require('./channelSelector');
 const moment = require('moment');
 

@@ -42,6 +42,10 @@ module.exports = {
                     return interaction.editReply('Invalid report type.');
             }
 
+            if (report.length === 0) {
+                return interaction.editReply(`No data found for ${reportType} report.`);
+            }
+
             // Split the report into chunks of 10 items to avoid overwhelming the message
             const chunks = chunkArray(report, 10);
 

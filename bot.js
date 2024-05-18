@@ -5,6 +5,7 @@ const fs = require('fs'); // imports the file io library
 const { initClient } = require('./botactions/initClient');
 const interactionHandler = require('./botactions/eventHandling/interactionEvents');
 const { handleMessageCreate } = require('./botactions/eventHandling/messageEvents');
+const { handleVoiceStateUpdate } = require('./botactions/eventHandling/voiceEvents')
 const { registerChannels } = require('./botactions/channelManagement/channelRegistry');
 const { deleteMessages } = require('./botactions/channelManagement/messageCleanup');
 const { checkEvents } = require('./botactions/scheduling/eventReminder');

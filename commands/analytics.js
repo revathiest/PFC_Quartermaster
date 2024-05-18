@@ -55,14 +55,29 @@ module.exports = {
                     .setDescription(description)
                     .setTimestamp();
 
-                for (const row of chunk) {
-                    const channel = await client.channels.fetch(row.channel_id).catch(() => null);
-                    const channelName = channel ? channel.name : 'Unknown Channel';
-                    const fieldValue = Object.entries(row)
-                        .filter(([key]) => key !== 'channel_id')
-                        .map(([key, value]) => `**${key.replace('_', ' ').toUpperCase()}:** ${value}`)
-                        .join('\n');
-                    embed.addFields({ name: channelName, value: fieldValue, inline: true });
+                if (reportType === 'usage') {
+                    let channelsField = '';
+                    let eventCountField = '';
+                    for (const row of chunk) {
+                        const channel = await client.channels.fetch(row.channel_id).catch(() => null);
+                        const channelName = channel ? channel.name : 'Unknown Channel';
+                        channelsField += `${channelName}\n`;
+                        eventCountField += `${row.event_count}\n`;
+                    }
+                    embed.addFields(
+                        { name: 'Channel', value: channelsField, inline: true },
+                        { name: 'Event Count', value: eventCountField, inline: true }
+                    );
+                } else {
+                    for (const row of chunk) {
+                        const channel = await client.channels.fetch(row.channel_id).catch(() => null);
+                        const channelName = channel ? channel.name : 'Unknown Channel';
+                        const fieldValue = Object.entries(row)
+                            .filter(([key]) => key !== 'channel_id')
+                            .map(([key, value]) => `**${key.replace('_', ' ').toUpperCase()}:** ${value}`)
+                            .join('\n');
+                        embed.addFields({ name: channelName, value: fieldValue, inline: true });
+                    }
                 }
 
                 if (index === 0) {

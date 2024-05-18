@@ -74,20 +74,20 @@ async function generateVoiceActivityReport(serverId) {
     return results;
 }
 
-async function generateReportByChannel(serverId) {
+async function generateReportByChannel(serverId, channelId) {
     const results = await UsageLog.findAll({
         attributes: [
-            'channel_id',
             'event_type',
             [sequelize.fn('COUNT', sequelize.col('event_type')), 'event_count']
         ],
         where: {
             server_id: serverId,
+            channel_id: channelId,
             timestamp: {
                 [Op.gte]: sequelize.literal("NOW() - INTERVAL 7 DAY")
             }
         },
-        group: ['channel_id', 'event_type'],
+        group: ['event_type'],
         order: [[sequelize.fn('COUNT', sequelize.col('event_type')), 'DESC']],
     });
     return results.map(result => result.get());

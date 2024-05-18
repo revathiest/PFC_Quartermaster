@@ -6,7 +6,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('analytics')
         .setDescription('Generate analytics reports')
-        .addStringOption(option => 
+        .addStringOption(option =>
             option.setName('type')
                 .setDescription('Type of report')
                 .setRequired(true)
@@ -35,8 +35,13 @@ module.exports = {
                     description = "This report shows the voice activity in each channel over the past 7 days, including the peak number of users and the total time logged.";
                     break;
                 case 'channel':
-                    report = await generateReportByChannel(serverId);
-                    description = "This report breaks down each type of event that has happened in each channel over the past 7 days.";
+                    const channelOption = interaction.options.getChannel('channel');
+                    if (!channelOption) {
+                        return interaction.editReply('You need to specify a channel for the channel report.');
+                    }
+                    const channelId = channelOption.id;
+                    report = await generateReportByChannel(serverId, channelId);
+                    description = `This report breaks down each type of event that has happened in the channel ${channelOption.name} over the past 7 days.`;
                     break;
                 default:
                     return interaction.editReply('Invalid report type.');
@@ -66,6 +71,17 @@ module.exports = {
                     }
                     embed.addFields(
                         { name: 'Channel', value: channelsField, inline: true },
+                        { name: 'Event Count', value: eventCountField, inline: true }
+                    );
+                } else if (reportType === 'channel') {
+                    let eventTypeField = '';
+                    let eventCountField = '';
+                    for (const row of chunk) {
+                        eventTypeField += `${row.event_type}\n`;
+                        eventCountField += `${row.event_count}\n`;
+                    }
+                    embed.addFields(
+                        { name: 'Event Type', value: eventTypeField, inline: true },
                         { name: 'Event Count', value: eventCountField, inline: true }
                     );
                 } else {

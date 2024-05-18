@@ -1,4 +1,5 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('@discordjs/builders');
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const { EmbedBuilder } = require('discord.js');
 const { generateUsageReport, generateVoiceActivityReport, generateReportByChannel, generateReportByRole } = require('./analytics/generateAnalytics');
 
 module.exports = {
@@ -40,7 +41,7 @@ module.exports = {
 
             const embed = new EmbedBuilder()
                 .setTitle(title)
-                .setColor('#0099ff')
+                .setColor(0x0099ff)  // Use numeric color value
                 .setTimestamp();
 
             for (const row of report) {

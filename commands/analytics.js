@@ -93,17 +93,20 @@ module.exports = {
                     let channelsField = '';
                     let averageUsersField = '';
                     let peakUsersField = '';
+                    let totalTimeField = '';
                     for (const row of chunk) {
                         const channel = await client.channels.fetch(row.channel_id).catch(() => null);
                         const channelName = channel ? channel.name : 'Unknown Channel';
                         channelsField += `${channelName}\n`;
                         averageUsersField += `${row.average_users}\n`;
                         peakUsersField += `${row.peak_users}\n`;
+                        totalTimeField += `${row.total_duration} seconds\n`;
                     }
                     embed.addFields(
                         { name: 'Channel', value: channelsField, inline: true },
                         { name: 'Average Users', value: averageUsersField, inline: true },
-                        { name: 'Peak Users', value: peakUsersField, inline: true }
+                        { name: 'Peak Users', value: peakUsersField, inline: true },
+                        { name: 'Total Time', value: totalTimeField, inline: true }
                     );
                 }
 

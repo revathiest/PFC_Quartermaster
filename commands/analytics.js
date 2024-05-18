@@ -9,11 +9,12 @@ module.exports = {
             option.setName('type')
                 .setDescription('Type of report')
                 .setRequired(true)
-                .addChoice('usage', 'usage')
-                .addChoice('voice', 'voice')
-                .addChoice('channel', 'channel')
-                .addChoice('role', 'role')
-        ),
+                .addChoices(
+                    { name: 'usage', value: 'usage' },
+                    { name: 'voice', value: 'voice' },
+                    { name: 'channel', value: 'channel' },
+                    { name: 'role', value: 'role' }
+                )),
     async execute(interaction) {
         const reportType = interaction.options.getString('type');
         let report;

@@ -5,6 +5,8 @@ const fs = require('fs'); // imports the file io library
 const { initClient } = require('./botactions/initClient');
 const interactionHandler = require('./botactions/eventHandling/interactionEvents');
 const { handleMessageCreate } = require('./botactions/eventHandling/messageEvents');
+const { handleReactionAdd } = require('./botactions/eventHandling/reactionEvents');
+const { handleVoiceStateUpdate } = require('./botactions/eventHandling/voiceEvents');
 const { registerChannels } = require('./botactions/channelManagement/channelRegistry');
 const { deleteMessages } = require('./botactions/channelManagement/messageCleanup');
 const { checkEvents } = require('./botactions/scheduling/eventReminder');
@@ -40,6 +42,10 @@ const initializeBot = async () => {
 
     client.on("messageCreate", message => handleMessageCreate(message, client));
 
+    client.on('messageReactionAdd', (reaction, user) => handleReactionAdd(reaction, user));
+
+    client.on("voiceStateUpdate", (oldState, newState) => handleVoiceStateUpdate(oldState, newState));
+
     //***********************************************************/
     //Client Setup
     //***********************************************************/
@@ -64,13 +70,13 @@ const initializeBot = async () => {
     client.once('ready', async () => {
         console.log('Discord client is ready!');
         try {
+
+            await initializeDatabase();  // Initialize and sync database
             await registerChannels(client);  // Register channels
             await registerCommands(client);
             await getInactiveUsersWithSingleRole(client);
             scheduleAnnouncements(client);
             console.log('Bot setup complete and ready to go!');
-
-            await initializeDatabase();  // Initialize and sync database
             console.log('Database synced');
 
             const logChannel = client.channels.cache.get(client.chanBotLog);

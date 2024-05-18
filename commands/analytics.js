@@ -38,7 +38,7 @@ module.exports = {
                     break;
                 case 'voice':
                     report = await generateVoiceActivityReport(serverId);
-                    description = "This report shows the voice activity in each channel over the past 7 days, including the peak number of users and the total time logged.";
+                    description = "This report shows the voice activity in each channel over the past 7 days, including the average number of users, peak number of users, and the total time logged.";
                     break;
                 case 'channel':
                     if (!channelOption) {
@@ -89,16 +89,22 @@ module.exports = {
                         { name: 'Event Type', value: eventTypeField, inline: true },
                         { name: 'Event Count', value: eventCountField, inline: true }
                     );
-                } else {
+                } else if (reportType === 'voice') {
+                    let channelsField = '';
+                    let averageUsersField = '';
+                    let peakUsersField = '';
                     for (const row of chunk) {
                         const channel = await client.channels.fetch(row.channel_id).catch(() => null);
                         const channelName = channel ? channel.name : 'Unknown Channel';
-                        const fieldValue = Object.entries(row)
-                            .filter(([key]) => key !== 'channel_id')
-                            .map(([key, value]) => `**${key.replace('_', ' ').toUpperCase()}:** ${value}`)
-                            .join('\n');
-                        embed.addFields({ name: channelName, value: fieldValue, inline: true });
+                        channelsField += `${channelName}\n`;
+                        averageUsersField += `${row.average_users}\n`;
+                        peakUsersField += `${row.peak_users}\n`;
                     }
+                    embed.addFields(
+                        { name: 'Channel', value: channelsField, inline: true },
+                        { name: 'Average Users', value: averageUsersField, inline: true },
+                        { name: 'Peak Users', value: peakUsersField, inline: true }
+                    );
                 }
 
                 if (index === 0) {

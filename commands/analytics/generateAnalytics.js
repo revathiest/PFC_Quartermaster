@@ -48,26 +48,36 @@ async function generateVoiceActivityReport(serverId) {
 
     for (const join of joins) {
         if (!channelData[join.channel_id]) {
-            channelData[join.channel_id] = { users: new Set(), peakUsers: 0, totalDuration: 0 };
+            channelData[join.channel_id] = { users: new Set(), peakUsers: 0, totalDuration: 0, activeDuration: 0, lastTimestamp: join.timestamp };
+        }
+        if (channelData[join.channel_id].users.size > 0) {
+            const duration = (new Date(join.timestamp) - new Date(channelData[join.channel_id].lastTimestamp)) / 1000;
+            channelData[join.channel_id].activeDuration += duration;
         }
         channelData[join.channel_id].users.add(join.user_id);
         channelData[join.channel_id].peakUsers = Math.max(channelData[join.channel_id].peakUsers, channelData[join.channel_id].users.size);
+        channelData[join.channel_id].lastTimestamp = join.timestamp;
     }
 
     for (const leave of leaves) {
         if (channelData[leave.channel_id] && channelData[leave.channel_id].users.has(leave.user_id)) {
+            const duration = (new Date(leave.timestamp) - new Date(channelData[leave.channel_id].lastTimestamp)) / 1000;
+            channelData[leave.channel_id].activeDuration += duration;
             channelData[leave.channel_id].users.delete(leave.user_id);
+            channelData[leave.channel_id].lastTimestamp = leave.timestamp;
         }
     }
 
     const results = [];
 
     for (const channelId in channelData) {
-        const { peakUsers, totalDuration } = channelData[channelId];
+        const { peakUsers, activeDuration } = channelData[channelId];
+        const averageUsers = (activeDuration > 0) ? activeDuration / (channelData[channelId].totalDuration / peakUsers) : 0;
         results.push({
             channel_id: channelId,
             peak_users: peakUsers,
-            total_duration: totalDuration
+            average_users: averageUsers.toFixed(2), // rounding to 2 decimal places
+            total_duration: activeDuration
         });
     }
 

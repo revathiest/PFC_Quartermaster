@@ -55,20 +55,15 @@ module.exports = {
                     .setDescription(description)
                     .setTimestamp();
 
-                const tableHeader = `| Channel | ${Object.keys(chunk[0]).filter(key => key !== 'channel_id').map(key => key.replace('_', ' ').toUpperCase()).join(' | ')} |`;
-                const tableSeparator = `|${'-'.repeat(tableHeader.length - 2)}|`;
-
-                let tableContent = chunk.map(row => {
-                    return `| ${Object.entries(row).map(([key, value]) => {
-                        if (key === 'channel_id') {
-                            const channel = client.channels.cache.get(value);
-                            return channel ? channel.name : 'Unknown Channel';
-                        }
-                        return value;
-                    }).join(' | ')} |`;
-                }).join('\n');
-
-                embed.addFields({ name: '\u200B', value: `${tableHeader}\n${tableSeparator}\n${tableContent}`, inline: false });
+                for (const row of chunk) {
+                    const channel = await client.channels.fetch(row.channel_id).catch(() => null);
+                    const channelName = channel ? channel.name : 'Unknown Channel';
+                    const fieldValue = Object.entries(row)
+                        .filter(([key]) => key !== 'channel_id')
+                        .map(([key, value]) => `**${key.replace('_', ' ').toUpperCase()}:** ${value}`)
+                        .join('\n');
+                    embed.addFields({ name: channelName, value: fieldValue, inline: true });
+                }
 
                 if (index === 0) {
                     await interaction.editReply({ embeds: [embed] });

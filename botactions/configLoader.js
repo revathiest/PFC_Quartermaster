@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { getConfigFromDatabase, saveConfigToDatabase } = require('./databaseHandler');
+const { getConfigFromDatabase, saveConfigToDatabase } = require('./databaseOperations/databaseHandler');
 
 const loadConfigFromFile = () => {
   console.log('Loading configuration from file...');

@@ -1,4 +1,4 @@
-const { getScheduledAnnouncements, deleteScheduledAnnouncement } = require('../scheduleHandler');
+const { getScheduledAnnouncements, deleteScheduledAnnouncement } = require('./scheduleHandler');
 const { EmbedBuilder } = require('discord.js');
 const moment = require('moment');
 

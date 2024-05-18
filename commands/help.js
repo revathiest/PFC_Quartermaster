@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { botPermsReq } = require('./../config.json');
+const { botPermsReq } = require('../config.json');
 const { EmbedBuilder } = require('discord.js');
 
 const Builder = new SlashCommandBuilder();

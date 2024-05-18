@@ -1,4 +1,4 @@
-const { voiceLog } = require('../../config/database');
+const { VoiceLog } = require('../../config/database');
 
 module.exports = {
     handleVoiceStateUpdate: async function(oldState, newState) {
@@ -7,7 +7,7 @@ module.exports = {
 
         if (!oldState.channelId && newState.channelId) {
             // User joined a voice channel
-            await voiceLog.create({
+            await VoiceLog.create({
                 user_id: userId,
                 event_type: 'voice_join',
                 event_data: JSON.stringify({ channel_id: channelId })

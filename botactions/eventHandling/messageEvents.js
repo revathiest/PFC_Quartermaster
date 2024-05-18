@@ -1,4 +1,4 @@
-const { usageLog } = require('../../config/database');
+const { UsageLog } = require('../../config/database');
 const filter = require('../../messages.json'); // Assumes messages.json contains both words and regex patterns
 
 module.exports = {
@@ -7,15 +7,15 @@ module.exports = {
             return;
         }
 
-        // Debug: Check if usageLog is defined
-        if (!usageLog) {
-            console.error('Error: usageLog is not defined');
+        // Debug: Check if UsageLog is defined
+        if (!UsageLog) {
+            console.error('Error: UsageLog is not defined');
             return;
         }
 
         try {
             // Log the message event to the database
-            await usageLog.create({
+            await UsageLog.create({
                 user_id: message.author.id,
                 event_type: 'message_create',
                 event_data: JSON.stringify({ content: message.content, channel_id: message.channel.id }),

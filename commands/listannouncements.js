@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { getScheduledAnnouncements } = require('../botactions/scheduleHandler');
+const { getScheduledAnnouncements } = require('../botactions/scheduling/scheduleHandler');
 
 const allowedRoles = ['Admiral', 'Fleet Admiral'];
 
@@ -7,6 +7,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('listannouncements')
         .setDescription('List all scheduled announcements'),
+    help: 'Lists all scheduled announcements. Only available to Admirals and Fleet Admirals.',
     async execute(interaction) {
         const memberRoles = interaction.member.roles.cache.map(role => role.name);
         if (!allowedRoles.some(role => memberRoles.includes(role))) {

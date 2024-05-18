@@ -1,5 +1,5 @@
-const { saveAnnouncementToDatabase } = require('./scheduleHandler');
-const { createChannelSelectMenu } = require('./channelSelector');
+const { saveAnnouncementToDatabase } = require('../scheduling/scheduleHandler');
+const { createChannelSelectMenu } = require('../commandHandling/channelSelector');
 const moment = require('moment');
 
 let pendingChannelSelection = {};

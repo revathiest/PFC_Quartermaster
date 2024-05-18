@@ -1,4 +1,4 @@
-const { saveAnnouncementToDatabase } = require('./scheduleHandler');
+const { saveAnnouncementToDatabase } = require('../scheduling/scheduleHandler');
 const moment = require('moment');
 
 module.exports = {

@@ -1,4 +1,4 @@
-const filter = require('../messages.json'); // Assumes messages.json contains both words and regex patterns
+const filter = require('../../messages.json'); // Assumes messages.json contains both words and regex patterns
 
 module.exports = {
     handleMessageCreate: function(message, client) {
@@ -14,7 +14,8 @@ module.exports = {
         // Filter based on individual words
         for (var word in filter.words) {
             if (filter.words.hasOwnProperty(word) && words.includes(word) && allowMessage) {
-                this.performAction(message, client, filter.words[word]);
+                module.exports.performAction(message, client, filter.words[word]); // Use module.exports to reference performAction
+                return; // Stop processing after an action is performed
             }
         }
 
@@ -23,7 +24,8 @@ module.exports = {
             if (filter.regex.hasOwnProperty(regex)) {
                 const regexObj = new RegExp(regex, "i"); // Example assumes regex patterns are stored directly and "i" flag for case-insensitivity
                 if (regexObj.test(content) && allowMessage) {
-                    this.performAction(message, client, filter.regex[regex]);
+                    module.exports.performAction(message, client, filter.regex[regex]); // Use module.exports to reference performAction
+                    return; // Stop processing after an action is performed
                 }
             }
         }
@@ -45,4 +47,4 @@ module.exports = {
         }
         return; // Stop processing after an action is performed
     }
-}
+};

@@ -1,4 +1,4 @@
-const filter = require('./messages.json');
+const filter = require('../../messages.json');
 
 module.exports = {
     process_messages: function(message, allowmessage, responseChannelID) {

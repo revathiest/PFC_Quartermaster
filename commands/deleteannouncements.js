@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { deleteScheduledAnnouncement } = require('../botactions/scheduleHandler');
+const { deleteScheduledAnnouncement } = require('../botactions/scheduling/scheduleHandler');
 
 const allowedRoles = ['Admiral', 'Fleet Admiral'];
 
@@ -11,6 +11,7 @@ module.exports = {
             option.setName('id')
                 .setDescription('The ID of the announcement to delete')
                 .setRequired(true)),
+    help: 'Deletes a scheduled announcement by its ID. Only available to Admirals and Fleet Admirals.',
     async execute(interaction) {
         const memberRoles = interaction.member.roles.cache.map(role => role.name);
         if (!allowedRoles.some(role => memberRoles.includes(role))) {

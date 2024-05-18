@@ -23,8 +23,7 @@ async function generateVoiceActivityReport(serverId) {
     const results = await VoiceLog.findAll({
         attributes: [
             'channel_id',
-            [sequelize.fn('AVG', sequelize.fn('COALESCE', sequelize.col('user_count'), 0)), 'average_users'],
-            [sequelize.fn('MAX', sequelize.fn('COALESCE', sequelize.col('user_count'), 0)), 'peak_users'],
+            [sequelize.fn('MAX', sequelize.col('user_id')), 'peak_users'],
             [sequelize.fn('SUM', sequelize.fn('COALESCE', sequelize.col('duration'), 0)), 'total_duration']
         ],
         where: {

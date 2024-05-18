@@ -1,8 +1,7 @@
-const { UsageLog, VoiceLog } = require('../../models');
-const sequelize = require('./config/database');
+const { sequelize, useageLog, voiceLog } = require('../../config/database');
 
 async function generateUsageReport() {
-    const results = await UsageLog.findAll({
+    const results = await useageLog.findAll({
         attributes: [
             'user_id',
             'event_type',
@@ -15,7 +14,7 @@ async function generateUsageReport() {
 }
 
 async function generateVoiceActivityReport() {
-    const results = await VoiceLog.findAll({
+    const results = await voiceLog.findAll({
         attributes: [
             'user_id',
             [sequelize.fn('SUM', sequelize.fn('JSON_UNQUOTE', sequelize.fn('JSON_EXTRACT', sequelize.col('event_data'), '$.duration'))), 'total_duration']
@@ -28,7 +27,7 @@ async function generateVoiceActivityReport() {
 }
 
 async function generateReportByChannel() {
-    const results = await UsageLog.findAll({
+    const results = await useageLog.findAll({
         attributes: [
             [sequelize.fn('JSON_UNQUOTE', sequelize.fn('JSON_EXTRACT', sequelize.col('event_data'), '$.channel_id')), 'channel_id'],
             [sequelize.fn('COUNT', sequelize.col('event_type')), 'event_count']

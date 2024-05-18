@@ -1,4 +1,4 @@
-const { usageLog } = require('../../models');
+const { usageLog } = require('../../config/database');
 const filter = require('../../messages.json'); // Assumes messages.json contains both words and regex patterns
 
 module.exports = {

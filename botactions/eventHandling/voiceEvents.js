@@ -1,4 +1,4 @@
-const { voiceLog } = require('../../models');
+const { voiceLog } = require('../../config/database');
 
 module.exports = {
     handleVoiceStateUpdate: async function(oldState, newState) {

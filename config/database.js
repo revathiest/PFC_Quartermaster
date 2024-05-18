@@ -10,13 +10,16 @@ const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.p
   logging: dbConfig.logging || false,
 });
 
+let useageLog
+let voiceLog
+
 const initializeDatabase = async () => {
   try {
     // Import models here to ensure they are defined before syncing
     require('../models/configModel');
     require('../models/scheduledAnnouncementModel');
-    require('../models/useageLog.js');
-    require('../models/voiceLog.js');
+    useageLog = require('../models/useageLog.js');
+    voiceLog = require('../models/voiceLog.js');
     
     await sequelize.sync({ force: false });  // Set to true only if you want to drop and recreate tables
     console.log('Database synchronized');
@@ -28,4 +31,6 @@ const initializeDatabase = async () => {
 module.exports = {
   sequelize,
   initializeDatabase,
+  useageLog,
+  voiceLog
 };

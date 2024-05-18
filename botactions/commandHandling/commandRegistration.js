@@ -15,7 +15,7 @@ async function registerCommands(client) {
 
     console.log('Registering commands:');
     for (const file of commandFiles) {
-        const command = require(`../commands/${file}`);
+        const command = require(`../../commands/${file}`);
         try {
             // Check if command.data has a toJSON method
             if (typeof command.data.toJSON === 'function') {

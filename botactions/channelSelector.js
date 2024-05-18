@@ -1,38 +1,47 @@
-const { ActionRowBuilder, StringSelectMenuBuilder, ChannelType, PermissionFlagsBits } = require('discord.js');
+const { ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 
-async function createChannelSelectMenu(guild) {
-    // Fetch the PyroFreelancerCorps role
-    const role = guild.roles.cache.find(r => r.name === "Pyro Freelancer Corps");
-    
-    if (!role) {
-        throw new Error("Role 'Pyro Freelancer Corps' not found.");
-    } else {
-        console.log('Role found');
+// Define the roles that can see the channels
+const roleNames = ['Guests', 'Members']; // Add your roles here
+
+/**
+ * Fetch channels that are visible to any of the specified roles.
+ * @param {Guild} guild - The guild object.
+ * @returns {Collection<Snowflake, Channel>} - Collection of channels.
+ */
+async function fetchChannelsForRoles(guild) {
+    const roles = guild.roles.cache.filter(role => roleNames.includes(role.name));
+    if (roles.size === 0) {
+        throw new Error(`None of the roles ${roleNames.join(', ')} found`);
     }
 
-    // Fetch all channels in the guild
-    const channels = await guild.channels.fetch();
-    const options = channels
-        .filter(channel => 
-            (channel.type === ChannelType.GuildText || 
-             channel.type === ChannelType.GuildAnnouncement) && 
-            channel.permissionsFor(role).has(PermissionFlagsBits.ViewChannel))  // Check permissions for the specific role
-        .map(channel => ({
+    // Fetch all channels and filter those that any of the roles can access
+    const channels = guild.channels.cache.filter(channel =>
+        roles.some(role => channel.permissionsFor(role).has('VIEW_CHANNEL'))
+    );
+
+    return channels;
+}
+
+/**
+ * Create a channel selection menu based on roles.
+ * @param {Guild} guild - The guild object.
+ * @returns {ActionRowBuilder} - The action row containing the select menu.
+ */
+async function createChannelSelectMenu(guild) {
+    const channels = await fetchChannelsForRoles(guild);
+
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId('channelSelect')
+        .setPlaceholder('Select a channel');
+
+    channels.forEach(channel => {
+        selectMenu.addOptions({
             label: channel.name,
-            value: channel.id,
-        }))
-        .slice(0, 25);  // Limit to 25 options
+            value: channel.id
+        });
+    });
 
-    // Create the selection menu
-    const row = new ActionRowBuilder()
-        .addComponents(
-            new StringSelectMenuBuilder()
-                .setCustomId('selectChannel')
-                .setPlaceholder('Select a channel')
-                .addOptions(options)
-        );
-
-    return row;
+    return new ActionRowBuilder().addComponents(selectMenu);
 }
 
 module.exports = { createChannelSelectMenu };

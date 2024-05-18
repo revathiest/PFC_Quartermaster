@@ -22,7 +22,8 @@ module.exports = {
 
         let reply = 'Scheduled Announcements:\n';
         announcements.forEach((ann, index) => {
-            reply += `${index + 1}. ID: ${ann.id}, Title: ${ann.title}, Time: ${ann.time}\n`;
+            const embedData = JSON.parse(ann.embedData); // Parse the embed data
+            reply += `${index + 1}. ID: ${ann.id}, Title: ${embedData.title}, Time: ${ann.time}\n`;
         });
 
         await interaction.reply(reply);

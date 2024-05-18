@@ -1,7 +1,7 @@
 const { ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 
 // Define the roles that can see the channels
-const roleNames = ['Guests', 'Members']; // Add your roles here
+const roleNames = ['Pyro Freelancer Corps']; // Add your roles here
 
 /**
  * Fetch channels that are visible to any of the specified roles.

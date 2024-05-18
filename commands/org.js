@@ -26,9 +26,10 @@ module.exports = {
 
     const fetch = require('node-fetch'); // required to call the Star Citizen API
 
-    const orgname = interaction.options._hoistedOptions[0].value;
+    let orgname = interaction.options._hoistedOptions[0].value;
+    orgname = orgname.charAt(0).toUpperCase() + orgname.slice(1).toLowerCase();
+    
     const apiUrl = SCApiLiveOrganization + orgname;
-
     console.log('API URL:', apiUrl); // Log the URL being called
 
     try {

@@ -15,9 +15,12 @@ async function fetchChannelsForRoles(guild) {
     }
 
     // Fetch all channels and filter those that any of the roles can access
-    const channels = guild.channels.cache.filter(channel =>
-        roles.some(role => channel.permissionsFor(role).has(PermissionsBitField.Flags.ViewChannel))
-    );
+    const channels = guild.channels.cache.filter(channel => {
+        return roles.some(role => {
+            const permissions = channel.permissionsFor(role);
+            return permissions && permissions.has(PermissionsBitField.Flags.ViewChannel);
+        });
+    });
 
     return channels;
 }

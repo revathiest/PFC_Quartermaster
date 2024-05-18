@@ -123,7 +123,7 @@ async function handleModalSubmit(interaction, client) {
         // Store the pending data to use after channel selection
         pendingChannelSelection[interaction.user.id] = { title, description, author, time };
 
-        // Create and send the select menu for channel selection
+        // Create and send the select menu for channel selection based on roles defined in channelSelector.js
         const selectMenu = await createChannelSelectMenu(interaction.guild);
         await interaction.reply({ content: 'Please select a channel:', components: [selectMenu], ephemeral: true });
     }

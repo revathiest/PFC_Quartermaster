@@ -7,18 +7,18 @@ module.exports = {
             return;
         }
 
-        // Debug: Check if UsageLog is defined
-        if (!UsageLog) {
-            console.error('Error: UsageLog is not defined');
-            return;
-        }
+        const serverId = message.guild.id;
 
         try {
             // Log the message event to the database
             await UsageLog.create({
                 user_id: message.author.id,
+                interaction_type: 'message',
                 event_type: 'message_create',
-                event_data: JSON.stringify({ content: message.content, channel_id: message.channel.id }),
+                message_content: message.content,
+                channel_id: message.channel.id,
+                server_id: serverId,
+                event_time: new Date(),
             });
             console.log('Message logged successfully');
         } catch (error) {

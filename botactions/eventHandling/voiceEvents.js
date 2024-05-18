@@ -4,13 +4,16 @@ module.exports = {
     handleVoiceStateUpdate: async function(oldState, newState) {
         const userId = newState.id;
         const channelId = newState.channelId;
+        const serverId = newState.guild.id;
 
         if (!oldState.channelId && newState.channelId) {
             // User joined a voice channel
             await VoiceLog.create({
                 user_id: userId,
                 event_type: 'voice_join',
-                event_data: JSON.stringify({ channel_id: channelId })
+                channel_id: channelId,
+                server_id: serverId,
+                start_time: new Date(),
             });
         } else if (oldState.channelId && !newState.channelId) {
             // User left a voice channel
@@ -18,6 +21,7 @@ module.exports = {
                 where: {
                     user_id: userId,
                     event_type: 'voice_join',
+                    channel_id: oldState.channelId,
                 },
                 order: [['timestamp', 'DESC']]
             });
@@ -30,7 +34,11 @@ module.exports = {
                 await VoiceLog.create({
                     user_id: userId,
                     event_type: 'voice_leave',
-                    event_data: JSON.stringify({ channel_id: oldState.channelId, duration }),
+                    channel_id: oldState.channelId,
+                    duration: duration,
+                    server_id: serverId,
+                    start_time: joinTimestamp,
+                    end_time: leaveTimestamp,
                 });
             }
         }

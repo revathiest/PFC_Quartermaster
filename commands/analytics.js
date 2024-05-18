@@ -70,6 +70,10 @@ module.exports = {
                             const role = await interaction.guild.roles.fetch(value).catch(() => null);
                             value = role ? role.name : 'Unknown Role';
                             key = 'Role';
+                        } else if (key === 'server_id') {
+                            const server = await client.guilds.fetch(value).catch(() => null);
+                            value = server ? server.name : 'Unknown Server';
+                            key = 'Server';
                         }
                         description += `**${key.replace('_', ' ').toUpperCase()}:** ${value}\n`;
                     }

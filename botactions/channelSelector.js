@@ -1,38 +1,60 @@
-const { ActionRowBuilder, StringSelectMenuBuilder, ChannelType, PermissionFlagsBits } = require('discord.js');
+const { ActionRowBuilder, StringSelectMenuBuilder, ChannelType } = require('discord.js');
 
-async function createChannelSelectMenu(guild) {
-    // Fetch the PyroFreelancerCorps role
-    const role = guild.roles.cache.find(r => r.name === "Pyro Freelancer Corps");
-    
-    if (!role) {
-        throw new Error("Role 'Pyro Freelancer Corps' not found.");
-    } else {
-        console.log('Role found');
+// Define the categories
+const categoryNames = ['PFCS Channels', 'Public Chat']; // Add your category names here
+
+/**
+ * Fetch channels that belong to the specified categories.
+ * @param {Guild} guild - The guild object.
+ * @returns {Collection<Snowflake, Channel>} - Collection of channels.
+ */
+async function fetchChannelsForCategories(guild) {
+    // Log available categories for debugging
+    console.log('Available categories in the guild:');
+    guild.channels.cache.filter(channel => channel.type === ChannelType.GuildCategory).forEach(category => {
+        console.log(`- ${category.name}`);
+    });
+
+    const categories = guild.channels.cache.filter(channel => 
+        categoryNames.includes(channel.name) && channel.type === ChannelType.GuildCategory
+    );
+
+    if (categories.size === 0) {
+        console.error(`None of the categories ${categoryNames.join(', ')} found. Available categories:`);
+        guild.channels.cache.filter(channel => channel.type === ChannelType.GuildCategory).forEach(category => {
+            console.error(`- ${category.name}`);
+        });
+        throw new Error(`None of the categories ${categoryNames.join(', ')} found`);
     }
 
-    // Fetch all channels in the guild
-    const channels = await guild.channels.fetch();
-    const options = channels
-        .filter(channel => 
-            (channel.type === ChannelType.GuildText || 
-             channel.type === ChannelType.GuildAnnouncement) && 
-            channel.permissionsFor(role).has(PermissionFlagsBits.ViewChannel))  // Check permissions for the specific role
-        .map(channel => ({
+    // Fetch all channels and filter those that belong to the specified categories
+    const channels = guild.channels.cache.filter(channel =>
+        categories.has(channel.parentId)
+    );
+
+    return channels;
+}
+
+/**
+ * Create a channel selection menu based on categories.
+ * @param {Guild} guild - The guild object.
+ * @returns {ActionRowBuilder} - The action row containing the select menu.
+ */
+async function createChannelSelectMenu(guild) {
+    const channels = await fetchChannelsForCategories(guild);
+
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId('channelSelect')
+        .setPlaceholder('Select a channel');
+
+    channels.forEach(channel => {
+        selectMenu.addOptions({
             label: channel.name,
-            value: channel.id,
-        }))
-        .slice(0, 25);  // Limit to 25 options
+            value: channel.id
+        });
+    });
 
-    // Create the selection menu
-    const row = new ActionRowBuilder()
-        .addComponents(
-            new StringSelectMenuBuilder()
-                .setCustomId('selectChannel')
-                .setPlaceholder('Select a channel')
-                .addOptions(options)
-        );
-
-    return row;
+    return new ActionRowBuilder().addComponents(selectMenu);
 }
 
 module.exports = { createChannelSelectMenu };

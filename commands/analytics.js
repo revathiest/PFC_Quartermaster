@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { MessageEmbed } = require('discord.js');
 const { generateUsageReport, generateVoiceActivityReport, generateReportByChannel, generateReportByRole } = require('./analytics/generateAnalytics');
 
 module.exports = {
@@ -15,9 +16,10 @@ module.exports = {
                     { name: 'channel', value: 'channel' },
                     { name: 'role', value: 'role' }
                 )),
-    async execute(interaction) {
+    async execute(interaction, client) {
         const reportType = interaction.options.getString('type');
         let report;
+        let title = `Report for ${reportType.charAt(0).toUpperCase() + reportType.slice(1)}`;
 
         switch (reportType) {
             case 'usage':
@@ -36,11 +38,32 @@ module.exports = {
                 return interaction.reply('Invalid report type.');
         }
 
-        let reportMessage = `Report for ${reportType}:\n`;
-        report.forEach(row => {
-            reportMessage += `${JSON.stringify(row)}\n`;
-        });
+        const embed = new MessageEmbed()
+            .setTitle(title)
+            .setColor('#0099ff')
+            .setTimestamp();
 
-        await interaction.reply(reportMessage);
+        for (const row of report) {
+            let description = '';
+            for (let [key, value] of Object.entries(row)) {
+                if (key === 'user_id') {
+                    const user = await client.users.fetch(value).catch(() => null);
+                    value = user ? user.username : 'Unknown User';
+                    key = 'User';
+                } else if (key === 'channel_id') {
+                    const channel = await client.channels.fetch(value).catch(() => null);
+                    value = channel ? channel.name : 'Unknown Channel';
+                    key = 'Channel';
+                } else if (key === 'role_id') {
+                    const role = await interaction.guild.roles.fetch(value).catch(() => null);
+                    value = role ? role.name : 'Unknown Role';
+                    key = 'Role';
+                }
+                description += `**${key.replace('_', ' ').toUpperCase()}:** ${value}\n`;
+            }
+            embed.addField('\u200B', description, false); // Use \u200B for a blank field name to avoid clutter
+        }
+
+        await interaction.reply({ embeds: [embed] });
     },
 };

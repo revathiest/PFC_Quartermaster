@@ -2,7 +2,6 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder } = require('discord.js');
 const { generateUsageReport, generateVoiceActivityReport, generateReportByChannel, generateReportByRole } = require('./analytics/generateAnalytics');
 
-const allowedRoles = ['Admiral', 'Fleet Admiral'];
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('analytics')
@@ -18,12 +17,6 @@ module.exports = {
                     { name: 'role', value: 'role' }
                 )),
     async execute(interaction, client) {
-        const memberRoles = interaction.member.roles.cache.map(role => role.name);
-        if (!allowedRoles.some(role => memberRoles.includes(role))) {
-            await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
-            return;
-        }
-
         const reportType = interaction.options.getString('type');
         let report;
         let title = `Report for ${reportType.charAt(0).toUpperCase() + reportType.slice(1)}`;
@@ -46,33 +39,39 @@ module.exports = {
                     return interaction.reply('Invalid report type.');
             }
 
-            const embed = new EmbedBuilder()
-                .setTitle(title)
-                .setColor(0x0099ff)  // Use numeric color value
-                .setTimestamp();
+            // Split the report into chunks of 10 items to avoid overwhelming the message
+            const chunks = chunkArray(report, 10);
 
-            for (const row of report) {
-                let description = '';
-                for (let [key, value] of Object.entries(row)) {
-                    if (key === 'user_id') {
-                        const user = await client.users.fetch(value).catch(() => null);
-                        value = user ? user.username : 'Unknown User';
-                        key = 'User';
-                    } else if (key === 'channel_id') {
-                        const channel = await client.channels.fetch(value).catch(() => null);
-                        value = channel ? channel.name : 'Unknown Channel';
-                        key = 'Channel';
-                    } else if (key === 'role_id') {
-                        const role = await interaction.guild.roles.fetch(value).catch(() => null);
-                        value = role ? role.name : 'Unknown Role';
-                        key = 'Role';
+            for (const [index, chunk] of chunks.entries()) {
+                const embed = new EmbedBuilder()
+                    .setTitle(`${title} (Page ${index + 1}/${chunks.length})`)
+                    .setColor(0x0099ff)  // Use numeric color value
+                    .setTimestamp();
+
+                for (const row of chunk) {
+                    let description = '';
+                    for (let [key, value] of Object.entries(row)) {
+                        if (key === 'user_id') {
+                            const user = await client.users.fetch(value).catch(() => null);
+                            value = user ? user.username : 'Unknown User';
+                            key = 'User';
+                        } else if (key === 'channel_id') {
+                            const channel = await client.channels.fetch(value).catch(() => null);
+                            value = channel ? channel.name : 'Unknown Channel';
+                            key = 'Channel';
+                        } else if (key === 'role_id') {
+                            const role = await interaction.guild.roles.fetch(value).catch(() => null);
+                            value = role ? role.name : 'Unknown Role';
+                            key = 'Role';
+                        }
+                        description += `**${key.replace('_', ' ').toUpperCase()}:** ${value}\n`;
                     }
-                    description += `**${key.replace('_', ' ').toUpperCase()}:** ${value}\n`;
+                    embed.addFields({ name: '\u200B', value: description, inline: false }); // Use \u200B for a blank field name to avoid clutter
                 }
-                embed.addFields({ name: '\u200B', value: description, inline: false }); // Use \u200B for a blank field name to avoid clutter
-            }
 
-            await interaction.reply({ embeds: [embed] });
+                // Send each chunk as a separate message
+                await interaction.followUp({ embeds: [embed] });
+            }
         } catch (error) {
             console.error('Error generating report:', error);
             await interaction.reply({
@@ -82,3 +81,12 @@ module.exports = {
         }
     },
 };
+
+// Helper function to chunk an array into smaller arrays of a specified size
+function chunkArray(array, size) {
+    const chunkedArray = [];
+    for (let i = 0; i < array.length; i += size) {
+        chunkedArray.push(array.slice(i, i + size));
+    }
+    return chunkedArray;
+}

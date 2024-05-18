@@ -72,11 +72,11 @@ async function generateVoiceActivityReport(serverId) {
 
     for (const channelId in channelData) {
         const { peakUsers, activeDuration } = channelData[channelId];
-        const averageUsers = (activeDuration > 0) ? activeDuration / (channelData[channelId].totalDuration / peakUsers) : 0;
+        const averageUsers = (activeDuration > 0) ? (activeDuration / (channelData[channelId].totalDuration / peakUsers)).toFixed(2) : "N/A";
         results.push({
             channel_id: channelId,
             peak_users: peakUsers,
-            average_users: averageUsers.toFixed(2), // rounding to 2 decimal places
+            average_users: averageUsers,
             total_duration: activeDuration
         });
     }

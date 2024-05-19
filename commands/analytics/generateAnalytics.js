@@ -30,7 +30,7 @@ async function generateVoiceActivityReport(serverId) {
 
     // Fetch voice join events from the past 7 days
     const joins = await VoiceLog.findAll({
-        attributes: ['channel_id', 'user_id', 'timestamp', [sequelize.literal("'join'"), 'eventType']],
+        attributes: ['channel_id', 'user_id', 'timestamp'],
         where: {
             server_id: serverId,
             event_type: 'voice_join',
@@ -44,7 +44,7 @@ async function generateVoiceActivityReport(serverId) {
 
     // Fetch voice leave events from the past 7 days
     const leaves = await VoiceLog.findAll({
-        attributes: ['channel_id', 'user_id', 'timestamp', [sequelize.literal("'leave'"), 'eventType']],
+        attributes: ['channel_id', 'user_id', 'timestamp'],
         where: {
             server_id: serverId,
             event_type: 'voice_leave',
@@ -56,8 +56,12 @@ async function generateVoiceActivityReport(serverId) {
     });
     console.log(`Fetched ${leaves.length} leave events`);
 
+    // Add event type to each event and combine
+    const joinEvents = joins.map(join => ({ ...join.get(), eventType: 'join' }));
+    const leaveEvents = leaves.map(leave => ({ ...leave.get(), eventType: 'leave' }));
+
     // Combine and sort events by timestamp
-    const events = [...joins, ...leaves].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    const events = [...joinEvents, ...leaveEvents].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
     console.log(`Total events after combining and sorting: ${events.length}`);
 
     const currentTime = new Date();

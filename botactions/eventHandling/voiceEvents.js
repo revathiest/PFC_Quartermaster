@@ -9,9 +9,9 @@ module.exports = {
         const serverId = oldState.guild.id || newState.guild.id; // Ensure serverId is captured correctly
 
         // Fetch channel names and user name using the client object
-        const newChannelName = newChannelId ? await getChannelNameById(newChannelId, client) : null;
-        const oldChannelName = oldChannelId ? await getChannelNameById(oldChannelId, client) : null;
-        const userName = await getUserNameById(userId, client);
+        const newChannelName = newChannelId ? await getChannelNameById(newChannelId, client).catch(() => null) : null;
+        const oldChannelName = oldChannelId ? await getChannelNameById(oldChannelId, client).catch(() => null) : null;
+        const userName = userId ? await getUserNameById(userId, client).catch(() => null) : null;
 
         console.log(`Voice state update: oldChannelId = ${oldChannelName}, newChannelId = ${newChannelName}`);
 

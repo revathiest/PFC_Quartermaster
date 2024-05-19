@@ -41,7 +41,7 @@ async function generateVoiceActivityReport(serverId) {
         const channel = channelData[event.channel_id];
 
         if (channel.users.size > 0) {
-            const duration = (new Date(event.timestamp) - channel.lastTimestamp) / 1000;
+            const duration = (new Date(event.timestamp) - channel.lastTimestamp);
             if (duration >= 0) {
                 channel.totalUserTime += duration * channel.users.size;
                 channel.totalActiveTime += duration;
@@ -63,7 +63,7 @@ async function generateVoiceActivityReport(serverId) {
     for (const channelId in channelData) {
         const channel = channelData[channelId];
         if (channel.users.size > 0) {
-            const duration = (currentTime - channel.lastTimestamp) / 1000;
+            const duration = (currentTime - channel.lastTimestamp);
             channel.totalUserTime += duration * channel.users.size;
             channel.totalActiveTime += duration;
         }

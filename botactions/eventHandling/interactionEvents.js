@@ -23,6 +23,7 @@ async function handleInteraction(interaction, client) {
                 interaction_type: 'command',
                 event_type: 'command_used',
                 command_name: interaction.commandName,
+                message_id: interaction.message.id,
                 channel_id: interaction.channel.id,
                 server_id: serverId,
                 event_time: new Date(),

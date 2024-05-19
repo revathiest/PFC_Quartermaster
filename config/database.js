@@ -13,7 +13,7 @@ const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.p
 // Import models after initializing sequelize
 const UsageLog = require('../models/usageLog')(sequelize);
 const VoiceLog = require('../models/voiceLog')(sequelize);
-const SnapChannel = require('../models/snapChannelsModel');
+const SnapChannel = require('../models/snapChannelsModel')(sequelize);
 
 const initializeDatabase = async () => {
     try {

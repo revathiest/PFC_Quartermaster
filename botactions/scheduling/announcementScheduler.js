@@ -10,7 +10,6 @@ async function checkScheduledAnnouncements(client){
     }
 
     const now = moment();
-    console.log(`Checking scheduled announcements at ${now.format('YYYY-MM-DD HH:mm:ss')}`);
 
     for (const announcement of announcements) {
         const announcementTime = moment(announcement.time, 'YYYY-MM-DD HH:mm:ss');

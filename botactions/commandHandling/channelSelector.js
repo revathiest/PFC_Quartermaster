@@ -9,11 +9,6 @@ const categoryNames = ['PFCS Channels', 'Public Chat']; // Add your category nam
  * @returns {Collection<Snowflake, Channel>} - Collection of channels.
  */
 async function fetchChannelsForCategories(guild) {
-    // Log available categories for debugging
-    console.log('Available categories in the guild:');
-    guild.channels.cache.filter(channel => channel.type === ChannelType.GuildCategory).forEach(category => {
-        console.log(`- ${category.name}`);
-    });
 
     const categories = guild.channels.cache.filter(channel => 
         categoryNames.includes(channel.name) && channel.type === ChannelType.GuildCategory

@@ -1,12 +1,9 @@
-const fs = require('fs');
-const path = require('path');
+const { SnapChannel } = require('../../config/database');
 
-async function deleteMessages(client) {
+async function deleteMessages(client, guild) {
     try {
-        // Properly construct the path to the file
-        const filePath = path.join(__dirname, '..', 'snapchannels.json');
-        const channelsData = fs.readFileSync(filePath);
-        const channels = JSON.parse(channelsData);
+        // Fetch snap channels from the database for the specific guild
+        const channels = await SnapChannel.findAll({ where: { serverId: guild.id } });
 
         for (const channelInfo of channels) {
             const channel = await client.channels.fetch(channelInfo.channelId);

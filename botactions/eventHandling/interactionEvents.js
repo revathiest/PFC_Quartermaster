@@ -166,7 +166,7 @@ async function handleSelectMenu(interaction, client) {
         // Ensure time is formatted correctly
         const formattedTime = moment(time, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
 
-        await saveAnnouncementToDatabase(selectedChannelId, interaction.guild.id, embedData, formattedTime);
+        await saveAnnouncementToDatabase(selectedChannelId, interaction.guild.id, embedData, formattedTime, client);
 
         await interaction.update({ content: `Announcement scheduled for ${formattedTime} in channel ${selectedChannel.name}`, components: [] });
 

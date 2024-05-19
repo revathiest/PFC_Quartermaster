@@ -2,7 +2,7 @@ const { getScheduledAnnouncements, deleteScheduledAnnouncement } = require('./sc
 const { EmbedBuilder } = require('discord.js');
 const moment = require('moment');
 
-const checkScheduledAnnouncements = async (client) => {
+async function checkScheduledAnnouncements(client){
     const announcements = await getScheduledAnnouncements();
     if (!Array.isArray(announcements)) {
         console.error('Scheduled announcements are not iterable:', announcements);
@@ -41,6 +41,6 @@ const checkScheduledAnnouncements = async (client) => {
     }
 };
 
-module.exports = (client) => {
-    setInterval(() => checkScheduledAnnouncements(client), 60000); // Check every minute
+module.exports = {
+    checkScheduledAnnouncements
 };

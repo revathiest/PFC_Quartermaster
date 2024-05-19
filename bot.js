@@ -1,21 +1,13 @@
 // Require the necessary discord.js classes
 require('dotenv').config();
-const { Collection } = require('discord.js');
-const fs = require('fs'); // imports the file io library
 const { initClient } = require('./botactions/initClient');
-const interactionHandler = require('./botactions/eventHandling/interactionEvents');
-const { handleMessageCreate } = require('./botactions/eventHandling/messageEvents');
-const { handleReactionAdd, handleReactionRemove } = require('./botactions/eventHandling/reactionEvents');
-const { handleVoiceStateUpdate } = require('./botactions/eventHandling/voiceEvents');
-const { registerChannels } = require('./botactions/channelManagement/channelRegistry');
-const { deleteMessages } = require('./botactions/channelManagement/messageCleanup');
-const { checkEvents } = require('./botactions/scheduling/eventReminder');
-const { handleRoleAssignment } = require('./botactions/userManagement/autoBanModule');
+const { interactionHandler, handleMessageCreate, handleReactionAdd, handleReactionRemove, handleVoiceStateUpdate } = require('./botactions/eventHandling');
+const { registerChannels, deleteMessages } = require('./botactions/channelManagement');
 const { registerCommands } = require('./botactions/commandHandling/commandRegistration');
-const { getInactiveUsersWithSingleRole } = require('./botactions/userManagement/inactiveUsersModule');
 const { initializeDatabase } = require('./config/database');
 const { loadConfiguration } = require('./botactions/configLoader');
-const scheduleAnnouncements = require('./botactions/scheduling/announcementScheduler');
+const { checkScheduledAnnouncements, checkEvents } = require('./botactions/scheduling');
+const { getInactiveUsersWithSingleRole, handleRoleAssignment } = require('./botactions/userManagement')
 
 const botType = process.env.BOT_TYPE;
 
@@ -43,6 +35,7 @@ const initializeBot = async () => {
     client.on("messageCreate", message => handleMessageCreate(message, client));
 
     client.on('messageReactionAdd', (reaction, user) => handleReactionAdd(reaction, user));
+    
     client.on('messageReactionRemove', (reaction, user) => handleReactionRemove(reaction, user));
 
     client.on("voiceStateUpdate", (oldState, newState) => handleVoiceStateUpdate(oldState, newState));
@@ -76,7 +69,7 @@ const initializeBot = async () => {
             await registerChannels(client);  // Register channels
             await registerCommands(client);
             await getInactiveUsersWithSingleRole(client);
-            scheduleAnnouncements(client);
+            setInterval(() => checkScheduledAnnouncements(client), 60000);
             console.log('Bot setup complete and ready to go!');
             console.log('Database synced');
 

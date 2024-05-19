@@ -30,7 +30,7 @@ async function generateVoiceActivityReport(serverId) {
 
     // Fetch voice join events from the past 7 days
     const joins = await VoiceLog.findAll({
-        attributes: ['channel_id', 'user_id', 'timestamp'],
+        attributes: ['channel_id', 'user_id', 'timestamp', [sequelize.literal("'join'"), 'eventType']],
         where: {
             server_id: serverId,
             event_type: 'voice_join',
@@ -44,7 +44,7 @@ async function generateVoiceActivityReport(serverId) {
 
     // Fetch voice leave events from the past 7 days
     const leaves = await VoiceLog.findAll({
-        attributes: ['channel_id', 'user_id', 'timestamp'],
+        attributes: ['channel_id', 'user_id', 'timestamp', [sequelize.literal("'leave'"), 'eventType']],
         where: {
             server_id: serverId,
             event_type: 'voice_leave',
@@ -56,46 +56,46 @@ async function generateVoiceActivityReport(serverId) {
     });
     console.log(`Fetched ${leaves.length} leave events`);
 
+    // Combine and sort events by timestamp
+    const events = [...joins, ...leaves].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    console.log(`Total events after combining and sorting: ${events.length}`);
+
     const currentTime = new Date();
     const channelData = {};
 
-    // Process each join event
-    for (const join of joins) {
-        console.log(`Processing join event: user ${join.user_id} joined channel ${join.channel_id} at ${join.timestamp}`);
-        if (!channelData[join.channel_id]) {
-            channelData[join.channel_id] = { users: new Set(), peakUsers: 0, totalUserTime: 0, lastTimestamp: new Date(join.timestamp) };
-            console.log(`Initialized data for channel ${join.channel_id}`);
+    // Process each event
+    for (const event of events) {
+        console.log(`Processing ${event.eventType} event: user ${event.user_id} ${event.eventType} channel ${event.channel_id} at ${event.timestamp}`);
+        if (!channelData[event.channel_id]) {
+            channelData[event.channel_id] = { users: new Set(), peakUsers: 0, totalUserTime: 0, lastTimestamp: new Date(event.timestamp) };
+            console.log(`Initialized data for channel ${event.channel_id}`);
         }
-        const channel = channelData[join.channel_id];
-        
+        const channel = channelData[event.channel_id];
+
         if (channel.users.size > 0) {
-            const duration = (new Date(join.timestamp) - channel.lastTimestamp) / 1000;
-            channel.totalUserTime += duration * channel.users.size;
-            console.log(`Join event: channel ${join.channel_id}, duration ${duration}s, users ${channel.users.size}, totalUserTime ${channel.totalUserTime}s`);
+            const duration = (new Date(event.timestamp) - channel.lastTimestamp) / 1000;
+            if (duration < 0) {
+                console.error(`Negative duration detected: event timestamp ${event.timestamp}, lastTimestamp ${channel.lastTimestamp}`);
+            } else {
+                channel.totalUserTime += duration * channel.users.size;
+                console.log(`${event.eventType} event: channel ${event.channel_id}, duration ${duration}s, users ${channel.users.size}, totalUserTime ${channel.totalUserTime}s`);
+            }
         }
 
-        channel.lastTimestamp = new Date(join.timestamp);
-        channel.users.add(join.user_id);
-        console.log(`User ${join.user_id} joined channel ${join.channel_id}, users now: ${channel.users.size}`);
+        channel.lastTimestamp = new Date(event.timestamp);
 
-        channel.peakUsers = Math.max(channel.peakUsers, channel.users.size);
-        console.log(`Updated peak users for channel ${join.channel_id} to ${channel.peakUsers}`);
-    }
-
-    // Process each leave event
-    for (const leave of leaves) {
-        console.log(`Processing leave event: user ${leave.user_id} left channel ${leave.channel_id} at ${leave.timestamp}`);
-        if (channelData[leave.channel_id] && channelData[leave.channel_id].users.has(leave.user_id)) {
-            const channel = channelData[leave.channel_id];
-            const duration = (new Date(leave.timestamp) - channel.lastTimestamp) / 1000;
-            if (duration < 0) {
-                console.error(`Negative duration detected: leave timestamp ${leave.timestamp}, lastTimestamp ${channel.lastTimestamp}`);
+        if (event.eventType === 'join') {
+            channel.users.add(event.user_id);
+            console.log(`User ${event.user_id} joined channel ${event.channel_id}, users now: ${channel.users.size}`);
+            channel.peakUsers = Math.max(channel.peakUsers, channel.users.size);
+            console.log(`Updated peak users for channel ${event.channel_id} to ${channel.peakUsers}`);
+        } else if (event.eventType === 'leave') {
+            if (channel.users.has(event.user_id)) {
+                channel.users.delete(event.user_id);
+                console.log(`User ${event.user_id} left channel ${event.channel_id}, users now: ${channel.users.size}`);
+            } else {
+                console.error(`User ${event.user_id} leave event without a corresponding join event in channel ${event.channel_id}`);
             }
-            channel.totalUserTime += duration * channel.users.size;
-            console.log(`Leave event: channel ${leave.channel_id}, duration ${duration}s, users ${channel.users.size}, totalUserTime ${channel.totalUserTime}s`);
-            channel.users.delete(leave.user_id);
-            channel.lastTimestamp = new Date(leave.timestamp);
-            console.log(`User ${leave.user_id} left channel ${leave.channel_id}, users now: ${channel.users.size}`);
         }
     }
 

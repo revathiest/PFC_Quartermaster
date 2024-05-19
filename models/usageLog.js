@@ -14,6 +14,10 @@ module.exports = (sequelize) => {
             type: DataTypes.STRING,
             allowNull: false,
         },
+        message_jid: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
         message_content: {
             type: DataTypes.TEXT,
             allowNull: true,

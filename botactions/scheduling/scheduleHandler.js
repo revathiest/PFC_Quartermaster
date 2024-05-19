@@ -1,4 +1,4 @@
-const ScheduledAnnouncement = require('../../models/scheduledAnnouncementModel');
+const ScheduledAnnouncement = require('../../models/scheduledAnnouncement');
 const { getChannelNameById, getGuildNameById } = require('../utilityFunctions');
 
 const saveAnnouncementToDatabase = async (channelId, guildId, embedData, time, client) => {

@@ -61,19 +61,20 @@ async function generateVoiceActivityReport(serverId) {
 
     // Process each join event
     for (const join of joins) {
+        console.log(`Processing join event: user ${join.user_id} joined channel ${join.channel_id} at ${join.timestamp}`);
         if (!channelData[join.channel_id]) {
-            channelData[join.channel_id] = { users: new Set(), peakUsers: 0, totalUserTime: 0, lastTimestamp: join.timestamp };
+            channelData[join.channel_id] = { users: new Set(), peakUsers: 0, totalUserTime: 0, lastTimestamp: new Date(join.timestamp) };
             console.log(`Initialized data for channel ${join.channel_id}`);
         }
         const channel = channelData[join.channel_id];
         
         if (channel.users.size > 0) {
-            const duration = (new Date(join.timestamp) - new Date(channel.lastTimestamp)) / 1000;
+            const duration = (new Date(join.timestamp) - channel.lastTimestamp) / 1000;
             channel.totalUserTime += duration * channel.users.size;
             console.log(`Join event: channel ${join.channel_id}, duration ${duration}s, users ${channel.users.size}, totalUserTime ${channel.totalUserTime}s`);
         }
 
-        channel.lastTimestamp = join.timestamp;
+        channel.lastTimestamp = new Date(join.timestamp);
         channel.users.add(join.user_id);
         console.log(`User ${join.user_id} joined channel ${join.channel_id}, users now: ${channel.users.size}`);
 
@@ -83,13 +84,17 @@ async function generateVoiceActivityReport(serverId) {
 
     // Process each leave event
     for (const leave of leaves) {
+        console.log(`Processing leave event: user ${leave.user_id} left channel ${leave.channel_id} at ${leave.timestamp}`);
         if (channelData[leave.channel_id] && channelData[leave.channel_id].users.has(leave.user_id)) {
             const channel = channelData[leave.channel_id];
-            const duration = (new Date(leave.timestamp) - new Date(channel.lastTimestamp)) / 1000;
+            const duration = (new Date(leave.timestamp) - channel.lastTimestamp) / 1000;
+            if (duration < 0) {
+                console.error(`Negative duration detected: leave timestamp ${leave.timestamp}, lastTimestamp ${channel.lastTimestamp}`);
+            }
             channel.totalUserTime += duration * channel.users.size;
             console.log(`Leave event: channel ${leave.channel_id}, duration ${duration}s, users ${channel.users.size}, totalUserTime ${channel.totalUserTime}s`);
             channel.users.delete(leave.user_id);
-            channel.lastTimestamp = leave.timestamp;
+            channel.lastTimestamp = new Date(leave.timestamp);
             console.log(`User ${leave.user_id} left channel ${leave.channel_id}, users now: ${channel.users.size}`);
         }
     }
@@ -98,7 +103,7 @@ async function generateVoiceActivityReport(serverId) {
     for (const channelId in channelData) {
         const channel = channelData[channelId];
         if (channel.users.size > 0) {
-            const duration = (currentTime - new Date(channel.lastTimestamp)) / 1000;
+            const duration = (currentTime - channel.lastTimestamp) / 1000;
             channel.totalUserTime += duration * channel.users.size;
             console.log(`Ongoing session: channel ${channelId}, duration ${duration}s, users ${channel.users.size}, totalUserTime ${channel.totalUserTime}s`);
         }
@@ -109,7 +114,7 @@ async function generateVoiceActivityReport(serverId) {
     // Calculate the average users and prepare the final results
     for (const channelId in channelData) {
         const { peakUsers, totalUserTime, lastTimestamp } = channelData[channelId];
-        const activeDuration = (currentTime - new Date(lastTimestamp)) / 1000;
+        const activeDuration = (currentTime - lastTimestamp) / 1000;
         const averageUsers = (activeDuration > 0) ? totalUserTime / activeDuration : "N/A";
         console.log(`Channel ${channelId} summary: peakUsers ${peakUsers}, totalUserTime ${totalUserTime}s, activeDuration ${activeDuration}s, averageUsers ${averageUsers}`);
         results.push({

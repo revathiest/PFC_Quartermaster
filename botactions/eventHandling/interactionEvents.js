@@ -71,12 +71,19 @@ async function handleInteraction(interaction, client) {
         await handleSelectMenu(interaction, client);
     } else if (interaction.isModalSubmit()) {
         try {
+            let commandName = 'unknown';
+            try{
+                commandName = interaction.message.interaction.commandName;
+            } catch (error){
+                console.error('Command not known for Select Menu');
+            };
+
             // Log the modal submit interaction to the database
             await UsageLog.create({
                 user_id: interaction.user.id,
                 interaction_type: 'modal_submit',
                 event_type: 'modal_submit',
-                command_name: interaction.message.interaction.commandName,
+                command_name: commandName,
                 channel_id: interaction.channel.id,
                 server_id: serverId,
                 event_time: new Date(),

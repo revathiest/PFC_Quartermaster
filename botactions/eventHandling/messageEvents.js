@@ -24,7 +24,6 @@ module.exports = {
         } catch (error) {
             console.error('Error logging message:', error);
         }
-
         // Process the message content
         const content = message.content;
         const words = content.split(' ');

@@ -79,7 +79,6 @@ module.exports = {
             } catch (error) {
                 console.error('Error logging modal submit interaction:', error);
             }
-
             await handleModalSubmit(interaction, client);
         } else {
             console.log('Received an unsupported interaction type.');

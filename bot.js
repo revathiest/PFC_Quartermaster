@@ -35,7 +35,7 @@ const initializeBot = async () => {
     client.on("messageCreate", message => handleMessageCreate(message, client));
 
     client.on('messageReactionAdd', (reaction, user) => handleReactionAdd(reaction, user));
-    
+  
     client.on('messageReactionRemove', (reaction, user) => handleReactionRemove(reaction, user));
 
     client.on("voiceStateUpdate", (oldState, newState) => handleVoiceStateUpdate(oldState, newState));

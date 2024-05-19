@@ -71,7 +71,7 @@ async function generateVoiceActivityReport(serverId) {
     for (const event of events) {
         console.log(`Processing ${event.eventType} event: user ${event.user_id} ${event.eventType} channel ${event.channel_id} at ${event.timestamp}`);
         if (!channelData[event.channel_id]) {
-            channelData[event.channel_id] = { users: new Set(), peakUsers: 0, totalUserTime: 0, lastTimestamp: new Date(event.timestamp) };
+            channelData[event.channel_id] = { users: new Set(), peakUsers: 0, totalUserTime: 0, totalActiveTime: 0, lastTimestamp: new Date(event.timestamp) };
             console.log(`Initialized data for channel ${event.channel_id}`);
         }
         const channel = channelData[event.channel_id];
@@ -82,7 +82,8 @@ async function generateVoiceActivityReport(serverId) {
                 console.error(`Negative duration detected: event timestamp ${event.timestamp}, lastTimestamp ${channel.lastTimestamp}`);
             } else {
                 channel.totalUserTime += duration * channel.users.size;
-                console.log(`${event.eventType} event: channel ${event.channel_id}, duration ${duration}s, users ${channel.users.size}, totalUserTime ${channel.totalUserTime}s`);
+                channel.totalActiveTime += duration;
+                console.log(`${event.eventType} event: channel ${event.channel_id}, duration ${duration}s, users ${channel.users.size}, totalUserTime ${channel.totalUserTime}s, totalActiveTime ${channel.totalActiveTime}s`);
             }
         }
 
@@ -109,7 +110,8 @@ async function generateVoiceActivityReport(serverId) {
         if (channel.users.size > 0) {
             const duration = (currentTime - channel.lastTimestamp) / 1000;
             channel.totalUserTime += duration * channel.users.size;
-            console.log(`Ongoing session: channel ${channelId}, duration ${duration}s, users ${channel.users.size}, totalUserTime ${channel.totalUserTime}s`);
+            channel.totalActiveTime += duration;
+            console.log(`Ongoing session: channel ${channelId}, duration ${duration}s, users ${channel.users.size}, totalUserTime ${channel.totalUserTime}s, totalActiveTime ${channel.totalActiveTime}s`);
         }
     }
 
@@ -117,10 +119,9 @@ async function generateVoiceActivityReport(serverId) {
 
     // Calculate the average users and prepare the final results
     for (const channelId in channelData) {
-        const { peakUsers, totalUserTime, lastTimestamp } = channelData[channelId];
-        const activeDuration = (currentTime - lastTimestamp) / 1000;
-        const averageUsers = (activeDuration > 0) ? totalUserTime / activeDuration : "N/A";
-        console.log(`Channel ${channelId} summary: peakUsers ${peakUsers}, totalUserTime ${totalUserTime}s, activeDuration ${activeDuration}s, averageUsers ${averageUsers}`);
+        const { peakUsers, totalUserTime, totalActiveTime } = channelData[channelId];
+        const averageUsers = (totalActiveTime > 0) ? totalUserTime / totalActiveTime : "N/A";
+        console.log(`Channel ${channelId} summary: peakUsers ${peakUsers}, totalUserTime ${totalUserTime}s, totalActiveTime ${totalActiveTime}s, averageUsers ${averageUsers}`);
         results.push({
             channel_id: channelId,
             peak_users: peakUsers,

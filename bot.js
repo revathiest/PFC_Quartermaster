@@ -5,7 +5,7 @@ const fs = require('fs'); // imports the file io library
 const { initClient } = require('./botactions/initClient');
 const interactionHandler = require('./botactions/eventHandling/interactionEvents');
 const { handleMessageCreate } = require('./botactions/eventHandling/messageEvents');
-const { handleReactionAdd } = require('./botactions/eventHandling/reactionEvents');
+const { handleReactionAdd, handleReactionRemove } = require('./botactions/eventHandling/reactionEvents');
 const { handleVoiceStateUpdate } = require('./botactions/eventHandling/voiceEvents');
 const { registerChannels } = require('./botactions/channelManagement/channelRegistry');
 const { deleteMessages } = require('./botactions/channelManagement/messageCleanup');
@@ -43,6 +43,7 @@ const initializeBot = async () => {
     client.on("messageCreate", message => handleMessageCreate(message, client));
 
     client.on('messageReactionAdd', (reaction, user) => handleReactionAdd(reaction, user));
+    client.on('messageReactionRemove', (reaction, user) => handleReactionRemove(reaction, user));
 
     client.on("voiceStateUpdate", (oldState, newState) => handleVoiceStateUpdate(oldState, newState));
 

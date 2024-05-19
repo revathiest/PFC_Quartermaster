@@ -29,6 +29,7 @@ module.exports = (sequelize) => {
         reaction_type: {
             type: DataTypes.STRING,
             allowNull: true,
+            charset: 'utf8mb4', // Ensures the field can store emojis
         },
         device_info: {
             type: DataTypes.STRING,

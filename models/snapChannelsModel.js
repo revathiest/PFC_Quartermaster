@@ -1,4 +1,5 @@
 const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
 
 module.exports = (sequelize) => {
     const SnapChannel = sequelize.define('SnapChannel', {

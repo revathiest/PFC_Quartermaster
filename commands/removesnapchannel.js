@@ -12,6 +12,7 @@ module.exports = {
                 .setDescription('The snap channel to remove')
                 .setRequired(true)),
     async execute(interaction) {
+        const memberRoles = interaction.member.roles.cache.map(role => role.name);
         if (!allowedRoles.some(role => memberRoles.includes(role))) {
             await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
             return;

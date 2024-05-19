@@ -16,6 +16,7 @@ module.exports = {
                 .setDescription('Purge time in days (default: 30)')
                 .setRequired(false)),
     async execute(interaction) {
+        const memberRoles = interaction.member.roles.cache.map(role => role.name);
         if (!allowedRoles.some(role => memberRoles.includes(role))) {
             await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
             return;

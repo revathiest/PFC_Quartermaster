@@ -1,6 +1,8 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { addSnapChannel } = require('../botactions/channelManagement/snapChannels');
 
+const allowedRoles = ['Admiral', 'Fleet Admiral'];
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('addsnapchannel')
@@ -14,6 +16,10 @@ module.exports = {
                 .setDescription('Purge time in days (default: 30)')
                 .setRequired(false)),
     async execute(interaction) {
+        if (!allowedRoles.some(role => memberRoles.includes(role))) {
+            await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+            return;
+        }
         try {
             const channel = interaction.options.getChannel('channel');
             const purgeTimeInDays = interaction.options.getInteger('purgetime') || 30; // Default to 30 days

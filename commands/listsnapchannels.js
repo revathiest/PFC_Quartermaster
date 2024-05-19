@@ -1,11 +1,17 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { listSnapChannels } = require('../botactions/channelManagement/snapChannels');
 
+const allowedRoles = ['Admiral', 'Fleet Admiral'];
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('listsnapchannels')
         .setDescription('Lists all snap channels'),
     async execute(interaction) {
+        if (!allowedRoles.some(role => memberRoles.includes(role))) {
+            await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+            return;
+        }
         try {
             const channels = await listSnapChannels({ where: { serverId: interaction.guild.id } });
             const channelList = channels.map(channel => {

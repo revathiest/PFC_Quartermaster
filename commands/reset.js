@@ -1,7 +1,4 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { exec } = require('child_process');
-const { InteractionCollector } = require('discord.js');
-const { join } = require('path');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -20,15 +17,19 @@ module.exports = {
     try {
       console.log(`Server shut down initiated by: ${username}`);
       await interaction.reply('Resetting...');
-  
+
       // Unregister all commands
       const globalCommands = await interaction.client.application.commands.fetch();
       const guildCommands = await interaction.guild.commands.fetch();
 
       try {
-        await Promise.all(guildCommands.map(command => command.delete()));
+        await Promise.all([
+          ...globalCommands.map(command => command.delete()),
+          ...guildCommands.map(command => command.delete())
+        ]);
+
         console.log('All commands deleted successfully.');
-        console.log('Completing server shutdown.')
+        console.log('Completing server shutdown.');
         process.exit(0);
       } catch (error) {
         console.error('Error occurred while deleting commands:', error);
@@ -37,10 +38,14 @@ module.exports = {
     
     } catch (error) {
       console.error(`Error occurred while trying to shut down the bot: ${error}`);
-      await interaction.reply({
-        content: 'An error occurred while trying to shut down the bot.',
-        ephemeral: true
-      });
+      try {
+        await interaction.editReply({
+          content: 'An error occurred while trying to shut down the bot.',
+          ephemeral: true
+        });
+      } catch (editError) {
+        console.error('Failed to edit the interaction reply:', editError);
+      }
     }
   }
 };

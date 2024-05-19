@@ -49,18 +49,19 @@ module.exports = {
                     break;
                 case 'channel':
                     if (!channelOption) {
-                        return interaction.editReply('You need to specify a channel for the channel report.');
+                        return interaction.editReply({content: 'You need to specify a channel for the channel report.', ephemeral: true});
                     }
                     const channelId = channelOption.id;
                     report = await generateReportByChannel(serverId, channelId);
                     description = `This report breaks down each type of event that has happened in the channel ${channelOption.name} over the past 7 days.`;
                     break;
                 default:
-                    return interaction.editReply('Invalid report type.');
+                    await interaction.editReply({content: 'Invalid report type.', ephemeral: true});
+                    return;
             }
 
             if (report.length === 0) {
-                return interaction.editReply(`No data found for ${reportType} report.`);
+                return interaction.editReply({content: `No data found for ${reportType} report.`, ephemeral: true});
             }
 
             const chunks = chunkArray(report, 10);
@@ -115,9 +116,9 @@ module.exports = {
                 }
 
                 if (index === 0) {
-                    await interaction.editReply({ embeds: [embed] });
+                    await interaction.editReply({ embeds: [embed], ephemeral: true });
                 } else {
-                    await interaction.followUp({ embeds: [embed] });
+                    await interaction.followUp({ embeds: [embed], ephemeral: true });
                 }
             }
         } catch (error) {

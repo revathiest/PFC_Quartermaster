@@ -43,6 +43,7 @@ module.exports = {
                 });
             }
         } else if (oldChannelId && newChannelId && oldChannelId !== newChannelId) {
+            console.log('Switched channels!')
             // User switched voice channels
             const joinLog = await VoiceLog.findOne({
                 where: {

@@ -7,7 +7,7 @@ module.exports = {
         .setDescription('Lists all snap channels'),
     async execute(interaction) {
         try {
-            const channels = await listSnapChannels();
+            const channels = await listSnapChannels({ where: { serverId: interaction.guild.id } });
             const channelList = channels.map(channel => {
                 const channelName = interaction.guild.channels.cache.get(channel.channelId)?.name || channel.channelId;
                 return `Channel: ${channelName}, Purge Time: ${channel.purgeTimeInDays} days, Server: ${interaction.guild.name}`;

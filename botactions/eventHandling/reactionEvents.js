@@ -40,7 +40,7 @@ module.exports = {
             });
             console.log('Reaction remove logged successfully');
         } catch (error) {
-            console.error('Error logging reaction add:', error);
+            console.error('Error logging reaction remove:', error); // Fix the error message here
         }
     }
 };

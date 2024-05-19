@@ -15,6 +15,7 @@ module.exports = {
                 user_id: message.author.id,
                 interaction_type: 'message',
                 event_type: 'message_create',
+                message_id: message.id,
                 message_content: message.content,
                 channel_id: message.channel.id,
                 server_id: serverId,

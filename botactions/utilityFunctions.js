@@ -1,4 +1,3 @@
-// Helper function to format time in HH:MM:SS
 function formatTime(seconds) {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);

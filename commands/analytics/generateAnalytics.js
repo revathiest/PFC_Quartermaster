@@ -3,6 +3,8 @@ const { Op } = require('sequelize');
 
 // Function to generate a usage report for the past 7 days
 async function generateUsageReport(serverId) {
+    console.log('Starting to generate usage report');
+
     const results = await UsageLog.findAll({
         attributes: [
             'channel_id',
@@ -17,11 +19,15 @@ async function generateUsageReport(serverId) {
         group: ['channel_id'],
         order: [[sequelize.fn('COUNT', sequelize.col('event_type')), 'DESC']],
     });
+
+    console.log('Finished generating usage report');
     return results.map(result => result.get());
 }
 
 // Function to generate a voice activity report for the past 7 days
 async function generateVoiceActivityReport(serverId) {
+    console.log('Starting to generate voice activity report');
+
     // Fetch voice join events from the past 7 days
     const joins = await VoiceLog.findAll({
         attributes: ['channel_id', 'user_id', 'timestamp'],
@@ -34,6 +40,7 @@ async function generateVoiceActivityReport(serverId) {
         },
         order: [['timestamp', 'ASC']]
     });
+    console.log(`Fetched ${joins.length} join events`);
 
     // Fetch voice leave events from the past 7 days
     const leaves = await VoiceLog.findAll({
@@ -47,30 +54,31 @@ async function generateVoiceActivityReport(serverId) {
         },
         order: [['timestamp', 'ASC']]
     });
+    console.log(`Fetched ${leaves.length} leave events`);
 
     const currentTime = new Date();
     const channelData = {};
 
     // Process each join event
     for (const join of joins) {
-        // Initialize channel data if not already present
         if (!channelData[join.channel_id]) {
             channelData[join.channel_id] = { users: new Set(), peakUsers: 0, totalUserTime: 0, lastTimestamp: join.timestamp };
+            console.log(`Initialized data for channel ${join.channel_id}`);
         }
         const channel = channelData[join.channel_id];
         
-        // Calculate duration since the last event if any users are present
         if (channel.users.size > 0) {
             const duration = (new Date(join.timestamp) - new Date(channel.lastTimestamp)) / 1000;
             channel.totalUserTime += duration * channel.users.size;
+            console.log(`Join event: channel ${join.channel_id}, duration ${duration}s, users ${channel.users.size}, totalUserTime ${channel.totalUserTime}s`);
         }
 
-        // Update last timestamp and add the user
         channel.lastTimestamp = join.timestamp;
         channel.users.add(join.user_id);
+        console.log(`User ${join.user_id} joined channel ${join.channel_id}, users now: ${channel.users.size}`);
 
-        // Update peak users if current number of users exceeds previous peak
         channel.peakUsers = Math.max(channel.peakUsers, channel.users.size);
+        console.log(`Updated peak users for channel ${join.channel_id} to ${channel.peakUsers}`);
     }
 
     // Process each leave event
@@ -79,8 +87,10 @@ async function generateVoiceActivityReport(serverId) {
             const channel = channelData[leave.channel_id];
             const duration = (new Date(leave.timestamp) - new Date(channel.lastTimestamp)) / 1000;
             channel.totalUserTime += duration * channel.users.size;
+            console.log(`Leave event: channel ${leave.channel_id}, duration ${duration}s, users ${channel.users.size}, totalUserTime ${channel.totalUserTime}s`);
             channel.users.delete(leave.user_id);
             channel.lastTimestamp = leave.timestamp;
+            console.log(`User ${leave.user_id} left channel ${leave.channel_id}, users now: ${channel.users.size}`);
         }
     }
 
@@ -90,6 +100,7 @@ async function generateVoiceActivityReport(serverId) {
         if (channel.users.size > 0) {
             const duration = (currentTime - new Date(channel.lastTimestamp)) / 1000;
             channel.totalUserTime += duration * channel.users.size;
+            console.log(`Ongoing session: channel ${channelId}, duration ${duration}s, users ${channel.users.size}, totalUserTime ${channel.totalUserTime}s`);
         }
     }
 
@@ -97,9 +108,10 @@ async function generateVoiceActivityReport(serverId) {
 
     // Calculate the average users and prepare the final results
     for (const channelId in channelData) {
-        const { peakUsers, totalUserTime, lastTimestamp, users } = channelData[channelId];
+        const { peakUsers, totalUserTime, lastTimestamp } = channelData[channelId];
         const activeDuration = (currentTime - new Date(lastTimestamp)) / 1000;
         const averageUsers = (activeDuration > 0) ? totalUserTime / activeDuration : "N/A";
+        console.log(`Channel ${channelId} summary: peakUsers ${peakUsers}, totalUserTime ${totalUserTime}s, activeDuration ${activeDuration}s, averageUsers ${averageUsers}`);
         results.push({
             channel_id: channelId,
             peak_users: peakUsers,
@@ -108,11 +120,14 @@ async function generateVoiceActivityReport(serverId) {
         });
     }
 
+    console.log('Finished generating voice activity report');
     return results;
 }
 
 // Function to generate a report for a specific channel
 async function generateReportByChannel(serverId, channelId) {
+    console.log(`Starting to generate report for channel ${channelId}`);
+
     const results = await UsageLog.findAll({
         attributes: [
             'event_type',
@@ -128,14 +143,10 @@ async function generateReportByChannel(serverId, channelId) {
         group: ['event_type'],
         order: [[sequelize.fn('COUNT', sequelize.col('event_type')), 'DESC']],
     });
+
+    console.log(`Finished generating report for channel ${channelId}`);
     return results.map(result => result.get());
 }
-
-module.exports = {
-    generateUsageReport,
-    generateVoiceActivityReport,
-    generateReportByChannel
-};
 
 // Helper function to format time in HH:MM:SS
 function formatTime(seconds) {

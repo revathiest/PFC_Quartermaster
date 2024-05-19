@@ -23,7 +23,6 @@ const saveAnnouncementToDatabase = async (channelId, guildId, embedData, time, c
 const getScheduledAnnouncements = async () => {
   try {
     const announcements = await ScheduledAnnouncement.findAll();
-    console.log(`Retrieved ${announcements.length} scheduled announcements from database`);
     return announcements;
   } catch (error) {
     console.error('Error retrieving scheduled announcements from database:', error);

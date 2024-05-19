@@ -2,11 +2,11 @@ const { VoiceLog } = require('../../config/database');
 
 module.exports = {
     handleVoiceStateUpdate: async function(oldState, newState) {
-        const userId = newState.id;
+        const userId = oldState.id || newState.id; // Ensure userId is captured correctly
         const newChannelId = newState.channelId;
         const oldChannelId = oldState.channelId;
-        const serverId = newState.guild.id;
-
+        const serverId = oldState.guild.id || newState.guild.id; // Ensure serverId is captured correctly
+console.log('something is happening!');
         if (!oldChannelId && newChannelId) {
             // User joined a voice channel
             await VoiceLog.create({
@@ -43,7 +43,6 @@ module.exports = {
                 });
             }
         } else if (oldChannelId && newChannelId && oldChannelId !== newChannelId) {
-            console.log('Switched channels!')
             // User switched voice channels
             const joinLog = await VoiceLog.findOne({
                 where: {
@@ -77,6 +76,15 @@ module.exports = {
                     channel_id: newChannelId,
                     server_id: serverId,
                     start_time: switchTimestamp,
+                });
+            } else {
+                // If there is no join log, create a new join log for the new channel
+                await VoiceLog.create({
+                    user_id: userId,
+                    event_type: 'voice_join',
+                    channel_id: newChannelId,
+                    server_id: serverId,
+                    start_time: new Date(),
                 });
             }
         }

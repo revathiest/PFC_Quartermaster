@@ -55,35 +55,41 @@ async function generateVoiceActivityReport(serverId) {
     for (const join of joins) {
         // Initialize channel data if not already present
         if (!channelData[join.channel_id]) {
-            channelData[join.channel_id] = { users: new Set(), peakUsers: 0, totalDuration: 0, totalUserTime: 0, lastTimestamp: join.timestamp };
+            channelData[join.channel_id] = { users: new Set(), peakUsers: 0, totalUserTime: 0, lastTimestamp: join.timestamp };
         }
-        // Add the user to the channel's user set
-        channelData[join.channel_id].users.add(join.user_id);
+        const channel = channelData[join.channel_id];
+        
+        // Calculate duration since the last event if any users are present
+        if (channel.users.size > 0) {
+            const duration = (new Date(join.timestamp) - new Date(channel.lastTimestamp)) / 1000;
+            channel.totalUserTime += duration * channel.users.size;
+        }
+
+        // Update last timestamp and add the user
+        channel.lastTimestamp = join.timestamp;
+        channel.users.add(join.user_id);
+
         // Update peak users if current number of users exceeds previous peak
-        channelData[join.channel_id].peakUsers = Math.max(channelData[join.channel_id].peakUsers, channelData[join.channel_id].users.size);
-        // Calculate the duration since the last event and update total user time
-        if (channelData[join.channel_id].users.size > 0) {
-            const duration = (new Date(join.timestamp) - new Date(channelData[join.channel_id].lastTimestamp)) / 1000;
-            channelData[join.channel_id].totalUserTime += duration * channelData[join.channel_id].users.size - 1;
-            channelData[join.channel_id].lastTimestamp = join.timestamp;
-        }
+        channel.peakUsers = Math.max(channel.peakUsers, channel.users.size);
     }
 
     // Process each leave event
     for (const leave of leaves) {
         if (channelData[leave.channel_id] && channelData[leave.channel_id].users.has(leave.user_id)) {
-            const duration = (new Date(leave.timestamp) - new Date(channelData[leave.channel_id].lastTimestamp)) / 1000;
-            channelData[leave.channel_id].totalUserTime += duration * channelData[leave.channel_id].users.size + 1;
-            channelData[leave.channel_id].users.delete(leave.user_id);
-            channelData[leave.channel_id].lastTimestamp = leave.timestamp;
+            const channel = channelData[leave.channel_id];
+            const duration = (new Date(leave.timestamp) - new Date(channel.lastTimestamp)) / 1000;
+            channel.totalUserTime += duration * channel.users.size;
+            channel.users.delete(leave.user_id);
+            channel.lastTimestamp = leave.timestamp;
         }
     }
 
     // Handle users still in the voice chat
     for (const channelId in channelData) {
-        if (channelData[channelId].users.size > 0) {
-            const duration = (currentTime - new Date(channelData[channelId].lastTimestamp)) / 1000;
-            channelData[channelId].totalUserTime += duration * channelData[channelId].users.size;
+        const channel = channelData[channelId];
+        if (channel.users.size > 0) {
+            const duration = (currentTime - new Date(channel.lastTimestamp)) / 1000;
+            channel.totalUserTime += duration * channel.users.size;
         }
     }
 
@@ -91,9 +97,9 @@ async function generateVoiceActivityReport(serverId) {
 
     // Calculate the average users and prepare the final results
     for (const channelId in channelData) {
-        const { peakUsers, totalUserTime, lastTimestamp } = channelData[channelId];
+        const { peakUsers, totalUserTime, lastTimestamp, users } = channelData[channelId];
         const activeDuration = (currentTime - new Date(lastTimestamp)) / 1000;
-        const averageUsers = totalUserTime / activeDuration || "N/A";
+        const averageUsers = (activeDuration > 0) ? totalUserTime / activeDuration : "N/A";
         results.push({
             channel_id: channelId,
             peak_users: peakUsers,
@@ -138,3 +144,9 @@ function formatTime(seconds) {
     const secs = Math.floor(seconds % 60);
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
+
+module.exports = {
+    generateUsageReport,
+    generateVoiceActivityReport,
+    generateReportByChannel
+};

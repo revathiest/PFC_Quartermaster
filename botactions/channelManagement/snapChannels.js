@@ -29,11 +29,14 @@ async function removeSnapChannel(channelId) {
 async function listSnapChannels() {
   try {
     const channels = await SnapChannel.findAll();
-    channels.forEach(channel => {
-      console.log(`Channel ID: ${channel.channelId}, Purge Time: ${channel.purgeTimeInDays} days, Server ID: ${channel.serverId}`);
-    });
+    return channels.map(channel => ({
+      channelId: channel.channelId,
+      purgeTimeInDays: channel.purgeTimeInDays,
+      serverId: channel.serverId,
+    }));
   } catch (error) {
     console.error('Error listing channels:', error);
+    throw error;
   }
 }
 

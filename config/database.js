@@ -13,13 +13,13 @@ const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.p
 // Import models after initializing sequelize
 const UsageLog = require('../models/usageLog')(sequelize);
 const VoiceLog = require('../models/voiceLog')(sequelize);
-const SnapChannel = require('../models/snapChannelsModel')(sequelize);
+const SnapChannel = require('../models/snapChannels')(sequelize);
 
 const initializeDatabase = async () => {
     try {
         // Ensure models are defined before syncing
-        require('../models/configModel');
-        require('../models/scheduledAnnouncementModel');
+        require('../models/config');
+        require('../models/scheduledAnnouncement');
 
         await sequelize.sync({ force: false });  // Set to true only if you want to drop and recreate tables
         console.log('Database synchronized');

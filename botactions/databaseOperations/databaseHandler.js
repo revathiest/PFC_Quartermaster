@@ -1,4 +1,4 @@
-const Config = require('../../models/configModel');
+const Config = require('../../models/config');
 
 const saveConfigToDatabase = async (config, botType) => {
   try {

@@ -36,7 +36,7 @@ module.exports = {
         let description;
 
         try {
-            await interaction.deferReply();
+            await interaction.deferReply({ephemeral: true});
 
             switch (reportType) {
                 case 'usage':

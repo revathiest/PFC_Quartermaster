@@ -1,8 +1,9 @@
 const { getScheduledAnnouncements, deleteScheduledAnnouncement } = require('./scheduleHandler');
 const { EmbedBuilder } = require('discord.js');
 const moment = require('moment');
+const { getChannelNameById, getGuildNameById } = require('../utilityFunctions');
 
-const checkScheduledAnnouncements = async (client) => {
+async function checkScheduledAnnouncements(client) {
     const announcements = await getScheduledAnnouncements();
     if (!Array.isArray(announcements)) {
         console.error('Scheduled announcements are not iterable:', announcements);
@@ -10,7 +11,6 @@ const checkScheduledAnnouncements = async (client) => {
     }
 
     const now = moment();
-    console.log(`Checking scheduled announcements at ${now.format('YYYY-MM-DD HH:mm:ss')}`);
 
     for (const announcement of announcements) {
         const announcementTime = moment(announcement.time, 'YYYY-MM-DD HH:mm:ss');
@@ -28,7 +28,12 @@ const checkScheduledAnnouncements = async (client) => {
                         .setAuthor({ name: 'Pyro Freelancer Corps' })
                         .setTimestamp()
                         .setFooter({ text: 'Official PFC Communication', iconURL: 'https://i.imgur.com/5sZV5QN.png' });
-                    console.log(`Sending announcement to channel ${announcement.channelId}: ${JSON.stringify(embedData)}`);
+
+                    // Resolve names
+                    const channelName = await getChannelNameById(announcement.channelId, client);
+                    const guildName = await getGuildNameById(announcement.guildId, client);
+
+                    console.log(`Sending announcement to channel ${channelName} in server ${guildName}`);
                     await channel.send({ embeds: [embed] });
                     await deleteScheduledAnnouncement(announcement.id);
                 } else {
@@ -39,8 +44,8 @@ const checkScheduledAnnouncements = async (client) => {
             }
         }
     }
-};
+}
 
-module.exports = (client) => {
-    setInterval(() => checkScheduledAnnouncements(client), 60000); // Check every minute
+module.exports = {
+    checkScheduledAnnouncements
 };

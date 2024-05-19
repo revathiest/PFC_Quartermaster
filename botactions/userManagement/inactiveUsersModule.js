@@ -1,5 +1,4 @@
-// inactiveUsersModule.js
-const path = require('path');
+const { formatDuration } = require('../../botactions/utilityFunctions')
 
 async function getInactiveUsersWithSingleRole(client) {
     const server = client.guilds.cache.first();
@@ -42,14 +41,6 @@ async function getInactiveUsersWithSingleRole(client) {
             console.log(`Channel ${client.chanBotLog} not found.`);
         }
     }
-}
-
-function formatDuration(duration) {
-    const seconds = Math.floor(duration / 1000) % 60;
-    const minutes = Math.floor(duration / 1000 / 60) % 60;
-    const hours = Math.floor(duration / 1000 / 60 / 60) % 24;
-    const days = Math.floor(duration / 1000 / 60 / 60 / 24);
-    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
 }
 
 module.exports = { getInactiveUsersWithSingleRole };

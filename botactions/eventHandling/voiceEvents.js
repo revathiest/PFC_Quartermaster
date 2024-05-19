@@ -1,13 +1,18 @@
 const { VoiceLog } = require('../../config/database');
+const {getChannelNameById, getUserNameById} = require('../../botactions/utilityFunctions')
 
 module.exports = {
-    handleVoiceStateUpdate: async function(oldState, newState) {
+    handleVoiceStateUpdate: async function(oldState, newState, client) {
         const userId = oldState.id || newState.id; // Ensure userId is captured correctly
         const newChannelId = newState.channelId;
         const oldChannelId = oldState.channelId;
         const serverId = oldState.guild.id || newState.guild.id; // Ensure serverId is captured correctly
 
-        console.log(`Voice state update: oldChannelId = ${oldChannelId}, newChannelId = ${newChannelId}`);
+        const newChannelName = getChannelNameById(newChannelId, client);
+        const oldChannelName = getChannelNameById(oldChannelId, client);
+        const userName = getUserNameById(userId, client);
+
+        console.log(`Voice state update: oldChannelId = ${oldChannelName}, newChannelId = ${newChannelName}`);
 
         if (!oldChannelId && newChannelId) {
             // User joined a voice channel
@@ -18,7 +23,7 @@ module.exports = {
                 server_id: serverId,
                 start_time: new Date(),
             });
-            console.log(`User ${userId} joined channel ${newChannelId}`);
+            console.log(`User ${userName} joined channel ${newChannelName}`);
         } else if (oldChannelId && !newChannelId) {
             // User left a voice channel
             const joinLog = await VoiceLog.findOne({
@@ -44,11 +49,11 @@ module.exports = {
                     start_time: joinTimestamp,
                     end_time: leaveTimestamp,
                 });
-                console.log(`User ${userId} left channel ${oldChannelId}`);
+                console.log(`User ${userName} left channel ${oldChannelName}`);
             }
         } else if (oldChannelId && newChannelId && oldChannelId !== newChannelId) {
             // User switched voice channels
-            console.log(`User ${userId} switched from channel ${oldChannelId} to channel ${newChannelId}`);
+            console.log(`User ${userName} switched from channel ${oldChannelName} to channel ${newChannelName}`);
             const joinLog = await VoiceLog.findOne({
                 where: {
                     user_id: userId,
@@ -73,7 +78,7 @@ module.exports = {
                     start_time: joinTimestamp,
                     end_time: switchTimestamp,
                 });
-                console.log(`Logged leave for user ${userId} from channel ${oldChannelId}`);
+                console.log(`Logged leave for user ${userName} from channel ${oldChannelName}`);
 
                 // Log join event for the new channel
                 await VoiceLog.create({
@@ -83,7 +88,7 @@ module.exports = {
                     server_id: serverId,
                     start_time: switchTimestamp,
                 });
-                console.log(`Logged join for user ${userId} to channel ${newChannelId}`);
+                console.log(`Logged join for user ${userName} to channel ${newChannelName}`);
             } else {
                 // If there is no join log, create a new join log for the new channel
                 await VoiceLog.create({
@@ -93,7 +98,7 @@ module.exports = {
                     server_id: serverId,
                     start_time: new Date(),
                 });
-                console.log(`No join log found for channel ${oldChannelId}, logged join for user ${userId} to channel ${newChannelId}`);
+                console.log(`No join log found for channel ${oldChannelName}, logged join for user ${userName} to channel ${newChannelName}`);
             }
         }
     }

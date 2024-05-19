@@ -43,9 +43,24 @@ async function getGuildNameById(guildId, client) {
     }
 }
 
+async function getUserNameById(userId, client) {
+    try {
+        const user = await client.users.fetch(userId);
+        if (user) {
+            return user.username;
+        } else {
+            throw new Error(`User with ID ${userId} not found.`);
+        }
+    } catch (error) {
+        console.error(`Error fetching user name for ID ${userId}:`, error);
+        throw error;
+    }
+}
+
 module.exports = {
     formatTime,
     formatDuration,
     getChannelNameById,
-    getGuildNameById
+    getGuildNameById,
+    getUserNameById
 };

@@ -38,7 +38,14 @@ const initializeBot = async () => {
   
     client.on('messageReactionRemove', (reaction, user) => handleReactionRemove(reaction, user));
 
-    client.on("voiceStateUpdate", (oldState, newState) => handleVoiceStateUpdate(oldState, newState, client));
+    client.on("voiceStateUpdate", (oldState, newState) => {
+        try {    
+        handleVoiceStateUpdate(oldState, newState, client);
+        } catch (error) {
+            console.error ('Error handling voice state update:', error.message);
+        }
+
+    });
 
     //***********************************************************/
     //Client Setup

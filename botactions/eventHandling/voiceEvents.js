@@ -1,5 +1,5 @@
 const { VoiceLog } = require('../../config/database');
-const {getChannelNameById, getUserNameById} = require('../../botactions/utilityFunctions')
+const { getChannelNameById, getUserNameById } = require('../../botactions/utilityFunctions');
 
 module.exports = {
     handleVoiceStateUpdate: async function(oldState, newState, client) {
@@ -8,9 +8,10 @@ module.exports = {
         const oldChannelId = oldState.channelId;
         const serverId = oldState.guild.id || newState.guild.id; // Ensure serverId is captured correctly
 
-        const newChannelName = getChannelNameById(newChannelId, client);
-        const oldChannelName = getChannelNameById(oldChannelId, client);
-        const userName = getUserNameById(userId, client);
+        // Fetch channel names and user name using the client object
+        const newChannelName = newChannelId ? await getChannelNameById(newChannelId, client) : null;
+        const oldChannelName = oldChannelId ? await getChannelNameById(oldChannelId, client) : null;
+        const userName = await getUserNameById(userId, client);
 
         console.log(`Voice state update: oldChannelId = ${oldChannelName}, newChannelId = ${newChannelName}`);
 

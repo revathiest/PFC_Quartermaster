@@ -1,5 +1,4 @@
 const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/database');
 
 module.exports = (sequelize) => {
     const SnapChannel = sequelize.define('SnapChannel', {
@@ -18,7 +17,7 @@ module.exports = (sequelize) => {
         },
         lastPurgeDate: {
             type: DataTypes.DATE,
-            defaultValue: sequelize.NOW
+            defaultValue: DataTypes.NOW
         }
     });
   

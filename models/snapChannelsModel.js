@@ -18,7 +18,7 @@ module.exports = (sequelize) => {
         },
         lastPurgeDate: {
             type: DataTypes.DATE,
-            defaultValue: Sequelize.NOW
+            defaultValue: sequelize.NOW
         }
     });
   

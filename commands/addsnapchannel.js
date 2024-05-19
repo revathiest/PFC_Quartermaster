@@ -1,27 +1,22 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { addSnapChannel } = require('../botactions/channelManagement');
-const { getChannelNameById, getGuildNameById } = require('../botactions/utilityFunctions');
+const { addSnapChannel } = require('../botactions/channelManagement/snapChannels');
 
 module.exports = {
     data: new SlashCommandBuilder()
-            .setName('addsnapchannel')
-            .setDescription('Add a new channel to be managed')
-            .addStringOption(option => 
-                option.setName('channelid')
-                    .setDescription('The ID of the channel')
-                    .setRequired(true))
-            .addIntegerOption(option =>
-                option.setName('purgetimeindays')
-                    .setDescription('Number of days after which messages will be purged')
-                    .setRequired(true)),
-    async execute(interaction, client) {
-        const options = interaction.options;
-        const channelId = options.getString('channelid');
-        const channelname = await getChannelNameById(channelId, client);
-        const purgeTimeInDays = options.getInteger('purgetimeindays');
-        const serverId = interaction.guild.id;
-        const guildName = getGuildNameById(serverId, client);
-        await addSnapChannel(channelId, purgeTimeInDays, serverId);
-        await interaction.reply(`Channel ${channelname} added with a purge time of ${purgeTimeInDays} days on server ${guildName}.`);
-    }
+        .setName('addsnapchannel')
+        .setDescription('Adds a snap channel')
+        .addStringOption(option =>
+            option.setName('channel')
+                .setDescription('The name of the snap channel')
+                .setRequired(true)),
+    async execute(interaction) {
+        try {
+            const channelName = interaction.options.getString('channel');
+            addSnapChannel(channelName);
+            await interaction.reply(`Snap channel ${channelName} added.`);
+        } catch (error) {
+            console.error(error);
+            await interaction.reply({ content: 'There was an error while adding the snap channel.', ephemeral: true });
+        }
+    },
 };

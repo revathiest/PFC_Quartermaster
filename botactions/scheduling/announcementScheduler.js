@@ -1,7 +1,7 @@
 const { getScheduledAnnouncements, deleteScheduledAnnouncement } = require('./scheduleHandler');
 const { EmbedBuilder } = require('discord.js');
 const moment = require('moment');
-const { getChannelNameById, getGuildNameById } = require('../utilityFunctions'); // Assume these utility functions exist
+const { getChannelNameById, getGuildNameById } = require('../utilityFunctions');
 
 async function checkScheduledAnnouncements(client) {
     const announcements = await getScheduledAnnouncements();

@@ -15,7 +15,7 @@ function formatDuration(milliseconds) {
     return `${days}d ${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`;
 }
 
- async function getChannelNameById(channelId, client) {
+async function getChannelNameById(channelId, client) {
     try {
         const channel = await client.channels.fetch(channelId);
         if (channel) {

@@ -5,24 +5,18 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('removesnapchannel')
         .setDescription('Removes a snap channel')
-        .addStringOption(option =>
+        .addChannelOption(option =>
             option.setName('channel')
-                .setDescription('The name of the snap channel')
+                .setDescription('The snap channel to remove')
                 .setRequired(true)),
     async execute(interaction) {
         try {
-            const channelName = interaction.options.getString('channel');
+            const channel = interaction.options.getChannel('channel');
             const guild = interaction.guild;
-            const channel = guild.channels.cache.find(ch => ch.name === channelName);
-
-            if (!channel) {
-                return await interaction.reply({ content: `Channel ${channelName} not found.`, ephemeral: true });
-            }
-
             const channelId = channel.id;
 
             await removeSnapChannel(channelId);
-            await interaction.reply(`Snap channel ${channelName} (ID: ${channelId}) removed.`);
+            await interaction.reply({ content: `Snap channel ${channel.name} removed.`, ephemeral: true });
         } catch (error) {
             console.error(error);
             await interaction.reply({ content: 'There was an error while removing the snap channel.', ephemeral: true });

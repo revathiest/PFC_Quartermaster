@@ -17,7 +17,7 @@ module.exports = {
     async execute(interaction, client) {
         const options = interaction.options;
         const channelId = options.getString('channelid');
-        const channelname = getChannelNameById(channelId, client);
+        const channelname = await getChannelNameById(channelId, client);
         const purgeTimeInDays = options.getInteger('purgetimeindays');
         const serverId = interaction.guild.id;
         const guildName = getGuildNameById(serverId, client);

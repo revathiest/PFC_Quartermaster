@@ -1,4 +1,5 @@
 const ScheduledAnnouncement = require('../../models/scheduledAnnouncementModel');
+const { getChannelNameById, getGuildNameById } = require('../utilityFunctions'); // Assume these utility functions exist
 
 const saveAnnouncementToDatabase = async (channelId, guildId, embedData, time) => {
   try {
@@ -8,7 +9,12 @@ const saveAnnouncementToDatabase = async (channelId, guildId, embedData, time) =
       embedData: JSON.stringify(embedData),
       time: String(time)  // Ensure time is a string and not null
     });
-    console.log(`Announcement saved to database: channelId=${channelId}, guildId=${guildId}, embedData=${JSON.stringify(embedData)}, time=${time}`);
+
+    // Resolve names
+    const channelName = await getChannelNameById(channelId);
+    const guildName = await getGuildNameById(guildId);
+
+    console.log(`Announcement saved to database: channel=${channelName}, server=${guildName}, time=${time}`);
   } catch (error) {
     console.error('Error saving announcement to database:', error);
   }

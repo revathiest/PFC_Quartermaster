@@ -13,6 +13,7 @@ module.exports = {
                 interaction_type: 'reaction',
                 event_type: 'reaction_add',
                 reaction_type: emoji.name, // Store the emoji name
+                message_id: reaction.message.id,
                 channel_id: message.channel.id,
                 server_id: serverId,
                 event_time: new Date(),

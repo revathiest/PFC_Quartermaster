@@ -1,7 +1,7 @@
 const ScheduledAnnouncement = require('../../models/scheduledAnnouncementModel');
-const { getChannelNameById, getGuildNameById } = require('../utilityFunctions'); // Assume these utility functions exist
+const { getChannelNameById, getGuildNameById } = require('../utilityFunctions');
 
-const saveAnnouncementToDatabase = async (channelId, guildId, embedData, time) => {
+const saveAnnouncementToDatabase = async (channelId, guildId, embedData, time, client) => {
   try {
     await ScheduledAnnouncement.create({
       channelId,
@@ -11,8 +11,8 @@ const saveAnnouncementToDatabase = async (channelId, guildId, embedData, time) =
     });
 
     // Resolve names
-    const channelName = await getChannelNameById(channelId);
-    const guildName = await getGuildNameById(guildId);
+    const channelName = await getChannelNameById(channelId, client);
+    const guildName = await getGuildNameById(guildId, client);
 
     console.log(`Announcement saved to database: channel=${channelName}, server=${guildName}, time=${time}`);
   } catch (error) {
@@ -23,6 +23,7 @@ const saveAnnouncementToDatabase = async (channelId, guildId, embedData, time) =
 const getScheduledAnnouncements = async () => {
   try {
     const announcements = await ScheduledAnnouncement.findAll();
+    console.log(`Retrieved ${announcements.length} scheduled announcements from database`);
     return announcements;
   } catch (error) {
     console.error('Error retrieving scheduled announcements from database:', error);

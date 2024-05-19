@@ -1,8 +1,9 @@
 const { getScheduledAnnouncements, deleteScheduledAnnouncement } = require('./scheduleHandler');
 const { EmbedBuilder } = require('discord.js');
 const moment = require('moment');
+const { getChannelNameById, getGuildNameById } = require('../utilityFunctions'); // Assume these utility functions exist
 
-async function checkScheduledAnnouncements(client){
+async function checkScheduledAnnouncements(client) {
     const announcements = await getScheduledAnnouncements();
     if (!Array.isArray(announcements)) {
         console.error('Scheduled announcements are not iterable:', announcements);
@@ -27,7 +28,12 @@ async function checkScheduledAnnouncements(client){
                         .setAuthor({ name: 'Pyro Freelancer Corps' })
                         .setTimestamp()
                         .setFooter({ text: 'Official PFC Communication', iconURL: 'https://i.imgur.com/5sZV5QN.png' });
-                    console.log(`Sending announcement to channel ${announcement.channelId}: ${JSON.stringify(embedData)}`);
+
+                    // Resolve names
+                    const channelName = await getChannelNameById(announcement.channelId, client);
+                    const guildName = await getGuildNameById(announcement.guildId, client);
+
+                    console.log(`Sending announcement to channel ${channelName} in server ${guildName}`);
                     await channel.send({ embeds: [embed] });
                     await deleteScheduledAnnouncement(announcement.id);
                 } else {
@@ -38,7 +44,7 @@ async function checkScheduledAnnouncements(client){
             }
         }
     }
-};
+}
 
 module.exports = {
     checkScheduledAnnouncements

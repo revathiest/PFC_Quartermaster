@@ -2,7 +2,6 @@ const ScheduledAnnouncement = require('../../models/scheduledAnnouncementModel')
 const { getChannelNameById, getGuildNameById } = require('../utilityFunctions');
 
 const saveAnnouncementToDatabase = async (channelId, guildId, embedData, time, client) => {
-  console.debug(`saveAnnouncementToDatabase called with channelId: ${channelId}, guildId: ${guildId}, time: ${time}, client: ${client}`);
   try {
     await ScheduledAnnouncement.create({
       channelId,

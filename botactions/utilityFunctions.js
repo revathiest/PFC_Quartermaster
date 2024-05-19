@@ -16,11 +16,9 @@ function formatDuration(milliseconds) {
 }
 
 async function getChannelNameById(channelId, client) {
-    console.debug(`getChannelNameById called with channelId: ${channelId}, client: ${client}`);
     try {
         const channel = await client.channels.fetch(channelId);
         if (channel) {
-            console.debug(`Fetched channel name: ${channel.name} for ID: ${channelId}`);
             return channel.name;
         } else {
             throw new Error(`Channel with ID ${channelId} not found.`);
@@ -32,11 +30,9 @@ async function getChannelNameById(channelId, client) {
 }
 
 async function getGuildNameById(guildId, client) {
-    console.debug(`getGuildNameById called with guildId: ${guildId}, client: ${client}`);
     try {
         const guild = await client.guilds.fetch(guildId);
         if (guild) {
-            console.debug(`Fetched guild name: ${guild.name} for ID: ${guildId}`);
             return guild.name;
         } else {
             throw new Error(`Guild with ID ${guildId} not found.`);

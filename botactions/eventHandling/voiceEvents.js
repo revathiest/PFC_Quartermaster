@@ -6,7 +6,9 @@ module.exports = {
         const newChannelId = newState.channelId;
         const oldChannelId = oldState.channelId;
         const serverId = oldState.guild.id || newState.guild.id; // Ensure serverId is captured correctly
-console.log('something is happening!');
+
+        console.log(`Voice state update: oldChannelId = ${oldChannelId}, newChannelId = ${newChannelId}`);
+
         if (!oldChannelId && newChannelId) {
             // User joined a voice channel
             await VoiceLog.create({
@@ -16,6 +18,7 @@ console.log('something is happening!');
                 server_id: serverId,
                 start_time: new Date(),
             });
+            console.log(`User ${userId} joined channel ${newChannelId}`);
         } else if (oldChannelId && !newChannelId) {
             // User left a voice channel
             const joinLog = await VoiceLog.findOne({
@@ -41,9 +44,11 @@ console.log('something is happening!');
                     start_time: joinTimestamp,
                     end_time: leaveTimestamp,
                 });
+                console.log(`User ${userId} left channel ${oldChannelId}`);
             }
         } else if (oldChannelId && newChannelId && oldChannelId !== newChannelId) {
             // User switched voice channels
+            console.log(`User ${userId} switched from channel ${oldChannelId} to channel ${newChannelId}`);
             const joinLog = await VoiceLog.findOne({
                 where: {
                     user_id: userId,
@@ -68,6 +73,7 @@ console.log('something is happening!');
                     start_time: joinTimestamp,
                     end_time: switchTimestamp,
                 });
+                console.log(`Logged leave for user ${userId} from channel ${oldChannelId}`);
 
                 // Log join event for the new channel
                 await VoiceLog.create({
@@ -77,6 +83,7 @@ console.log('something is happening!');
                     server_id: serverId,
                     start_time: switchTimestamp,
                 });
+                console.log(`Logged join for user ${userId} to channel ${newChannelId}`);
             } else {
                 // If there is no join log, create a new join log for the new channel
                 await VoiceLog.create({
@@ -86,6 +93,7 @@ console.log('something is happening!');
                     server_id: serverId,
                     start_time: new Date(),
                 });
+                console.log(`No join log found for channel ${oldChannelId}, logged join for user ${userId} to channel ${newChannelId}`);
             }
         }
     }

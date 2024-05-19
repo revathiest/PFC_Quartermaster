@@ -14,7 +14,7 @@ module.exports = (sequelize) => {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        message_jid: {
+        message_id: {
             type: DataTypes.STRING,
             allowNull: true,
         },

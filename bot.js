@@ -8,8 +8,7 @@ const { initializeDatabase } = require('./config/database');
 const { loadConfiguration } = require('./botactions/configLoader');
 const { checkScheduledAnnouncements, checkEvents } = require('./botactions/scheduling');
 const { getInactiveUsersWithSingleRole, handleRoleAssignment } = require('./botactions/userManagement');
-const { deleteEventFromDatabase, saveEventToDatabase, updateEventInDatabase } = require('./botactions/scheduledEventsHandler');
-const { handleUpdateEvent, handleDeleteEvent } = require('./botactions/eventHandling/scheduledEvents');
+const { handleCreateEvent, handleUpdateEvent, handleDeleteEvent } = require('./botactions/eventHandling/scheduledEvents');
 
 const botType = process.env.BOT_TYPE;
 

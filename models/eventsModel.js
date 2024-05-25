@@ -3,12 +3,12 @@ const { DataTypes } = require('sequelize');
 module.exports = (sequelize) => {
     const Event = sequelize.define('Event', {
         event_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.BIGINT,
             primaryKey: true,
             autoIncrement: true
         },
         server_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.BIGINT,
             allowNull: false
         },
         name: {

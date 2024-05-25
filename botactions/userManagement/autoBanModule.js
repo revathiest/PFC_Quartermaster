@@ -1,11 +1,14 @@
-const roleWatermelon = '999136367554613398'; // Role ID for the special role
+const watermelonRoles = ['999136367554613398', '1241068008529727529']; // Array of role IDs for the special roles
 
 async function handleRoleAssignment(oldMember, newMember, client) {
-    if (!oldMember.roles.cache.has(roleWatermelon) && newMember.roles.cache.has(roleWatermelon)) {
+    const hadWatermelonRole = watermelonRoles.some(role => oldMember.roles.cache.has(role));
+    const hasWatermelonRole = watermelonRoles.some(role => newMember.roles.cache.has(role));
+
+    if (!hadWatermelonRole && hasWatermelonRole) {
         try {
             const fetchedLogs = await newMember.guild.fetchAuditLogs({
                 limit: 1,
-                type: 'MEMBER_ROLE_UPDATE' // Discord Audit Log type for role updates
+                type: 25 // Correct integer value for MEMBER_ROLE_UPDATE
             });
 
             const roleChangeLog = fetchedLogs.entries.first();
@@ -17,12 +20,12 @@ async function handleRoleAssignment(oldMember, newMember, client) {
             const { executor, target } = roleChangeLog;
 
             if (target.id === newMember.id && executor.id === newMember.id) {
-                client.channels.cache.get(client.chanBotLog).send(`User ${newMember.user.username} has assigned themselves the watermelon role.`);
+                client.channels.cache.get(client.chanBotLog).send(`User ${newMember.user.username} has assigned themselves a watermelon role.`);
                 
-                await newMember.ban({ reason: 'Automatically banned for self-assigning the watermelon role.' });
+                await newMember.ban({ reason: 'Automatically banned for self-assigning a watermelon role.' });
                 client.channels.cache.get(client.chanBotLog).send(`Automatically banned ${newMember.user.tag}.`);
             } else {
-                client.channels.cache.get(client.chanBotLog).send(`${newMember.user.tag} was given the watermelon role by someone else.`);
+                client.channels.cache.get(client.chanBotLog).send(`${newMember.user.tag} was given a watermelon role by someone else.`);
             }
         } catch (error) {
             client.channels.cache.get(client.chanBotLog).send(`An error occurred when checking the audit logs or banning the user: ${error}`);

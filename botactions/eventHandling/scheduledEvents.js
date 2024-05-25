@@ -1,7 +1,7 @@
-const { UsageLog } = require('../../config/database');
+const { saveEventToDatabase, updateEventInDatabase, deleteEventFromDatabase } = require('../scheduledEventsHandler')
 
 
-async function handleCreateEvent (guildScheduledEvent) {
+async function handleCreateEvent (guildScheduledEvent, client) {
 
     const event = {
         server_id: guildScheduledEvent.guild.id,
@@ -22,7 +22,7 @@ async function handleCreateEvent (guildScheduledEvent) {
 
 }
 
-async function handleUpdateEvent(oldGuildScheduledEvent, newGuildScheduledEvent) {
+async function handleUpdateEvent(oldGuildScheduledEvent, newGuildScheduledEvent, client) {
 
     const eventId = oldGuildScheduledEvent.id; // Use the scheduled event ID
 
@@ -43,7 +43,7 @@ async function handleUpdateEvent(oldGuildScheduledEvent, newGuildScheduledEvent)
     }
 }
 
-async function handleDeleteEvent(guildScheduledEvent) {
+async function handleDeleteEvent(guildScheduledEvent, client) {
     const eventId = guildScheduledEvent.id; // Use the scheduled event ID
     
     try {

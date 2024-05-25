@@ -42,12 +42,12 @@ const initializeBot = async () => {
     client.on("voiceStateUpdate", (oldState, newState) => handleVoiceStateUpdate(oldState, newState, client));
 
     // Event listener for scheduled event creation
-    client.on('guildScheduledEventCreate', async (guildScheduledEvent) => handleCreateEvent(guildScheduledEvent));
+    client.on('guildScheduledEventCreate', async (guildScheduledEvent) => handleCreateEvent(guildScheduledEvent, client));
     
-    client.on('guildScheduledEventUpdate', async (oldGuildScheduledEvent, newGuildScheduledEvent) => handleUpdateEvent(oldGuildScheduledEvent,newGuildScheduledEvent));
+    client.on('guildScheduledEventUpdate', async (oldGuildScheduledEvent, newGuildScheduledEvent) => handleUpdateEvent(oldGuildScheduledEvent,newGuildScheduledEvent, client));
     
     // Event listener for scheduled event deletion
-    client.on('guildScheduledEventDelete', async (guildScheduledEvent) => handleDeleteEvent(guildScheduledEvent));
+    client.on('guildScheduledEventDelete', async (guildScheduledEvent) => handleDeleteEvent(guildScheduledEvent, client));
 
     //***********************************************************/
     //Client Setup

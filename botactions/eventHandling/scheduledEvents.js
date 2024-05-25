@@ -4,6 +4,7 @@ const { saveEventToDatabase, updateEventInDatabase, deleteEventFromDatabase } = 
 async function handleCreateEvent (guildScheduledEvent, client) {
 
     const event = {
+        event_id: guildScheduledEvent.id,
         server_id: guildScheduledEvent.guild.id,
         name: guildScheduledEvent.name,
         description: guildScheduledEvent.description,

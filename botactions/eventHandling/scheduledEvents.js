@@ -1,6 +1,4 @@
-const { now } = require('sequelize/types/utils');
 const { saveEventToDatabase, updateEventInDatabase, deleteEventFromDatabase } = require('../scheduledEventsHandler')
-
 
 async function handleCreateEvent (guildScheduledEvent, client) {
 

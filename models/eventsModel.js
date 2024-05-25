@@ -45,7 +45,7 @@ module.exports = (sequelize) => {
         }
     }, {
         timestamps: false,
-        tableName: 'events'
+        tableName: 'Events'
     });
 
     return Event;

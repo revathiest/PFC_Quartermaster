@@ -54,6 +54,20 @@ async function handleDeleteEvent(guildScheduledEvent, client) {
     } catch (error) {
         console.error('Error deleting scheduled event from database:', error);
     }
+}
+
+function getStatus(event) {
+    const now = moment();
+    const startTime = moment(event.scheduledStartTimestamp);
+    const endTime = moment(event.scheduledEndTimestamp);
+
+    if (now.isBefore(startTime)) {
+        return 'upcoming';
+    } else if (now.isBetween(startTime, endTime)) {
+        return 'active';
+    } else if (now.isAfter(endTime)) {
+        return 'ended';
+    }
 };
 
 

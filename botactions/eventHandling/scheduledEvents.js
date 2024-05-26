@@ -10,7 +10,8 @@ async function handleCreateEvent (guildScheduledEvent, client) {
         start_time: guildScheduledEvent.scheduledStartTimestamp,
         end_time: guildScheduledEvent.scheduledEndTimestamp,
         event_coordinator: guildScheduledEvent.creator.username,
-        location: guildScheduledEvent.location
+        location: guildScheduledEvent.location,
+        status: getStatus(guildScheduledEvent)
     };
 
     try {
@@ -32,7 +33,8 @@ async function handleUpdateEvent(oldGuildScheduledEvent, newGuildScheduledEvent,
         start_time: newGuildScheduledEvent.scheduledStartTimestamp,
         end_time: newGuildScheduledEvent.scheduledEndTimestamp,
         event_coordinator: newGuildScheduledEvent.creator.username,
-        location: newGuildScheduledEvent.location
+        location: newGuildScheduledEvent.location,
+        status: getStatus(guildScheduledEvent)
     };
 
     try {

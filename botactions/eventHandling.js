@@ -8,5 +8,5 @@ module.exports = {
     handleMessageCreate,
     handleReactionAdd,
     handleReactionRemove,
-    handleVoiceStateUpdate,
+    handleVoiceStateUpdate
 }

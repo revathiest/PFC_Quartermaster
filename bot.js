@@ -7,7 +7,8 @@ const { registerCommands } = require('./botactions/commandHandling/commandRegist
 const { initializeDatabase } = require('./config/database');
 const { loadConfiguration } = require('./botactions/configLoader');
 const { checkScheduledAnnouncements, checkEvents } = require('./botactions/scheduling');
-const { getInactiveUsersWithSingleRole, handleRoleAssignment } = require('./botactions/userManagement')
+const { getInactiveUsersWithSingleRole, handleRoleAssignment } = require('./botactions/userManagement');
+const { handleCreateEvent, handleUpdateEvent, handleDeleteEvent, syncEventsInDatabase } = require('./botactions/eventHandling/scheduledEvents');
 
 const botType = process.env.BOT_TYPE;
 
@@ -38,14 +39,15 @@ const initializeBot = async () => {
   
     client.on('messageReactionRemove', (reaction, user) => handleReactionRemove(reaction, user));
 
-    client.on("voiceStateUpdate", (oldState, newState) => {
-        try {    
-        handleVoiceStateUpdate(oldState, newState, client);
-        } catch (error) {
-            console.error ('Error handling voice state update:', error.message);
-        }
+    client.on("voiceStateUpdate", (oldState, newState) => handleVoiceStateUpdate(oldState, newState, client));
 
-    });
+    // Event listener for scheduled event creation
+    client.on('guildScheduledEventCreate', async (guildScheduledEvent) => handleCreateEvent(guildScheduledEvent, client));
+    
+    client.on('guildScheduledEventUpdate', async (oldGuildScheduledEvent, newGuildScheduledEvent) => handleUpdateEvent(oldGuildScheduledEvent,newGuildScheduledEvent, client));
+    
+    // Event listener for scheduled event deletion
+    client.on('guildScheduledEventDelete', async (guildScheduledEvent) => handleDeleteEvent(guildScheduledEvent, client));
 
     //***********************************************************/
     //Client Setup
@@ -76,6 +78,7 @@ const initializeBot = async () => {
             await registerChannels(client);  // Register channels
             await registerCommands(client);
             await getInactiveUsersWithSingleRole(client);
+            await syncEventsInDatabase(client);
             setInterval(() => checkScheduledAnnouncements(client), 60000);
             console.log('Bot setup complete and ready to go!');
             console.log('Database synced');

@@ -14,6 +14,7 @@ const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.p
 const UsageLog = require('../models/usageLog')(sequelize);
 const VoiceLog = require('../models/voiceLog')(sequelize);
 const SnapChannel = require('../models/snapChannels')(sequelize);
+const Event = require('../models/eventsModel')(sequelize);
 
 const initializeDatabase = async () => {
     try {
@@ -33,5 +34,6 @@ module.exports = {
     initializeDatabase,
     UsageLog,
     VoiceLog,
-    SnapChannel
+    SnapChannel,
+    Event
 };

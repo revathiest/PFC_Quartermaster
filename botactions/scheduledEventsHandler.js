@@ -85,6 +85,8 @@ async function syncEventsInDatabase(client) {
         // Fetch events from the client
         const servEvents = await getAllScheduledEventsFromClient(client);
 
+        console.log(servEvents);
+
         // Create a map of database events by ID for quick lookup
         const dbEventsMap = new Map(dbEvents.map(event => [event.event_id, event]));
 

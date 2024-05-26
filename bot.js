@@ -102,8 +102,6 @@ const initializeBot = async () => {
         } catch (error) {
             console.error('Error during channel registration:', error);
         }
-        
-        console.log("testing");
 
     });
 

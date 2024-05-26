@@ -30,7 +30,10 @@ async function handleUpdateEvent(oldGuildScheduledEvent, newGuildScheduledEvent,
 
     switch(eventStatus){
         case 3:
-            handleDeleteEvent(newGuildScheduledEvent)
+        case 4:
+            handleDeleteEvent(newGuildScheduledEvent);
+            return;
+        default:
     }
 
     const eventId = oldGuildScheduledEvent.id; // Use the scheduled event ID

@@ -26,6 +26,13 @@ async function handleCreateEvent (guildScheduledEvent, client) {
 
 async function handleUpdateEvent(oldGuildScheduledEvent, newGuildScheduledEvent, client) {
 
+    const eventStatus = getStatus(newGuildScheduledEvent.status);
+
+    switch(eventStatus){
+        case 3:
+            handleDeleteEvent(newGuildScheduledEvent)
+    }
+
     const eventId = oldGuildScheduledEvent.id; // Use the scheduled event ID
 
     const updatedEvent = {
@@ -46,7 +53,7 @@ async function handleUpdateEvent(oldGuildScheduledEvent, newGuildScheduledEvent,
     }
 }
 
-async function handleDeleteEvent(guildScheduledEvent, client) {
+async function handleDeleteEvent(guildScheduledEvent) {
     const eventId = guildScheduledEvent.id; // Use the scheduled event ID
     
     try {

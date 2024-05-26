@@ -83,7 +83,7 @@ function getStatus(numericStatus) {
         case 4:
             return 'canceled';
         default:
-            return 'unknown';
+            return 'upcoming';
     }
 }
 

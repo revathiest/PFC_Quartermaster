@@ -1,4 +1,4 @@
-const { saveEventToDatabase, updateEventInDatabase, deleteEventFromDatabase } = require('../scheduledEventsHandler')
+const { saveEventToDatabase, updateEventInDatabase, deleteEventFromDatabase, getAllEventsFromDatabase, syncEventsInDatabase} = require('../scheduledEventsHandler')
 
 async function handleCreateEvent (guildScheduledEvent, client) {
 
@@ -52,21 +52,13 @@ async function handleDeleteEvent(guildScheduledEvent, client) {
     } catch (error) {
         console.error('Error deleting scheduled event from database:', error);
     }
-}
-
-const getAllEventsFromDatabase = async () => {
-    try {
-        const events = await Event.findAll();
-        console.log('All events retrieved from database:', events);
-        return events;
-    } catch (error) {
-        console.error('Error retrieving all events from database:', error);
-    }
 };
+
 
 module.exports = {
     handleCreateEvent,
     handleUpdateEvent,
     handleDeleteEvent,
-    getAllEventsFromDatabase
+    getAllEventsFromDatabase,
+    syncEventsInDatabase
 }

@@ -3,3 +3,4 @@ config.json
 .vscode/launch.json
 variables.json
 *.zip
+node_modules/

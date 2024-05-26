@@ -58,6 +58,10 @@ async function handleDeleteEvent(guildScheduledEvent, client) {
 }
 function getStatus(event) {
     const now = moment();
+    console.log(event.scheduled_start_time);
+    console.log(event.scheduled_end_time);
+    console.log(event.actual_start_time);
+    console.log(event.actual_end_time);
     const startTime = event.actual_start_time ? moment(event.actual_start_time) : moment(event.scheduled_start_time);
     const endTime = event.actual_end_time ? moment(event.actual_end_time) : moment(event.scheduled_end_time);
 

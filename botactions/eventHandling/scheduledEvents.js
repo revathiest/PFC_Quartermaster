@@ -34,7 +34,7 @@ async function handleUpdateEvent(oldGuildScheduledEvent, newGuildScheduledEvent,
         end_time: newGuildScheduledEvent.scheduledEndTimestamp,
         event_coordinator: newGuildScheduledEvent.creator.username,
         location: newGuildScheduledEvent.location,
-        status: getStatus(guildScheduledEvent)
+        status: getStatus(newGuildScheduledEvent)
     };
 
     try {

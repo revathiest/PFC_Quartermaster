@@ -31,8 +31,8 @@ async function handleUpdateEvent(oldGuildScheduledEvent, newGuildScheduledEvent,
     console.log(eventStatus);
 
     switch(eventStatus){
-        case 3:
-        case 4:
+        case 'ended':
+        case 'canceled':
 
             console.log('Attempting to delete event from database.');
             handleDeleteEvent(newGuildScheduledEvent);
@@ -51,7 +51,7 @@ async function handleUpdateEvent(oldGuildScheduledEvent, newGuildScheduledEvent,
         end_time: newGuildScheduledEvent.scheduledEndTimestamp,
         event_coordinator: newGuildScheduledEvent.creator.username,
         location: newGuildScheduledEvent.location,
-        status: getStatus(newGuildScheduledEvent.status)
+        status: newGuildScheduledEvent.status
     };
 
     try {

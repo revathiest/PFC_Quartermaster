@@ -110,6 +110,8 @@ const initializeBot = async () => {
     } catch (error) {
         console.error('Failed to login:', error);
     }
+
+    console.log("done");
 };
 
 // Start the bot

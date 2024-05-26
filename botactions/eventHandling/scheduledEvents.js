@@ -35,7 +35,7 @@ async function handleUpdateEvent(oldGuildScheduledEvent, newGuildScheduledEvent,
         end_time: newGuildScheduledEvent.scheduledEndTimestamp,
         event_coordinator: newGuildScheduledEvent.creator.username,
         location: newGuildScheduledEvent.location,
-        status: getStatus(newGuildScheduledEvent)
+        status: getStatus(newGuildScheduledEvent.status)
     };
 
     try {
@@ -56,22 +56,18 @@ async function handleDeleteEvent(guildScheduledEvent, client) {
         console.error('Error deleting scheduled event from database:', error);
     }
 }
-function getStatus(event) {
-    const now = moment();
-    console.log(event);
-    console.log(event.scheduled_start_time);
-    console.log(event.scheduled_end_time);
-    console.log(event.actual_start_time);
-    console.log(event.actual_end_time);
-    const startTime = event.actual_start_time ? moment(event.actual_start_time) : moment(event.scheduled_start_time);
-    const endTime = event.actual_end_time ? moment(event.actual_end_time) : moment(event.scheduled_end_time);
-
-    if (now.isBefore(startTime)) {
-        return 'upcoming';
-    } else if (now.isBetween(startTime, endTime, null, '[]')) {
-        return 'active';
-    } else if (now.isAfter(endTime)) {
-        return 'ended';
+function getStatus(numericStatus) {
+    switch (numericStatus) {
+        case 1:
+            return 'upcoming';
+        case 2:
+            return 'active';
+        case 3:
+            return 'ended';
+        case 4:
+            return 'canceled';
+        default:
+            return 'unknown';
     }
 }
 

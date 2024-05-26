@@ -1,4 +1,5 @@
 const { saveEventToDatabase, updateEventInDatabase, deleteEventFromDatabase, getAllEventsFromDatabase, syncEventsInDatabase} = require('../scheduledEventsHandler')
+const moment = require('moment');
 
 async function handleCreateEvent (guildScheduledEvent, client) {
 

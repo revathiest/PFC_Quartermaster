@@ -102,6 +102,9 @@ const initializeBot = async () => {
         } catch (error) {
             console.error('Error during channel registration:', error);
         }
+
+        console.log('done...');
+        
     });
 
     // Login to Discord with your client's token
@@ -110,8 +113,6 @@ const initializeBot = async () => {
     } catch (error) {
         console.error('Failed to login:', error);
     }
-
-    console.log('done...');
 
 };
 

@@ -28,13 +28,19 @@ async function handleUpdateEvent(oldGuildScheduledEvent, newGuildScheduledEvent,
 
     const eventStatus = getStatus(newGuildScheduledEvent.status);
 
+    console.log(eventStatus);
+
     switch(eventStatus){
         case 3:
         case 4:
+
+            console.log('Attempting to delete event from database.');
             handleDeleteEvent(newGuildScheduledEvent);
             return;
         default:
     }
+
+    console.log('Updating event in database.')
 
     const eventId = oldGuildScheduledEvent.id; // Use the scheduled event ID
 

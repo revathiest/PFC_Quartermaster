@@ -26,7 +26,7 @@
     "sodium-native": "^3.4.1",
     "tweetnacl": "^1.0.3"
   },
-  "nodeVersion": "20.13.1",
+  "nodeVersion": "21.6.2",
   "devDependencies": {
     "@tsconfig/node10": "^1.0.9"
   }

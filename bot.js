@@ -81,7 +81,6 @@ const initializeBot = async () => {
             await syncEventsInDatabase(client);
             setInterval(() => checkScheduledAnnouncements(client), 60000);
             console.log('Bot setup complete and ready to go!');
-            console.log('Database synced');
 
             const logChannel = client.channels.cache.get(client.chanBotLog);
             if (logChannel) {
@@ -102,6 +101,7 @@ const initializeBot = async () => {
         } catch (error) {
             console.error('Error during channel registration:', error);
         }
+
     });
 
     // Login to Discord with your client's token
@@ -110,6 +110,7 @@ const initializeBot = async () => {
     } catch (error) {
         console.error('Failed to login:', error);
     }
+
 };
 
 // Start the bot

@@ -1,5 +1,7 @@
 runbot.cmd
 config.json
+.env
 .vscode/launch.json
 variables.json
 *.zip
+node_modules/

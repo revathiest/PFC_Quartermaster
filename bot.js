@@ -81,7 +81,6 @@ const initializeBot = async () => {
             await syncEventsInDatabase(client);
             setInterval(() => checkScheduledAnnouncements(client), 60000);
             console.log('Bot setup complete and ready to go!');
-            console.log('Database synced');
 
             const logChannel = client.channels.cache.get(client.chanBotLog);
             if (logChannel) {

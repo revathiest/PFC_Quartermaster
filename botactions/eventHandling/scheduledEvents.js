@@ -28,8 +28,6 @@ async function handleUpdateEvent(oldGuildScheduledEvent, newGuildScheduledEvent,
 
     const eventStatus = getStatus(newGuildScheduledEvent.status);
 
-    console.log(eventStatus);
-
     switch(eventStatus){
         case 'ended':
         case 'canceled':

@@ -25,7 +25,7 @@ module.exports = (sequelize) => {
         },
         end_time: {
             type: DataTypes.DATE,
-            allowNull: false
+            allowNull: true
         },
         event_coordinator: {
             type: DataTypes.STRING,

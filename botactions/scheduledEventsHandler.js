@@ -79,6 +79,8 @@ async function getAllScheduledEventsFromClient(client) {
 
 async function syncEventsInDatabase(client) {
     try {
+        const serverId = client.guilds.cache.first().id;
+
         // Fetch events from the database
         const dbEvents = await Event.findAll();
 
@@ -127,7 +129,7 @@ async function syncEventsInDatabase(client) {
         for (const dbEvent of dbEvents) {
             if (!servEventsMap.has(dbEvent.event_id)) {
                 await Event.destroy({
-                    where: { event_id: dbEvent.event_id }
+                    where: { event_id: dbEvent.event_id, server_id: serverId }
                 });
             }
         }

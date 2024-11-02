@@ -96,32 +96,35 @@ async function syncEventsInDatabase(client) {
 
             console.log('Syncing event:', servEvent.id);
             console.log(servEvent.name);
-
-            if (dbEvent) {
-                // If the event exists in the database, update it
-                await Event.update({
-                    name: servEvent.name,
-                    description: servEvent.description,
-                    start_time: new Date(servEvent.startTime),
-                    end_time: new Date(servEvent.endTime),
-                    event_coordinator: servEvent.coordinator,
-                    location: servEvent.location,
-                    updated_at: new Date()
-                }, {
-                    where: { event_id: servEvent.id }
-                });
-            } else {
-                // If the event does not exist in the database, create it
-                await Event.create({
-                    event_id: servEvent.id,
-                    server_id: servEvent.guildId,
-                    name: servEvent.name,
-                    description: servEvent.description,
-                    start_time: new Date(servEvent.startTime),
-                    end_time: new Date(servEvent.endTime),
-                    event_coordinator: servEvent.coordinator,
-                    location: servEvent.location
-                });
+            try {
+                if (dbEvent) {
+                    // If the event exists in the database, update it
+                    await Event.update({
+                        name: servEvent.name,
+                        description: servEvent.description,
+                        start_time: new Date(servEvent.startTime),
+                        end_time: new Date(servEvent.endTime),
+                        event_coordinator: servEvent.coordinator,
+                        location: servEvent.location,
+                        updated_at: new Date()
+                    }, {
+                        where: { event_id: servEvent.id }
+                    });
+                } else {
+                    // If the event does not exist in the database, create it
+                    await Event.create({
+                        event_id: servEvent.id,
+                        server_id: servEvent.guildId,
+                        name: servEvent.name,
+                        description: servEvent.description,
+                        start_time: new Date(servEvent.startTime),
+                        end_time: new Date(servEvent.endTime),
+                        event_coordinator: servEvent.coordinator,
+                        location: servEvent.location
+                    });
+                }
+            } catch {
+                console.log('Unable to sync... continuing...');
             }
         }
 

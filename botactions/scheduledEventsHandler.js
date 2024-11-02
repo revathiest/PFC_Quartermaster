@@ -94,6 +94,9 @@ async function syncEventsInDatabase(client) {
         for (const servEvent of servEvents) {
             const dbEvent = dbEventsMap.get(servEvent.id);
 
+            console.log('Syncing event:', servEvent.id);
+            console.log(servEvent.name);
+
             if (dbEvent) {
                 // If the event exists in the database, update it
                 await Event.update({

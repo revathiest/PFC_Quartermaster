@@ -17,8 +17,6 @@ const updateEventInDatabase = async (event_id, updatedEvent) => {
             return event;
         } else {
             console.log('Event not found');
-            console.log('Attempting to save as new event');
-            saveEventToDatabase(updatedEvent);
             return null;
         }
     } catch (error) {

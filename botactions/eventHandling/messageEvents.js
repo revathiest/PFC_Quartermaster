@@ -27,14 +27,15 @@ module.exports = {
         }
         // Process the message content
         const content = message.content;
+        console.log(content);
         const words = content.split(' ');
+        console.log(words);
         let allowMessage = true; // Placeholder for any additional conditions to allow message processing
 
         // Filter based on individual words
         for (const word in filter.words) {
-            const wordToCheck = word.toLowerCase();
-            console.log(wordToCheck);
-            if (filter.words.hasOwnProperty(wordToCheck) && words.includes(wordToCheck) && allowMessage) {
+            if (filter.words.hasOwnProperty(word) && words.includes(word) && allowMessage) {
+                console.log("Attempting to send message for " & word)
                 module.exports.performAction(message, client, filter.words[word]); // Use module.exports to reference performAction
                 return; // Stop processing after an action is performed
             }

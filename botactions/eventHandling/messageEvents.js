@@ -32,7 +32,8 @@ module.exports = {
 
         // Filter based on individual words
         for (const word in filter.words) {
-            const wordToCheck = word.toLowerCase()
+            const wordToCheck = word.toLowerCase();
+            console.log(wordToCheck);
             if (filter.words.hasOwnProperty(wordToCheck) && words.includes(wordToCheck) && allowMessage) {
                 module.exports.performAction(message, client, filter.words[word]); // Use module.exports to reference performAction
                 return; // Stop processing after an action is performed

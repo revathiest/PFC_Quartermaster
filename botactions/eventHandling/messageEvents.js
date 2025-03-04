@@ -27,7 +27,6 @@ module.exports = {
         }
         // Process the message content
         const content = message.content;
-        // const words = content.split(' ').map(word => word.toLowerCase());
         const lowerCaseContent = content.toLowerCase();
         let allowMessage = true; // Placeholder for any additional conditions to allow message processing
 

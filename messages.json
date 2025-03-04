@@ -18,7 +18,6 @@
 	  }
 	},
 	"regex": {
-		"good bot": { "action": "respond", "response": "Thank you. I try." }
 	}
 	
   }

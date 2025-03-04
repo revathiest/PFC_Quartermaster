@@ -44,20 +44,12 @@ module.exports = {
             }
         }
 
-        // Filter based on individual words
-        // for (const word in filter.words) {
-        //     if (filter.words.hasOwnProperty(word) && words.includes(word) && allowMessage) {
-        //         console.log('Attempting to send message for ' + word);
-        //         module.exports.performAction(message, client, filter.words[word]); // Use module.exports to reference performAction
-        //         return; // Stop processing after an action is performed
-        //     }
-        // }
-
         // Filter based on regular expressions
         for (const regex in filter.regex) {
             if (filter.regex.hasOwnProperty(regex)) {
                 const regexObj = new RegExp(regex, "i"); // Example assumes regex patterns are stored directly and "i" flag for case-insensitivity
                 if (regexObj.test(content) && allowMessage) {
+                    console.log('Matched regex:', regexPattern);
                     module.exports.performAction(message, client, filter.regex[regex]); // Use module.exports to reference performAction
                     return; // Stop processing after an action is performed
                 }

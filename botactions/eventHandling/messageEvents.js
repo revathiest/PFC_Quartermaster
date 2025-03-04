@@ -30,14 +30,10 @@ module.exports = {
         const lowerCaseContent = content.toLowerCase();
         let allowMessage = true; // Placeholder for any additional conditions to allow message processing
 
-        console.log(`Received message: "${message.content}"`);
-        console.log(`Checking against phrases:`, Object.keys(filter.words));
-
-
         //Filter based on individual words and phrases
         for (const phrase in filter.words) {
             if (filter.words.hasOwnProperty(phrase) && lowerCaseContent.includes(phrase) && allowMessage) {
-                console.log('Attempting to send message for ' + phrase);
+                console.log('Attempting to send message for "' + phrase + '"');
                 module.exports.performAction(message, client, filter.words[phrase]); // Use module.exports to reference performAction
                 return; // Stop processing after an action is performed
             }

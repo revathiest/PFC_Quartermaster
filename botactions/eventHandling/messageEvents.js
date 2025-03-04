@@ -27,17 +27,31 @@ module.exports = {
         }
         // Process the message content
         const content = message.content;
-        const words = content.split(' ').map(word => word.toLowerCase());
+        // const words = content.split(' ').map(word => word.toLowerCase());
+        const lowerCaseContent = content.toLowerCase();
         let allowMessage = true; // Placeholder for any additional conditions to allow message processing
 
-        // Filter based on individual words
-        for (const word in filter.words) {
-            if (filter.words.hasOwnProperty(word) && words.includes(word) && allowMessage) {
-                console.log('Attempting to send message for ' + word);
-                module.exports.performAction(message, client, filter.words[word]); // Use module.exports to reference performAction
+        console.log(`Received message: "${message.content}"`);
+        console.log(`Checking against phrases:`, Object.keys(filter.words));
+
+
+        //Filter based on individual words and phrases
+        for (const phrase in filter.words) {
+            if (filter.words.hasOwnProperty(phrase) && lowerCaseContent.includes(phrase) && allowMessage) {
+                console.log('Attempting to send message for ' + phrase);
+                module.exports.performAction(message, client, filter.words[phrase]); // Use module.exports to reference performAction
                 return; // Stop processing after an action is performed
             }
         }
+
+        // Filter based on individual words
+        // for (const word in filter.words) {
+        //     if (filter.words.hasOwnProperty(word) && words.includes(word) && allowMessage) {
+        //         console.log('Attempting to send message for ' + word);
+        //         module.exports.performAction(message, client, filter.words[word]); // Use module.exports to reference performAction
+        //         return; // Stop processing after an action is performed
+        //     }
+        // }
 
         // Filter based on regular expressions
         for (const regex in filter.regex) {

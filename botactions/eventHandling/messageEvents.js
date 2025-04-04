@@ -58,7 +58,7 @@ module.exports = {
         } else if (actionDetail.action === "personal") {
             // Check if a userId or username is specified, and compare with the message author.
             console.log(actionDetail.userId);
-            console.log(message.author.id)
+            console.log(message.author.id);
             if (actionDetail.userId && message.author.id === actionDetail.userId) {
                 message.channel.send(actionDetail.response);
             } else if (actionDetail.username && message.author.username.toLowerCase() === actionDetail.username.toLowerCase()) {

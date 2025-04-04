@@ -28,47 +28,77 @@ module.exports = {
         // Process the message content
         const content = message.content;
         const lowerCaseContent = content.toLowerCase();
+        // Create arrays for personal and regular triggers
+        const personalTriggers = [];
+        const regularTriggers = [];
         let allowMessage = true; // Placeholder for any additional conditions to allow message processing
 
-        //Filter based on individual words and phrases
+        // Split triggers based on their action type
         for (const phrase in filter.words) {
-            if (filter.words.hasOwnProperty(phrase) && lowerCaseContent.includes(phrase) && allowMessage) {
-                console.log('Attempting to send message for "' + phrase + '"');
-                module.exports.performAction(message, client, filter.words[phrase]); // Use module.exports to reference performAction
-                return; // Stop processing after an action is performed
+            if (filter.words.hasOwnProperty(phrase)) {
+                if (filter.words[phrase].action === "personal") {
+                    personalTriggers.push(phrase);
+                } else {
+                    regularTriggers.push(phrase);
+                }
+            }
+        }
+
+        // Process personal triggers first
+        for (const phrase of personalTriggers) {
+            if (lowerCaseContent.includes(phrase)) {
+                console.log('Checking personal trigger for "' + phrase + '"');
+                if (module.exports.performAction(message, client, filter.words[phrase])) {
+                    return; // If a personal trigger matched and executed, stop here.
+                }
+            }
+        }
+        
+        // Then process regular triggers
+        for (const phrase of regularTriggers) {
+            if (lowerCaseContent.includes(phrase)) {
+                console.log('Checking regular trigger for "' + phrase + '"');
+                if (module.exports.performAction(message, client, filter.words[phrase])) {
+                    return; // Execute the trigger and exit.
+                }
             }
         }
 
         // Filter based on regular expressions
         for (const regex in filter.regex) {
             if (filter.regex.hasOwnProperty(regex)) {
-                const regexObj = new RegExp(regex, "i"); // Example assumes regex patterns are stored directly and "i" flag for case-insensitivity
+                const regexObj = new RegExp(regex, "i"); // Regex patterns with case-insensitivity
                 if (regexObj.test(content) && allowMessage) {
-                    console.log('Matched regex:', regexPattern);
-                    module.exports.performAction(message, client, filter.regex[regex]); // Use module.exports to reference performAction
-                    return; // Stop processing after an action is performed
+                    console.log('Matched regex: ' + regex);
+                    if (module.exports.performAction(message, client, filter.regex[regex])) {
+                        return;
+                    }
                 }
             }
         }
     },
 
     performAction: function(message, client, actionDetail) {
+        // Handle personal actions
         if (actionDetail.action === "personal") {
-            // Check if a userId or username is specified, and compare with the message author.
-            console.log(actionDetail.userId);
-            console.log(message.author);
-            console.log(actionDetail);
             if (actionDetail.userId && message.author.id === actionDetail.userId) {
                 message.channel.send(actionDetail.response);
-            } else if (actionDetail.userId && message.author.username.toLowerCase() === actionDetail.userId.toLowerCase()) {
+                return true; // Personal action matched, so stop further processing.
+            } else if (actionDetail.username && message.author.username.toLowerCase() === actionDetail.username.toLowerCase()) {
                 message.channel.send(actionDetail.response);
+                return true; // Personal action matched.
             } else {
-                // If the user doesn't match, simply ignore.
                 console.log("Personal action ignored: User does not match");
+                return false; // No match, so allow further triggers.
             }
-        } else if (actionDetail.action === "respond") {
+        }
+        // Regular respond action.
+        else if (actionDetail.action === "respond") {
             message.channel.send(actionDetail.response);
-        } else if (actionDetail.action === "delete") {
+            return true;
+        }
+        // Delete action.
+        else if (actionDetail.action === "delete") {
             const channelName = message.channel.name;
             const username = message.author.username;
             const deletionMessage = `The following message has been deleted from channel ${channelName}. Sender - ${username}`;
@@ -78,7 +108,8 @@ module.exports = {
                 responseChannel.send(message.content);
             }
             message.delete();
+            return true;
         }
-        return; // Stop processing after an action is performed
+        return false;
     }
 };

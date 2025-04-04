@@ -15,6 +15,11 @@
 	  "good bot":{
 		"action": "respond",
 		"response": "Thank you, I try."
+	  },
+		"bot":{
+		  "action": "Personal",
+		  "response": "Fuck you, Arson",
+		  "userId": "163726901779759104"
 	  }
 	},
 	"regex": {

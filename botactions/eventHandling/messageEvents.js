@@ -53,7 +53,20 @@ module.exports = {
     },
 
     performAction: function(message, client, actionDetail) {
-        if (actionDetail.action === "respond") {
+        if (actionDetail.action === "personal") {
+            // Check if a userId or username is specified, and compare with the message author.
+            console.log(actionDetail.userId);
+            console.log(message.author);
+            console.log(actionDetail);
+            if (actionDetail.userId && message.author.id === actionDetail.userId) {
+                message.channel.send(actionDetail.response);
+            } else if (actionDetail.userId && message.author.username.toLowerCase() === actionDetail.userId.toLowerCase()) {
+                message.channel.send(actionDetail.response);
+            } else {
+                // If the user doesn't match, simply ignore.
+                console.log("Personal action ignored: User does not match");
+            }
+        } else if (actionDetail.action === "respond") {
             message.channel.send(actionDetail.response);
         } else if (actionDetail.action === "personal") {
             // Check if a userId or username is specified, and compare with the message author.

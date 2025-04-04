@@ -17,7 +17,7 @@
 		"response": "Thank you, I try."
 	  },
 		"bot":{
-		  "action": "Personal",
+		  "action": "personal",
 		  "response": "Fuck you, Arson",
 		  "userId": "163726901779759104"
 	  }

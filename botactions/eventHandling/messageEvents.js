@@ -62,7 +62,7 @@ module.exports = {
             console.log(actionDetail);
             if (actionDetail.userId && message.author.id === actionDetail.userId) {
                 message.channel.send(actionDetail.response);
-            } else if (actionDetail.username && message.author.username.toLowerCase() === actionDetail.username.toLowerCase()) {
+            } else if (actionDetail.userId && message.author.username.toLowerCase() === actionDetail.userId.toLowerCase()) {
                 message.channel.send(actionDetail.response);
             } else {
                 // If the user doesn't match, simply ignore.

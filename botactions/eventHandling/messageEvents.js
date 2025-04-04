@@ -28,17 +28,39 @@ module.exports = {
         // Process the message content
         const content = message.content;
         const lowerCaseContent = content.toLowerCase();
+        // Create arrays for personal and regular triggers
+        const personalTriggers = [];
+        const regularTriggers = [];
         let allowMessage = true; // Placeholder for any additional conditions to allow message processing
 
-        //Filter based on individual words and phrases
+        // Split triggers based on their action type
         for (const phrase in filter.words) {
-            if (filter.words.hasOwnProperty(phrase) && lowerCaseContent.includes(phrase) && allowMessage) {
-                console.log('Attempting to send message for "' + phrase + '"');
-                // If performAction returns true, an action was executed and we stop processing further.
-                if (module.exports.performAction(message, client, filter.words[phrase])) {
-                    return;
+            if (filter.words.hasOwnProperty(phrase)) {
+                if (filter.words[phrase].action === "personal") {
+                    personalTriggers.push(phrase);
+                } else {
+                    regularTriggers.push(phrase);
                 }
-                // Otherwise, continue checking other triggers.
+            }
+        }
+
+        // Process personal triggers first
+        for (const phrase of personalTriggers) {
+            if (lowerCaseContent.includes(phrase)) {
+                console.log('Checking personal trigger for "' + phrase + '"');
+                if (module.exports.performAction(message, client, filter.words[phrase])) {
+                    return; // If a personal trigger matched and executed, stop here.
+                }
+            }
+        }
+        
+        // Then process regular triggers
+        for (const phrase of regularTriggers) {
+            if (lowerCaseContent.includes(phrase)) {
+                console.log('Checking regular trigger for "' + phrase + '"');
+                if (module.exports.performAction(message, client, filter.words[phrase])) {
+                    return; // Execute the trigger and exit.
+                }
             }
         }
 

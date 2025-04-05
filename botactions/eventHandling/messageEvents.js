@@ -81,6 +81,9 @@ module.exports = {
     performAction: function(message, client, actionDetail) {
         // Handle personal actions
         if (actionDetail.action === "personal") {
+            console.log(actionDetail.userId)
+            console.log(message.author.id)
+            console.log(message.author)
             if (actionDetail.userId && message.author.id === actionDetail.userId) {
                 message.channel.send(actionDetail.response);
                 return true; // Personal action matched, so stop further processing.

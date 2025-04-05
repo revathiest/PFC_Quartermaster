@@ -87,7 +87,7 @@ module.exports = {
             if (actionDetail.userId && message.author.id === actionDetail.userId) {
                 message.channel.send(actionDetail.response);
                 return true; // Personal action matched, so stop further processing.
-            } else if (actionDetail.userId && message.author.username.toLowerCase() === actionDetail.username.toLowerCase()) {
+            } else if (actionDetail.userId && message.author.username.toLowerCase() === actionDetail.userId.toLowerCase()) {
                 message.channel.send(actionDetail.response);
                 return true; // Personal action matched.
             } else {

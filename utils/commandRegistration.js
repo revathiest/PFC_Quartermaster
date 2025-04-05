@@ -18,28 +18,28 @@ async function registerCommands(client) {
             const command = require(filePath);
 
             if (!command.data || typeof command.data.toJSON !== 'function') {
-                throw new TypeError(`Missing or invalid command structure in ${file}`);
+                throw new TypeError(`File "${file}" is missing a valid 'data' property or toJSON method.`);
             }
 
             client.commands.set(command.data.name, command);
             commands.push(command.data.toJSON());
-            console.log(`Registered command: ${command.data.name}`);
+            console.log(`✅ Registered command: ${command.data.name}`);
         } catch (err) {
-            console.warn(`Skipping file "${file}" — not a valid command. Reason: ${err.message}`);
+            console.warn(`⚠️ Skipping "${file}": ${err.message}`);
         }
     }
 
     const rest = new REST({ version: '10' }).setToken(token);
 
     try {
-        console.log('Refreshing application (/) commands...');
+        console.log('🔁 Syncing commands with Discord...');
         await rest.put(
             Routes.applicationGuildCommands(clientId, guildId),
             { body: commands }
         );
-        console.log('Successfully registered all commands.');
+        console.log('✅ Successfully registered all commands.');
     } catch (error) {
-        console.error('Failed to register commands:', error);
+        console.error('❌ Discord registration failed:', error);
     }
 }
 

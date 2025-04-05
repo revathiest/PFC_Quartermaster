@@ -1,4 +1,3 @@
-// src/utils/registerCommands.js
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v10');
 const fs = require('fs');
@@ -10,17 +9,24 @@ async function registerCommands(client) {
     const commandsPath = path.join(__dirname, '../../commands');
     const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
+    client.commands = new Map();
+
     for (const file of commandFiles) {
         const filePath = path.join(commandsPath, file);
-        const command = require(filePath);
 
-        if (!command.data || typeof command.data.toJSON !== 'function') {
-            console.warn(`Skipping invalid command file: ${file}`);
-            continue;
+        try {
+            const command = require(filePath);
+
+            if (!command.data || typeof command.data.toJSON !== 'function') {
+                throw new TypeError(`Missing or invalid command structure in ${file}`);
+            }
+
+            client.commands.set(command.data.name, command);
+            commands.push(command.data.toJSON());
+            console.log(`Registered command: ${command.data.name}`);
+        } catch (err) {
+            console.warn(`Skipping file "${file}" — not a valid command. Reason: ${err.message}`);
         }
-
-        client.commands.set(command.data.name, command);
-        commands.push(command.data.toJSON());
     }
 
     const rest = new REST({ version: '10' }).setToken(token);

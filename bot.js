@@ -3,7 +3,7 @@ require('dotenv').config();
 const { initClient } = require('./botactions/initClient');
 const { interactionHandler, handleMessageCreate, handleReactionAdd, handleReactionRemove, handleVoiceStateUpdate } = require('./botactions/eventHandling');
 const { registerChannels, deleteMessages } = require('./botactions/channelManagement');
-const { registerCommands } = require('./utils/commandRegistration');
+const registerCommands = require('./utils/commandRegistration');
 const { initializeDatabase } = require('./config/database');
 const { loadConfiguration } = require('./botactions/configLoader');
 const { checkScheduledAnnouncements, checkEvents } = require('./botactions/scheduling');

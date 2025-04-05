@@ -2,11 +2,11 @@ const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v10');
 const fs = require('fs');
 const path = require('path');
-const { clientId, guildId, token } = require('../../config.json');
+const { clientId, guildId, token } = require('../config.json');
 
 async function registerCommands(client) {
     const commands = [];
-    const commandsPath = path.join(__dirname, '../../commands');
+    const commandsPath = path.join(__dirname, '../commands');
     const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
     client.commands = new Map();

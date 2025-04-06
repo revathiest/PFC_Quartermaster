@@ -8,6 +8,8 @@ module.exports = {
     .setDescription('Sync API data into the database (admin only)'),
 
   async execute(interaction) {
+    console.log('[DEBUG] interaction.member:', interaction.member);
+
     if (!isAdmin(interaction.member)) {
       return interaction.reply({
         content: '❌ You do not have permission to run this command.',

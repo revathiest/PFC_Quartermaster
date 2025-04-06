@@ -5,8 +5,13 @@ const BASE_URL = 'https://api.star-citizen.wiki/api/v2';
 
 async function fetchSCData(endpoint, queryparams = {}) {
   try {
-    const params = new URLSearchParams(queryparams).toString();
-    const initialUrl = `${BASE_URL}/${endpoint}${params ? `?${params}` : ''}`;
+    // Build the first request URL with limit=1 if no limit provided
+    const initialParams = new URLSearchParams({
+      ...queryparams,
+      ...(queryparams.limit ? {} : { limit: 1 })
+    }).toString();
+
+    const initialUrl = `${BASE_URL}/${endpoint}${initialParams ? `?${initialParams}` : ''}`;
 
     const firstResponse = await fetch(initialUrl);
     if (!firstResponse.ok) throw new Error(`Initial fetch failed: ${firstResponse.statusText}`);
@@ -18,6 +23,7 @@ async function fetchSCData(endpoint, queryparams = {}) {
       throw new Error('Unable to determine total number of items from response');
     }
 
+    // Build the second request URL with limit=total
     const finalParams = new URLSearchParams({ ...queryparams, limit: total }).toString();
     const fullUrl = `${BASE_URL}/${endpoint}?${finalParams}`;
 

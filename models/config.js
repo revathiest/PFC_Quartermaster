@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 
-module.exports = (SEQUELIZE) => {
+module.exports = (sequelize) => {
   return sequelize.define('Config', {
     key: {
       type: DataTypes.STRING,

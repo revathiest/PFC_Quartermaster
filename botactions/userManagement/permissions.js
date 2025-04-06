@@ -7,16 +7,7 @@
  */
  function isAdmin(interaction) {
 
-    if (!interaction){
-        console.log('[PERMISSIONS] No interaction defined.');
-        return false;
-    }
-    if (!interaction.member){
-        console.log('[PERMISSIONS] No member defined in interaction.');
-        return false;
-    }
-
-    const member = interaction.member;
+    const member = interaction.member || await interaction.guild.members.fetch(interaction.user.id);
 
     if (!member){
         console.log('[PERMISSIONS] Unable to extract member.');

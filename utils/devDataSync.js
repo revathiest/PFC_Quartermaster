@@ -22,7 +22,9 @@ const SnapChannelModel = (sequelize) => sequelize.define('SnapChannel', {
     }
   }, {
     tableName: 'snapchannels',
-    timestamps: false
+    timestamps: false,
+    createdAt: false,
+    updatedAt: false
   });  
 
 async function syncSnapChannelsFromProd() {

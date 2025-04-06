@@ -1,4 +1,4 @@
-const Config = require('../../models/config');
+const Config = require('../../models/config')(sequlize);
 
 const saveConfigToDatabase = async (config, botType) => {
   try {

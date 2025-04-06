@@ -15,13 +15,11 @@ const UsageLog = require('../models/usageLog')(sequelize);
 const VoiceLog = require('../models/voiceLog')(sequelize);
 const SnapChannel = require('../models/snapChannels')(sequelize);
 const Event = require('../models/eventsModel')(sequelize);
+const Config = require('../models/config')(sequelize);
+const ScheduledAnnouncement = require('../models/scheduledAnnouncement')(sequelize);
 
 const initializeDatabase = async () => {
     try {
-        // Ensure models are defined before syncing
-        require('../models/config');
-        require('../models/scheduledAnnouncement');
-
         await sequelize.sync({ force: false });  // Set to true only if you want to drop and recreate tables
         console.log('Database synchronized');
     } catch (error) {
@@ -35,5 +33,7 @@ module.exports = {
     UsageLog,
     VoiceLog,
     SnapChannel,
-    Event
+    Event,
+    Config,
+    ScheduledAnnouncement
 };

@@ -9,7 +9,7 @@ module.exports = {
 
   async execute(interaction) {
 
-    if (!isAdmin(interaction.member)) {
+    if (!(await isAdmin(interaction.member))) {
       return interaction.reply({
         content: '❌ You do not have permission to run this command.',
         ephemeral: true

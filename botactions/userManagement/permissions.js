@@ -5,7 +5,7 @@
  * @param {CommandInteraction} interaction - The Discord interaction object.
  * @returns {boolean} - True if the user is an admin, false otherwise.
  */
- function isAdmin(interaction) {
+async function isAdmin(interaction) {
 
     const member = interaction.member || await interaction.guild.members.fetch(interaction.user.id);
 

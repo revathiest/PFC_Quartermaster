@@ -4,7 +4,8 @@
   "description": "The Pyro Freelancer Corps Discord Bot",
   "main": "bot.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prestart": "npm install",
+    "start": "node bot.js"
   },
   "author": "Kenneth Hart",
   "license": "ISC",

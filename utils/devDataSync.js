@@ -27,7 +27,7 @@ const SnapChannelModel = (sequelize) => sequelize.define('SnapChannel', {
     }
   }, {
     tableName: 'SnapChannels',
-    timestamps: false
+    timestamps: true
   });
   
 

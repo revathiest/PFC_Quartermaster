@@ -24,25 +24,17 @@ async function syncManufacturers() {
         continue;
       }
 
-      const [record, isNew] = await Manufacturer.upsert({
+      const [record, wasCreated] = await Manufacturer.upsert({
         code,
         name: entry.name,
         link: entry.link,
       });
 
-      if (isNew) {
-        created++;
-      } else {
-        updated++;
-      }
+      wasCreated ? created++ : updated++;
     }
 
-    return {
-      created,
-      updated,
-      skipped,
-      total: manufacturers.length,
-    };
+    console.log(`[API SYNC] Synced manufacturers - Created: ${created}, Updated: ${updated}, Skipped: ${skipped}`);
+    return { created, updated, skipped, total: manufacturers.length };
   } catch (err) {
     console.error('[API SYNC] Error syncing manufacturers:', err);
     throw err;

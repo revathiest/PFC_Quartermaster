@@ -12,6 +12,15 @@ async function syncManufacturers() {
     }
 
     for (const entry of manufacturers) {
+
+    const code = entry.code?.trim()
+      
+    if (!code) {
+      console.warn(`[SKIPPED] Missing or empty code for: "${entry.name}"`);
+      skipped++;
+      continue;
+    }
+
       await Manufacturer.upsert({
         code: entry.code,
         name: entry.name,

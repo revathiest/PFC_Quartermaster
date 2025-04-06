@@ -3,6 +3,11 @@ const { prodSequelize, devSequelize } = require('../config/dualDatabase');
 
 // Define the model manually since we aren't importing the shared model file
 const SnapChannelModel = (sequelize) => sequelize.define('SnapChannel', {
+    id: {
+      type: require('sequelize').INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
     channelId: {
       type: require('sequelize').STRING,
       allowNull: false,
@@ -22,10 +27,9 @@ const SnapChannelModel = (sequelize) => sequelize.define('SnapChannel', {
     }
   }, {
     tableName: 'snapchannels',
-    timestamps: false,
-    createdAt: false,
-    updatedAt: false
-  });  
+    timestamps: false
+  });
+  
 
 async function syncSnapChannelsFromProd() {
   console.log('[DEV SYNC] Entered syncSnapChannelsFromProd()');

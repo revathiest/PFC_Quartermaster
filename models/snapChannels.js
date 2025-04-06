@@ -2,6 +2,11 @@ const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
     const SnapChannel = sequelize.define('SnapChannel', {
+        id: {
+            type: require('sequelize').INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
         channelId: {
             type: DataTypes.STRING,
             allowNull: false,

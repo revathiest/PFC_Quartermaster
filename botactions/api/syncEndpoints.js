@@ -13,4 +13,7 @@ async function syncAllEndpoints() {
   return results;
 }
 
-module.exports = { syncAllEndpoints };
+module.exports = { 
+    syncAllEndpoints,
+    syncManufacturers
+};

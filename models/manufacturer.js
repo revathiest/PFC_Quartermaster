@@ -2,23 +2,18 @@ const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
   return sequelize.define('Manufacturer', {
-    uuid: {
-      type: DataTypes.STRING,
-      primaryKey: true
-    },
     code: {
       type: DataTypes.STRING,
+      primaryKey: true,
       allowNull: false
     },
     name: {
       type: DataTypes.STRING,
       allowNull: false
     },
-    description: {
-      type: DataTypes.TEXT
-    },
-    logo: {
-      type: DataTypes.STRING
+    link: {
+      type: DataTypes.STRING,
+      allowNull: false
     }
   }, {
     tableName: 'Manufacturers',

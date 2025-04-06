@@ -7,8 +7,6 @@ async function syncManufacturers() {
   try {
     const manufacturers = await fetchSCData('manufacturers');
 
-    console.log('[DEBUG] API Response:', manufacturers);
-
     if (!Array.isArray(manufacturers)) {
       throw new Error('Expected an array of manufacturers');
     }
@@ -21,7 +19,6 @@ async function syncManufacturers() {
       });
     }
 
-    console.log(`[API SYNC] Synced ${manufacturers.length} manufacturers.`);
     return { created: manufacturers.length };
   } catch (err) {
     console.error('[API SYNC] Error syncing manufacturers:', err);

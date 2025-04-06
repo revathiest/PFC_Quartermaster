@@ -24,4 +24,4 @@ async function syncManufacturers() {
   }
 }
 
-module.exports = syncManufacturers;
+module.exports = { syncManufacturers };

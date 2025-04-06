@@ -3,10 +3,12 @@ const fetch = require('node-fetch');
 
 const BASE_URL = 'https://api.star-citizen.wiki/api/v2';
 
-async function fetchSCData(endpoint) {
+async function fetchSCData(endpoint, queryparams = {}) {
   try {
-    // First request to get total number of items
-    const firstResponse = await fetch(`${BASE_URL}/${endpoint}`);
+    const params = new URLSearchParams(queryparams).toString();
+    const initialUrl = `${BASE_URL}/${endpoint}${params ? `?${params}` : ''}`;
+
+    const firstResponse = await fetch(initialUrl);
     if (!firstResponse.ok) throw new Error(`Initial fetch failed: ${firstResponse.statusText}`);
 
     const initialJson = await firstResponse.json();
@@ -16,8 +18,10 @@ async function fetchSCData(endpoint) {
       throw new Error('Unable to determine total number of items from response');
     }
 
-    // Second request with the full limit
-    const fullResponse = await fetch(`${BASE_URL}/${endpoint}?limit=${total}`);
+    const finalParams = new URLSearchParams({ ...queryparams, limit: total }).toString();
+    const fullUrl = `${BASE_URL}/${endpoint}?${finalParams}`;
+
+    const fullResponse = await fetch(fullUrl);
     if (!fullResponse.ok) throw new Error(`Full fetch failed: ${fullResponse.statusText}`);
 
     const fullJson = await fullResponse.json();

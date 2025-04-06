@@ -1,4 +1,4 @@
-const fetchFromAPI = require('../fetchFromAPI');
+const fetchFromAPI = require('../fetchSCData');
 const { Manufacturer } = require('../../config/database');
 
 async function syncManufacturers() {

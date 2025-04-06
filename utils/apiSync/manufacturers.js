@@ -8,6 +8,8 @@ async function syncManufacturers() {
     const initialResponse = await fetchSCData('manufacturers');
     const total = initialResponse?.meta?.total;
 
+    console.log('[DEBUG] API Response: ', initialResponse);
+
     if (!total || typeof total !== 'number') {
       throw new Error('Could not determine total manufacturers count');
     }

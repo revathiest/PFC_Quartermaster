@@ -13,6 +13,8 @@ async function fetchSCData(endpoint, queryparams = {}) {
 
     const initialUrl = `${BASE_URL}/${endpoint}${initialParams ? `?${initialParams}` : ''}`;
 
+    console.log(initialUrl);
+
     const firstResponse = await fetch(initialUrl);
     if (!firstResponse.ok) throw new Error(`Initial fetch failed: ${firstResponse.statusText}`);
 

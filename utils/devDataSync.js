@@ -2,39 +2,12 @@
 const { prodSequelize, devSequelize } = require('../config/dualDatabase');
 
 // Define the model manually since we aren't importing the shared model file
-const SnapChannelModel = (sequelize) => sequelize.define('SnapChannel', {
-    id: {
-      type: require('sequelize').INTEGER,
-      primaryKey: true,
-      autoIncrement: true
-    },
-    channelId: {
-      type: require('sequelize').STRING,
-      allowNull: false,
-      unique: true
-    },
-    purgeTimeInDays: {
-      type: require('sequelize').INTEGER,
-      allowNull: false
-    },
-    serverId: {
-      type: require('sequelize').STRING,
-      allowNull: false
-    },
-    lastPurgeDate: {
-      type: require('sequelize').DATE,
-      defaultValue: require('sequelize').NOW
-    }
-  }, {
-    tableName: 'SnapChannels',
-    timestamps: true
-  });
-  
+const SnapChannelFactory = require('../models/snapChannels');
 
 async function syncSnapChannelsFromProd() {
   console.log('[DEV SYNC] Entered syncSnapChannelsFromProd()');
-  const ProdSnapChannel = SnapChannelModel(prodSequelize);
-  const DevSnapChannel = SnapChannelModel(devSequelize);
+  const ProdSnapChannel = SnapChannelFactory(prodSequelize);
+  const DevSnapChannel = SnapChannelFactory(devSequelize);
 
   await prodSequelize.sync();
   await devSequelize.sync();

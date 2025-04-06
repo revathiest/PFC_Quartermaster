@@ -1,9 +1,9 @@
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
-    const SnapChannel = sequelize.define('SnapChannel', {
+    return sequelize.define('SnapChannel', {
         id: {
-            type: require('sequelize').INTEGER,
+            type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true
         },
@@ -24,7 +24,8 @@ module.exports = (sequelize) => {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW
         }
+    }, {
+        tableName: 'SnapChannels',
+        timestamps: true
     });
-  
-    return SnapChannel;
-}
+};

@@ -12,14 +12,6 @@ const { handleCreateEvent, handleUpdateEvent, handleDeleteEvent, syncEventsInDat
 
 const botType = process.env.BOT_TYPE;
 
-if (botType === 'development') {
-    console.log('[DEV SYNC] Detected development mode, starting SnapChannel sync...');
-    (async () => {
-        const { syncSnapChannelsFromProd } = require('./utils/devDataSync');
-        await syncSnapChannelsFromProd();
-      })();
-}
-
 // Load configuration before initializing the client
 const initializeBot = async () => {
     const config = await loadConfiguration(botType);

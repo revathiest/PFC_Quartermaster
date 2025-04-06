@@ -1,5 +1,4 @@
-const { sequelize } = require('../../config/database');
-const ScheduledAnnouncement = require('../../models/scheduledAnnouncement');
+const { sequelize, ScheduledAnnouncement } = require('../../config/database');
 const { getChannelNameById, getGuildNameById } = require('../utilityFunctions');
 
 const saveAnnouncementToDatabase = async (channelId, guildId, embedData, time, client) => {
@@ -23,6 +22,7 @@ const saveAnnouncementToDatabase = async (channelId, guildId, embedData, time, c
 
 const getScheduledAnnouncements = async () => {
   try {
+    console.log('[DEBUG] ScheduledAnnouncement model type:', typeof ScheduledAnnouncement);
     const announcements = await ScheduledAnnouncement.findAll();
     return announcements;
   } catch (error) {

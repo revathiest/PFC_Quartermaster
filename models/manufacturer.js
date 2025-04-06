@@ -9,15 +9,15 @@ module.exports = (sequelize) => {
     },
     code: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: false
     },
     name: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: false
     },
     link: {
       type: DataTypes.STRING(1024),
-      allowNull: true
+      allowNull: false
     }
   }, {
     tableName: 'Manufacturers',

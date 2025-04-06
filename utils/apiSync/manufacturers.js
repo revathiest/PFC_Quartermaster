@@ -4,6 +4,10 @@ const { Manufacturer } = require('../../config/database');
 async function syncManufacturers() {
   console.log('[API SYNC] Syncing manufacturers...');
 
+  let created = 0;
+  let updated = 0;
+  let skipped = 0;
+
   try {
     const manufacturers = await fetchSCData('manufacturers');
 
@@ -12,25 +16,33 @@ async function syncManufacturers() {
     }
 
     for (const entry of manufacturers) {
+      const code = entry.code?.trim();
 
-    const code = entry.code?.trim()
-    
-    let skipped = 0;
+      if (!code) {
+        console.warn(`[SKIPPED] Missing or empty code for: "${entry.name}"`);
+        skipped++;
+        continue;
+      }
 
-    if (!code) {
-      console.warn(`[SKIPPED] Missing or empty code for: "${entry.name}"`);
-      skipped++;
-      continue;
-    }
-
-      await Manufacturer.upsert({
-        code: entry.code,
+      const [record, isNew] = await Manufacturer.upsert({
+        code,
         name: entry.name,
         link: entry.link,
       });
+
+      if (isNew) {
+        created++;
+      } else {
+        updated++;
+      }
     }
 
-    return { created: manufacturers.length };
+    return {
+      created,
+      updated,
+      skipped,
+      total: manufacturers.length,
+    };
   } catch (err) {
     console.error('[API SYNC] Error syncing manufacturers:', err);
     throw err;

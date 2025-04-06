@@ -21,15 +21,19 @@ module.exports = {
     try {
       const result = await syncManufacturers();
 
-      const embed = new EmbedBuilder()
-      .setTitle('✅ Manufacturer Sync Complete')
-      .setColor(0x00ff00)
-      .setDescription(`Successfully synced **${result.created}** manufacturers.`)
-      .addFields(
-        { name: 'Skipped', value: `${result.skipped || 0}`, inline: true },
-        { name: 'Total Fetched', value: `${result.created + (result.skipped || 0)}`, inline: true }
-      )
-      .setTimestamp();
+      const embed = {
+        color: 0x00ff99,
+        title: '✅ API Sync Complete: Manufacturers',
+        description: `Manufacturer data sync completed successfully.`,
+        fields: [
+          { name: 'New Records', value: `${result.created}`, inline: true },
+          { name: 'Updated Records', value: `${result.updated}`, inline: true },
+          { name: 'Skipped', value: `${result.skipped || 0}`, inline: true },
+          { name: 'Total Fetched', value: `${result.total}`, inline: true }
+        ],
+        timestamp: new Date().toISOString(),
+      };
+      
 
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {

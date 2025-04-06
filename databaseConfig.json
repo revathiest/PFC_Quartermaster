@@ -1,8 +1,8 @@
 {
     "development": {
-        "database": "customer_480708_database",
-        "username": "customer_480708_database",
-        "password": "c!Qrls-Qf$i-Eufh01zl",
+        "database": "customer_726407_PFC_DevBot",
+        "username": "customer_726407_PFC_DevBot",
+        "password": "CpUHtn0hDD=kf8arVOEzP=uT",
         "host": "na05-sql.pebblehost.com",
         "dialect": "mysql"
     },

@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
-    const Event = sequelize.define('Event', {
+    return sequelize.define('Event', {
         event_id: {
             type: DataTypes.BIGINT,
             primaryKey: true,
@@ -48,9 +48,7 @@ module.exports = (sequelize) => {
             defaultValue: DataTypes.NOW
         }
     }, {
-        timestamps: false,
-        tableName: 'Events'
+        tableName: 'Events',
+        timestamps: false
     });
-
-    return Event;
 };

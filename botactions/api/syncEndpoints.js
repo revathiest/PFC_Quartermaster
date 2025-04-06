@@ -23,5 +23,6 @@ async function syncAllEndpoints() {
 
 module.exports = { 
     syncAllEndpoints,
-    syncManufacturers
+    syncManufacturers,
+    syncVehicles
 };

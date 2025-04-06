@@ -1,27 +1,19 @@
-// models/Vehicle.js
-module.exports = (sequelize, DataTypes) => {
-    return sequelize.define('Vehicle', {
-      uuid: {
-        type: DataTypes.UUID,
-        primaryKey: true,
-        allowNull: false,
-      },
-      name: {
-        type: DataTypes.STRING(100),
-        allowNull: false,
-      },
-      link: {
-        type: DataTypes.STRING(1024),
-        allowNull: false,
-      },
-      updated_at: {
-        type: DataTypes.DATE,
-        allowNull: true,
-      },
-      version: {
-        type: DataTypes.STRING(50),
-        allowNull: true,
-      },
-    });
-  };
-  
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database').sequelize;
+
+const Vehicle = sequelize.define('Vehicle', {
+  uuid: {
+    type: DataTypes.STRING,
+    primaryKey: true,
+    allowNull: false
+  },
+  name: DataTypes.STRING,
+  link: DataTypes.STRING(1024),
+  version: DataTypes.STRING,
+  updated_at: DataTypes.DATE
+}, {
+  tableName: 'Vehicles',
+  timestamps: false
+});
+
+module.exports = Vehicle;

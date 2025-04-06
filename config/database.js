@@ -18,6 +18,7 @@ const Event = require('../models/eventsModel')(sequelize);
 const Config = require('../models/config')(sequelize);
 const ScheduledAnnouncement = require('../models/scheduledAnnouncement')(sequelize);
 const Manufacturer = require('../models/manufacturer')(sequelize);
+const Vehicle = require('../models/vehicle')(sequelize);
 
 const initializeDatabase = async () => {
     try {
@@ -37,5 +38,6 @@ module.exports = {
     Event,
     Config,
     ScheduledAnnouncement,
-    Manufacturer
+    Manufacturer,
+    Vehicle
 };

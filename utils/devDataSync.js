@@ -26,7 +26,7 @@ const SnapChannelModel = (sequelize) => sequelize.define('SnapChannel', {
       defaultValue: require('sequelize').NOW
     }
   }, {
-    tableName: 'snapchannels',
+    tableName: 'SnapChannels',
     timestamps: false
   });
   

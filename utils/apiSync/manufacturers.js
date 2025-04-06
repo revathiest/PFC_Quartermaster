@@ -5,22 +5,26 @@ async function syncManufacturers() {
   console.log('[API SYNC] Syncing manufacturers...');
 
   try {
-    const data = await fetchSCData('manufacturers');
-    if (!Array.isArray(data)) throw new Error('Expected an array of manufacturers');
+    const response = await fetchSCData('manufacturers');
+    const data = response.data;
+
+    if (!Array.isArray(data)) {
+      throw new Error('Expected an array of manufacturers');
+    }
 
     for (const entry of data) {
       await Manufacturer.upsert({
-        uuid: entry.uuid,
-        code: entry.code,
+        code: entry.code,       // Acts as unique identifier
         name: entry.name,
-        description: entry.description,
-        logo: entry.media?.logo
+        link: entry.link
       });
     }
 
     console.log(`[API SYNC] Synced ${data.length} manufacturers.`);
+    return { created: data.length, updated: 0 }; // Placeholder until we track diffs
   } catch (err) {
     console.error('[API SYNC] Error syncing manufacturers:', err);
+    throw err;
   }
 }
 

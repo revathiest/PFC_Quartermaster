@@ -2,43 +2,39 @@
 const fetch = require('node-fetch');
 
 const BASE_URL = 'https://api.star-citizen.wiki/api/v2';
+const MAX_LIMIT = 50;
 
 async function fetchSCData(endpoint, queryparams = {}) {
   try {
-    // Build the first request URL with limit=1 if no limit provided
-    const initialParams = new URLSearchParams({
-      ...queryparams,
-      ...(queryparams.limit ? {} : { limit: 1 })
-    }).toString();
+    // Get total count from the first request
+    const params = new URLSearchParams({ ...queryparams, limit: 1 }).toString();
+    const firstUrl = `${BASE_URL}/${endpoint}?${params}`;
+    const initialResponse = await fetch(firstUrl);
+    if (!initialResponse.ok) throw new Error(`Initial fetch failed: ${initialResponse.statusText}`);
 
-    const initialUrl = `${BASE_URL}/${endpoint}${initialParams ? `?${initialParams}` : ''}`;
-
-    console.log(initialUrl);
-
-    const firstResponse = await fetch(initialUrl);
-    if (!firstResponse.ok) throw new Error(`Initial fetch failed: ${firstResponse.statusText}`);
-
-    const initialJson = await firstResponse.json();
+    const initialJson = await initialResponse.json();
     const total = initialJson?.meta?.total;
+    if (!total || typeof total !== 'number') throw new Error('Unable to determine total count');
 
-    if (!total || typeof total !== 'number') {
-      throw new Error('Unable to determine total number of items from response');
+    const pages = Math.ceil(total / MAX_LIMIT);
+    const results = [];
+
+    for (let page = 1; page <= pages; page++) {
+      const pagedParams = new URLSearchParams({ ...queryparams, limit: MAX_LIMIT, page }).toString();
+      const pageUrl = `${BASE_URL}/${endpoint}?${pagedParams}`;
+      const res = await fetch(pageUrl);
+      if (!res.ok) throw new Error(`Page ${page} fetch failed: ${res.statusText}`);
+      const json = await res.json();
+
+      if (Array.isArray(json.data)) {
+        results.push(...json.data);
+      } else {
+        console.warn(`[FETCH WARN] Page ${page} returned unexpected data format`);
+      }
     }
 
-    // Build the second request URL with limit=total
-    const finalParams = new URLSearchParams({ ...queryparams, limit: total }).toString();
-    const fullUrl = `${BASE_URL}/${endpoint}?${finalParams}`;
+    return results;
 
-    const fullResponse = await fetch(fullUrl);
-    if (!fullResponse.ok) throw new Error(`Full fetch failed: ${fullResponse.statusText}`);
-
-    const fullJson = await fullResponse.json();
-
-    if (!Array.isArray(fullJson.data)) {
-      throw new Error(`Expected array in 'data', got ${typeof fullJson.data}`);
-    }
-
-    return fullJson.data;
   } catch (err) {
     console.error(`[FETCH ERROR] ${err.message}`);
     return [];

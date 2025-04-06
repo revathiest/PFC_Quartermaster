@@ -13,8 +13,10 @@ const { handleCreateEvent, handleUpdateEvent, handleDeleteEvent, syncEventsInDat
 const botType = process.env.BOT_TYPE;
 
 if (botType === 'development') {
-    const { syncSnapChannelsFromProd } = require('./utils/devDataSync');
-    await syncSnapChannelsFromProd();
+    (async () => {
+        const { syncSnapChannelsFromProd } = require('./utils/devDataSync');
+        await syncSnapChannelsFromProd();
+      })();
 }
 
 // Load configuration before initializing the client

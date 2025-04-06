@@ -24,12 +24,13 @@ async function syncSnapChannelsFromProd() {
   await devSequelize.sync();
 
   const prodData = await ProdSnapChannel.findAll({ raw: true });
+  console.log('Prod SnapChannels:', prodData);  // 👈 add this
+  
   const devData = await DevSnapChannel.findAll({ raw: true });
-
-  const devKeys = new Set(devData.map(d => `${d.guildId}:${d.channelId}`));
+  const devKeys = new Set(devData.map(d => `${d.serverId}:${d.channelId}`));
 
   const toInsert = prodData.filter(row => {
-    const key = `${row.guildId}:${row.channelId}`;
+    const key = `${row.serverId}:${row.channelId}`;
     return !devKeys.has(key);
   });
 

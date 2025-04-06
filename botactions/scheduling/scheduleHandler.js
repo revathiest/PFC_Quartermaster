@@ -22,6 +22,7 @@ const saveAnnouncementToDatabase = async (channelId, guildId, embedData, time, c
 
 const getScheduledAnnouncements = async () => {
   try {
+    console.log('[DEBUG] ScheduledAnnouncement model type:', typeof ScheduledAnnouncement);
     const announcements = await ScheduledAnnouncement.findAll();
     return announcements;
   } catch (error) {

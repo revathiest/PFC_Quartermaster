@@ -15,6 +15,8 @@ const Config = sequelize.define('Config', {
     allowNull: false,
   }
 }, {
+  tableName: 'Configs',        // ✅ explicitly define table name
+  timestamps: true,           // ✅ include createdAt/updatedAt
   uniqueKeys: {
     unique_key: {
       fields: ['key', 'botType']

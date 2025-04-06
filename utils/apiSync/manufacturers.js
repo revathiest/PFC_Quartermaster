@@ -5,17 +5,9 @@ async function syncManufacturers() {
   console.log('[API SYNC] Syncing manufacturers...');
 
   try {
-    const initialResponse = await fetchSCData('manufacturers');
-    const total = initialResponse?.meta?.total;
+    const manufacturers = await fetchSCData('manufacturers');
 
-    console.log('[DEBUG] API Response: ', initialResponse.meta);
-
-    if (!total || typeof total !== 'number') {
-      throw new Error('Could not determine total manufacturers count');
-    }
-
-    const fullResponse = await fetchSCData('manufacturers', { limit: total });
-    const manufacturers = fullResponse?.data;
+    console.log('[DEBUG] API Response:', manufacturers);
 
     if (!Array.isArray(manufacturers)) {
       throw new Error('Expected an array of manufacturers');

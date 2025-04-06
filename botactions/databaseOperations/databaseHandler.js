@@ -1,4 +1,5 @@
-const Config = require('../../models/config')(sequlize);
+const { sequelize } = require('../../config/database');
+const Config = require('../../models/config')(sequelize);
 
 const saveConfigToDatabase = async (config, botType) => {
   try {

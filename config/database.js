@@ -17,6 +17,7 @@ const SnapChannel = require('../models/snapChannels')(sequelize);
 const Event = require('../models/eventsModel')(sequelize);
 const Config = require('../models/config')(sequelize);
 const ScheduledAnnouncement = require('../models/scheduledAnnouncement')(sequelize);
+const Manufacturer = require('../models/manufacturer')(sequelize);
 
 const initializeDatabase = async () => {
     try {
@@ -35,5 +36,6 @@ module.exports = {
     SnapChannel,
     Event,
     Config,
-    ScheduledAnnouncement
+    ScheduledAnnouncement,
+    Manufacturer
 };

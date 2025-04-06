@@ -14,7 +14,9 @@ async function syncManufacturers() {
     for (const entry of manufacturers) {
 
     const code = entry.code?.trim()
-      
+    
+    let skipped = 0;
+
     if (!code) {
       console.warn(`[SKIPPED] Missing or empty code for: "${entry.name}"`);
       skipped++;

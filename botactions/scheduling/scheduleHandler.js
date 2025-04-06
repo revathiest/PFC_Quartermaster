@@ -1,3 +1,4 @@
+const { sequelize } = require('../../config/database');
 const ScheduledAnnouncement = require('../../models/scheduledAnnouncement');
 const { getChannelNameById, getGuildNameById } = require('../utilityFunctions');
 

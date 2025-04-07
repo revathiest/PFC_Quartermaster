@@ -17,13 +17,6 @@ async function syncGalactapedia() {
     }
 
     for (const entry of entries) {
-      const id = entry.uuid?.trim();
-
-      if (!id) {
-        console.warn(`[SKIPPED] Missing or empty UUID for: "${entry.title}"`);
-        skipped++;
-        continue;
-      }
 
       const [record, wasCreated] = await GalactapediaEntry.upsert({
         id,

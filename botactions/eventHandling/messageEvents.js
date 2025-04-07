@@ -1,11 +1,12 @@
 const { UsageLog } = require('../../config/database');
 const filter = require('../../messages.json');
-const { Configuration, OpenAIApi } = require('openai');
+const OpenAI = require('openai');
+
 
 const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
 });
-const openai = new OpenAIApi(configuration);
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 module.exports = {
     handleMessageCreate: async function (message, client) {
@@ -71,7 +72,7 @@ module.exports = {
             if (!prompt) return;
 
             try {
-                const completion = await openai.createChatCompletion({
+                const completion = await openai.chat.completions.create({
                     model: "gpt-3.5-turbo",
                     messages: [
                         { role: "system", content: "You are a helpful and friendly Discord bot." },
@@ -79,8 +80,9 @@ module.exports = {
                     ],
                     temperature: 0.7,
                 });
+                
 
-                const reply = completion.data.choices[0].message.content;
+                const reply = completion.data.choices[0]?.message?.content;
                 await message.reply(reply);
             } catch (err) {
                 console.error('[OPENAI ERROR]', err);

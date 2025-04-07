@@ -1,6 +1,6 @@
 const { syncManufacturers } = require('../../utils/apiSync/manufacturers');
 const { syncVehicles } = require('../../utils/apiSync/vehicles');
-const { syncGalactapediaEntries } = require('../../utils/apiSync/galactapedia');
+const { syncGalactapedia } = require('../../utils/apiSync/galactapedia');
 
 async function syncAllEndpoints() {
   const results = [];
@@ -20,7 +20,7 @@ async function syncAllEndpoints() {
   }
 
   try {
-    const galactapediaResult = await syncGalactapediaEntries();
+    const galactapediaResult = await syncGalactapedia();
     results.push(galactapediaResult);
   } catch (error) {
     results.push({ endpoint: 'vehicles', success: false, error: error.message });
@@ -33,5 +33,5 @@ module.exports = {
     syncAllEndpoints,
     syncManufacturers,
     syncVehicles,
-    syncGalactapediaEntries
+    syncGalactapedia
 };

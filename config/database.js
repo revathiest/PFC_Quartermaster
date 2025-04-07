@@ -19,7 +19,7 @@ const Config = require('../models/config')(sequelize);
 const ScheduledAnnouncement = require('../models/scheduledAnnouncement')(sequelize);
 const Manufacturer = require('../models/manufacturer')(sequelize);
 const Vehicle = require('../models/vehicle')(sequelize);
-const VehicleDetail = require('/models/vehicleDetail')(sequelize);
+const VehicleDetail = require('../models/vehicleDetail')(sequelize);
 
 const initializeDatabase = async () => {
     try {

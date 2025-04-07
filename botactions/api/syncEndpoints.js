@@ -1,5 +1,6 @@
 const { syncManufacturers } = require('../../utils/apiSync/manufacturers');
-const { syncVehicles } = require('../../utils/apiSync/vehicles')
+const { syncVehicles } = require('../../utils/apiSync/vehicles');
+const { syncShops } = require('../../utils/apiSync/shops');
 
 async function syncAllEndpoints() {
   const results = [];

@@ -73,7 +73,6 @@ module.exports = {
 
     await updateStep('manufacturers', syncManufacturers);
     await updateStep('vehicles', syncVehicles);
-    await updateStep('shops', syncShops);
 
     embed.title = '✅ API Sync Complete';
     embed.color = 0x00ff99;

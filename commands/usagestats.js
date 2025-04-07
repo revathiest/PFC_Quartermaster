@@ -85,7 +85,7 @@ const {
     .setColor(0x00AE86)
     .setTitle(`📊 Usage Summary for ${displayName}`)
     .setDescription(`A summary of user activity across the server, including messages sent, time spent in voice channels, and commands used.`)
-    .setFooter(`Stats from the last 30 days.`)
+    .setFooter({ text: `Stats from the last 30 days.` })
     .setTimestamp();
 
     // ==== MESSAGES SECTION ====

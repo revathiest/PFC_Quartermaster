@@ -113,7 +113,6 @@ const {
           }
   
           for (const tag of data.tags || []) {
-            console.log('[TAG UPSERT]' + tag);
             await GalactapediaTag.upsert({
               entry_id: entry.id,
               tag_id: tag.id,
@@ -122,7 +121,6 @@ const {
           }
   
           for (const prop of data.properties || []) {
-            console.log('[PROP UPSERT]' + prop);
             await GalactapediaProperty.create({
               entry_id: entry.id,
               name: prop.name,
@@ -131,7 +129,6 @@ const {
           }
   
           for (const rel of data.related_articles || []) {
-            console.log('[REL UPSERT]' + rel);
             await GalactapediaRelatedArticle.upsert({
               entry_id: entry.id,
               related_id: rel.id,

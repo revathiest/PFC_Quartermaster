@@ -6,6 +6,7 @@ const {
   // add more sync functions here when needed
 } = require('../botactions/api/syncEndpoints');
 const { isAdmin } = require('../botactions/userManagement/permissions');
+const pad = (str, len = 7) => String(str).padEnd(len);
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -33,13 +34,24 @@ module.exports = {
         color: 0x00ff99,
         title: '✅ API Sync Complete',
         description: `All available endpoints were synced successfully.`,
-        fields: Object.entries(results).flatMap(([key, result]) => [
-          { name: `📦 ${key.charAt(0).toUpperCase() + key.slice(1)}`, value: '\u200B' },
-          { name: 'New Records', value: `${result.created || 0}`, inline: true },
-          { name: 'Updated Records', value: `${result.updated || 0}`, inline: true },
-          { name: 'Skipped', value: `${result.skipped || 0}`, inline: true },
-          { name: 'Total Fetched', value: `${result.total || 0}`, inline: true },
-        ]),
+        fields: [
+          {
+            name: '📊 Sync Summary',
+            value: '```' +
+              ['Endpoint     | New  | Updated | Skipped | Total']
+                .concat(['------------|------|---------|---------|------'])
+                .concat(Object.entries(results).map(([key, r]) => {
+                  const label = pad(key, 12);
+                  const created = pad(r.created ?? 0);
+                  const updated = pad(r.updated ?? 0);
+                  const skipped = pad(r.skipped ?? 0);
+                  const total = pad(r.total ?? 0);
+                  return `${label}| ${created}| ${updated}| ${skipped}| ${total}`;
+                }))
+                .join('\n') +
+              '```'
+          }
+        ],
         timestamp: new Date().toISOString(),
       };
 

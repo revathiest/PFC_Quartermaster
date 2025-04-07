@@ -19,7 +19,6 @@ async function syncGalactapedia() {
     for (const entry of entries) {
 
       const [record, wasCreated] = await GalactapediaEntry.upsert({
-        id,
         title: entry.title,
         slug: entry.slug,
         thumbnail: entry.thumbnail,

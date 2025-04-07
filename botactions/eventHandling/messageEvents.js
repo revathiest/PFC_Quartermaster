@@ -39,6 +39,7 @@ module.exports = {
                 console.error('[OPENAI ERROR]', err);
                 await message.reply("Sorry, I couldn't fetch a reply right now.");
             }
+            return;
         }      
 
         try {

@@ -5,7 +5,6 @@ module.exports = (sequelize) => {
   const GalactapediaCategory = sequelize.define('GalactapediaCategory', {
     entry_id: {
       type: DataTypes.STRING,
-      primaryKey: true,
       allowNull: false,
     },
     category_id: {

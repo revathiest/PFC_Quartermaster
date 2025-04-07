@@ -19,6 +19,13 @@ async function syncAllEndpoints() {
     results.push({ endpoint: 'vehicles', success: false, error: error.message });
   }
 
+  try {
+    const galactapediaResult = await syncGalactapediaEntries();
+    results.push(galactapediaResult);
+  } catch (error) {
+    results.push({ endpoint: 'vehicles', success: false, error: error.message });
+  }
+
   return results;
 }
 

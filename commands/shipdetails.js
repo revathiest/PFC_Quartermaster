@@ -67,19 +67,57 @@ module.exports = {
     }
 
     const embed = {
-      color: 0x0099ff,
-      title: `${detail.name}`,
-      description: `Detailed info for **${detail.name}**`,
-      fields: [
-        { name: 'Class', value: detail.class_name, inline: true },
-        { name: 'Size (L×W×H)', value: `${detail.length}×${detail.beam}×${detail.height}m`, inline: true },
-        { name: 'Cargo Capacity', value: `${detail.cargo_capacity}`, inline: true },
-        { name: 'Crew', value: `${detail.crew_min}–${detail.crew_max}`, inline: true },
-        { name: 'Shields', value: `${detail.shield_hp}`, inline: true },
-        { name: 'Version', value: detail.version, inline: true },
-      ],
-      timestamp: new Date(detail.updated_at).toISOString()
-    };
+        color: 0x0099ff,
+        title: `${detail.name}`,
+        description: `**Class:** ${detail.class_name || 'N/A'}\n**Version:** ${detail.version || 'N/A'}`,
+        fields: [
+          {
+            name: '🛠 Dimensions',
+            value: `**L×W×H:** ${detail.length ?? '?'}×${detail.beam ?? '?'}×${detail.height ?? '?'} m`,
+            inline: true,
+          },
+          {
+            name: '👥 Crew',
+            value: `**Min–Max:** ${detail.crew_min ?? '?'}–${detail.crew_max ?? '?'}`,
+            inline: true,
+          },
+          {
+            name: '📦 Cargo',
+            value: `**Capacity:** ${detail.cargo_capacity ?? 0} SCU\n**Inventory:** ${detail.vehicle_inventory ?? 0}K μSCU`,
+            inline: true,
+          },
+          {
+            name: '🚀 Speed',
+            value: `**SCM/Max:** ${detail.speed_scm ?? '?'} / ${detail.speed_max ?? '?'}\n**Q-Drive:** ${detail.quantum_speed ? (detail.quantum_speed / 1_000_000).toFixed(1) : '?'} Mm/s`,
+            inline: true,
+          },
+          {
+            name: '🛡 Shield & Armor',
+            value: `**Shields:** ${detail.shield_hp ?? '?'}\n**Phys:** ${detail.armor_damage_physical ?? '?'}x | **Energy:** ${detail.armor_damage_energy ?? '?'}x`,
+            inline: true,
+          },
+          {
+            name: '📡 Emissions',
+            value: `**IR:** ${detail.ir ?? '?'}\n**EM (idle):** ${detail.em_idle ?? '?'}\n**EM (max):** ${detail.em_max ?? '?'}`,
+            inline: true,
+          },
+          {
+            name: '⚙️ Agility',
+            value: `**Pitch/Yaw/Roll:** ${detail.agility_pitch ?? '?'} / ${detail.agility_yaw ?? '?'} / ${detail.agility_roll ?? '?'}`,
+            inline: true,
+          },
+          {
+            name: '🏗 Production',
+            value: `**Status:** ${detail.production_status || 'N/A'}\n**MSRP:** ${detail.msrp ? `$${detail.msrp}` : 'N/A'}`,
+            inline: true,
+          }
+        ],
+        timestamp: new Date(detail.updated_at).toISOString(),
+        footer: {
+          text: `Last Updated`
+        }
+      };
+      
 
     await interaction.editReply({ embeds: [embed] });
   }

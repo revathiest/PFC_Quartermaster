@@ -40,8 +40,8 @@ module.exports = {
             value:
               '```' +
               [
-                `Endpoint       | New   | Updated | Skipped | Total`,
-                `---------------|-------|---------|---------|------`,
+                `Endpoint        | New   | Updated | Skipped | Total`,
+                `----------------|-------|---------|---------|------`,
                 ...Object.entries(results).map(([key, r]) => {
                   const name = key.padEnd(15);
                   const created = String(r.created ?? 0).padStart(5);

@@ -1,4 +1,3 @@
-// commands/galactapedia.js
 const {
     SlashCommandBuilder,
     StringSelectMenuBuilder,
@@ -6,7 +5,14 @@ const {
     ComponentType,
   } = require('discord.js');
   const { Op } = require('sequelize');
-  const { GalactapediaEntry, GalactapediaDetail } = require('../config/database');
+  const {
+    GalactapediaEntry,
+    GalactapediaDetail,
+    GalactapediaCategory,
+    GalactapediaTag,
+    GalactapediaProperty,
+    GalactapediaRelated
+  } = require('../config/database');
   const { fetchSCDataByUrl } = require('../utils/fetchSCData');
   
   module.exports = {
@@ -77,19 +83,59 @@ const {
         }
       }
   
-      // Fetch or refresh detail
       let detail = await GalactapediaDetail.findByPk(entry.id);
       if (!detail) {
         try {
-          const response = await fetchSCDataByUrl(entry.rsi_url);
-          const html = response?.data?.content;
-          const cleaned = html?.replace(/<[^>]*>?/gm, '')?.trim()?.slice(0, 4000);
+          const response = await fetchSCDataByUrl(entry.api_url);
+          const data = response.data;
   
-        //   await GalactapediaDetail.upsert({
-        //     id: entry.id,
-        //     content: cleaned || 'No content found.',
-        //     updated_at: new Date()
-        //   });
+          const content = data.translations?.en_EN?.trim()?.slice(0, 4000) || 'No content found.';
+  
+          await GalactapediaDetail.upsert({
+            id: entry.id,
+            content,
+            updated_at: new Date()
+          });
+  
+          // Related tables
+          await GalactapediaCategory.destroy({ where: { entry_id: entry.id } });
+          await GalactapediaTag.destroy({ where: { entry_id: entry.id } });
+          await GalactapediaProperty.destroy({ where: { entry_id: entry.id } });
+          await GalactapediaRelated.destroy({ where: { entry_id: entry.id } });
+  
+          for (const cat of data.categories || []) {
+            await GalactapediaCategory.upsert({
+              id: cat.id,
+              entry_id: entry.id,
+              name: cat.name
+            });
+          }
+  
+          for (const tag of data.tags || []) {
+            await GalactapediaTag.upsert({
+              id: tag.id,
+              entry_id: entry.id,
+              name: tag.name
+            });
+          }
+  
+          for (const prop of data.properties || []) {
+            await GalactapediaProperty.create({
+              entry_id: entry.id,
+              name: prop.name,
+              value: prop.value
+            });
+          }
+  
+          for (const rel of data.related_articles || []) {
+            await GalactapediaRelated.upsert({
+              id: rel.id,
+              entry_id: entry.id,
+              title: rel.title,
+              url: rel.url,
+              api_url: rel.api_url
+            });
+          }
   
           detail = await GalactapediaDetail.findByPk(entry.id);
         } catch (err) {

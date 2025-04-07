@@ -1,6 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { Vehicle, VehicleDetail } = require('../config/database');
 const { fetchSCDataByUrl } = require('../utils/fetchSCData'); // We'll create this if you haven't
+const { Op } = require('sequelize');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -19,7 +20,7 @@ module.exports = {
 
     const vehicle = await Vehicle.findOne({
       where: {
-        [interaction.client.Sequelize.Op.or]: [
+        [Op.or]: [
           { name: query },
           { uuid: query }
         ]

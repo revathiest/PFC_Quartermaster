@@ -27,7 +27,7 @@ module.exports = (sequelize) => {
     indexes: [
       {
         unique: false,
-        fields: ['article_id']
+        fields: ['entry_id']
       }
     ],
     charset: 'utf8mb4',

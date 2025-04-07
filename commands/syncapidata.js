@@ -3,10 +3,8 @@ const {
   syncManufacturers,
   syncVehicles,
   syncShops
-  // add more sync functions here when needed
 } = require('../botactions/api/syncEndpoints');
 const { isAdmin } = require('../botactions/userManagement/permissions');
-const pad = (str, len = 7) => String(str).padEnd(len);
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -23,47 +21,60 @@ module.exports = {
 
     await interaction.deferReply({ ephemeral: true });
 
-    try {
-      const results = {};
+    const results = {};
+    const getFormattedTable = () => {
+      const headers = ['Endpoint', 'New', 'Updated', 'Skipped', 'Total'];
+      const rows = Object.entries(results).map(([key, res]) => [
+        key.padEnd(15),
+        String(res.created ?? 0).padStart(5),
+        String(res.updated ?? 0).padStart(7),
+        String(res.skipped ?? 0).padStart(7),
+        String(res.total ?? 0).padStart(5)
+      ]);
 
-      results.manufacturers = await syncManufacturers();
-      results.vehicles = await syncVehicles();
-      results.shops = await syncShops();
+      const formatRow = (row) => `| ${row.join(' | ')} |`;
 
-      const embed = {
-        color: 0x00ff99,
-        title: '✅ API Sync Complete',
-        description: `All available endpoints were synced successfully.`,
-        fields: [
-          {
-            name: '📊 Sync Summary',
-            value:
-              '```' +
-              [
-                `Endpoint        | New   | Updated | Skipped | Total`,
-                `----------------|-------|---------|---------|------`,
-                ...Object.entries(results).map(([key, r]) => {
-                  const name = key.padEnd(15);
-                  const created = String(r.created ?? 0).padStart(5);
-                  const updated = String(r.updated ?? 0).padStart(7);
-                  const skipped = String(r.skipped ?? 0).padStart(7);
-                  const total = String(r.total ?? 0).padStart(6);
-                  return `${name} | ${created} | ${updated} | ${skipped} | ${total}`;
-                })
-              ].join('\n') + '```'
-          }
-        ],
-        timestamp: new Date().toISOString(),
-      };
-      
+      const lines = [
+        formatRow(headers),
+        `|${headers.map(() => '---').join('|')}|`,
+        ...rows.map(formatRow)
+      ];
 
+      return '```markdown\n' + lines.join('\n') + '\n```';
+    };
+
+    const embed = {
+      color: 0x00ff99,
+      title: '⏳ API Sync In Progress',
+      description: 'Starting sync...',
+      timestamp: new Date().toISOString()
+    };
+
+    await interaction.editReply({ embeds: [embed] });
+
+    // Run syncs one-by-one, updating after each
+    const updateStep = async (label, fn) => {
+      try {
+        results[label] = await fn();
+      } catch (err) {
+        console.error(`[SYNC ERROR] ${label}:`, err);
+        results[label] = { created: 0, updated: 0, skipped: 0, total: 0, error: true };
+      }
+
+      embed.description = getFormattedTable();
+      embed.title = '🔄 Syncing API Data...';
       await interaction.editReply({ embeds: [embed] });
-    } catch (err) {
-      console.error('[SYNC ERROR]', err);
-      await interaction.editReply({
-        content: '❌ Something went wrong while syncing API data.',
-        ephemeral: true
-      });
-    }
+    };
+
+    await updateStep('manufacturers', syncManufacturers);
+    await updateStep('vehicles', syncVehicles);
+    await updateStep('shops', syncShops);
+
+    embed.title = '✅ API Sync Complete';
+    embed.color = 0x00ff99;
+    embed.description = getFormattedTable();
+    embed.timestamp = new Date().toISOString();
+
+    await interaction.editReply({ embeds: [embed] });
   }
 };

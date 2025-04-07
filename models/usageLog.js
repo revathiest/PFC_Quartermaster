@@ -58,8 +58,12 @@ module.exports = (sequelize) => {
         timestamp: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW,
-        },
-    });
+        }
+    },{
+        charset: 'utf8mb4',
+        collate: 'utf8mb4_unicode_ci'
+      }
+      );
 
     return UsageLog;
 };

@@ -1,7 +1,8 @@
 const { SlashCommandBuilder } = require('discord.js');
 const {
   syncManufacturers,
-  syncVehicles
+  syncVehicles,
+  syncShops
   // add more sync functions here when needed
 } = require('../botactions/api/syncEndpoints');
 const { isAdmin } = require('../botactions/userManagement/permissions');
@@ -26,6 +27,7 @@ module.exports = {
 
       results.manufacturers = await syncManufacturers();
       results.vehicles = await syncVehicles();
+      results.shops = await syncShops();
 
       const embed = {
         color: 0x00ff99,

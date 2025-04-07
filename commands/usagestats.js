@@ -77,46 +77,50 @@ const {
         voiceData[id].count++;
       }
   
-      // === Embed Construction
-      const embed = new EmbedBuilder()
-        .setColor(0x00AE86)
-        .setTitle(`📊 Usage Summary for ${userMention(targetUser.id)}`)
-        .setDescription(`Stats from the last 30 days`)
-        .setTimestamp();
-  
-      // ==== MESSAGES SECTION ====
-      embed.addFields({ name: '📝 Messages', value: '\u200B' });
-      if (Object.keys(messageCounts).length === 0) {
-        embed.addFields({ name: 'No text activity', value: 'No messages sent during the last 30 days.', inline: false });
-      } else {
-        embed.addFields(
-          { name: '**Channel**', value: Object.keys(messageCounts).map(id => `<#${id}>`).join('\n'), inline: true },
-          { name: '**Messages**', value: Object.values(messageCounts).join('\n'), inline: true },
-        );
-      }
-  
-      // ==== VOICE SECTION ====
-      embed.addFields({ name: '🎙️ Voice', value: '\u200B' });
-      if (Object.keys(voiceData).length === 0) {
-        embed.addFields({ name: 'No voice activity', value: 'No voice time recorded during the last 30 days.', inline: false });
-      } else {
-        embed.addFields(
-          { name: '**Channel**', value: Object.keys(voiceData).map(id => `<#${id}>`).join('\n'), inline: true },
-          { name: '**Total (min)**', value: Object.values(voiceData).map(v => `${Math.round(v.total / 60)}`).join('\n'), inline: true },
-          { name: '**Avg (min)**', value: Object.values(voiceData).map(v => `${Math.round((v.total / v.count) / 60)}`).join('\n'), inline: true },
-        );
-      }
-  
-      // ==== COMMANDS SECTION ====
-      embed.addFields({ name: '⌨️ Commands', value: '\u200B' });
-      if (Object.keys(commandCounts).length === 0) {
-        embed.addFields({ name: 'No commands used', value: 'No commands were used during the last 30 days.', inline: false });
-      } else {
-        embed.addFields(
-          { name: '**Command**', value: Object.keys(commandCounts).map(cmd => `/${cmd}`).join('\n'), inline: true },
-          { name: '**Used**', value: Object.values(commandCounts).join('\n'), inline: true },
-        );
-      }
+// === Embed Construction
+const embed = new EmbedBuilder()
+  .setColor(0x00AE86)
+  .setTitle(`📊 Usage Summary for ${userMention(targetUser.id)}`)
+  .setDescription(`Stats from the last 30 days`)
+  .setTimestamp();
+
+// ==== MESSAGES SECTION ====
+embed.addFields({ name: '\u200B', value: '\u200B' }); // spacer
+embed.addFields({ name: '📝 Messages', value: ' ' }); // thin space to render the section nicely
+if (Object.keys(messageCounts).length === 0) {
+  embed.addFields({ name: 'No text activity', value: 'No messages sent during the last 30 days.', inline: false });
+} else {
+  embed.addFields(
+    { name: '**Channel**', value: Object.keys(messageCounts).map(id => `<#${id}>`).join('\n'), inline: true },
+    { name: '**Messages**', value: Object.values(messageCounts).join('\n'), inline: true }
+  );
+}
+
+// ==== VOICE SECTION ====
+embed.addFields({ name: '\u200B', value: '\u200B' }); // spacer
+embed.addFields({ name: '🎙️ Voice', value: ' ' });
+if (Object.keys(voiceData).length === 0) {
+  embed.addFields({ name: 'No voice activity', value: 'No voice time recorded during the last 30 days.', inline: false });
+} else {
+  embed.addFields(
+    { name: '**Channel**', value: Object.keys(voiceData).map(id => `<#${id}>`).join('\n'), inline: true },
+    { name: '**Total (min)**', value: Object.values(voiceData).map(v => `${Math.round(v.total / 60)}`).join('\n'), inline: true },
+    { name: '**Avg (min)**', value: Object.values(voiceData).map(v => `${Math.round((v.total / v.count) / 60)}`).join('\n'), inline: true }
+  );
+}
+
+// ==== COMMANDS SECTION ====
+embed.addFields({ name: '\u200B', value: '\u200B' }); // spacer
+embed.addFields({ name: '⌨️ Commands', value: ' ' });
+if (Object.keys(commandCounts).length === 0) {
+  embed.addFields({ name: 'No commands used', value: 'No commands were used during the last 30 days.', inline: false });
+} else {
+  embed.addFields(
+    { name: '**Command**', value: Object.keys(commandCounts).map(cmd => `/${cmd}`).join('\n'), inline: true },
+    { name: '**Used**', value: Object.values(commandCounts).join('\n'), inline: true }
+  );
+}
+
   
       await interaction.editReply({ embeds: [embed] });
     }

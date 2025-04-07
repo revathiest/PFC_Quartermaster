@@ -105,7 +105,6 @@ const {
           await GalactapediaRelatedArticle.destroy({ where: { entry_id: entry.id } });
   
           for (const cat of data.categories || []) {
-            console.log(cat);
             await GalactapediaCategory.upsert({
               entry_id: entry.id,
               category_id: cat.category_id,
@@ -114,6 +113,7 @@ const {
           }
   
           for (const tag of data.tags || []) {
+            console.log(tag);
             await GalactapediaTag.upsert({
               entry_id: entry.id,
               tag_id: tag.id,
@@ -122,6 +122,7 @@ const {
           }
   
           for (const prop of data.properties || []) {
+            console.log(prop);
             await GalactapediaProperty.create({
               entry_id: entry.id,
               name: prop.name,
@@ -130,6 +131,7 @@ const {
           }
   
           for (const rel of data.related_articles || []) {
+            console.log(rel);
             await GalactapediaRelated.upsert({
               entry_id: entry.id,
               related_id: rel.id,

@@ -1,7 +1,7 @@
 const { Sequelize } = require('sequelize');
 const config = require('../databaseConfig.json');  // Adjust the path if needed
 
-const env = process.env.NODE_ENV || 'development';
+const env = process.env.BOT_TYPE || 'development';
 const dbConfig = config[env];
 
 const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.password, {

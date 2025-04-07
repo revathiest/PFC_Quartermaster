@@ -66,7 +66,7 @@ module.exports = {
         if (message.mentions.has(client.user)) {
             const prompt = message.content.replace(/<@!?(\d+)>/, '').trim();
             if (!prompt) return;
-
+        
             try {
                 const completion = await openai.chat.completions.create({
                     model: "gpt-3.5-turbo",
@@ -76,15 +76,20 @@ module.exports = {
                     ],
                     temperature: 0.7,
                 });
-                
-
-                const reply = completion.data.choices[0]?.message?.content;
-                await message.reply(reply);
+        
+                const reply = completion?.choices?.[0]?.message?.content;
+        
+                if (reply) {
+                    await message.reply(reply);
+                } else {
+                    console.warn('[OPENAI WARNING] No valid response from OpenAI.');
+                    await message.reply("Hmm, I didn’t quite catch that. Try again?");
+                }
             } catch (err) {
                 console.error('[OPENAI ERROR]', err);
                 await message.reply("Sorry, I couldn't fetch a reply right now.");
             }
-        }
+        }        
     },
 
     performAction: function (message, client, actionDetail) {

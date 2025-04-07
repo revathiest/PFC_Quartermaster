@@ -26,11 +26,11 @@ module.exports = (sequelize) => {
     },
     rsi_url: {
       type: DataTypes.STRING(1000),
-      allowNull: false,
+      allowNull: true,
     },
     api_url: {
       type: DataTypes.STRING(1000),
-      allowNull: false,
+      allowNull: true,
     },
     created_at: {
       type: DataTypes.DATE,

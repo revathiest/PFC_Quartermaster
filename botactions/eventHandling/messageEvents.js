@@ -1,16 +1,19 @@
 const { UsageLog } = require('../../config/database');
-const filter = require('../../messages.json'); // Assumes messages.json contains both words and regex patterns
+const filter = require('../../messages.json');
+const { Configuration, OpenAIApi } = require('openai');
+
+const configuration = new Configuration({
+    apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
 
 module.exports = {
-    handleMessageCreate: async function(message, client) {
-        if (!message.guild || message.author.bot) {
-            return;
-        }
+    handleMessageCreate: async function (message, client) {
+        if (!message.guild || message.author.bot) return;
 
         const serverId = message.guild.id;
 
         try {
-            // Log the message event to the database
             await UsageLog.create({
                 user_id: message.author.id,
                 interaction_type: 'message',
@@ -25,91 +28,95 @@ module.exports = {
         } catch (error) {
             console.error('Error logging message:', error);
         }
-        // Process the message content
+
         const content = message.content;
         const lowerCaseContent = content.toLowerCase();
-        // Create arrays for personal and regular triggers
         const personalTriggers = [];
         const regularTriggers = [];
-        let allowMessage = true; // Placeholder for any additional conditions to allow message processing
+        let allowMessage = true;
 
-        // Split triggers based on their action type
         for (const phrase in filter.words) {
-            if (filter.words.hasOwnProperty(phrase)) {
-                if (filter.words[phrase].action === "personal") {
-                    personalTriggers.push(phrase);
-                } else {
-                    regularTriggers.push(phrase);
-                }
+            if (filter.words[phrase].action === "personal") {
+                personalTriggers.push(phrase);
+            } else {
+                regularTriggers.push(phrase);
             }
         }
 
-        // Process personal triggers first
         for (const phrase of personalTriggers) {
             if (lowerCaseContent.includes(phrase)) {
                 console.log('Checking personal trigger for "' + phrase + '"');
-                if (module.exports.performAction(message, client, filter.words[phrase])) {
-                    return; // If a personal trigger matched and executed, stop here.
-                }
-            }
-        }
-        
-        // Then process regular triggers
-        for (const phrase of regularTriggers) {
-            if (lowerCaseContent.includes(phrase)) {
-                console.log('Checking regular trigger for "' + phrase + '"');
-                if (module.exports.performAction(message, client, filter.words[phrase])) {
-                    return; // Execute the trigger and exit.
-                }
+                if (module.exports.performAction(message, client, filter.words[phrase])) return;
             }
         }
 
-        // Filter based on regular expressions
+        for (const phrase of regularTriggers) {
+            if (lowerCaseContent.includes(phrase)) {
+                console.log('Checking regular trigger for "' + phrase + '"');
+                if (module.exports.performAction(message, client, filter.words[phrase])) return;
+            }
+        }
+
         for (const regex in filter.regex) {
-            if (filter.regex.hasOwnProperty(regex)) {
-                const regexObj = new RegExp(regex, "i"); // Regex patterns with case-insensitivity
-                if (regexObj.test(content) && allowMessage) {
-                    console.log('Matched regex: ' + regex);
-                    if (module.exports.performAction(message, client, filter.regex[regex])) {
-                        return;
-                    }
-                }
+            const regexObj = new RegExp(regex, "i");
+            if (regexObj.test(content) && allowMessage) {
+                console.log('Matched regex: ' + regex);
+                if (module.exports.performAction(message, client, filter.regex[regex])) return;
+            }
+        }
+
+        // 🔥 NEW: If bot is mentioned, reply with OpenAI
+        if (message.mentions.has(client.user)) {
+            const prompt = message.content.replace(/<@!?(\d+)>/, '').trim();
+            if (!prompt) return;
+
+            try {
+                const completion = await openai.createChatCompletion({
+                    model: "gpt-3.5-turbo",
+                    messages: [
+                        { role: "system", content: "You are a helpful and friendly Discord bot." },
+                        { role: "user", content: prompt }
+                    ],
+                    temperature: 0.7,
+                });
+
+                const reply = completion.data.choices[0].message.content;
+                await message.reply(reply);
+            } catch (err) {
+                console.error('[OPENAI ERROR]', err);
+                await message.reply("Sorry, I couldn't fetch a reply right now.");
             }
         }
     },
 
-    performAction: function(message, client, actionDetail) {
-        // Handle personal actions
+    performAction: function (message, client, actionDetail) {
         if (actionDetail.action === "personal") {
-            if (actionDetail.userId && message.author.id === actionDetail.userId) {
+            if (
+                (actionDetail.userId && message.author.id === actionDetail.userId) ||
+                (actionDetail.userId && message.author.username.toLowerCase() === actionDetail.userId.toLowerCase())
+            ) {
                 message.channel.send(actionDetail.response);
-                return true; // Personal action matched, so stop further processing.
-            } else if (actionDetail.userId && message.author.username.toLowerCase() === actionDetail.userId.toLowerCase()) {
-                message.channel.send(actionDetail.response);
-                return true; // Personal action matched.
+                return true;
             } else {
                 console.log("Personal action ignored: User does not match");
-                return false; // No match, so allow further triggers.
+                return false;
             }
-        }
-        // Regular respond action.
-        else if (actionDetail.action === "respond") {
+        } else if (actionDetail.action === "respond") {
             message.channel.send(actionDetail.response);
             return true;
-        }
-        // Delete action.
-        else if (actionDetail.action === "delete") {
+        } else if (actionDetail.action === "delete") {
             const channelName = message.channel.name;
             const username = message.author.username;
             const deletionMessage = `The following message has been deleted from channel ${channelName}. Sender - ${username}`;
             const responseChannel = client.channels.cache.get(client.chanProfanityAlert);
-            if (responseChannel && responseChannel.isText()) {
+            if (responseChannel && responseChannel.isTextBased?.()) {
                 responseChannel.send(deletionMessage);
                 responseChannel.send(message.content);
             }
             message.delete();
             return true;
         }
+
         return false;
     }
 };

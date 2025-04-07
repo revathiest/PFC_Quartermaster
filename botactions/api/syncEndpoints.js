@@ -1,5 +1,6 @@
 const { syncManufacturers } = require('../../utils/apiSync/manufacturers');
 const { syncVehicles } = require('../../utils/apiSync/vehicles');
+const { syncGalactapediaEntries } = require('../../utils/apiSync/galactapedia');
 
 async function syncAllEndpoints() {
   const results = [];
@@ -24,5 +25,6 @@ async function syncAllEndpoints() {
 module.exports = { 
     syncAllEndpoints,
     syncManufacturers,
-    syncVehicles
+    syncVehicles,
+    syncGalactapediaEntries
 };

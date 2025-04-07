@@ -2,7 +2,8 @@ const { SlashCommandBuilder } = require('discord.js');
 const {
   syncManufacturers,
   syncVehicles,
-  syncShops
+  syncShops,
+  syncGalactapediaEntries
 } = require('../botactions/api/syncEndpoints');
 const { isAdmin } = require('../botactions/userManagement/permissions');
 
@@ -73,6 +74,7 @@ module.exports = {
 
     await updateStep('manufacturers', syncManufacturers);
     await updateStep('vehicles', syncVehicles);
+    await updateStep('galactapedia', syncGalactapediaEntries)
 
     embed.title = '✅ API Sync Complete';
     embed.color = 0x00ff99;

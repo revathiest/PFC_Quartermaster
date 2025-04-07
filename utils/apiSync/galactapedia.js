@@ -24,8 +24,8 @@ async function syncGalactapedia() {
         slug: entry.slug,
         thumbnail: entry.thumbnail,
         type: entry.type,
-        rsi_url: entry.url,
-        api_url: entry.link,
+        rsi_url: entry.rsi_url,
+        api_url: entry.api_url,
         created_at: entry.created_at ?? null
       });
 

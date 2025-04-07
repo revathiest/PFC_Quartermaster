@@ -10,6 +10,37 @@ module.exports = {
 
         const serverId = message.guild.id;
 
+        // 🔥 NEW: If bot is mentioned, reply with OpenAI
+        if (message.mentions.has(client.user)) {
+            const prompt = message.content.replace(/<@!?(\d+)>/, '').trim();
+            if (!prompt) return;
+
+            const model = process.env.OPENAI_MODEL;
+        
+            try {
+                const completion = await openai.chat.completions.create({
+                    model: model,
+                    messages: [
+                        { role: "system", content: "You are a helpful and friendly Discord bot." },
+                        { role: "user", content: prompt }
+                    ],
+                    temperature: 0.7,
+                });
+        
+                const reply = completion?.choices?.[0]?.message?.content;
+        
+                if (reply) {
+                    await message.reply(reply);
+                } else {
+                    console.warn('[OPENAI WARNING] No valid response from OpenAI.');
+                    await message.reply("Hmm, I didn’t quite catch that. Try again?");
+                }
+            } catch (err) {
+                console.error('[OPENAI ERROR]', err);
+                await message.reply("Sorry, I couldn't fetch a reply right now.");
+            }
+        }      
+
         try {
             await UsageLog.create({
                 user_id: message.author.id,
@@ -60,38 +91,7 @@ module.exports = {
                 console.log('Matched regex: ' + regex);
                 if (module.exports.performAction(message, client, filter.regex[regex])) return;
             }
-        }
-
-        // 🔥 NEW: If bot is mentioned, reply with OpenAI
-        if (message.mentions.has(client.user)) {
-            const prompt = message.content.replace(/<@!?(\d+)>/, '').trim();
-            if (!prompt) return;
-
-            const model = process.env.OPENAI_MODEL;
-        
-            try {
-                const completion = await openai.chat.completions.create({
-                    model: model,
-                    messages: [
-                        { role: "system", content: "You are a helpful and friendly Discord bot." },
-                        { role: "user", content: prompt }
-                    ],
-                    temperature: 0.7,
-                });
-        
-                const reply = completion?.choices?.[0]?.message?.content;
-        
-                if (reply) {
-                    await message.reply(reply);
-                } else {
-                    console.warn('[OPENAI WARNING] No valid response from OpenAI.');
-                    await message.reply("Hmm, I didn’t quite catch that. Try again?");
-                }
-            } catch (err) {
-                console.error('[OPENAI ERROR]', err);
-                await message.reply("Sorry, I couldn't fetch a reply right now.");
-            }
-        }        
+        }  
     },
 
     performAction: function (message, client, actionDetail) {

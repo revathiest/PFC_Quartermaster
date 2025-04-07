@@ -82,7 +82,7 @@ const embed = new EmbedBuilder()
   .setColor(0x00AE86)
   .setTitle(`📊 Usage Summary for ${userMention(targetUser.id)}`)
   .setDescription(`Stats from the last 30 days`)
-  .setTimestamp();
+  .setTimestamp('Stats from the last 30 days');
 
 // ==== MESSAGES SECTION ====
 embed.addFields({ name: '📝 Messages', value: ' ' }); // thin space to render the section nicely

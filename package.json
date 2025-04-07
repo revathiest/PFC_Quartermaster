@@ -17,7 +17,8 @@
     "isomorphic-unfetch": "^3.1.0",
     "moment": "^2.30.1",
     "mysql2": "^3.9.7",
-    "sequelize": "^6.37.3"
+    "sequelize": "^6.37.3",
+    "openai": "^4.0.0"
   },
   "nodeVersion": "21.6.2",
   "devDependencies": {

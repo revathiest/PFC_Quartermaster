@@ -1,6 +1,5 @@
 // utils/fetchSCData.js
 const fetch = require('node-fetch');
-const axios = require('axios');
 
 const BASE_URL = 'https://api.star-citizen.wiki/api/v2';
 const DEFAULT_LIMIT = 50;
@@ -50,10 +49,16 @@ async function fetchSCData(endpoint, queryparams = {}) {
 }
 
 async function fetchSCDataByUrl(url) {
-  const response = await axios.get(url, {
+  const response = await fetch(url, {
     headers: { Accept: 'application/json' }
   });
-  return response.data;
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data;
 }
 
 module.exports = { 

@@ -11,7 +11,8 @@ const {
     GalactapediaCategory,
     GalactapediaTag,
     GalactapediaProperty,
-    GalactapediaRelated
+    GalactapediaRelated,
+    GalactapediaRelatedArticle
   } = require('../config/database');
   const { fetchSCDataByUrl } = require('../utils/fetchSCData');
   
@@ -101,7 +102,7 @@ const {
           await GalactapediaCategory.destroy({ where: { entry_id: entry.id } });
           await GalactapediaTag.destroy({ where: { entry_id: entry.id } });
           await GalactapediaProperty.destroy({ where: { entry_id: entry.id } });
-          await GalactapediaRelated.destroy({ where: { entry_id: entry.id } });
+          await GalactapediaRelatedArticle.destroy({ where: { entry_id: entry.id } });
   
           for (const cat of data.categories || []) {
             await GalactapediaCategory.upsert({

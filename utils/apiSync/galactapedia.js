@@ -1,45 +1,50 @@
 // utils/apiSync/galactapedia.js
-const { GalactapediaEntry } = require('../../config/database');
 const { fetchSCData } = require('../../utils/fetchSCData');
+const { GalactapediaEntry } = require('../../config/database');
 
-async function syncGalactapediaEntries() {
-  const baseUrl = 'https://api.star-citizen.wiki/api/v2/galactapedia';
-  let totalCreated = 0;
-  let totalUpdated = 0;
-  let totalFetched = 0;
+async function syncGalactapedia() {
+  console.log('[API SYNC] Syncing Galactapedia entries...');
 
-  let page = 1;
-  let nextPageUrl = `${baseUrl}?page=${page}`;
+  let created = 0;
+  let updated = 0;
+  let skipped = 0;
 
-  while (nextPageUrl) {
-    const response = await fetchSCData(nextPageUrl);
-    const entries = response?.data || [];
-    totalFetched += entries.length;
+  try {
+    const entries = await fetchSCData('galactapedia');
+
+    if (!Array.isArray(entries)) {
+      throw new Error('Expected an array of Galactapedia entries');
+    }
 
     for (const entry of entries) {
-      const [record, created] = await GalactapediaEntry.upsert({
-        id: entry.id,
+      const id = entry.uuid?.trim();
+
+      if (!id) {
+        console.warn(`[SKIPPED] Missing or empty UUID for: "${entry.title}"`);
+        skipped++;
+        continue;
+      }
+
+      const [record, wasCreated] = await GalactapediaEntry.upsert({
+        id,
         title: entry.title,
         slug: entry.slug,
         thumbnail: entry.thumbnail,
         type: entry.type,
         rsi_url: entry.url,
-        api_url: entry.api_url,
-        created_at: entry.created_at
+        api_url: entry.link,
+        created_at: entry.created_at ?? null
       });
 
-      if (created) totalCreated++;
-      else totalUpdated++;
+      wasCreated ? created++ : updated++;
     }
 
-    nextPageUrl = response.links?.next || null;
+    console.log(`[API SYNC] Synced Galactapedia entries - Created: ${created}, Updated: ${updated}, Skipped: ${skipped}`);
+    return { created, updated, skipped, total: entries.length };
+  } catch (err) {
+    console.error('[API SYNC] Error syncing Galactapedia entries:', err);
+    throw err;
   }
-
-  return {
-    created: totalCreated,
-    updated: totalUpdated,
-    total: totalFetched
-  };
 }
 
-module.exports = { syncGalactapediaEntries };
+module.exports = { syncGalactapedia };

@@ -5,6 +5,7 @@ module.exports = (sequelize) => {
   const GalactapediaTag = sequelize.define('GalactapediaTag', {
     entry_id: {
       type: DataTypes.STRING,
+      primaryKey: true,
       allowNull: false
     },
     tag_id: {

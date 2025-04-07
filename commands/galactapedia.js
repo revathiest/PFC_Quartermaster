@@ -107,7 +107,9 @@ const {
           for (const cat of data.categories || []) {
             await GalactapediaCategory.upsert({
               id: cat.id,
-              entry_id: entry.id,
+              entry_id: cat.id,
+              category_id: cat.category_id,
+              category_name: cat.category_name,
               name: cat.name
             });
           }

@@ -197,9 +197,9 @@ module.exports = {
       title: `${detail.name} — ${detail.focus || 'Unknown Role'}`,
       description: detail.description || 'No description available.',
       fields: [
-        { name: 'Class', value: detail.class_name || 'N/A', inline: true },
+        { name: 'Class', value: detail.name || 'N/A', inline: true },
         { name: 'Type', value: detail.type || 'N/A', inline: true },
-        { name: 'Manufacturer', value: detail.manufacturer || 'N/A', inline: true },
+        { name: 'Manufacturer', value: detail.manufacturer_name || 'N/A', inline: true },
         { name: 'Crew (Min–Max)', value: `${detail.crew_min ?? '?'}–${detail.crew_max ?? '?'}`, inline: true },
         { name: 'Cargo Capacity', value: `${detail.cargo_capacity ?? 0} SCU`, inline: true },
         { name: 'Vehicle Inventory', value: `${detail.vehicle_inventory ?? 0}k µSCU`, inline: true },

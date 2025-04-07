@@ -23,25 +23,30 @@ module.exports = {
 
     const results = {};
     const getFormattedTable = () => {
+      const pad = (str, len) => String(str).padEnd(len, ' ');
       const headers = ['Endpoint', 'New', 'Updated', 'Skipped', 'Total'];
-      const rows = Object.entries(results).map(([key, res]) => [
-        key.padEnd(15),
-        String(res.created ?? 0).padStart(5),
-        String(res.updated ?? 0).padStart(7),
-        String(res.skipped ?? 0).padStart(7),
-        String(res.total ?? 0).padStart(5)
-      ]);
-
-      const formatRow = (row) => `| ${row.join(' | ')} |`;
-
-      const lines = [
-        formatRow(headers),
-        `|${headers.map(() => '---').join('|')}|`,
-        ...rows.map(formatRow)
-      ];
-
-      return '```markdown\n' + lines.join('\n') + '\n```';
+      const colWidths = [15, 6, 8, 8, 6];
+    
+      const formatRow = (row) =>
+        '| ' + row.map((val, i) => pad(val, colWidths[i])).join(' | ') + ' |';
+    
+      const headerRow = formatRow(headers);
+      const dividerRow = '| ' + colWidths.map(w => '-'.repeat(w)).join(' | ') + ' |';
+      const dataRows = Object.entries(results).map(([key, res]) =>
+        formatRow([
+          key,
+          res.created ?? 0,
+          res.updated ?? 0,
+          res.skipped ?? 0,
+          res.total ?? 0
+        ])
+      );
+    
+      return '```markdown\n' +
+        [headerRow, dividerRow, ...dataRows].join('\n') +
+        '\n```';
     };
+    
 
     const embed = {
       color: 0x00ff99,

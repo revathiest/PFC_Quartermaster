@@ -151,9 +151,37 @@ async function handleButton(interaction, client) {
 }
 
 async function handleSelectMenu(interaction, client) {
-    const selectedChannelId = interaction.values[0];
-    const selectedChannel = await interaction.guild.channels.fetch(selectedChannelId);
     const userSelection = pendingChannelSelection[interaction.user.id];
+    const selectedValue = interaction.values[0];
+    const isChannelId = /^\d{17,19}$/.test(selectedValue); // Discord Snowflakes are 17-19 digit numbers
+
+if (isChannelId) {
+  const selectedChannelId = selectedValue;
+  const selectedChannel = await interaction.guild.channels.fetch(selectedChannelId);
+  const userSelection = pendingChannelSelection[interaction.user.id];
+
+  if (userSelection) {
+    const embedData = {
+      title: userSelection.title,
+      description: userSelection.description,
+      author: userSelection.author
+    };
+    const time = userSelection.time;
+
+    const formattedTime = moment(time, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+
+    await saveAnnouncementToDatabase(selectedChannelId, interaction.guild.id, embedData, formattedTime, client);
+
+    await interaction.update({
+      content: `Announcement scheduled for ${formattedTime} in channel ${selectedChannel.name}`,
+      components: []
+    });
+
+    delete pendingChannelSelection[interaction.user.id];
+    return;
+  }
+}
+
 
     if (userSelection) {
         const embedData = {

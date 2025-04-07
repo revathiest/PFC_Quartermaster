@@ -10,7 +10,7 @@ module.exports = (sequelize) => {
     },
     content: {
       type: DataTypes.TEXT('long'),
-      allowNull: false
+      allowNull: true
     },
     created_at: {
       type: DataTypes.DATE,

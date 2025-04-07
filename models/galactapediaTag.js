@@ -10,11 +10,11 @@ module.exports = (sequelize) => {
     },
     tag_id: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
     },
     tag_name: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
     }
   }, {
     indexes: [

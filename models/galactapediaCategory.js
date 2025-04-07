@@ -10,11 +10,11 @@ module.exports = (sequelize) => {
     },
     category_id: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     category_name: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     }
   }, {
     charset: 'utf8mb4',

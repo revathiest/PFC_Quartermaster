@@ -10,19 +10,19 @@ module.exports = (sequelize) => {
     },
     related_id: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
     },
     title: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
     },
     url: {
       type: DataTypes.STRING(1000),
-      allowNull: false
+      allowNull: true
     },
     api_url: {
       type: DataTypes.STRING(1000),
-      allowNull: false
+      allowNull: true
     }
   }, {
     indexes: [

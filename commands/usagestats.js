@@ -85,7 +85,6 @@ const embed = new EmbedBuilder()
   .setTimestamp();
 
 // ==== MESSAGES SECTION ====
-embed.addFields({ name: '\u200B', value: '\u200B' }); // spacer
 embed.addFields({ name: '📝 Messages', value: ' ' }); // thin space to render the section nicely
 if (Object.keys(messageCounts).length === 0) {
   embed.addFields({ name: 'No text activity', value: 'No messages sent during the last 30 days.', inline: false });
@@ -97,7 +96,6 @@ if (Object.keys(messageCounts).length === 0) {
 }
 
 // ==== VOICE SECTION ====
-embed.addFields({ name: '\u200B', value: '\u200B' }); // spacer
 embed.addFields({ name: '🎙️ Voice', value: ' ' });
 if (Object.keys(voiceData).length === 0) {
   embed.addFields({ name: 'No voice activity', value: 'No voice time recorded during the last 30 days.', inline: false });
@@ -110,7 +108,6 @@ if (Object.keys(voiceData).length === 0) {
 }
 
 // ==== COMMANDS SECTION ====
-embed.addFields({ name: '\u200B', value: '\u200B' }); // spacer
 embed.addFields({ name: '⌨️ Commands', value: ' ' });
 if (Object.keys(commandCounts).length === 0) {
   embed.addFields({ name: 'No commands used', value: 'No commands were used during the last 30 days.', inline: false });

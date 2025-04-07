@@ -106,19 +106,17 @@ const {
   
           for (const cat of data.categories || []) {
             await GalactapediaCategory.upsert({
-              id: cat.id,
-              entry_id: cat.id,
+              entry_id: entry.id,
               category_id: cat.category_id,
-              category_name: cat.category_name,
-              name: cat.name
+              category_name: cat.category_name
             });
           }
   
           for (const tag of data.tags || []) {
             await GalactapediaTag.upsert({
-              id: tag.id,
               entry_id: entry.id,
-              name: tag.name
+              tag_id: tag.id,
+              tag_name: tag.name
             });
           }
   
@@ -132,8 +130,8 @@ const {
   
           for (const rel of data.related_articles || []) {
             await GalactapediaRelated.upsert({
-              id: rel.id,
               entry_id: entry.id,
+              related_id: rel.id,
               title: rel.title,
               url: rel.url,
               api_url: rel.api_url

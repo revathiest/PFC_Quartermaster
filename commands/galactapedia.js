@@ -105,6 +105,7 @@ const {
           await GalactapediaRelatedArticle.destroy({ where: { entry_id: entry.id } });
   
           for (const cat of data.categories || []) {
+            console.log(cat);
             await GalactapediaCategory.upsert({
               entry_id: entry.id,
               category_id: cat.category_id,

@@ -66,10 +66,12 @@ module.exports = {
         if (message.mentions.has(client.user)) {
             const prompt = message.content.replace(/<@!?(\d+)>/, '').trim();
             if (!prompt) return;
+
+            const model = process.env.OPENAI_MODEL;
         
             try {
                 const completion = await openai.chat.completions.create({
-                    model: "gpt-3.5-turbo",
+                    model: model,
                     messages: [
                         { role: "system", content: "You are a helpful and friendly Discord bot." },
                         { role: "user", content: prompt }

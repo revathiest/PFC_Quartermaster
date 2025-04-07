@@ -28,10 +28,10 @@ module.exports = {
       const colWidths = [15, 6, 8, 8, 6];
     
       const formatRow = (row) =>
-        '| ' + row.map((val, i) => pad(val, colWidths[i])).join(' | ') + ' |';
+        '| ' + row.map((val, i) => pad(val, colWidths[i])).join('|') + '|';
     
       const headerRow = formatRow(headers);
-      const dividerRow = '| ' + colWidths.map(w => '-'.repeat(w)).join(' | ') + ' |';
+      const dividerRow = '| ' + colWidths.map(w => '-'.repeat(w)).join('|') + '|';
       const dataRows = Object.entries(results).map(([key, res]) =>
         formatRow([
           key,

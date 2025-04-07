@@ -1,6 +1,6 @@
 // utils/apiSync/galactapedia.js
 const { GalactapediaEntry } = require('../../config/database');
-const fetchSCData = require('../../utils/fetchSCData');
+const { fetchSCData } = require('../../utils/fetchSCData');
 
 async function syncGalactapediaEntries() {
   const baseUrl = 'https://api.star-citizen.wiki/api/v2/galactapedia';

@@ -20,7 +20,12 @@ const ScheduledAnnouncement = require('../models/scheduledAnnouncement')(sequeli
 const Manufacturer = require('../models/manufacturer')(sequelize);
 const Vehicle = require('../models/vehicle')(sequelize);
 const VehicleDetail = require('../models/vehicleDetail')(sequelize);
-const Shop = require('../models/shop');
+const GalactapediaEntry = require('../models/galactapediaEntry')(sequelize);
+const GalactapediaDetail = require('../models/galactapediaDetail')(sequelize);
+const GalactapediaProperty = require('../models/galactapediaProperty')(sequelize);
+const GalactapediaRelatedArticle = require('../models/galactapediaRelatedArticle')(sequelize);
+const GalactapediaTag = require('../models/galactapediaTag')(sequelize);
+const GalactapediaCategory = require('../models/galactapediaCategory')(sequelize);
 
 const initializeDatabase = async () => {
     try {
@@ -43,5 +48,10 @@ module.exports = {
     Manufacturer,
     Vehicle,
     VehicleDetail,
-    Shop
+    GalactapediaEntry,
+    GalactapediaDetail,
+    GalactapediaProperty,
+    GalactapediaRelatedArticle,
+    GalactapediaTag,
+    GalactapediaCategory
 };

@@ -1,35 +1,39 @@
-// models/shop.js
+// models/galactapediaEntry.js
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
-  const Shop = sequelize.define('Shop', {
-    uuid: {
+  const GalactapediaEntry = sequelize.define('GalactapediaEntry', {
+    id: {
       type: DataTypes.STRING,
       primaryKey: true,
       allowNull: false,
     },
-    name_raw: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    name: {
+    title: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    position: {
+    slug: {
       type: DataTypes.STRING,
-      allowNull: true,
-    },
-    profit_margin: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    link: {
-      type: DataTypes.STRING(500),
       allowNull: false,
     },
-    version: {
+    thumbnail: {
+      type: DataTypes.STRING(1000),
+      allowNull: true,
+    },
+    type: {
       type: DataTypes.STRING,
+      allowNull: true,
+    },
+    rsi_url: {
+      type: DataTypes.STRING(1000),
+      allowNull: true,
+    },
+    api_url: {
+      type: DataTypes.STRING(1000),
+      allowNull: true,
+    },
+    created_at: {
+      type: DataTypes.DATE,
       allowNull: true,
     },
   }, {
@@ -37,5 +41,5 @@ module.exports = (sequelize) => {
     collate: 'utf8mb4_unicode_ci',
   });
 
-  return Shop;
+  return GalactapediaEntry;
 };

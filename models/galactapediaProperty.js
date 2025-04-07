@@ -3,7 +3,7 @@ const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
   const GalactapediaProperty = sequelize.define('GalactapediaProperty', {
-    article_id: {
+    entry_id: {
       type: DataTypes.STRING,
       allowNull: false
     },

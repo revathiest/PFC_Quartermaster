@@ -92,7 +92,7 @@ const {
           const content = data.translations?.en_EN?.trim()?.slice(0, 4000) || 'No content found.';
   
           await GalactapediaDetail.upsert({
-            id: entry.id,
+            entry_id: entry.id,
             content,
             updated_at: new Date()
           });

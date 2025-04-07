@@ -3,7 +3,7 @@ const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
   const GalactapediaRelatedArticle = sequelize.define('GalactapediaRelatedArticle', {
-    article_id: {
+    entry_id: {
       type: DataTypes.STRING,
       allowNull: false
     },

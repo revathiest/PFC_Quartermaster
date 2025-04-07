@@ -18,11 +18,19 @@ async function syncAllEndpoints() {
     results.push({ endpoint: 'vehicles', success: false, error: error.message });
   }
 
+  try {
+    const shopResult = await syncShops();
+    results.push(shopResult);
+  } catch (error) {
+    results.push({ endpoint: 'shops', success: false, error: error.message });
+  }
+
   return results;
 }
 
 module.exports = { 
     syncAllEndpoints,
     syncManufacturers,
-    syncVehicles
+    syncVehicles,
+    syncShops
 };

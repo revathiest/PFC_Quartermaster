@@ -20,6 +20,7 @@ const ScheduledAnnouncement = require('../models/scheduledAnnouncement')(sequeli
 const Manufacturer = require('../models/manufacturer')(sequelize);
 const Vehicle = require('../models/vehicle')(sequelize);
 const VehicleDetail = require('../models/vehicleDetail')(sequelize);
+const Shop = require('../models/shop');
 
 const initializeDatabase = async () => {
     try {
@@ -41,5 +42,6 @@ module.exports = {
     ScheduledAnnouncement,
     Manufacturer,
     Vehicle,
-    VehicleDetail
+    VehicleDetail,
+    Shop
 };

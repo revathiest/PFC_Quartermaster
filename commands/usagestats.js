@@ -1,110 +1,146 @@
 // commands/usagestats.js
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const { UsageLog, VoiceLog, sequelize } = require('../config/database');
+const { SlashCommandBuilder, EmbedBuilder, userMention } = require('discord.js');
 const { Op } = require('sequelize');
+const { UsageLog, VoiceLog } = require('../config/database');
+const { isAdmin } = require('../botactions/userManagement/permissions');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('usagestats')
-    .setDescription('View 30-day usage stats for yourself or another user (admin only)')
+    .setDescription('View message and voice usage stats for yourself or another user')
     .addUserOption(option =>
       option.setName('user')
-        .setDescription('User to get stats for')
+        .setDescription('Select a user to view stats for')
         .setRequired(false)
     ),
 
   async execute(interaction) {
-    const target = interaction.options.getUser('user') || interaction.user;
+    const targetUser = interaction.options.getUser('user') || interaction.user;
+    const isAllowed = await isAdmin(interaction.member);
+    const requestingUser = interaction.user;
 
-    // Permissions check for viewing others' stats
-    if (target.id !== interaction.user.id && !interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
-      return interaction.reply({ content: '❌ You can only view your own stats unless you’re an admin.', ephemeral: true });
-    }
-
-    await interaction.deferReply();
-
-    const now = new Date();
-    const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
-
-    // --- Text Usage ---
-    const messageStats = await UsageLog.findAll({
-      attributes: [
-        'channel_id',
-        [sequelize.fn('COUNT', sequelize.col('id')), 'message_count']
-      ],
-      where: {
-        user_id: target.id,
-        server_id: interaction.guild.id,
-        event_type: 'message_create',
-        timestamp: {
-          [Op.gte]: thirtyDaysAgo
-        }
-      },
-      group: ['channel_id'],
-      raw: true
-    });
-
-    // --- Voice Usage ---
-    const voiceStats = await VoiceLog.findAll({
-      attributes: [
-        'channel_id',
-        [sequelize.fn('SUM', sequelize.col('duration')), 'voice_duration']
-      ],
-      where: {
-        user_id: target.id,
-        server_id: interaction.guild.id,
-        timestamp: {
-          [Op.gte]: thirtyDaysAgo
-        }
-      },
-      group: ['channel_id'],
-      raw: true
-    });
-
-    const voiceMap = Object.fromEntries(
-      voiceStats.map(v => [v.channel_id, v.voice_duration])
-    );
-
-    // --- Merge stats ---
-    const combinedChannelIds = new Set([
-      ...messageStats.map(m => m.channel_id),
-      ...voiceStats.map(v => v.channel_id)
-    ]);
-
-    const rows = [];
-    for (const channelId of combinedChannelIds) {
-      const messageCount = messageStats.find(m => m.channel_id === channelId)?.message_count || 0;
-      const voiceTime = voiceMap[channelId] || 0;
-      rows.push({
-        channelId,
-        messageCount,
-        voiceTime
+    if (targetUser.id !== requestingUser.id && !isAllowed) {
+      return interaction.reply({
+        content: '❌ You don’t have permission to view stats for other users.',
+        ephemeral: true
       });
     }
 
-    // --- Embed Formatting ---
-    const embed = {
-      color: 0x0099ff,
-      title: `📊 30-Day Usage Stats for ${target.username}`,
-      fields: [],
-      timestamp: new Date().toISOString()
-    };
+    await interaction.deferReply({ ephemeral: true });
 
-    const column1 = ['**Channel**'];
-    const column2 = ['**Messages**'];
-    const column3 = ['**Voice (min)**'];
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    for (const row of rows) {
-      column1.push(`<#${row.channelId}>`);
-      column2.push(`${row.messageCount}`);
-      column3.push(`${Math.round(row.voiceTime / 60)}`);
+    const serverId = interaction.guild.id;
+
+    // Message Stats
+    const messageStats = await UsageLog.findAll({
+      where: {
+        user_id: targetUser.id,
+        server_id: serverId,
+        event_type: 'message_create',
+        timestamp: { [Op.gte]: thirtyDaysAgo }
+      },
+      attributes: ['channel_id'],
+      raw: true
+    });
+
+    const messageCounts = {};
+    for (const msg of messageStats) {
+      const channelId = msg.channel_id;
+      messageCounts[channelId] = (messageCounts[channelId] || 0) + 1;
     }
 
-    embed.fields.push(
-      { name: '\u200B', value: column1.join('\n'), inline: true },
-      { name: '\u200B', value: column2.join('\n'), inline: true },
-      { name: '\u200B', value: column3.join('\n'), inline: true }
-    );
+    const messageFields = [
+      { name: '**Channel**', value: '\u200B', inline: true },
+      { name: '**Messages**', value: '\u200B', inline: true },
+      { name: '\u200B', value: '\u200B', inline: true }
+    ];
+
+    for (const [channelId, count] of Object.entries(messageCounts)) {
+      messageFields[0].value += `<#${channelId}>\n`;
+      messageFields[1].value += `${count}\n`;
+      messageFields[2].value += '\u200B\n';
+    }
+
+    // Voice Stats
+    const voiceStats = await VoiceLog.findAll({
+      where: {
+        user_id: targetUser.id,
+        server_id: serverId,
+        timestamp: { [Op.gte]: thirtyDaysAgo },
+        duration: { [Op.gt]: 0 }
+      },
+      raw: true
+    });
+
+    const voiceData = {};
+    for (const log of voiceStats) {
+      const chan = log.channel_id || 'Unknown';
+      if (!voiceData[chan]) {
+        voiceData[chan] = { total: 0, count: 0 };
+      }
+      voiceData[chan].total += log.duration || 0;
+      voiceData[chan].count++;
+    }
+
+    const voiceFields = [
+      { name: '**Voice Channel**', value: '\u200B', inline: true },
+      { name: '**Total (min)**', value: '\u200B', inline: true },
+      { name: '**Avg (min)**', value: '\u200B', inline: true }
+    ];
+
+    for (const [chan, { total, count }] of Object.entries(voiceData)) {
+      voiceFields[0].value += `<#${chan}>\n`;
+      voiceFields[1].value += `${Math.round(total / 60)}\n`;
+      voiceFields[2].value += `${Math.round(total / count / 60)}\n`;
+    }
+
+    // Command Usage Stats
+    const commandStats = await UsageLog.findAll({
+      where: {
+        user_id: targetUser.id,
+        server_id: serverId,
+        event_type: 'command_used',
+        timestamp: { [Op.gte]: thirtyDaysAgo }
+      },
+      attributes: ['command_name'],
+      raw: true
+    });
+
+    const commandCounts = {};
+    for (const log of commandStats) {
+      const cmd = log.command_name || 'Unknown';
+      commandCounts[cmd] = (commandCounts[cmd] || 0) + 1;
+    }
+
+    const commandFields = [
+      { name: '**Command**', value: '\u200B', inline: true },
+      { name: '**Used**', value: '\u200B', inline: true },
+      { name: '\u200B', value: '\u200B', inline: true }
+    ];
+
+    for (const [cmd, count] of Object.entries(commandCounts)) {
+      commandFields[0].value += `/${cmd}\n`;
+      commandFields[1].value += `${count}\n`;
+      commandFields[2].value += '\u200B\n';
+    }
+
+    const embed = new EmbedBuilder()
+      .setColor(0x00AE86)
+      .setTitle(`📊 Usage Summary for ${userMention(targetUser.id)}`)
+      .setDescription(`Stats from the last 30 days`)
+      .addFields(
+        { name: '📝 Messages', value: '\u200B' },
+        ...messageFields,
+        { name: '\u200B', value: '\u200B' },
+        { name: '🎙️ Voice', value: '\u200B' },
+        ...voiceFields,
+        { name: '\u200B', value: '\u200B' },
+        { name: '⌨️ Commands', value: '\u200B' },
+        ...commandFields
+      )
+      .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });
   }

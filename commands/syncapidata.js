@@ -37,23 +37,25 @@ module.exports = {
         fields: [
           {
             name: '📊 Sync Summary',
-            value: '```' +
-              ['Endpoint     | New  | Updated | Skipped | Total']
-                .concat(['------------|------|---------|---------|------'])
-                .concat(Object.entries(results).map(([key, r]) => {
-                  const label = pad(key, 12);
-                  const created = pad(r.created ?? 0);
-                  const updated = pad(r.updated ?? 0);
-                  const skipped = pad(r.skipped ?? 0);
-                  const total = pad(r.total ?? 0);
-                  return `${label}| ${created}| ${updated}| ${skipped}| ${total}`;
-                }))
-                .join('\n') +
-              '```'
+            value:
+              '```' +
+              [
+                `Endpoint       | New   | Updated | Skipped | Total`,
+                `---------------|-------|---------|---------|------`,
+                ...Object.entries(results).map(([key, r]) => {
+                  const name = key.padEnd(15);
+                  const created = String(r.created ?? 0).padStart(5);
+                  const updated = String(r.updated ?? 0).padStart(7);
+                  const skipped = String(r.skipped ?? 0).padStart(7);
+                  const total = String(r.total ?? 0).padStart(6);
+                  return `${name} | ${created} | ${updated} | ${skipped} | ${total}`;
+                })
+              ].join('\n') + '```'
           }
         ],
         timestamp: new Date().toISOString(),
       };
+      
 
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {

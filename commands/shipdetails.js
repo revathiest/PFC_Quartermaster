@@ -90,8 +90,12 @@ module.exports = {
         const detailData = await fetchSCDataByUrl(vehicle.link);
         const parsed = detailData.data;
 
+        if (!parsed.uuid) {
+          console.warn(`[SHIPDETAILS] API data missing uuid for "${parsed.name}", falling back to vehicle.uuid`);
+        }
+
         await VehicleDetail.upsert({
-          uuid: parsed.uuid,
+          uuid: parsed.uuid || vehicle.uuid,
           name: parsed.name,
           slug: parsed.slug,
           class_name: parsed.class_name,

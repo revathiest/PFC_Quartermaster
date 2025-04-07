@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, StringSelectMenuBuilder, ActionRowBuilder, ComponentType } = require('discord.js');
 const { Vehicle, VehicleDetail } = require('../config/database');
 const { fetchSCDataByUrl } = require('../utils/fetchSCData');
-const { Op } = require(sequelize);
+const { Op } = require('sequelize');
 
 module.exports = {
   data: new SlashCommandBuilder()

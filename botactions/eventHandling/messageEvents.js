@@ -10,7 +10,7 @@ try {
         path.join(__dirname, '../quartermaster_prompt.txt'),
         'utf8'
     )
-} catch {
+} catch (err) {
     console.error('[PROMPT LOAD ERROR]', err);
     quartermasterPrompt = 'You are a helpful and friendly bot.'; // Fallback
 }

@@ -7,7 +7,7 @@ const path = require('path');
 let quartermasterPrompt = ''
 try {
     quartermasterPrompt = fs.readFileSync(
-        path.join(__dirname, '../quartermaster_prompt.txt'),
+        path.join(__dirname, '../../quartermaster_prompt.txt'),
         'utf8'
     )
 } catch (err) {

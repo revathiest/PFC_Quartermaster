@@ -1,6 +1,19 @@
 const { UsageLog } = require('../../config/database');
 const filter = require('../../messages.json');
 const OpenAI = require('openai');
+const fs = require('fs');
+const path = require('path');
+
+let quartermasterPrompt = ''
+try {
+    fs.readFileSync(
+        path.join(__dirname, 'prompts', 'quartermaster_prompt.txt'),
+        'utf8'
+    )
+} catch {
+    console.error('[PROMPT LOAD ERROR]', err);
+    quartermasterPrompt = 'You are a helpful and friendly bot.'; // Fallback
+}
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 

@@ -16,10 +16,16 @@ module.exports = {
 
     try {
       const user = await interaction.client.users.fetch(userId);
-      await interaction.reply(`🕵️‍♂️ **User ID**: \`${user.id}\`\n👤 **Username**: \`${user.tag}\``);
+      await interaction.reply({
+        content: `🕵️‍♂️ **User ID**: \`${user.id}\`\n👤 **Username**: \`${user.tag}\``,
+        ephemeral: true
+      });
     } catch (error) {
       console.error(`Failed to fetch user: ${error}`);
-      await interaction.reply({ content: `❌ Couldn't fetch user with ID \`${userId}\`.`, ephemeral: true });
+      await interaction.reply({
+        content: `❌ Couldn't fetch user with ID \`${userId}\`.`,
+        ephemeral: true
+      });
     }
   }
 };

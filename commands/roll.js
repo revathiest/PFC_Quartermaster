@@ -34,7 +34,7 @@ module.exports = {
           { name: 'Result', value: `**${result.total}**`, inline: true },
           { name: 'Rolls', value: result.rolls.join(', ') }
         )
-        .setFooter({ text: reason ? `Reason: ${reason}` : '' })
+        .setFooter({ text: reason ? `Reason: ${reason}` : null })
         .setTimestamp();
 
       await interaction.reply({ embeds: [embed] });

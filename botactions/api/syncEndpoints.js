@@ -2,7 +2,7 @@ const { syncManufacturers } = require('../../utils/apiSync/manufacturers');
 const { syncVehicles } = require('../../utils/apiSync/vehicles');
 const { syncGalactapedia } = require('../../utils/apiSync/galactapedia');
 const { syncUexVehicles } = require('../../utils/apiSync/syncUexVehicles');
-const { syncUexTerminals, syncUexTerminals } = require('../../utils/apiSync/syncUexTerminals');
+const { syncUexTerminals } = require('../../utils/apiSync/syncUexTerminals');
 
 async function syncAllEndpoints() {
   const results = [];

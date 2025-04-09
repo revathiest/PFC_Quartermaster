@@ -5,7 +5,7 @@ const fetch = require('node-fetch');
 
 const TerminalEndpointMap = {
   commodity: 'commodities_prices',
-  item: 'item_prices',
+  item: 'items_prices',
   vehicle_buy: 'vehicles_purchases_prices',
   vehicle_rent: 'vehicles_rentals_prices',
   commodity_raw: 'commodities_raw_prices',

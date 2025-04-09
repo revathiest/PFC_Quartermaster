@@ -46,9 +46,9 @@ module.exports = {
         ])
       );
     
-      return '```markdown\n' +
-        [headerRow, dividerRow, ...dataRows].join('\n') +
-        '\n```';
+      return '```\n' +
+      [headerRow, dividerRow, ...dataRows].join('\n') +
+      '\n```';
     };
     
 

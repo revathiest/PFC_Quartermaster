@@ -88,7 +88,7 @@ module.exports = {
 
     if (matches.length === 1) {
       const embed = buildVehicleEmbed(matches[0]);
-      return interaction.reply({ embeds: [embed], ephemeral: true });
+      return interaction.reply({ embeds: [embed], ephemeral: false });
     }
 
     const menu = new StringSelectMenuBuilder()

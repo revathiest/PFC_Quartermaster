@@ -1,8 +1,7 @@
-// botactions/databaseOperations/syncUexVehicles.js
-import fetch from 'node-fetch';
-import db from '../../models/index.js';
+const fetch = require('node-fetch');
+const db = require('../../models'); // Adjust if your Sequelize init is elsewhere
 
-export async function syncUexVehicles() {
+async function syncUexVehicles() {
   const url = 'https://api.uexcorp.space/2.0/vehicles';
   const res = await fetch(url, {
     headers: {
@@ -11,7 +10,7 @@ export async function syncUexVehicles() {
   });
 
   if (!res.ok) throw new Error(`Failed to fetch vehicles: ${res.status}`);
-  const data = await res.json(); // Array of vehicles
+  const data = await res.json();
 
   const results = [];
 
@@ -42,7 +41,6 @@ export async function syncUexVehicles() {
       url_video: v.url_video,
       url_photos: JSON.stringify(v.url_photos),
 
-      // Booleans
       is_spaceship: v.is_spaceship,
       is_ground_vehicle: v.is_ground_vehicle,
       is_single_pilot: v.is_single_pilot,
@@ -72,5 +70,15 @@ export async function syncUexVehicles() {
     results.push({ id: v.id, name: v.name, created });
   }
 
-  return results;
+  return {
+    endpoint: 'uex_vehicles',
+    created: results.filter(r => r.created).length,
+    updated: results.length - results.filter(r => r.created).length,
+    skipped: 0,
+    total: results.length
+  };
 }
+
+module.exports = {
+  syncUexVehicles
+};

@@ -2,6 +2,7 @@ const { syncManufacturers } = require('../../utils/apiSync/manufacturers');
 const { syncVehicles } = require('../../utils/apiSync/vehicles');
 const { syncGalactapedia } = require('../../utils/apiSync/galactapedia');
 const { syncUexVehicles } = require('../../utils/apiSync/syncUexVehicles');
+const { syncUexTerminals, syncUexTerminals } = require('../../utils/apiSync/syncUexTerminals');
 
 async function syncAllEndpoints() {
   const results = [];
@@ -34,6 +35,13 @@ async function syncAllEndpoints() {
     results.push({ endpoint: 'vehicles', success: false, error: error.message });
   }
 
+  try{
+    const  syncUexTerminalResult = await syncUexTerminals();
+    results.push(syncUexTerminalResult);
+  } catch (error) {
+    results.push({ endpoint: 'terminals', success: false, error: error.message });
+  }
+
   return results;
 }
 
@@ -42,5 +50,6 @@ module.exports = {
     syncManufacturers,
     syncVehicles,
     syncGalactapedia,
-    syncUexVehicles
+    syncUexVehicles,
+    syncUexTerminals
 };

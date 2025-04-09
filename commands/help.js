@@ -1,36 +1,48 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { botPermsReq } = require('../config.json');
 const { EmbedBuilder } = require('discord.js');
 
-const Builder = new SlashCommandBuilder();
-
-Builder.type = 1;
-Builder.default_member_permissions = botPermsReq;
-Builder.setName('help')
-    .setDescription('Sends Help information to the user');
+const Builder = new SlashCommandBuilder()
+  .setName('help')
+  .setDescription('Displays a categorized list of all commands and what they do');
 
 module.exports = {
-    data: Builder,
+  data: Builder,
 
-    async execute(interaction, client) {
-        // Get all registered commands
-        const commands = client.commands;
-        let helpText = '';
+  async execute(interaction, client) {
+    const commands = client.commands;
 
-        // Iterate over each command and add its help text
-        commands.forEach(command => {
-            const commandHelp = command.help || 'No help text available for this command.';
-            helpText += `**/${command.data.name}**: ${commandHelp}\n`;
-        });
+    // Group commands by category
+    const categories = {};
 
-        const responseEmbed = new EmbedBuilder()
-            .setColor('#0099ff')
-            .setTitle('PFC Quartermaster Help')
-            .setDescription(helpText);
+    for (const command of commands.values()) {
+      const category = command.category || 'Uncategorized';
+      const helpText = command.help || 'No description provided.';
 
-        // Send the help text as a direct message to the user
-        await interaction.user.send({ embeds: [responseEmbed] });
-        // Reply to the interaction to let the user know the help text was sent
-        await interaction.reply({ content: 'Check your DMs', ephemeral: true });
+      if (!categories[category]) {
+        categories[category] = [];
+      }
+
+      categories[category].push({
+        name: `/${command.data.name}`,
+        value: helpText
+      });
     }
+
+    // Build embed
+    const embed = new EmbedBuilder()
+      .setColor('#0099ff')
+      .setTitle('📘 Quartermaster Command Help')
+      .setDescription('Here’s what I can do, sorted by category.')
+      .setFooter({ text: 'Use /help anytime to see this again.' })
+      .setTimestamp();
+
+    // Add commands grouped by category
+    for (const [category, cmds] of Object.entries(categories)) {
+      const fieldValue = cmds.map(cmd => `**${cmd.name}**: ${cmd.value}`).join('\n');
+      embed.addFields({ name: `📂 ${category}`, value: fieldValue });
+    }
+
+    // Send ephemeral response in current channel
+    await interaction.reply({ embeds: [embed], ephemeral: true });
+  }
 };

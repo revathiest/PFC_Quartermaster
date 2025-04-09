@@ -6,8 +6,10 @@ const allowedRoles = ['Admiral', 'Fleet Admiral'];
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('listannouncements')
-        .setDescription('List all scheduled announcements'),help: 'Lists all snap channels configured for automatic purge.'
+        .setDescription('List all scheduled announcements')
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+        
+    help: 'Lists all snap channels configured for automatic purge.',
     category: 'Admin',        
     async execute(interaction) {
         const memberRoles = interaction.member.roles.cache.map(role => role.name);

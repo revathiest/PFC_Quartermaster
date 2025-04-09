@@ -21,8 +21,8 @@ module.exports = {
             option.setName('channel')
                 .setDescription('Channel for channel report')
                 .setRequired(false)
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-        ),
+        )
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
         help: 'Generates analytics reports for text usage, voice activity, or specific channel events.',
         category: 'Admin',        
     async execute(interaction, client) {

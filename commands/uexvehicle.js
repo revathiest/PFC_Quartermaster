@@ -40,9 +40,12 @@ function buildVehicleEmbed(vehicle) {
         { name: 'Dimensions', value: `${vehicle.length}m x ${vehicle.width}m x ${vehicle.height}m`, inline: false },
         { name: 'Fuel', value: `Quantum: ${vehicle.fuel_quantum || 0} | Hydrogen: ${vehicle.fuel_hydrogen || 0}`, inline: false }
       )
-      .setFooter({ text: `Vehicle ID: ${vehicle.id}` })
       .setColor(0x0088cc)
-      .setTimestamp();
+      .setTimestamp()
+      .setFooter({
+        text: `Vehicle ID: ${vehicle.id} • Game Version: ${vehicle.game_version || 'unknown'}`
+      });
+      
   
     // Collect all roles that are true
     const trueRoles = Object.entries(VEHICLE_ROLES)

@@ -127,13 +127,6 @@ const {
   
       const embed = buildTerminalEmbed(location, matches);
   
-      // Delete ephemeral reply, then send public message
-      try {
-        await interaction.deleteReply();
-      } catch (err) {
-        console.warn('Could not delete ephemeral reply:', err);
-      }
-  
       return interaction.channel.send({
         content: `Here are the public terminals for **${location}**:`,
         embeds: [embed]

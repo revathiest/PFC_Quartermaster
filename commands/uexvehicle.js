@@ -83,7 +83,7 @@ module.exports = {
     });
 
     if (matches.length === 0) {
-      return interaction.reply({ content: `No vehicles found matching "${name}".`, ephemeral: true });
+      return interaction.reply({ content: `No vehicles found matching "${name}".`, ephemeral: false });
     }
 
     if (matches.length === 1) {

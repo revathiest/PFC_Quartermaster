@@ -1,11 +1,9 @@
 const { SlashCommandBuilder, PermissionsBitField, EmbedBuilder } = require('discord.js');
 
-const Builder = new SlashCommandBuilder()
-  .setName('help')
-  .setDescription('Displays a categorized list of available commands');
-
 module.exports = {
-  data: Builder,
+  data: new SlashCommandBuilder()
+    .setName('help')
+    .setDescription('Displays a categorized list of available commands'),
 
   async execute(interaction, client) {
     const userPerms = interaction.member.permissions;
@@ -16,12 +14,12 @@ module.exports = {
     for (const command of commands.values()) {
       const permBitfield = command.data.default_member_permissions;
 
-      // Filter out commands the user doesn’t have permission to use
+      // If the command has required permissions and the user doesn't have them, skip it
       if (
         permBitfield &&
         !userPerms.has(PermissionsBitField.resolve(permBitfield))
       ) {
-        continue; // Skip this command
+        continue;
       }
 
       const category = command.category || 'Uncategorized';
@@ -47,12 +45,13 @@ module.exports = {
         }
         chunk += `${line}\n`;
       }
+
       if (chunk.length > 0) {
         embed.addFields({ name: `📂 ${category}`, value: chunk });
       }
     }
 
-    if (embed.fields.length === 0) {
+    if (!embed.data.fields || embed.data.fields.length === 0) {
       embed.setDescription('You don’t currently have access to any commands.');
     }
 

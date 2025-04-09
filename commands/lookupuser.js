@@ -26,7 +26,7 @@ module.exports = {
       });
 
     } catch (error) {
-      console.error(`Failed to fetch member ${userId}:`, error);
+        console.warn(`User ${userId} not found in this server — using global profile.`);
 
       // Fallback to global user lookup if not in guild
       try {

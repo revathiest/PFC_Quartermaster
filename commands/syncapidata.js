@@ -76,7 +76,7 @@ module.exports = {
 
     await updateStep('manufacturers', syncManufacturers);
     await updateStep('vehicles', syncVehicles);
-    await updateStep('galactapedia', syncGalactapedia)
+    await updateStep('galactapedia', syncGalactapedia);
 
     embed.title = '✅ API Sync Complete';
     embed.color = 0x00ff99;

@@ -12,7 +12,9 @@ module.exports = {
         .setDescription('Ship name or UUID')
         .setRequired(true)
     ),
-
+  help: 'Fetches and displays detailed data about any ship from Star Citizen, including speed, cargo, emissions, and more.',
+  category: 'Star Citizen',
+  
   async execute(interaction) {
     const query = interaction.options.getString('ship');
     await interaction.deferReply();

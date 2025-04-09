@@ -10,6 +10,8 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('syncapidata')
     .setDescription('Sync all Star Citizen API data into the database (admin only)'),
+  help: 'Admin-only command to sync all Star Citizen API data into the bot database. Displays live progress as it works.',
+  category: 'Admin',
 
   async execute(interaction) {
     if (!(await isAdmin(interaction.member))) {

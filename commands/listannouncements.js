@@ -6,8 +6,8 @@ const allowedRoles = ['Admiral', 'Fleet Admiral'];
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('listannouncements')
-        .setDescription('List all scheduled announcements'),
-    help: 'Lists all scheduled announcements. Only available to Admirals and Fleet Admirals.',
+        .setDescription('List all scheduled announcements'),help: 'Lists all snap channels configured for automatic purge.',
+        category: 'Admin',        
     async execute(interaction) {
         const memberRoles = interaction.member.roles.cache.map(role => role.name);
         if (!allowedRoles.some(role => memberRoles.includes(role))) {

@@ -25,6 +25,8 @@ const {
           .setDescription('Search term (name or partial match)')
           .setRequired(true)
       ),
+      help: 'Search and display Galactapedia entries with full descriptions and related content.',
+      category: 'Star Citizen',
   
     async execute(interaction) {
       const query = interaction.options.getString('query');

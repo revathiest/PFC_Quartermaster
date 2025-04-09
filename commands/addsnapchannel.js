@@ -15,6 +15,9 @@ module.exports = {
             option.setName('purgetime')
                 .setDescription('Purge time in days (default: 30)')
                 .setRequired(false)),
+    help: 'Adds a channel to the snap purge list. Messages in snap channels are auto-deleted after a set time.',
+    category: 'Admin',
+                
     async execute(interaction) {
         const memberRoles = interaction.member.roles.cache.map(role => role.name);
         if (!allowedRoles.some(role => memberRoles.includes(role))) {

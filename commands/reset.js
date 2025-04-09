@@ -4,6 +4,8 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('reset')
     .setDescription('Restarts the Quartermaster (Admin only)'),
+    help: 'Resets the bot and removes all registered commands. Admin only.',
+    category: 'Admin',
 
   async execute(interaction) {
     if (!interaction.member.permissions.has('ADMINISTRATOR')) {

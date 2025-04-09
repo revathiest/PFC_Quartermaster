@@ -5,6 +5,8 @@ module.exports = {
         .setName('schedule')
         .setDescription('Schedules an announcement as an embed'),
     roles: ['Fleet Admiral', 'Admiral'],
+    help: 'Opens a modal to schedule a rich embedded announcement for later posting.',
+    category: 'Admin',
     async execute(interaction) {
         const modal = new ModalBuilder()
             .setCustomId('scheduleModal')

@@ -10,8 +10,10 @@ Builder.setName('org')
     .addStringOption(option => option.setName('name').setDescription('The name of the Organization to look up.').setRequired(true));
 
 module.exports = {
-    data: Builder,
+    data: Builder,// Already includes:
     help: 'Gets information about a specified RSI organization.',
+    category: 'Star Citizen',
+    
     async execute(interaction, client) {
         console.log('Executing org command'); // Debug statement
 

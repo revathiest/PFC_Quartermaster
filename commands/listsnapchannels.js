@@ -7,6 +7,8 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('listsnapchannels')
         .setDescription('Lists all snap channels'),
+    help: 'Lists all snap channels configured for automatic purge.',
+    category: 'Admin',
     async execute(interaction) {
         const memberRoles = interaction.member.roles.cache.map(role => role.name);
         if (!allowedRoles.some(role => memberRoles.includes(role))) {

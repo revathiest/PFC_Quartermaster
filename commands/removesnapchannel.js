@@ -11,6 +11,9 @@ module.exports = {
             option.setName('channel')
                 .setDescription('The snap channel to remove')
                 .setRequired(true)),
+    help: 'Removes a channel from the snap purge list.',
+    category: 'Admin',
+
     async execute(interaction) {
         const memberRoles = interaction.member.roles.cache.map(role => role.name);
         if (!allowedRoles.some(role => memberRoles.includes(role))) {

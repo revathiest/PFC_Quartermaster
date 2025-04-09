@@ -1,16 +1,18 @@
-// utils/fetchUexData.js
 const fetch = require('node-fetch');
 
 const BASE_URL = 'https://api.uexcorp.space/2.0';
 
 /**
- * Fetch data from a UEX API endpoint.
- * @param {string} endpoint - The endpoint to call, e.g., 'vehicles'
- * @returns {Promise<Array|Object>} - Parsed JSON response
+ * Fetches raw JSON from a UEX API endpoint.
+ * Does NOT automatically extract `.data` to give flexibility.
+ * 
+ * @param {string} endpoint - Endpoint to hit (e.g. 'vehicles', 'ships/123')
+ * @returns {Promise<Object>} - The full JSON response from the UEX API
  */
 async function fetchUexData(endpoint) {
   try {
     const url = `${BASE_URL}/${endpoint}`;
+
     const response = await fetch(url, {
       headers: {
         Authorization: `Bearer ${process.env.UEX_API_TOKEN}`,
@@ -22,16 +24,15 @@ async function fetchUexData(endpoint) {
       throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const json = await response.json();
 
-    if (!Array.isArray(data) && typeof data !== 'object') {
-      throw new Error('Unexpected response format from UEX API');
-    }
+    console.log(`[UEX FETCH] ${endpoint} response:`, JSON.stringify(json, null, 2)); // 💡 Optional: comment this out later
 
-    return data;
+    return json;
+
   } catch (err) {
     console.error(`[UEX FETCH ERROR] ${err.message}`);
-    return [];
+    return {};
   }
 }
 

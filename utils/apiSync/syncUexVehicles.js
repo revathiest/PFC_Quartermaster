@@ -9,7 +9,8 @@ async function syncUexVehicles() {
   let skipped = 0;
 
   try {
-    const vehicles = await fetchUexData('vehicles');
+    const response = await fetchUexData('vehicles');
+    const vehicles = response?.data;
 
     if (!Array.isArray(vehicles)) {
       throw new Error('Expected an array of vehicles');

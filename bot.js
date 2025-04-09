@@ -12,6 +12,23 @@ const { handleCreateEvent, handleUpdateEvent, handleDeleteEvent, syncEventsInDat
 
 const botType = process.env.BOT_TYPE;
 
+const fs = require('fs');
+const logStream = fs.createWriteStream('bot.log', { flags: 'a' });
+
+const origConsoleError = console.error;
+const origConsoleLog = console.log;
+
+console.error = (...args) => {
+  logStream.write('[ERROR] ' + args.join(' ') + '\n');
+  origConsoleError(...args);
+};
+
+console.log = (...args) => {
+  logStream.write('[LOG] ' + args.join(' ') + '\n');
+  origConsoleLog(...args);
+};
+
+
 // Load configuration before initializing the client
 const initializeBot = async () => {
     const config = await loadConfiguration(botType);

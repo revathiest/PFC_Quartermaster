@@ -1,84 +1,87 @@
-const fetch = require('node-fetch');
-const db = require('../../models'); // Adjust if your Sequelize init is elsewhere
+const { fetchUexData } = require('../../utils/fetchUexData');
+const { UexVehicle } = require('../../config/database');
 
 async function syncUexVehicles() {
-  const url = 'https://api.uexcorp.space/2.0/vehicles';
-  const res = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${process.env.UEX_API_TOKEN}`
+  console.log('[API SYNC] Syncing UEX vehicles...');
+
+  let created = 0;
+  let updated = 0;
+  let skipped = 0;
+
+  try {
+    const vehicles = await fetchUexData('vehicles');
+
+    if (!Array.isArray(vehicles)) {
+      throw new Error('Expected an array of vehicles');
     }
-  });
 
-  if (!res.ok) throw new Error(`Failed to fetch vehicles: ${res.status}`);
-  const data = await res.json();
+    for (const entry of vehicles) {
+      if (!entry.id || !entry.name) {
+        console.warn(`[SKIPPED] Missing ID or name for vehicle:`, entry);
+        skipped++;
+        continue;
+      }
 
-  const results = [];
+      const [record, wasCreated] = await UexVehicle.upsert({
+        id: entry.id,
+        uuid: entry.uuid,
+        name: entry.name,
+        name_full: entry.name_full,
+        slug: entry.slug,
+        company_name: entry.company_name,
+        crew: entry.crew,
+        scu: entry.scu,
+        mass: entry.mass,
+        width: entry.width,
+        height: entry.height,
+        length: entry.length,
+        fuel_quantum: entry.fuel_quantum,
+        fuel_hydrogen: entry.fuel_hydrogen,
+        container_sizes: entry.container_sizes,
+        pad_type: entry.pad_type,
+        game_version: entry.game_version,
+        date_added: entry.date_added,
+        date_modified: entry.date_modified,
+        url_store: entry.url_store,
+        url_brochure: entry.url_brochure,
+        url_hotsite: entry.url_hotsite,
+        url_video: entry.url_video,
+        url_photos: JSON.stringify(entry.url_photos),
+        is_spaceship: entry.is_spaceship,
+        is_ground_vehicle: entry.is_ground_vehicle,
+        is_single_pilot: entry.is_single_pilot,
+        is_multi_crew: entry.is_multi_crew,
+        is_combat: entry.is_combat,
+        is_exploration: entry.is_exploration,
+        is_industry: entry.is_industry,
+        is_cargo: entry.is_cargo,
+        is_refinery: entry.is_refinery,
+        is_mining: entry.is_mining,
+        is_salvage: entry.is_salvage,
+        is_transport: entry.is_transport,
+        is_medical: entry.is_medical,
+        is_racing: entry.is_racing,
+        is_touring: entry.is_touring,
+        is_data: entry.is_data,
+        is_stealth: entry.is_stealth,
+        is_military: entry.is_military,
+        is_civilian: entry.is_civilian,
+        is_personal_transport: entry.is_personal_transport,
+        is_vehicle_transport: entry.is_vehicle_transport,
+        is_research: entry.is_research,
+        is_pathfinder: entry.is_pathfinder,
+        is_multirole: entry.is_multirole
+      });
 
-  for (const v of data) {
-    const [vehicle, created] = await db.UexVehicle.upsert({
-      id: v.id,
-      uuid: v.uuid,
-      name: v.name,
-      name_full: v.name_full,
-      slug: v.slug,
-      company_name: v.company_name,
-      crew: v.crew,
-      scu: v.scu,
-      mass: v.mass,
-      width: v.width,
-      height: v.height,
-      length: v.length,
-      fuel_quantum: v.fuel_quantum,
-      fuel_hydrogen: v.fuel_hydrogen,
-      container_sizes: v.container_sizes,
-      pad_type: v.pad_type,
-      game_version: v.game_version,
-      date_added: v.date_added,
-      date_modified: v.date_modified,
-      url_store: v.url_store,
-      url_brochure: v.url_brochure,
-      url_hotsite: v.url_hotsite,
-      url_video: v.url_video,
-      url_photos: JSON.stringify(v.url_photos),
+      wasCreated ? created++ : updated++;
+    }
 
-      is_spaceship: v.is_spaceship,
-      is_ground_vehicle: v.is_ground_vehicle,
-      is_single_pilot: v.is_single_pilot,
-      is_multi_crew: v.is_multi_crew,
-      is_combat: v.is_combat,
-      is_exploration: v.is_exploration,
-      is_industry: v.is_industry,
-      is_cargo: v.is_cargo,
-      is_refinery: v.is_refinery,
-      is_mining: v.is_mining,
-      is_salvage: v.is_salvage,
-      is_transport: v.is_transport,
-      is_medical: v.is_medical,
-      is_racing: v.is_racing,
-      is_touring: v.is_touring,
-      is_data: v.is_data,
-      is_stealth: v.is_stealth,
-      is_military: v.is_military,
-      is_civilian: v.is_civilian,
-      is_personal_transport: v.is_personal_transport,
-      is_vehicle_transport: v.is_vehicle_transport,
-      is_research: v.is_research,
-      is_pathfinder: v.is_pathfinder,
-      is_multirole: v.is_multirole
-    });
-
-    results.push({ id: v.id, name: v.name, created });
+    console.log(`[API SYNC] Synced UEX vehicles - Created: ${created}, Updated: ${updated}, Skipped: ${skipped}`);
+    return { created, updated, skipped, total: vehicles.length };
+  } catch (err) {
+    console.error('[API SYNC] Error syncing UEX vehicles:', err);
+    throw err;
   }
-
-  return {
-    endpoint: 'uex_vehicles',
-    created: results.filter(r => r.created).length,
-    updated: results.length - results.filter(r => r.created).length,
-    skipped: 0,
-    total: results.length
-  };
 }
 
-module.exports = {
-  syncUexVehicles
-};
+module.exports = { syncUexVehicles };

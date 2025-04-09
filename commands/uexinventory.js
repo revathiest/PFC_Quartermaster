@@ -5,16 +5,12 @@ const fetch = require('node-fetch');
 
 const TerminalEndpointMap = {
   commodity: 'commodities_prices',
+  item: 'item_prices',
+  vehicle_buy: 'vehicles_purchases_prices',
+  vehicle_rent: 'vehicles_rentals_prices',
+  commodity_raw: 'commodities_raw_prices',
   refinery: 'commodities_prices', // optionally /refineries_audits
-  cargo_center: 'commodities_prices',
-  shop_fps: 'items_prices',
-  shop_vehicle: 'items_prices',
-  food: 'items_prices',
-  medical: 'items_prices',
-  refuel: 'fuel_prices',
-  fuel: 'fuel_prices',
-  rental: 'vehicle_rental_prices',
-  vehicle_buy: 'vehicles_purchases_prices'
+  fuel: 'fuel_prices'
 };
 
 const PAGE_SIZE = 10;

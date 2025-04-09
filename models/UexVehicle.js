@@ -1,65 +1,206 @@
-// models/UexVehicle.js
-module.exports = (sequelize, DataTypes) => {
-    const UexVehicle = sequelize.define('UexVehicle', {
-      id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true
-      },
-      uuid: DataTypes.UUID,
-      name: DataTypes.STRING,
-      name_full: DataTypes.STRING,
-      slug: DataTypes.STRING,
-      company_name: DataTypes.STRING,
-      crew: DataTypes.STRING,
-      scu: DataTypes.INTEGER,
-      mass: DataTypes.INTEGER,
-      width: DataTypes.FLOAT,
-      height: DataTypes.FLOAT,
-      length: DataTypes.FLOAT,
-      fuel_quantum: DataTypes.FLOAT,
-      fuel_hydrogen: DataTypes.FLOAT,
-      container_sizes: DataTypes.STRING,
-      pad_type: DataTypes.STRING,
-      game_version: DataTypes.STRING,
-      date_added: DataTypes.BIGINT,
-      date_modified: DataTypes.BIGINT,
-      url_store: DataTypes.TEXT,
-      url_brochure: DataTypes.TEXT,
-      url_hotsite: DataTypes.TEXT,
-      url_video: DataTypes.TEXT,
-      url_photos: DataTypes.TEXT,
-  
-      // Booleans
-      is_spaceship: DataTypes.BOOLEAN,
-      is_ground_vehicle: DataTypes.BOOLEAN,
-      is_single_pilot: DataTypes.BOOLEAN,
-      is_multi_crew: DataTypes.BOOLEAN,
-      is_combat: DataTypes.BOOLEAN,
-      is_exploration: DataTypes.BOOLEAN,
-      is_industry: DataTypes.BOOLEAN,
-      is_cargo: DataTypes.BOOLEAN,
-      is_refinery: DataTypes.BOOLEAN,
-      is_mining: DataTypes.BOOLEAN,
-      is_salvage: DataTypes.BOOLEAN,
-      is_transport: DataTypes.BOOLEAN,
-      is_medical: DataTypes.BOOLEAN,
-      is_racing: DataTypes.BOOLEAN,
-      is_touring: DataTypes.BOOLEAN,
-      is_data: DataTypes.BOOLEAN,
-      is_stealth: DataTypes.BOOLEAN,
-      is_military: DataTypes.BOOLEAN,
-      is_civilian: DataTypes.BOOLEAN,
-      is_personal_transport: DataTypes.BOOLEAN,
-      is_vehicle_transport: DataTypes.BOOLEAN,
-      is_research: DataTypes.BOOLEAN,
-      is_pathfinder: DataTypes.BOOLEAN,
-      is_multirole: DataTypes.BOOLEAN
-    }, {
-      charset: 'utf8mb4',
-      collate: 'utf8mb4_unicode_ci',
-      timestamps: false
-    });
-  
-    return UexVehicle;
-  };
-  
+const { DataTypes } = require('sequelize');
+
+module.exports = (sequelize) => {
+  const UexVehicle = sequelize.define('UexVehicle', {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      allowNull: false,
+    },
+    uuid: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    name_full: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    slug: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    company_name: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    crew: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    scu: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    mass: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    width: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+    },
+    height: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+    },
+    length: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+    },
+    fuel_quantum: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+    },
+    fuel_hydrogen: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+    },
+    container_sizes: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    pad_type: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    game_version: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    date_added: {
+      type: DataTypes.BIGINT,
+      allowNull: true,
+    },
+    date_modified: {
+      type: DataTypes.BIGINT,
+      allowNull: true,
+    },
+    url_store: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    url_brochure: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    url_hotsite: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    url_video: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    url_photos: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+
+    // Boolean flags (updated formatting)
+    is_spaceship: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    is_ground_vehicle: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    is_single_pilot: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    is_multi_crew: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    is_combat: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    is_exploration: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    is_industry: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    is_cargo: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    is_refinery: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    is_mining: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    is_salvage: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    is_transport: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    is_medical: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    is_racing: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    is_touring: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    is_data: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    is_stealth: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    is_military: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    is_civilian: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    is_personal_transport: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    is_vehicle_transport: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    is_research: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    is_pathfinder: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    is_multirole: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    }
+  }, {
+    charset: 'utf8mb4',
+    collate: 'utf8mb4_unicode_ci'
+  });
+
+  return UexVehicle;
+};

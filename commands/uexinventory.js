@@ -209,75 +209,108 @@ module.exports = {
   },
 
   option: async (interaction) => {
-    const [prefix, arg1, arg2] = interaction.customId.split('::');
+    try {
+      console.log('[DEBUG] Received select menu interaction');
+      console.log('[DEBUG] customId:', interaction.customId);
+      console.log('[DEBUG] values:', interaction.values);
   
-    if (prefix === 'uexinv_type') {
-      const selectedType = interaction.values[0];
-      const location = arg1;
-      console.log(`[LOG] User selected terminal type: ${selectedType}`);
+      const [prefix, arg1, arg2] = interaction.customId.split('::');
+      console.log(`[DEBUG] Parsed prefix: ${prefix}, arg1: ${arg1}, arg2: ${arg2}`);
   
-      const locationFilter = { [Op.like]: `%${location}%` };
+      // Step 1: User selected a terminal type
+      if (prefix === 'uexinv_type') {
+        const selectedType = interaction.values[0];
+        const location = arg1;
+        console.log(`[LOG] User selected terminal type: ${selectedType} at ${location}`);
   
-      const terminals = await db.UexTerminal.findAll({
-        where: {
-          type: selectedType,
-          [Op.or]: [
-            { star_system_name: locationFilter },
-            { planet_name: locationFilter },
-            { orbit_name: locationFilter },
-            { space_station_name: locationFilter },
-            { outpost_name: locationFilter },
-            { city_name: locationFilter }
-          ]
-        },
-        order: [['name', 'ASC']]
-      });
+        const locationFilter = { [Op.like]: `%${location}%` };
   
-      if (terminals.length === 0) {
+        const terminals = await db.UexTerminal.findAll({
+          where: {
+            type: selectedType,
+            [Op.or]: [
+              { star_system_name: locationFilter },
+              { planet_name: locationFilter },
+              { orbit_name: locationFilter },
+              { space_station_name: locationFilter },
+              { outpost_name: locationFilter },
+              { city_name: locationFilter }
+            ]
+          },
+          order: [['name', 'ASC']]
+        });
+  
+        console.log(`[DEBUG] Found ${terminals.length} terminals`);
+  
+        if (terminals.length === 0) {
+          return interaction.update({
+            content: `❌ No terminals of type \`${selectedType}\` found at **${location}**.`,
+            components: [],
+            ephemeral: true
+          });
+        }
+  
+        if (terminals.length === 1) {
+          console.log('[DEBUG] Only one terminal found — sending directly to inventory embed');
+          return fetchInventoryEmbed(interaction, terminals[0]);
+        }
+  
+        const terminalOptions = terminals.slice(0, 25).map(term => ({
+          label: term.name || term.nickname || term.code,
+          value: `uexinv_terminal::${term.id}`
+        }));
+  
+        const row = new ActionRowBuilder().addComponents(
+          new StringSelectMenuBuilder()
+            .setCustomId(`uexinv_terminal_menu::${selectedType}::${location}`)
+            .setPlaceholder('Select a terminal')
+            .addOptions(terminalOptions)
+        );
+  
+        console.log('[DEBUG] Sending terminal list select menu');
         return interaction.update({
-          content: `❌ No terminals of type \`${selectedType}\` found at **${location}**.`,
-          components: [],
+          content: `Terminals of type \`${selectedType}\` at **${location}**:`,
+          components: [row],
+          embeds: [],
           ephemeral: true
         });
       }
   
-      if (terminals.length === 1) {
-        return fetchInventoryEmbed(interaction, terminals[0]);
+      // Step 2: User selected a specific terminal
+      if (prefix === 'uexinv_terminal') {
+        const terminalId = arg1;
+        console.log(`[LOG] User selected terminal ID: ${terminalId}`);
+  
+        const terminal = await db.UexTerminal.findByPk(terminalId);
+        if (!terminal) {
+          console.warn(`[WARN] No terminal found with ID: ${terminalId}`);
+          return interaction.update({
+            content: `❌ Could not find terminal with ID ${terminalId}.`,
+            components: [],
+            ephemeral: true
+          });
+        }
+  
+        console.log('[DEBUG] Fetching inventory for terminal:', terminal.name);
+        return fetchInventoryEmbed(interaction, terminal);
       }
   
-      const terminalOptions = terminals.slice(0, 25).map(term => ({
-        label: term.name || term.nickname || term.code,
-        value: `uexinv_terminal::${term.id}`
-      }));
-  
-      const row = new ActionRowBuilder().addComponents(
-        new StringSelectMenuBuilder()
-          .setCustomId(`uexinv_terminal_menu::${selectedType}::${location}`)
-          .setPlaceholder('Select a terminal')
-          .addOptions(terminalOptions)
-      );
-  
-      return interaction.update({
-        content: `Terminals of type \`${selectedType}\` at **${location}**:`,
-        components: [row],
-        embeds: [],
+      // Unknown prefix
+      console.warn(`[WARN] Unhandled select menu prefix: ${prefix}`);
+      await interaction.reply({
+        content: '❌ Unrecognized selection.',
         ephemeral: true
       });
-    }
   
-    if (prefix === 'uexinv_terminal') {
-      const terminalId = arg1;
-      console.log(`[LOG] User selected terminal ID: ${terminalId}`);
-      const terminal = await db.UexTerminal.findByPk(terminalId);
-      if (!terminal) {
-        return interaction.update({
-          content: `❌ Could not find terminal with ID ${terminalId}.`,
-          components: [],
-          ephemeral: true
-        });
+    } catch (err) {
+      console.error('[ERROR] Failed to handle select menu interaction:', err);
+      try {
+        await interaction.reply({ content: '❌ Something went wrong handling your selection.', ephemeral: true });
+      } catch {
+        if (!interaction.replied && !interaction.deferred) {
+          console.log('[ERROR] Could not reply to failed interaction (not deferred or replied)');
+        }
       }
-  
-      return fetchInventoryEmbed(interaction, terminal);
     }
   },  
 

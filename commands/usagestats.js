@@ -1,8 +1,6 @@
 // commands/usagestats.js
 const {
     SlashCommandBuilder,
-    PermissionFlagsBits,
-    userMention,
     EmbedBuilder,
   } = require('discord.js');
   const { UsageLog, VoiceLog } = require('../config/database');

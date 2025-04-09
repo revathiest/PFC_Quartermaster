@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, EmbedBuilder } = require('discord.js');
 const db = require('../config/database');
+const { Op } = require('sequelize');
 
 function buildVehicleEmbed(vehicle) {
   return new EmbedBuilder()
@@ -33,7 +34,7 @@ module.exports = {
     const matches = await db.UexVehicle.findAll({
       where: {
         name: {
-          [db.Sequelize.Op.like]: `%${name}%`
+          [Op.like]: `%${name}%`
         }
       },
       limit: 25

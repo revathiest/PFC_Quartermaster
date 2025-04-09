@@ -1,4 +1,4 @@
-const { fetchUexData } = require('../utils/fetchUexData');
+const { fetchUexData } = require('../fetchUexData');
 const { UexVehicle } = require('../../config/database');
 
 async function syncUexVehicles() {

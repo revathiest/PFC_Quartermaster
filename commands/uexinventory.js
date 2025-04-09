@@ -217,7 +217,7 @@ module.exports = {
       const [prefix, arg1, arg2] = interaction.customId.split('::');
       console.log(`[DEBUG] Parsed prefix: ${prefix}, arg1: ${arg1}, arg2: ${arg2}`);
   
-      // Step 1: User selected a terminal type
+      // If user selected terminal TYPE
       if (prefix === 'uexinv_type') {
         const selectedType = interaction.values[0];
         const location = arg1;
@@ -276,9 +276,9 @@ module.exports = {
         });
       }
   
-      // Step 2: User selected a specific terminal
-      if (prefix === 'uexinv_terminal') {
-        const terminalId = arg1;
+      // If user selected a specific terminal
+      if (interaction.values[0].startsWith('uexinv_terminal::')) {
+        const terminalId = interaction.values[0].split('::')[1];
         console.log(`[LOG] User selected terminal ID: ${terminalId}`);
   
         const terminal = await db.UexTerminal.findByPk(terminalId);
@@ -295,8 +295,8 @@ module.exports = {
         return fetchInventoryEmbed(interaction, terminal);
       }
   
-      // Unknown prefix
-      console.warn(`[WARN] Unhandled select menu prefix: ${prefix}`);
+      // Unhandled or unknown interaction
+      console.warn(`[WARN] Unhandled interaction — no matching handler`);
       await interaction.reply({
         content: '❌ Unrecognized selection.',
         ephemeral: true
@@ -304,12 +304,8 @@ module.exports = {
   
     } catch (err) {
       console.error('[ERROR] Failed to handle select menu interaction:', err);
-      try {
+      if (!interaction.replied && !interaction.deferred) {
         await interaction.reply({ content: '❌ Something went wrong handling your selection.', ephemeral: true });
-      } catch {
-        if (!interaction.replied && !interaction.deferred) {
-          console.log('[ERROR] Could not reply to failed interaction (not deferred or replied)');
-        }
       }
     }
   },  

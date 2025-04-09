@@ -1,5 +1,5 @@
 // models/UexVehicle.js
-export default (sequelize, DataTypes) => {
+module.exports = (sequelize, DataTypes) => {
     const UexVehicle = sequelize.define('UexVehicle', {
       id: {
         type: DataTypes.INTEGER,
@@ -27,7 +27,7 @@ export default (sequelize, DataTypes) => {
       url_brochure: DataTypes.TEXT,
       url_hotsite: DataTypes.TEXT,
       url_video: DataTypes.TEXT,
-      url_photos: DataTypes.TEXT, // JSON string of photo URLs
+      url_photos: DataTypes.TEXT,
   
       // Booleans
       is_spaceship: DataTypes.BOOLEAN,

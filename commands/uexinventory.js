@@ -5,7 +5,7 @@ const fetch = require('node-fetch');
 
 const TerminalEndpointMap = {
   commodity: 'commodities_prices',
-  refinery: 'commodities_prices',
+  refinery: 'commodities_prices', // optionally /refineries_audits
   cargo_center: 'commodities_prices',
   shop_fps: 'items_prices',
   shop_vehicle: 'items_prices',
@@ -13,7 +13,8 @@ const TerminalEndpointMap = {
   medical: 'items_prices',
   refuel: 'fuel_prices',
   fuel: 'fuel_prices',
-  rental: 'vehicle_rental_prices'
+  rental: 'vehicle_rental_prices',
+  vehicle_buy: 'vehicles_purchases_prices'
 };
 
 const PAGE_SIZE = 10;
@@ -27,20 +28,34 @@ function chunkInventory(items) {
 }
 
 async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = false) {
+  console.log(`[LOG] Fetching inventory for terminal ${terminal.name} (ID: ${terminal.id}), page ${page}`);
+  
   const endpoint = TerminalEndpointMap[terminal.type];
   if (!endpoint) {
+    console.error(`[ERROR] No endpoint found for terminal type: ${terminal.type}`);
     return interaction.reply({
       content: `❌ No inventory data available for terminal type: \`${terminal.type}\`.`,
       ephemeral: !isPublic
     });
   }
 
+  console.log(`[LOG] Querying endpoint: ${endpoint} for terminal ID ${terminal.id}`);
   const url = `https://api.uexcorp.space/2.0/${endpoint}?id_terminal=${terminal.id}`;
   const res = await fetch(url);
-  const json = await res.json();
 
+  if (!res.ok) {
+    console.error(`[ERROR] Failed to fetch from ${url}: ${res.statusText}`);
+    return interaction.reply({
+      content: `❌ Failed to retrieve inventory data for terminal: \`${terminal.name}\`.`,
+      ephemeral: !isPublic
+    });
+  }
+
+  const json = await res.json();
   const items = json?.data;
+
   if (!Array.isArray(items) || items.length === 0) {
+    console.warn(`[WARN] No items found for terminal ${terminal.name} at ${terminal.id}`);
     return interaction.reply({
       content: `❌ No inventory data found for terminal \`${terminal.name}\`.`,
       ephemeral: !isPublic
@@ -57,11 +72,46 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
     .setColor(0x0088cc)
     .setTimestamp();
 
-  embed.addFields(chunk.map(item => ({
-    name: item.commodity_name || item.item_name || 'Unknown',
-    value: `Buy: ${item.price_buy ?? 'N/A'} UEC\nSell: ${item.price_sell ?? 'N/A'} UEC`,
-    inline: true
-  })));
+  // Handling different endpoint formats
+  if (endpoint === 'commodities_prices') {
+    embed.addFields(chunk.map(item => ({
+      name: item.commodity_name,
+      value: `Buy: ${item.price_buy ?? 'N/A'} UEC\nSell: ${item.price_sell ?? 'N/A'} UEC\nSCU Available: ${item.scu_sell_stock ?? 'N/A'}`,
+      inline: true
+    })));
+  }
+
+  if (endpoint === 'items_prices') {
+    embed.addFields(chunk.map(item => ({
+      name: item.item_name,
+      value: `Buy: ${item.price_buy ?? 'N/A'} UEC\nSell: ${item.price_sell ?? 'N/A'} UEC\nDurability: ${item.durability ?? 'N/A'}%`,
+      inline: true
+    })));
+  }
+
+  if (endpoint === 'fuel_prices') {
+    embed.addFields(chunk.map(item => ({
+      name: item.commodity_name,
+      value: `Buy: ${item.price_buy ?? 'N/A'} UEC`,
+      inline: true
+    })));
+  }
+
+  if (endpoint === 'vehicle_rental_prices') {
+    embed.addFields(chunk.map(item => ({
+      name: item.terminal_name,
+      value: `Rent: ${item.price_rent ?? 'N/A'} UEC`,
+      inline: true
+    })));
+  }
+
+  if (endpoint === 'vehicles_purchases_prices') {
+    embed.addFields(chunk.map(item => ({
+      name: item.vehicle_name || 'Unknown Vehicle',
+      value: `Buy: ${item.price_buy ?? 'N/A'} UEC`,
+      inline: true
+    })));
+  }
 
   const components = [];
 
@@ -99,8 +149,10 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
   };
 
   if (interaction.replied || interaction.deferred) {
+    console.log('[LOG] Editing reply with updated inventory embed');
     await interaction.editReply(payload);
   } else {
+    console.log('[LOG] Sending initial reply with inventory embed');
     await interaction.reply(payload);
   }
 }
@@ -117,6 +169,8 @@ module.exports = {
 
   async execute(interaction) {
     const location = interaction.options.getString('location');
+    console.log(`[LOG] User requested inventory for location: ${location}`);
+
     const locationFilter = { [Op.like]: `%${location}%` };
 
     const terminals = await db.UexTerminal.findAll({
@@ -133,10 +187,12 @@ module.exports = {
     });
 
     if (!terminals.length) {
+      console.log(`[LOG] No terminals found for location: ${location}`);
       return interaction.reply({ content: `❌ No terminals found at "${location}".`, ephemeral: true });
     }
 
     const types = [...new Set(terminals.map(t => t.type).filter(Boolean))];
+    console.log(`[LOG] Found terminal types: ${types.join(', ')}`);
 
     const select = new StringSelectMenuBuilder()
       .setCustomId(`uexinv_type::${location}`)
@@ -157,6 +213,8 @@ module.exports = {
     if (prefix !== 'uexinv_type') return;
 
     const selectedType = interaction.values[0];
+    console.log(`[LOG] User selected terminal type: ${selectedType}`);
+
     const locationFilter = { [Op.like]: `%${location}%` };
 
     const terminals = await db.UexTerminal.findAll({
@@ -175,6 +233,7 @@ module.exports = {
     });
 
     if (terminals.length === 0) {
+      console.log(`[LOG] No terminals of type ${selectedType} found at ${location}`);
       return interaction.update({
         content: `❌ No terminals of type \`${selectedType}\` found at **${location}**.`,
         components: [],
@@ -212,6 +271,7 @@ module.exports = {
 
     const terminal = await db.UexTerminal.findByPk(terminalId);
     if (!terminal) {
+      console.log(`[ERROR] Terminal not found for ID: ${terminalId}`);
       return interaction.reply({ content: '❌ Terminal not found.', ephemeral: true });
     }
 

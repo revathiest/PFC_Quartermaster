@@ -2,21 +2,60 @@ const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, EmbedBui
 const db = require('../config/database');
 const { Op } = require('sequelize');
 
+const VEHICLE_ROLES = {
+    is_spaceship: 'Spaceship',
+    is_ground_vehicle: 'Ground Vehicle',
+    is_single_pilot: 'Single Pilot',
+    is_multi_crew: 'Multi-Crew',
+    is_combat: 'Combat',
+    is_exploration: 'Exploration',
+    is_industry: 'Industry',
+    is_cargo: 'Cargo',
+    is_refinery: 'Refinery',
+    is_mining: 'Mining',
+    is_salvage: 'Salvage',
+    is_transport: 'Transport',
+    is_medical: 'Medical',
+    is_racing: 'Racing',
+    is_touring: 'Touring',
+    is_data: 'Data',
+    is_stealth: 'Stealth',
+    is_military: 'Military',
+    is_civilian: 'Civilian',
+    is_personal_transport: 'Personal Transport',
+    is_vehicle_transport: 'Vehicle Transport',
+    is_research: 'Research',
+    is_pathfinder: 'Pathfinder',
+    is_multirole: 'Multirole'
+  };
+
 function buildVehicleEmbed(vehicle) {
-  return new EmbedBuilder()
-    .setTitle(`🛠️ ${vehicle.name_full || vehicle.name}`)
-    .setDescription(vehicle.slug ? `Slug: \`${vehicle.slug}\`` : null)
-    .addFields(
-      { name: 'Crew', value: vehicle.crew || 'Unknown', inline: true },
-      { name: 'Cargo', value: `${vehicle.scu || 0} SCU`, inline: true },
-      { name: 'Mass', value: `${vehicle.mass || 0} kg`, inline: true },
-      { name: 'Dimensions', value: `${vehicle.length}m x ${vehicle.width}m x ${vehicle.height}m`, inline: false },
-      { name: 'Fuel', value: `Quantum: ${vehicle.fuel_quantum || 0} | Hydrogen: ${vehicle.fuel_hydrogen || 0}`, inline: false }
-    )
-    .setFooter({ text: `Vehicle ID: ${vehicle.id}` })
-    .setColor(0x0088cc)
-    .setTimestamp();
-}
+    const embed = new EmbedBuilder()
+      .setTitle(`🛠️ ${vehicle.name_full || vehicle.name}`)
+      .setDescription(vehicle.slug ? `Slug: \`${vehicle.slug}\`` : null)
+      .addFields(
+        { name: 'Crew', value: vehicle.crew || 'Unknown', inline: true },
+        { name: 'Cargo', value: `${vehicle.scu || 0} SCU`, inline: true },
+        { name: 'Mass', value: `${vehicle.mass || 0} kg`, inline: true },
+        { name: 'Dimensions', value: `${vehicle.length}m x ${vehicle.width}m x ${vehicle.height}m`, inline: false },
+        { name: 'Fuel', value: `Quantum: ${vehicle.fuel_quantum || 0} | Hydrogen: ${vehicle.fuel_hydrogen || 0}`, inline: false }
+      )
+      .setFooter({ text: `Vehicle ID: ${vehicle.id}` })
+      .setColor(0x0088cc)
+      .setTimestamp();
+  
+    // Collect all roles that are true
+    const trueRoles = Object.entries(VEHICLE_ROLES)
+      .filter(([key]) => vehicle[key] === true)
+      .map(([, label]) => `✅ ${label}`);
+  
+    if (trueRoles.length) {
+      embed.addFields({ name: 'Roles & Capabilities', value: trueRoles.join('\n'), inline: false });
+    }
+  
+    return embed;
+  }
+  
 
 module.exports = {
   data: new SlashCommandBuilder()

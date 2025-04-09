@@ -27,6 +27,7 @@ const GalactapediaRelatedArticle = require('../models/galactapediaRelatedArticle
 const GalactapediaTag = require('../models/galactapediaTag')(sequelize);
 const GalactapediaCategory = require('../models/galactapediaCategory')(sequelize);
 const UexVehicle = require('../models/UexVehicle')(sequelize);
+const UexTerminal = require('../models/uexTerminal')(sequelize);
 
 const initializeDatabase = async () => {
     try {
@@ -55,5 +56,6 @@ module.exports = {
     GalactapediaRelatedArticle,
     GalactapediaTag,
     GalactapediaCategory,
-    UexVehicle
+    UexVehicle,
+    UexTerminal
 };

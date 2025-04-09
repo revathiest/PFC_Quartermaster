@@ -14,7 +14,8 @@ module.exports = {
         .addIntegerOption(option =>
             option.setName('purgetime')
                 .setDescription('Purge time in days (default: 30)')
-                .setRequired(false)),
+                .setRequired(false))
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
     help: 'Adds a channel to the snap purge list. Messages in snap channels are auto-deleted after a set time.',
     category: 'Admin',
                 

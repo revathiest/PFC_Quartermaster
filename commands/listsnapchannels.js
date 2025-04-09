@@ -6,7 +6,8 @@ const allowedRoles = ['Admiral', 'Fleet Admiral'];
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('listsnapchannels')
-        .setDescription('Lists all snap channels'),
+        .setDescription('Lists all snap channels')
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
     help: 'Lists all snap channels configured for automatic purge.',
     category: 'Admin',
     async execute(interaction) {

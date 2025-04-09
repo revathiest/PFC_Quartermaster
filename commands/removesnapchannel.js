@@ -10,7 +10,8 @@ module.exports = {
         .addChannelOption(option =>
             option.setName('channel')
                 .setDescription('The snap channel to remove')
-                .setRequired(true)),
+                .setRequired(true))
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
     help: 'Removes a channel from the snap purge list.',
     category: 'Admin',
 

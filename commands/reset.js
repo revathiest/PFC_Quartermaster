@@ -3,7 +3,8 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('reset')
-    .setDescription('Restarts the Quartermaster (Admin only)'),
+    .setDescription('Restarts the Quartermaster (Admin only)')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
     help: 'Resets the bot and removes all registered commands. Admin only.',
     category: 'Admin',
 

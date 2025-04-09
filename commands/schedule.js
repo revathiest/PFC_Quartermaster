@@ -3,7 +3,8 @@ const { SlashCommandBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, Act
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('schedule')
-        .setDescription('Schedules an announcement as an embed'),
+        .setDescription('Schedules an announcement as an embed')
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
     roles: ['Fleet Admiral', 'Admiral'],
     help: 'Opens a modal to schedule a rich embedded announcement for later posting.',
     category: 'Admin',

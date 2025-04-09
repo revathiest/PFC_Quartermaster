@@ -10,9 +10,10 @@ module.exports = {
         .addStringOption(option =>
             option.setName('id')
                 .setDescription('The ID of the announcement to delete')
-                .setRequired(true)),// Already includes:
-                help: 'Deletes a scheduled announcement by its ID. Only available to Admirals and Fleet Admirals.',
-                category: 'Admin',                
+                .setRequired(true))// Already includes:
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+    help: 'Deletes a scheduled announcement by its ID. Only available to Admirals and Fleet Admirals.',
+    category: 'Admin',                
     async execute(interaction) {
         const memberRoles = interaction.member.roles.cache.map(role => role.name);
         if (!allowedRoles.some(role => memberRoles.includes(role))) {

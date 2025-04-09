@@ -9,7 +9,8 @@ const { isAdmin } = require('../botactions/userManagement/permissions');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('syncapidata')
-    .setDescription('Sync all Star Citizen API data into the database (admin only)'),
+    .setDescription('Sync all Star Citizen API data into the database (admin only)')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
   help: 'Admin-only command to sync all Star Citizen API data into the bot database. Displays live progress as it works.',
   category: 'Admin',
 

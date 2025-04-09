@@ -83,7 +83,7 @@ module.exports = {
     });
 
     if (matches.length === 0) {
-      return interaction.reply({ content: `No vehicles found matching "${name}".`, ephemeral: false });
+      return interaction.reply({ content: `No vehicles found matching "${name}".`, ephemeral: true });
     }
 
     if (matches.length === 1) {
@@ -105,7 +105,7 @@ module.exports = {
     await interaction.reply({
       content: `Found ${matches.length} vehicles. Please choose one:`,
       components: [row],
-      ephemeral: true
+      ephemeral: false
     });
   },
 

@@ -10,25 +10,17 @@ module.exports = {
 
   async execute(interaction, client) {
     const commands = client.commands;
-
-    // Group commands by category
     const categories = {};
 
     for (const command of commands.values()) {
       const category = command.category || 'Uncategorized';
       const helpText = command.help || 'No description provided.';
 
-      if (!categories[category]) {
-        categories[category] = [];
-      }
+      if (!categories[category]) categories[category] = [];
 
-      categories[category].push({
-        name: `/${command.data.name}`,
-        value: helpText
-      });
+      categories[category].push(`**/${command.data.name}**: ${helpText}`);
     }
 
-    // Build embed
     const embed = new EmbedBuilder()
       .setColor('#0099ff')
       .setTitle('📘 Quartermaster Command Help')
@@ -36,13 +28,20 @@ module.exports = {
       .setFooter({ text: 'Use /help anytime to see this again.' })
       .setTimestamp();
 
-    // Add commands grouped by category
-    for (const [category, cmds] of Object.entries(categories)) {
-      const fieldValue = cmds.map(cmd => `**${cmd.name}**: ${cmd.value}`).join('\n');
-      embed.addFields({ name: `📂 ${category}`, value: fieldValue });
+    for (const [category, entries] of Object.entries(categories)) {
+      let chunk = '';
+      for (const line of entries) {
+        if ((chunk + line + '\n').length > 1024) {
+          embed.addFields({ name: `📂 ${category}`, value: chunk });
+          chunk = '';
+        }
+        chunk += `${line}\n`;
+      }
+      if (chunk.length > 0) {
+        embed.addFields({ name: `📂 ${category}`, value: chunk });
+      }
     }
 
-    // Send ephemeral response in current channel
     await interaction.reply({ embeds: [embed], ephemeral: true });
   }
 };

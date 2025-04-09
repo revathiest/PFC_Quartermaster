@@ -29,7 +29,7 @@ const VEHICLE_ROLES = {
     is_multirole: 'Multirole'
   };
 
-function buildVehicleEmbed(vehicle) {
+  function buildVehicleEmbed(vehicle) {
     const embed = new EmbedBuilder()
       .setTitle(`🛠️ ${vehicle.name_full || vehicle.name}`)
       .setDescription(vehicle.slug ? `Slug: \`${vehicle.slug}\`` : null)
@@ -40,24 +40,50 @@ function buildVehicleEmbed(vehicle) {
         { name: 'Dimensions', value: `${vehicle.length}m x ${vehicle.width}m x ${vehicle.height}m`, inline: false },
         { name: 'Fuel', value: `Quantum: ${vehicle.fuel_quantum || 0} | Hydrogen: ${vehicle.fuel_hydrogen || 0}`, inline: false }
       )
-      .setColor(0x0088cc)
-      .setTimestamp()
       .setFooter({
         text: `Vehicle ID: ${vehicle.id} • Game Version: ${vehicle.game_version || 'unknown'}`
-      });
-      
+      })
+      .setColor(0x0088cc)
+      .setTimestamp();
   
-    // Collect all roles that are true
+    // Optional pricing fields
+    if (vehicle.pledge_cost || vehicle.ingame_cost || vehicle.rental_cost) {
+      embed.addFields({
+        name: 'Pricing',
+        value: [
+          vehicle.pledge_cost ? `💸 Pledge: ${vehicle.pledge_cost}` : null,
+          vehicle.ingame_cost ? `🪙 In-Game: ${vehicle.ingame_cost}` : null,
+          vehicle.rental_cost ? `🛻 Rental: ${vehicle.rental_cost}` : null
+        ].filter(Boolean).join('\n'),
+        inline: false
+      });
+    }
+  
+    // Optional loaners
+    if (vehicle.loaners) {
+      embed.addFields({
+        name: 'Loaner Vehicles',
+        value: vehicle.loaners,
+        inline: false
+      });
+    }
+  
+    // Roles & capabilities
     const trueRoles = Object.entries(VEHICLE_ROLES)
       .filter(([key]) => vehicle[key] === true)
       .map(([, label]) => `✅ ${label}`);
   
     if (trueRoles.length) {
-      embed.addFields({ name: 'Roles & Capabilities', value: trueRoles.join('\n'), inline: false });
+      embed.addFields({
+        name: 'Roles & Capabilities',
+        value: trueRoles.join('\n'),
+        inline: false
+      });
     }
   
     return embed;
   }
+  
   
 
 module.exports = {

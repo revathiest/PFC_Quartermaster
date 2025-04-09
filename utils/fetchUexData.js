@@ -24,7 +24,7 @@ async function fetchUexData(endpoint) {
       throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
     }
 
-    // const json = await response.json();
+    const json = await response.json();
 
     // console.log(`[UEX FETCH] ${endpoint} response:`, JSON.stringify(json, null, 2)); // 💡 Optional: comment this out later
 

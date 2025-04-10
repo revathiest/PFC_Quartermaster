@@ -118,8 +118,8 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
       attributes: ['id', 'name']
     });
     const vehicleMap = Object.fromEntries(vehicleRecords.map(v => [v.id, v.name]));
-    const header = `| Vehicle                 |     Buy |`;
-    const divider = `|------------------------|---------|`;
+    const header = `| Vehicle                  |     Buy |`;
+    const divider = `|--------------------------|---------|`;
     
     const rows = chunk.map(item => {
       const name = vehicleMap[item.id_vehicle] ?? 'Unknown Vehicle';

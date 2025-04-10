@@ -34,24 +34,33 @@ async function handleInteraction(interaction, client) {
 
     else if (interaction.isButton()) {
         try {
-            const commandName = interaction.message?.interaction?.commandName || 'unknown';
+            // Attempt to get the command name from the original slash command
+            let commandName = interaction.message?.interaction?.commandName;
+    
+            // Fallback: try to guess it based on customId
+            if (!commandName) {
+                const id = interaction.customId;
+                if (id.startsWith('uexinv_')) commandName = 'uexinventory';
+                // add more customId patterns here if needed
+            }
     
             await UsageLog.create({
                 user_id: interaction.user.id,
                 interaction_type: 'button',
                 event_type: 'button_click',
-                command_name: commandName,
+                command_name: commandName || 'unknown',
                 channel_id: interaction.channel.id,
                 server_id: serverId,
                 event_time: new Date(),
             });
-            console.log(`Button click logged for command: ${commandName}`);
+            console.log(`Button click logged for command: ${commandName || 'unknown'}`);
         } catch (error) {
             console.error('Error logging button click:', error);
         }
     
         await handleButton(interaction, client);
     }
+    
     
 
     else if (interaction.isStringSelectMenu()) {

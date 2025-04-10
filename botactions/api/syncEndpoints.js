@@ -4,6 +4,7 @@ const { syncGalactapedia } = require('../../utils/apiSync/galactapedia');
 const { syncUexVehicles } = require('../../utils/apiSync/syncUexVehicles');
 const { syncUexTerminals } = require('../../utils/apiSync/syncUexTerminals');
 const { syncUexItemPrices } = require('../../utils/apiSync/syncUexItemPrices');
+const { syncUexCategories } = require('../../utils/apiSync/syncUexCategories');
 
 async function syncAllEndpoints() {
   const results = [];
@@ -50,6 +51,13 @@ async function syncAllEndpoints() {
     results.push({endpoint: 'items_prices_all', success: false, erro: error.message });
   }
 
+  try {
+    const syncUexCategoryResult = await syncUexCategories();
+    results.push(syncUexCategoryResult);
+  }catch (error){
+    results.push({endpoint: 'categories', success: false, erro: error.message });
+  }
+
   return results;
 }
 
@@ -60,5 +68,6 @@ module.exports = {
     syncGalactapedia,
     syncUexVehicles,
     syncUexTerminals,
-    syncUexItemPrices
+    syncUexItemPrices,
+    syncUexCategories
 };

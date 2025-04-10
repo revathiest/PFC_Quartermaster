@@ -191,7 +191,11 @@ module.exports = {
   },
 
   option: async (interaction) => {
-    const [prefix, selectedType, location] = interaction.customId.split('::');
+    const parts = interaction.customId.split('::');
+    const prefix = parts[0];
+    const selectedType = parts[1];
+    const location = parts.slice(2).join('::'); // in case location had colons/spaces
+    
 
     if (prefix === 'uexinv_type') {
       const locationFilter = { [Op.like]: `%${location}%` };

@@ -118,14 +118,17 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
       attributes: ['id', 'name']
     });
     const vehicleMap = Object.fromEntries(vehicleRecords.map(v => [v.id, v.name]));
+    const header = `| Vehicle                 |     Buy |`;
+    const divider = `|------------------------|---------|`;
     
-    const header = `| Vehicle                     |     Buy |`;
     const rows = chunk.map(item => {
       const name = vehicleMap[item.id_vehicle] ?? 'Unknown Vehicle';
-      return `| ${name.padEnd(25)} | ${String(item.price_buy ?? 'N/A').padStart(7)} |`;
+      return `| ${name.padEnd(24)} | ${String(item.price_buy ?? 'N/A').padStart(8)} |`;
     });
-    const table = '```markdown\n' + [header, ...rows].join('\n') + '\n```';
+    
+    const table = '```markdown\n' + [header, divider, ...rows].join('\n') + '\n```';
     embed.setDescription(table);
+    
     
     
   }

@@ -12,31 +12,31 @@ module.exports = (sequelize) => {
     },
     id_category: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     id_terminal: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     price_buy: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     price_sell: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     date_added: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     date_modified: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     item_name: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     item_uuid: {
       type: DataTypes.UUID,
@@ -44,7 +44,7 @@ module.exports = (sequelize) => {
     },
     terminal_name: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
   }, {
     tableName: 'UexItemPrices',

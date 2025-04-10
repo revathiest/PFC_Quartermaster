@@ -77,7 +77,7 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
     if (endpoint === 'items_prices') {
         console.log(`[DEBUG] Formatting items_prices table with ${chunk.length} items`);
       
-        const header = `| Item                          |     Buy |    Sell |`;
+        const header = `| Item                           |     Buy |    Sell |`;
         const rows = chunk.map(item =>
           `| ${formatColumn(item.item_name, 30)} | ${String(item.price_buy ?? 'N/A').padStart(7)} | ${String(item.price_sell ?? 'N/A').padStart(7)} |`
         );
@@ -104,7 +104,7 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
       if (endpoint === 'fuel_prices') {
         console.log(`[DEBUG] Formatting fuel_prices`);
       
-        const header = `| Fuel Type                     |     Buy |`;
+        const header = `| Fuel Type                      |     Buy |`;
         const rows = chunk.map(item =>
           `| ${formatColumn(item.commodity_name, 30)} | ${String(item.price_buy ?? 'N/A').padStart(7)} |`
         );
@@ -124,8 +124,8 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
         });
         const vehicleMap = Object.fromEntries(vehicleRecords.map(v => [v.id, v.name]));
       
-        const header = `| Vehicle                       |  Rental |`;
-        const divider = `|------------------------------|---------|`;
+        const header = `| Vehicle                        |  Rental |`;
+        const divider = `|--------------------------------|---------|`;
       
         const rows = chunk.map(item => {
           const name = vehicleMap[item.id_vehicle] ?? `Vehicle #${item.id_vehicle ?? '??'}`;
@@ -145,12 +145,12 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
         });
         const vehicleMap = Object.fromEntries(vehicleRecords.map(v => [v.id, v.name]));
       
-        const header = `| Vehicle                       |     Buy |`;
-        const divider = `|------------------------------|---------|`;
+        const header = `| Vehicle                         |     Buy |`;
+        const divider = `|----------------------------------|----------|`;
       
         const rows = chunk.map(item => {
           const name = vehicleMap[item.id_vehicle] ?? 'Unknown Vehicle';
-          return `| ${formatColumn(name, 30)} | ${String(item.price_buy ?? 'N/A').padStart(7)} |`;
+          return `| ${formatColumn(name, 30)} | ${String(item.price_buy ?? 'N/A').padStart(8)} |`;
         });
       
         const table = '```markdown\n' + [header, divider, ...rows].join('\n') + '\n```';

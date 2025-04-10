@@ -40,7 +40,6 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
   console.log(`[DEBUG] Fetch URL: ${url}`);
 
   const res = await fetch(url);
-
   if (!res.ok) {
     console.error(`[ERROR] Fetch failed: ${res.status} ${res.statusText}`);
     return interaction.reply({
@@ -71,6 +70,7 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
     .setTimestamp();
 
   if (endpoint === 'items_prices') {
+    console.log(`[DEBUG] Formatting items_prices table with ${chunk.length} items`);
     const header = `| Item                      |     Buy |    Sell |\n|---------------------------|---------|---------|`;
     const rows = chunk.map(item =>
       `| ${item.item_name.padEnd(25)} | ${String(item.price_buy ?? 'N/A').padStart(7)} | ${String(item.price_sell ?? 'N/A').padStart(7)} |`
@@ -80,6 +80,7 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
   }
 
   if (endpoint === 'commodities_prices') {
+    console.log(`[DEBUG] Formatting commodities_prices`);
     embed.addFields(chunk.map(item => ({
       name: item.commodity_name,
       value: `Buy: ${item.price_buy ?? 'N/A'} UEC\nSell: ${item.price_sell ?? 'N/A'} UEC\nSCU: ${item.scu_sell_stock ?? 'N/A'}`,
@@ -88,6 +89,7 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
   }
 
   if (endpoint === 'fuel_prices') {
+    console.log(`[DEBUG] Formatting fuel_prices`);
     embed.addFields(chunk.map(item => ({
       name: item.commodity_name,
       value: `Buy: ${item.price_buy ?? 'N/A'} UEC`,
@@ -96,6 +98,7 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
   }
 
   if (endpoint === 'vehicle_rental_prices') {
+    console.log(`[DEBUG] Formatting vehicle_rental_prices`);
     embed.addFields(chunk.map(item => ({
       name: item.terminal_name,
       value: `Rent: ${item.price_rent ?? 'N/A'} UEC`,
@@ -104,6 +107,7 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
   }
 
   if (endpoint === 'vehicles_purchases_prices') {
+    console.log(`[DEBUG] Formatting vehicles_purchases_prices`);
     embed.addFields(chunk.map(item => ({
       name: item.vehicle_name || 'Unknown Vehicle',
       value: `Buy: ${item.price_buy ?? 'N/A'} UEC`,

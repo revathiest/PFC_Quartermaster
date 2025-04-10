@@ -26,7 +26,7 @@ const GalactapediaProperty = require('../models/galactapediaProperty')(sequelize
 const GalactapediaRelatedArticle = require('../models/galactapediaRelatedArticle')(sequelize);
 const GalactapediaTag = require('../models/galactapediaTag')(sequelize);
 const GalactapediaCategory = require('../models/galactapediaCategory')(sequelize);
-const UexVehicle = require('../models/UexVehicle')(sequelize);
+const UexVehicle = require('../models/uexVehicle')(sequelize);
 const UexTerminal = require('../models/uexTerminal')(sequelize);
 
 const initializeDatabase = async () => {

@@ -59,7 +59,10 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
   }
 
   const chunks = chunkInventory(items);
+  page = Math.max(0, Math.min(page, chunks.length - 1)); // Clamp page to valid range
+  
   const chunk = chunks[page];
+  
 
   const embed = new EmbedBuilder()
     .setTitle(`📦 Inventory: ${terminal.name}`)

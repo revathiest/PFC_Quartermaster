@@ -94,7 +94,7 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
   
   if (endpoint === 'fuel_prices') {
     console.log(`[DEBUG] Formatting fuel_prices`);
-    const header = `| Fuel Type                   |     Buy |`;
+    const header = `| Fuel Type                 |     Buy |`;
     const rows = chunk.map(item =>
       `| ${item.commodity_name.padEnd(25)} | ${String(item.price_buy ?? 'N/A').padStart(7)} |`
     );

@@ -1,4 +1,3 @@
-const { createChannelSelectMenu } = require('../commandHandling/channelSelector');
 const moment = require('moment');
 const { UsageLog } = require('../../config/database');
 

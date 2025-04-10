@@ -1,6 +1,10 @@
 const { fetchUexData } = require('../fetchUexData');
 const { UexCategory } = require('../../config/database');
 
+const db = require('../../config/database');
+console.log('📦 Available models:', Object.keys(db));
+
+
 async function syncUexCategories() {
   console.log('[API SYNC] Syncing UEX categories...');
 

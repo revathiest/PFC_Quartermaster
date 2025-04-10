@@ -8,31 +8,31 @@ module.exports = (sequelize) => {
     },
     type: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
     },
     section: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
     },
     name: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
     },
     is_game_related: {
       type: DataTypes.BOOLEAN,
-      allowNull: false
+      allowNull: true
     },
     is_mining: {
       type: DataTypes.BOOLEAN,
-      allowNull: false
+      allowNull: true
     },
     date_added: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: true
     },
     date_modified: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: true
     }
   }, {
     tableName: 'UexCategories',

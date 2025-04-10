@@ -1,4 +1,5 @@
 const { DataTypes } = require('sequelize');
+console.log('✅ uexVehicle.js loaded');
 
 module.exports = (sequelize) => {
   const UexVehicle = sequelize.define('UexVehicle', {

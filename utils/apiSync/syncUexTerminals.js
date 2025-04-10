@@ -1,5 +1,5 @@
 const { fetchUexData } = require('../fetchUexData');
-const { UexTerminal } = require('../../config/database');
+const { UexTerminal } = require('../../v');
 
 async function syncUexTerminals() {
   console.log('[API SYNC] Syncing UEX terminals...');

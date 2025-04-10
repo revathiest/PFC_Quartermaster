@@ -112,6 +112,7 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
   }
 
   if (endpoint === 'vehicles_purchases_prices') {
+    console.log(`[DEBUG] Sample vehicle data:`, chunk[0]);
     const header = `| Vehicle                     |     Buy |`;
     const rows = chunk.map(item =>
       `| ${item.vehicle_name?.padEnd(25) ?? 'Unknown Vehicle'.padEnd(25)} | ${String(item.price_buy ?? 'N/A').padStart(7)} |`

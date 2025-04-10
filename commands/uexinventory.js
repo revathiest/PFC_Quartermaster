@@ -186,19 +186,26 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
     ephemeral: !isPublic
   };
 
-  if (isPublic) {
-    if (interaction.replied || interaction.deferred) {
-      return interaction.followUp({
-        ...payload,
-        ephemeral: false
-      });
-    } else {
-      return interaction.reply({
-        ...payload,
-        ephemeral: false
-      });
+  if (isPublic && interaction.isButton()) {
+    // If this is the original Make Public button
+    if (interaction.customId.startsWith('uexinv_public')) {
+      if (interaction.replied || interaction.deferred) {
+        return interaction.followUp({
+          ...payload,
+          ephemeral: false
+        });
+      } else {
+        return interaction.reply({
+          ...payload,
+          ephemeral: false
+        });
+      }
     }
+  
+    // Else: it's a public message already — just update it
+    return interaction.update(payload);
   }
+  
 
   console.log(`[DEBUG] Sending embed payload. Replied: ${interaction.replied}, Deferred: ${interaction.deferred}`);
 
@@ -346,7 +353,7 @@ module.exports = {
       ephemeral: true
     });
   },
-  
+
   button: async (interaction) => {
     const [action, terminalId, pageStr, publicFlag] = interaction.customId.split('::');
     const page = parseInt(pageStr, 10);

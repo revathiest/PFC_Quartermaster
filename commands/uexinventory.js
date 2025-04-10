@@ -204,7 +204,8 @@ module.exports = {
   },
 
   option: async (interaction) => {
-    const [prefix, selectedType, location] = interaction.customId.split('::');
+    const [prefix, location] = interaction.customId.split('::');
+    const selectedType = interaction.values[0];    
     console.log(`[DEBUG] Option handler called for type=${selectedType}, location=${location}`);
 
     if (prefix === 'uexinv_type') {

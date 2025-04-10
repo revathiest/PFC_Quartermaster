@@ -187,12 +187,19 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
   };
 
   if (isPublic) {
-    // Send new public message instead of updating the ephemeral one
-    return interaction.followUp({
-      ...payload,
-      ephemeral: false
-    });
+    if (interaction.replied || interaction.deferred) {
+      return interaction.followUp({
+        ...payload,
+        ephemeral: false
+      });
+    } else {
+      return interaction.reply({
+        ...payload,
+        ephemeral: false
+      });
+    }
   }
+  
 
   console.log(`[DEBUG] Sending embed payload. Replied: ${interaction.replied}, Deferred: ${interaction.deferred}`);
 

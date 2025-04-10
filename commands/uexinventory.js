@@ -145,7 +145,7 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
         });
         const vehicleMap = Object.fromEntries(vehicleRecords.map(v => [v.id, v.name]));
       
-        const header = `| Vehicle                        |     Buy |`;
+        const header = `| Vehicle                        |      Buy |`;
         const divider = `|--------------------------------|----------|`;
       
         const rows = chunk.map(item => {

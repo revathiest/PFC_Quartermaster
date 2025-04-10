@@ -77,23 +77,21 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
     );    
     const table = '```markdown\n' + [header, ...rows].join('\n') + '\n```';
     embed.setDescription(table);
-  }
 
-  if (endpoint === 'commodities_prices') {
+  }if (endpoint === 'commodities_prices') {
     console.log(`[DEBUG] Formatting commodities_prices`);
   
-    const header = `| Commodity               |     Buy |    Sell |   SCU |`;
-    const divider = `|------------------------|---------|---------|-------|`;
+    const header = `| Commodity               |     Buy |    Sell |`;
+    const divider = `|------------------------|---------|---------|`;
   
     const rows = chunk.map(item =>
-      `| ${item.commodity_name.padEnd(24)} | ${String(item.price_buy ?? 'N/A').padStart(7)} | ${String(item.price_sell ?? 'N/A').padStart(7)} | ${String(item.scu_sell_stock ?? 'N/A').padStart(5)} |`
+      `| ${item.commodity_name.padEnd(24)} | ${String(item.price_buy ?? 'N/A').padStart(7)} | ${String(item.price_sell ?? 'N/A').padStart(7)} |`
     );
   
     const table = '```markdown\n' + [header, divider, ...rows].join('\n') + '\n```';
     embed.setDescription(table);
   }
   
-
   if (endpoint === 'fuel_prices') {
     console.log(`[DEBUG] Formatting fuel_prices`);
     const header = `| Fuel Type                   |     Buy |`;

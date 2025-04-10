@@ -103,26 +103,26 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
 
   if (endpoint === 'vehicle_rental_prices') {
     console.log('[DEBUG] Sample rental item:', JSON.stringify(chunk[0], null, 2));
-
-    const vehicleIds = chunk.map(item => item.id_vehicle);
+  
+    const vehicleIds = chunk.map(item => item.vehicle_id).filter(Boolean);
     const vehicleRecords = await db.UexVehicle.findAll({
       where: { id: vehicleIds },
       attributes: ['id', 'name']
     });
     const vehicleMap = Object.fromEntries(vehicleRecords.map(v => [v.id, v.name]));
-    
+  
     const header = `| Vehicle                 |  Rental |`;
     const divider = `|------------------------|---------|`;
-    
+  
     const rows = chunk.map(item => {
-      const name = vehicleMap[item.id_vehicle] ?? 'Unknown Vehicle';
+      const name = vehicleMap[item.vehicle_id] ?? `Vehicle #${item.vehicle_id ?? '??'}`;
       return `| ${name.padEnd(24)} | ${String(item.price_rent ?? 'N/A').padStart(7)} |`;
     });
-    
+  
     const table = '```markdown\n' + [header, divider, ...rows].join('\n') + '\n```';
     embed.setDescription(table);
-    
   }
+  
 
   if (endpoint === 'vehicles_purchases_prices') {
     const vehicleIds = chunk.map(item => item.id_vehicle);

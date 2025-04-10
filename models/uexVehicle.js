@@ -99,8 +99,6 @@ module.exports = (sequelize) => {
       type: DataTypes.TEXT,
       allowNull: true,
     },
-
-    // Boolean flags (updated formatting)
     is_spaceship: {
       type: DataTypes.BOOLEAN,
       allowNull: true,
@@ -198,6 +196,7 @@ module.exports = (sequelize) => {
       allowNull: true,
     }
   }, {
+    tableName: 'UexVehicles',
     charset: 'utf8mb4',
     collate: 'utf8mb4_unicode_ci'
   });

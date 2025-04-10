@@ -212,15 +212,37 @@ module.exports = {
   },
 
   option: async (interaction) => {
-    const [prefix, location] = interaction.customId.split('::');
-    const selectedType = interaction.values[0];
-
+    const parts = interaction.customId.split('::');
+    const [prefix] = parts;
+  
     console.log(`[DEBUG] Option handler triggered.`);
+    console.log(`[DEBUG] Parsed interaction: prefix=${prefix}, values=${interaction.values}`);
+  
+    if (prefix === 'uexinv_terminal_menu') {
+      const terminalId = interaction.values[0].split('::')[1];
+      const terminal = await db.UexTerminal.findByPk(terminalId);
+  
+      if (!terminal) {
+        console.error(`[ERROR] Terminal not found in DB for ID: ${terminalId}`);
+        return interaction.update({
+          content: `❌ Terminal not found.`,
+          components: [],
+          ephemeral: true
+        });
+      }
+  
+      return fetchInventoryEmbed(interaction, terminal);
+    }
+  
+    // Existing logic for uexinv_type_menu
+    const [, location] = parts;
+    const selectedType = interaction.values[0];
+  
     console.log(`[DEBUG] Parsed interaction: prefix=${prefix}, location=${location}, selectedType=${selectedType}`);
-
+  
     const locationFilter = { [Op.like]: `%${location}%` };
     console.log(`[DEBUG] Sequelize location filter:`, locationFilter);
-
+  
     const terminals = await db.UexTerminal.findAll({
       where: {
         type: selectedType,
@@ -235,9 +257,9 @@ module.exports = {
       },
       order: [['name', 'ASC']]
     });
-
+  
     console.log(`[DEBUG] Terminals matching query: ${terminals.length}`);
-
+  
     if (!terminals.length) {
       return interaction.update({
         content: `❌ No terminals of type \`${selectedType}\` found at **${location}**.`,
@@ -245,30 +267,30 @@ module.exports = {
         ephemeral: true
       });
     }
-
+  
     if (terminals.length === 1) {
       return fetchInventoryEmbed(interaction, terminals[0]);
     }
-
+  
     const terminalOptions = terminals.slice(0, 25).map(term => ({
       label: term.name || term.nickname || term.code,
       value: `uexinv_terminal::${term.id}`
     }));
-
+  
     const row = new ActionRowBuilder().addComponents(
       new StringSelectMenuBuilder()
         .setCustomId(`uexinv_terminal_menu::${selectedType}::${location}`)
         .setPlaceholder('Select a terminal')
         .addOptions(terminalOptions)
     );
-
+  
     return interaction.update({
       content: `Terminals of type \`${selectedType}\` at **${location}**:`,
       components: [row],
       embeds: [],
       ephemeral: true
     });
-  },
+  },  
 
   button: async (interaction) => {
     const [action, terminalId, pageStr] = interaction.customId.split('::');

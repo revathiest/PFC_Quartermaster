@@ -102,7 +102,10 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
   }
 
   if (endpoint === 'vehicle_rental_prices') {
-    console.log('[DEBUG] Sample rental item:', JSON.stringify(chunk[0], null, 2));
+    embed.setDescription('```json\n' + JSON.stringify(chunk[0], null, 2) + '\n```');
+    await interaction.reply({ embeds: [embed], ephemeral: true });
+    return;
+    
   
     const vehicleIds = chunk.map(item => item.vehicle_id).filter(Boolean);
     const vehicleRecords = await db.UexVehicle.findAll({

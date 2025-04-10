@@ -24,7 +24,7 @@ function chunkInventory(items) {
 }
 
 async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = false) {
-  console.log(`[DEBUG] Fetching inventory embed with terminal:`, terminal);
+  //console.log(`[DEBUG] Fetching inventory embed with terminal:`, terminal);
   console.log(`[DEBUG] Page: ${page}, isPublic: ${isPublic}`);
 
   const endpoint = TerminalEndpointMap[terminal.type];
@@ -102,6 +102,7 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
   }
 
   if (endpoint === 'vehicle_rental_prices') {
+    console.log('[DEBUG] Sample rental item:', chunk[0]);
     const vehicleIds = chunk.map(item => item.id_vehicle);
     const vehicleRecords = await db.UexVehicle.findAll({
       where: { id: vehicleIds },
@@ -119,7 +120,6 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
     
     const table = '```markdown\n' + [header, divider, ...rows].join('\n') + '\n```';
     embed.setDescription(table);
-    
     
   }
 
@@ -140,9 +140,7 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
     
     const table = '```markdown\n' + [header, divider, ...rows].join('\n') + '\n```';
     embed.setDescription(table);
-    
-    
-    
+        
   }
 
   const components = [];

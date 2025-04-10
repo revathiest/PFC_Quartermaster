@@ -24,12 +24,11 @@ function chunkInventory(items) {
 }
 
 function formatColumn(text, width) {
-    if (!text) return ''.padEnd(width);
-    return text.length > width ? text.slice(0, width - 1) + '…' : text.padEnd(width);
-  }
-  
+  if (!text) return ''.padEnd(width);
+  return text.length > width ? text.slice(0, width - 1) + '…' : text.padEnd(width);
+}
+
 async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = false) {
-  //console.log(`[DEBUG] Fetching inventory embed with terminal:`, terminal);
   console.log(`[DEBUG] Page: ${page}, isPublic: ${isPublic}`);
 
   const endpoint = TerminalEndpointMap[terminal.type];
@@ -74,89 +73,84 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
     .setColor(0x0088cc)
     .setTimestamp();
 
-    if (endpoint === 'items_prices') {
-        console.log(`[DEBUG] Formatting items_prices table with ${chunk.length} items`);
-      
-        const header = `| Item                           |     Buy |    Sell |`;
-        const rows = chunk.map(item =>
-          `| ${formatColumn(item.item_name, 30)} | ${String(item.price_buy ?? 'N/A').padStart(7)} | ${String(item.price_sell ?? 'N/A').padStart(7)} |`
-        );
-        const table = '```markdown\n' + [header, ...rows].join('\n') + '\n```';
-        embed.setDescription(table);
-      }
-      
+  if (endpoint === 'items_prices') {
+    console.log(`[DEBUG] Formatting items_prices table with ${chunk.length} items`);
 
-      if (endpoint === 'commodities_prices') {
-        console.log(`[DEBUG] Formatting commodities_prices`);
-      
-        const header = `| Commodity                     |     Buy |    Sell |`;
-        const divider = `|------------------------------|---------|---------|`;
-      
-        const rows = chunk.map(item =>
-          `| ${formatColumn(item.commodity_name, 30)} | ${String(item.price_buy ?? 'N/A').padStart(7)} | ${String(item.price_sell ?? 'N/A').padStart(7)} |`
-        );
-      
-        const table = '```markdown\n' + [header, divider, ...rows].join('\n') + '\n```';
-        embed.setDescription(table);
-      }
-      
-  
-      if (endpoint === 'fuel_prices') {
-        console.log(`[DEBUG] Formatting fuel_prices`);
-      
-        const header = `| Fuel Type                      |     Buy |`;
-        const rows = chunk.map(item =>
-          `| ${formatColumn(item.commodity_name, 30)} | ${String(item.price_buy ?? 'N/A').padStart(7)} |`
-        );
-      
-        const table = '```markdown\n' + [header, ...rows].join('\n') + '\n```';
-        embed.setDescription(table);
-      }
-      
+    const header = `| Item                           |     Buy |    Sell |`;
+    const rows = chunk.map(item =>
+      `| ${formatColumn(item.item_name, 30)} | ${String(item.price_buy ?? 'N/A').padStart(7)} | ${String(item.price_sell ?? 'N/A').padStart(7)} |`
+    );
+    const table = '```markdown\n' + [header, ...rows].join('\n') + '\n```';
+    embed.setDescription(table);
+  }
 
-      if (endpoint === 'vehicles_rentals_prices') {
-        console.log('[DEBUG] Formatting vehicles_rentals_prices');
-      
-        const vehicleIds = chunk.map(item => item.id_vehicle);
-        const vehicleRecords = await db.UexVehicle.findAll({
-          where: { id: vehicleIds },
-          attributes: ['id', 'name']
-        });
-        const vehicleMap = Object.fromEntries(vehicleRecords.map(v => [v.id, v.name]));
-      
-        const header = `| Vehicle                        |  Rental |`;
-        const divider = `|--------------------------------|---------|`;
-      
-        const rows = chunk.map(item => {
-          const name = vehicleMap[item.id_vehicle] ?? `Vehicle #${item.id_vehicle ?? '??'}`;
-          return `| ${formatColumn(name, 30)} | ${String(item.price_rent ?? 'N/A').padStart(7)} |`;
-        });
-      
-        const table = '```markdown\n' + [header, divider, ...rows].join('\n') + '\n```';
-        embed.setDescription(table);
-      }
-      
-  
-      if (endpoint === 'vehicles_purchases_prices') {
-        const vehicleIds = chunk.map(item => item.id_vehicle);
-        const vehicleRecords = await db.UexVehicle.findAll({
-          where: { id: vehicleIds },
-          attributes: ['id', 'name']
-        });
-        const vehicleMap = Object.fromEntries(vehicleRecords.map(v => [v.id, v.name]));
-      
-        const header = `| Vehicle                        |      Buy |`;
-        const divider = `|--------------------------------|----------|`;
-      
-        const rows = chunk.map(item => {
-          const name = vehicleMap[item.id_vehicle] ?? 'Unknown Vehicle';
-          return `| ${formatColumn(name, 30)} | ${String(item.price_buy ?? 'N/A').padStart(8)} |`;
-        });
-      
-        const table = '```markdown\n' + [header, divider, ...rows].join('\n') + '\n```';
-        embed.setDescription(table);
-      }
-      
+  if (endpoint === 'commodities_prices') {
+    console.log(`[DEBUG] Formatting commodities_prices`);
+
+    const header = `| Commodity                     |     Buy |    Sell |`;
+    const divider = `|------------------------------|---------|---------|`;
+
+    const rows = chunk.map(item =>
+      `| ${formatColumn(item.commodity_name, 30)} | ${String(item.price_buy ?? 'N/A').padStart(7)} | ${String(item.price_sell ?? 'N/A').padStart(7)} |`
+    );
+
+    const table = '```markdown\n' + [header, divider, ...rows].join('\n') + '\n```';
+    embed.setDescription(table);
+  }
+
+  if (endpoint === 'fuel_prices') {
+    console.log(`[DEBUG] Formatting fuel_prices`);
+
+    const header = `| Fuel Type                      |     Buy |`;
+    const rows = chunk.map(item =>
+      `| ${formatColumn(item.commodity_name, 30)} | ${String(item.price_buy ?? 'N/A').padStart(7)} |`
+    );
+
+    const table = '```markdown\n' + [header, ...rows].join('\n') + '\n```';
+    embed.setDescription(table);
+  }
+
+  if (endpoint === 'vehicles_rentals_prices') {
+    console.log('[DEBUG] Formatting vehicles_rentals_prices');
+
+    const vehicleIds = chunk.map(item => item.id_vehicle);
+    const vehicleRecords = await db.UexVehicle.findAll({
+      where: { id: vehicleIds },
+      attributes: ['id', 'name']
+    });
+    const vehicleMap = Object.fromEntries(vehicleRecords.map(v => [v.id, v.name]));
+
+    const header = `| Vehicle                        |  Rental |`;
+    const divider = `|--------------------------------|---------|`;
+
+    const rows = chunk.map(item => {
+      const name = vehicleMap[item.id_vehicle] ?? `Vehicle #${item.id_vehicle ?? '??'}`;
+      return `| ${formatColumn(name, 30)} | ${String(item.price_rent ?? 'N/A').padStart(7)} |`;
+    });
+
+    const table = '```markdown\n' + [header, divider, ...rows].join('\n') + '\n```';
+    embed.setDescription(table);
+  }
+
+  if (endpoint === 'vehicles_purchases_prices') {
+    const vehicleIds = chunk.map(item => item.id_vehicle);
+    const vehicleRecords = await db.UexVehicle.findAll({
+      where: { id: vehicleIds },
+      attributes: ['id', 'name']
+    });
+    const vehicleMap = Object.fromEntries(vehicleRecords.map(v => [v.id, v.name]));
+
+    const header = `| Vehicle                        |      Buy |`;
+    const divider = `|--------------------------------|----------|`;
+
+    const rows = chunk.map(item => {
+      const name = vehicleMap[item.id_vehicle] ?? 'Unknown Vehicle';
+      return `| ${formatColumn(name, 30)} | ${String(item.price_buy ?? 'N/A').padStart(8)} |`;
+    });
+
+    const table = '```markdown\n' + [header, divider, ...rows].join('\n') + '\n```';
+    embed.setDescription(table);
+  }
 
   const components = [];
 
@@ -194,15 +188,16 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
 
   console.log(`[DEBUG] Sending embed payload. Replied: ${interaction.replied}, Deferred: ${interaction.deferred}`);
 
-  if (interaction.isButton() || interaction.isSelectMenu()) {
+  if (interaction.replied || interaction.deferred) {
+    console.warn('[WARN] Tried to reply to an interaction that was already handled.');
+    return;
+  }
+
+  if (interaction.isButton() || interaction.isStringSelectMenu?.()) {
     await interaction.update(payload);
-  } else if (interaction.replied || interaction.deferred) {
-    await interaction.editReply(payload);
   } else {
     await interaction.reply(payload);
   }
-  
-  
 }
 
 module.exports = {
@@ -261,14 +256,14 @@ module.exports = {
   option: async (interaction) => {
     const parts = interaction.customId.split('::');
     const [prefix] = parts;
-  
+
     console.log(`[DEBUG] Option handler triggered.`);
     console.log(`[DEBUG] Parsed interaction: prefix=${prefix}, values=${interaction.values}`);
-  
+
     if (prefix === 'uexinv_terminal_menu') {
       const terminalId = interaction.values[0].split('::')[1];
       const terminal = await db.UexTerminal.findByPk(terminalId);
-  
+
       if (!terminal) {
         console.error(`[ERROR] Terminal not found in DB for ID: ${terminalId}`);
         return interaction.update({
@@ -277,19 +272,18 @@ module.exports = {
           ephemeral: true
         });
       }
-  
-      await fetchInventoryEmbed(interaction, terminal);
+
+      return await fetchInventoryEmbed(interaction, terminal);
     }
-  
-    // Existing logic for uexinv_type_menu
+
     const [, location] = parts;
     const selectedType = interaction.values[0];
-  
+
     console.log(`[DEBUG] Parsed interaction: prefix=${prefix}, location=${location}, selectedType=${selectedType}`);
-  
+
     const locationFilter = { [Op.like]: `%${location}%` };
     console.log(`[DEBUG] Sequelize location filter:`, locationFilter);
-  
+
     const terminals = await db.UexTerminal.findAll({
       where: {
         type: selectedType,
@@ -304,9 +298,9 @@ module.exports = {
       },
       order: [['name', 'ASC']]
     });
-  
+
     console.log(`[DEBUG] Terminals matching query: ${terminals.length}`);
-  
+
     if (!terminals.length) {
       return interaction.update({
         content: `❌ No terminals of type \`${selectedType}\` found at **${location}**.`,
@@ -314,30 +308,30 @@ module.exports = {
         ephemeral: true
       });
     }
-  
+
     if (terminals.length === 1) {
       return fetchInventoryEmbed(interaction, terminals[0]);
     }
-  
+
     const terminalOptions = terminals.slice(0, 25).map(term => ({
       label: term.name || term.nickname || term.code,
       value: `uexinv_terminal::${term.id}`
     }));
-  
+
     const row = new ActionRowBuilder().addComponents(
       new StringSelectMenuBuilder()
         .setCustomId(`uexinv_terminal_menu::${selectedType}::${location}`)
         .setPlaceholder('Select a terminal')
         .addOptions(terminalOptions)
     );
-  
+
     return interaction.update({
       content: `Terminals of type \`${selectedType}\` at **${location}**:`,
       components: [row],
       embeds: [],
       ephemeral: true
     });
-  },  
+  },
 
   button: async (interaction) => {
     const [action, terminalId, pageStr] = interaction.customId.split('::');

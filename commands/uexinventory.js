@@ -346,23 +346,23 @@ module.exports = {
       ephemeral: true
     });
   },
-
+  
   button: async (interaction) => {
-    const [action, terminalId, pageStr] = interaction.customId.split('::');
+    const [action, terminalId, pageStr, publicFlag] = interaction.customId.split('::');
     const page = parseInt(pageStr, 10);
+    const isPublic = publicFlag === 'true' || action === 'uexinv_public';
+  
     const terminal = await db.UexTerminal.findByPk(terminalId);
-    console.log(`[DEBUG] Button interaction. Action=${action}, TerminalID=${terminalId}, Page=${page}`);
-
+    console.log(`[DEBUG] Button interaction. Action=${action}, TerminalID=${terminalId}, Page=${page}, isPublic=${isPublic}`);
+  
     if (!terminal) {
       console.error(`[ERROR] Terminal not found in DB for ID: ${terminalId}`);
       return interaction.reply({ content: '❌ Terminal not found.', ephemeral: true });
     }
-
+  
     const newPage = action === 'uexinv_prev' ? page - 1 : action === 'uexinv_next' ? page + 1 : page;
-    const isPublic = action === 'uexinv_public';
-
-    console.log(`[DEBUG] Resolved newPage=${newPage}, isPublic=${isPublic}`);
-
+  
     return fetchInventoryEmbed(interaction, terminal, newPage, isPublic);
   }
+  
 };

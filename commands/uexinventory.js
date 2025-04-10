@@ -112,13 +112,21 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
   }
 
   if (endpoint === 'vehicles_purchases_prices') {
-    console.log(`[DEBUG] Sample vehicle data:`, chunk[0]);
+    const vehicleIds = chunk.map(item => item.id_vehicle);
+    const vehicleRecords = await db.UexVehicle.findAll({
+      where: { id: vehicleIds },
+      attributes: ['id', 'name']
+    });
+    const vehicleMap = Object.fromEntries(vehicleRecords.map(v => [v.id, v.name]));
+    
     const header = `| Vehicle                     |     Buy |`;
-    const rows = chunk.map(item =>
-      `| ${item.vehicle_name?.padEnd(25) ?? 'Unknown Vehicle'.padEnd(25)} | ${String(item.price_buy ?? 'N/A').padStart(7)} |`
-    );
+    const rows = chunk.map(item => {
+      const name = vehicleMap[item.id_vehicle] ?? 'Unknown Vehicle';
+      return `| ${name.padEnd(25)} | ${String(item.price_buy ?? 'N/A').padStart(7)} |`;
+    });
     const table = '```markdown\n' + [header, ...rows].join('\n') + '\n```';
     embed.setDescription(table);
+    
     
   }
 

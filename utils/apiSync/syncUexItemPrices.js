@@ -1,5 +1,5 @@
 const { fetchUexData } = require('../../utils/fetchUexData');
-const { UexItemPrice } = require('../../models');
+const { UexItemPrice } = require('../../config/database');
 async function syncUexItemPrices(sequelize) {
   try {
     const response = await fetchUexData('/items_prices_all');

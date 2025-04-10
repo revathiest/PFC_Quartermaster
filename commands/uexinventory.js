@@ -1,5 +1,5 @@
 const moment = require('moment');
-const { UsageLog } = require('../../config/database');
+const { UsageLog } = require('../config/database');
 
 let pendingChannelSelection = {};
 

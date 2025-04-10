@@ -56,7 +56,7 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
   const chunk = chunks[page];
 
   const embed = new EmbedBuilder()
-    .setTitle(`📦 Inventory: ${terminal.name}`)
+    .setTitle(`📦 ${terminal.type.toUpperCase()} Inventory: ${terminal.name}`)
     .setDescription(`Showing ${endpoint.replace('_', ' ')} — Page ${page + 1}/${chunks.length}`)
     .setFooter({ text: `Terminal ID: ${terminal.id} • Game Version: ${terminal.game_version || 'N/A'}` })
     .setColor(0x0088cc)
@@ -88,7 +88,7 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
 
   if (endpoint === 'vehicle_rental_prices') {
     embed.addFields(chunk.map(item => ({
-      name: item.terminal_name,
+      name: item.vehicle_name || 'Unnamed Vehicle',
       value: `Rent: ${item.price_rent ?? 'N/A'} UEC`,
       inline: true
     })));
@@ -115,7 +115,7 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
         .setCustomId(`uexinv_next::${terminal.id}::${page}`)
         .setLabel('▶️ Next')
         .setStyle(ButtonStyle.Secondary)
-        .setDisabled(page === chunks.length - 1)
+        .setDisabled(page >= chunks.length - 1)
     );
     components.push(navButtons);
   }
@@ -154,51 +154,12 @@ module.exports = {
     ),
 
   async execute(interaction) {
-    const location = interaction.options.getString('location');
-    const locationFilter = { [Op.like]: `%${location}%` };
-
-    const terminals = await db.UexTerminal.findAll({
-      where: {
-        [Op.or]: [
-          { star_system_name: locationFilter },
-          { planet_name: locationFilter },
-          { orbit_name: locationFilter },
-          { space_station_name: locationFilter },
-          { outpost_name: locationFilter },
-          { city_name: locationFilter }
-        ]
-      }
-    });
-
-    if (!terminals.length) {
-      return interaction.reply({ content: `❌ No terminals found at "${location}".`, ephemeral: true });
-    }
-
-    const types = [...new Set(terminals.map(t => t.type).filter(Boolean))];
-
-    const select = new StringSelectMenuBuilder()
-      .setCustomId(`uexinv_type::${location}`)
-      .setPlaceholder('Select a terminal type')
-      .addOptions(types.map(t => ({ label: t, value: t })));
-
-    const row = new ActionRowBuilder().addComponents(select);
-
-    return interaction.reply({
-      content: `Found **${terminals.length}** terminals at **${location}**. Choose a type:`,
-      components: [row],
-      ephemeral: true
-    });
-  },
-
-  option: async (interaction) => {
-    const [prefix, selectedType, location] = interaction.customId.split('::');
-
-    if (prefix === 'uexinv_type') {
+    try {
+      const location = interaction.options.getString('location');
       const locationFilter = { [Op.like]: `%${location}%` };
 
       const terminals = await db.UexTerminal.findAll({
         where: {
-          type: selectedType,
           [Op.or]: [
             { star_system_name: locationFilter },
             { planet_name: locationFilter },
@@ -207,68 +168,131 @@ module.exports = {
             { outpost_name: locationFilter },
             { city_name: locationFilter }
           ]
-        },
-        order: [['name', 'ASC']]
+        }
       });
 
       if (!terminals.length) {
-        return interaction.update({
-          content: `❌ No terminals of type \`${selectedType}\` found at **${location}**.`,
-          components: [],
-          ephemeral: true
-        });
+        return interaction.reply({ content: `❌ No terminals found at "${location}".`, ephemeral: true });
       }
 
-      if (terminals.length === 1) {
-        return fetchInventoryEmbed(interaction, terminals[0]);
-      }
+      const validTypes = Object.keys(TerminalEndpointMap);
+      const types = [...new Set(
+        terminals.map(t => t.type).filter(t => validTypes.includes(t))
+      )];
 
-      const terminalOptions = terminals.slice(0, 25).map(term => ({
-        label: term.name || term.nickname || term.code,
-        value: `uexinv_terminal::${term.id}`
-      }));
+      const select = new StringSelectMenuBuilder()
+        .setCustomId(`uexinv_type::${location}`)
+        .setPlaceholder('Select a terminal type')
+        .addOptions(types.map(t => ({ label: t, value: t })));
 
-      const row = new ActionRowBuilder().addComponents(
-        new StringSelectMenuBuilder()
-          .setCustomId(`uexinv_terminal_menu::${selectedType}::${location}`)
-          .setPlaceholder('Select a terminal')
-          .addOptions(terminalOptions)
-      );
+      const row = new ActionRowBuilder().addComponents(select);
 
-      return interaction.update({
-        content: `Terminals of type \`${selectedType}\` at **${location}**:`,
+      return interaction.reply({
+        content: `Found **${terminals.length}** terminals at **${location}**. Choose a type:`,
         components: [row],
-        embeds: [],
         ephemeral: true
       });
+    } catch (err) {
+      console.error('[ERROR] execute() failed:', err);
+      if (!interaction.replied && !interaction.deferred) {
+        await interaction.reply({ content: '❌ Something went wrong.', ephemeral: true });
+      }
     }
+  },
 
-    if (interaction.values[0].startsWith('uexinv_terminal::')) {
-      const terminalId = interaction.values[0].split('::')[1];
-      const terminal = await db.UexTerminal.findByPk(terminalId);
+  option: async (interaction) => {
+    try {
+      const [prefix, selectedType, location] = interaction.customId.split('::');
 
-      if (!terminal) {
+      if (prefix === 'uexinv_type') {
+        const locationFilter = { [Op.like]: `%${location}%` };
+
+        const terminals = await db.UexTerminal.findAll({
+          where: {
+            type: selectedType,
+            [Op.or]: [
+              { star_system_name: locationFilter },
+              { planet_name: locationFilter },
+              { orbit_name: locationFilter },
+              { space_station_name: locationFilter },
+              { outpost_name: locationFilter },
+              { city_name: locationFilter }
+            ]
+          },
+          order: [['name', 'ASC']]
+        });
+
+        if (!terminals.length) {
+          return interaction.update({
+            content: `❌ No terminals of type \`${selectedType}\` found at **${location}**.`,
+            components: [],
+            ephemeral: true
+          });
+        }
+
+        if (terminals.length === 1) {
+          return fetchInventoryEmbed(interaction, terminals[0]);
+        }
+
+        const terminalOptions = terminals.slice(0, 25).map(term => ({
+          label: term.name || term.nickname || term.code,
+          value: `uexinv_terminal::${term.id}`
+        }));
+
+        const row = new ActionRowBuilder().addComponents(
+          new StringSelectMenuBuilder()
+            .setCustomId(`uexinv_terminal_menu::${selectedType}::${location}`)
+            .setPlaceholder('Select a terminal')
+            .addOptions(terminalOptions)
+        );
+
         return interaction.update({
-          content: `❌ Could not find terminal with ID ${terminalId}.`,
-          components: [],
+          content: `Terminals of type \`${selectedType}\` at **${location}**:`,
+          components: [row],
+          embeds: [],
           ephemeral: true
         });
       }
 
-      return fetchInventoryEmbed(interaction, terminal);
+      if (interaction.values[0].startsWith('uexinv_terminal::')) {
+        const terminalId = interaction.values[0].split('::')[1];
+        const terminal = await db.UexTerminal.findByPk(terminalId);
+
+        if (!terminal) {
+          return interaction.update({
+            content: `❌ Could not find terminal with ID ${terminalId}.`,
+            components: [],
+            ephemeral: true
+          });
+        }
+
+        return fetchInventoryEmbed(interaction, terminal);
+      }
+    } catch (err) {
+      console.error('[ERROR] option() handler failed:', err);
+      if (!interaction.replied && !interaction.deferred) {
+        await interaction.reply({ content: '❌ Something went wrong handling your selection.', ephemeral: true });
+      }
     }
   },
 
   button: async (interaction) => {
-    const [action, terminalId, pageStr] = interaction.customId.split('::');
-    const page = parseInt(pageStr, 10);
-    const terminal = await db.UexTerminal.findByPk(terminalId);
-    if (!terminal) {
-      return interaction.reply({ content: '❌ Terminal not found.', ephemeral: true });
-    }
+    try {
+      const [action, terminalId, pageStr] = interaction.customId.split('::');
+      const page = parseInt(pageStr, 10);
+      const terminal = await db.UexTerminal.findByPk(terminalId);
+      if (!terminal) {
+        return interaction.reply({ content: '❌ Terminal not found.', ephemeral: true });
+      }
 
-    const newPage = action === 'uexinv_prev' ? page - 1 : action === 'uexinv_next' ? page + 1 : page;
-    const isPublic = action === 'uexinv_public';
-    return fetchInventoryEmbed(interaction, terminal, newPage, isPublic);
+      const newPage = action === 'uexinv_prev' ? page - 1 : action === 'uexinv_next' ? page + 1 : page;
+      const isPublic = action === 'uexinv_public';
+      return fetchInventoryEmbed(interaction, terminal, newPage, isPublic);
+    } catch (err) {
+      console.error('[ERROR] button() handler failed:', err);
+      if (!interaction.replied && !interaction.deferred) {
+        await interaction.reply({ content: '❌ Something went wrong.', ephemeral: true });
+      }
+    }
   }
 };

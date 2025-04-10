@@ -198,7 +198,7 @@ module.exports = {
     console.log(`[DEBUG] Terminal types:`, types);
 
     const select = new StringSelectMenuBuilder()
-      .setCustomId(`uexinv_type::${location}`)
+      .setCustomId(`uexinv_type_menu::${location}`)
       .setPlaceholder('Select a terminal type')
       .addOptions(types.map(t => ({ label: t, value: t })));
 
@@ -212,13 +212,11 @@ module.exports = {
   },
 
   option: async (interaction) => {
-    const parts = interaction.customId.split('::');
-    const prefix = parts[0];
-    const selectedType = parts[1];
-    const location = parts.slice(2).join('::');
+    const [prefix, location] = interaction.customId.split('::');
+    const selectedType = interaction.values[0];
 
     console.log(`[DEBUG] Option handler triggered.`);
-    console.log(`[DEBUG] Parsed interaction: prefix=${prefix}, type=${selectedType}, location=${location}`);
+    console.log(`[DEBUG] Parsed interaction: prefix=${prefix}, location=${location}, selectedType=${selectedType}`);
 
     const locationFilter = { [Op.like]: `%${location}%` };
     console.log(`[DEBUG] Sequelize location filter:`, locationFilter);

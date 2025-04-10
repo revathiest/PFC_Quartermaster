@@ -81,38 +81,44 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
 
   if (endpoint === 'commodities_prices') {
     console.log(`[DEBUG] Formatting commodities_prices`);
-    embed.addFields(chunk.map(item => ({
-      name: item.commodity_name,
-      value: `Buy: ${item.price_buy ?? 'N/A'} UEC\nSell: ${item.price_sell ?? 'N/A'} UEC\nSCU: ${item.scu_sell_stock ?? 'N/A'}`,
-      inline: true
-    })));
+    const header = `| Commodity                   |     Buy |    Sell |    SCU |`;
+    const rows = chunk.map(item =>
+      `| ${item.commodity_name.padEnd(25)} | ${String(item.price_buy ?? 'N/A').padStart(7)} | ${String(item.price_sell ?? 'N/A').padStart(7)} | ${String(item.scu_sell_stock ?? 'N/A').padStart(6)} |`
+    );
+    const table = '```markdown\n' + [header, ...rows].join('\n') + '\n```';
+    embed.setDescription(table);
+    
   }
 
   if (endpoint === 'fuel_prices') {
     console.log(`[DEBUG] Formatting fuel_prices`);
-    embed.addFields(chunk.map(item => ({
-      name: item.commodity_name,
-      value: `Buy: ${item.price_buy ?? 'N/A'} UEC`,
-      inline: true
-    })));
+    const header = `| Fuel Type                   |     Buy |`;
+    const rows = chunk.map(item =>
+      `| ${item.commodity_name.padEnd(25)} | ${String(item.price_buy ?? 'N/A').padStart(7)} |`
+    );
+    const table = '```markdown\n' + [header, ...rows].join('\n') + '\n```';
+    embed.setDescription(table);
+    
   }
 
   if (endpoint === 'vehicle_rental_prices') {
-    console.log(`[DEBUG] Formatting vehicle_rental_prices`);
-    embed.addFields(chunk.map(item => ({
-      name: item.terminal_name,
-      value: `Rent: ${item.price_rent ?? 'N/A'} UEC`,
-      inline: true
-    })));
+    const header = `| Vehicle                     |   Rental |`;
+    const rows = chunk.map(item =>
+      `| ${item.terminal_name.padEnd(25)} | ${String(item.price_rent ?? 'N/A').padStart(7)} |`
+    );
+    const table = '```markdown\n' + [header, ...rows].join('\n') + '\n```';
+    embed.setDescription(table);
+    
   }
 
   if (endpoint === 'vehicles_purchases_prices') {
-    console.log(`[DEBUG] Formatting vehicles_purchases_prices`);
-    embed.addFields(chunk.map(item => ({
-      name: item.vehicle_name || 'Unknown Vehicle',
-      value: `Buy: ${item.price_buy ?? 'N/A'} UEC`,
-      inline: true
-    })));
+    const header = `| Vehicle                     |     Buy |`;
+    const rows = chunk.map(item =>
+      `| ${item.vehicle_name?.padEnd(25) ?? 'Unknown Vehicle'.padEnd(25)} | ${String(item.price_buy ?? 'N/A').padStart(7)} |`
+    );
+    const table = '```markdown\n' + [header, ...rows].join('\n') + '\n```';
+    embed.setDescription(table);
+    
   }
 
   const components = [];

@@ -101,7 +101,7 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
     
   }
 
-  if (endpoint === 'vehicle_rental_prices') {
+  if (endpoint === 'vehicles_rental_prices') {
     console.log('[DEBUG] Entered vehicle_rental_prices block');
   
     const sample = chunk?.[0];

@@ -308,17 +308,36 @@ module.exports = {
 
   button: async (interaction) => {
     const [action, terminalId, pageStr] = interaction.customId.split('::');
-    const page = parseInt(pageStr, 10);
-
+    const currentPage = parseInt(pageStr, 10) || 0;
+  
     const terminal = await db.UexTerminal.findByPk(terminalId);
     if (!terminal) {
       console.log(`[ERROR] Terminal not found for ID: ${terminalId}`);
       return interaction.reply({ content: '❌ Terminal not found.', ephemeral: true });
     }
-
-    const newPage = action === 'uexinv_prev' ? page - 1 : action === 'uexinv_next' ? page + 1 : page;
+  
+    const endpoint = TerminalEndpointMap[terminal.type];
+    if (!endpoint) {
+      console.log(`[ERROR] No endpoint for terminal type: ${terminal.type}`);
+      return interaction.reply({ content: '❌ Unknown terminal type.', ephemeral: true });
+    }
+  
+    // Fetch the total number of items
+    const url = `https://api.uexcorp.space/2.0/${endpoint}?id_terminal=${terminal.id}`;
+    const res = await fetch(url);
+    const json = await res.json();
+    const items = Array.isArray(json?.data) ? json.data : [];
+  
+    const totalPages = Math.ceil(items.length / PAGE_SIZE);
+    const clampedPage = Math.max(0, Math.min(
+      action === 'uexinv_prev' ? currentPage - 1 :
+      action === 'uexinv_next' ? currentPage + 1 : currentPage,
+      totalPages - 1
+    ));
+  
     const isPublic = action === 'uexinv_public';
-
-    return fetchInventoryEmbed(interaction, terminal, newPage, isPublic);
+  
+    return fetchInventoryEmbed(interaction, terminal, clampedPage, isPublic);
   }
+  
 };

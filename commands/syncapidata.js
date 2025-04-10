@@ -4,7 +4,8 @@ const {
   syncVehicles,
   syncGalactapedia,
   syncUexVehicles,
-  syncUexTerminals
+  syncUexTerminals,
+  syncUexItemPrices
 } = require('../botactions/api/syncEndpoints');
 const { isAdmin } = require('../botactions/userManagement/permissions');
 
@@ -81,6 +82,7 @@ module.exports = {
     await updateStep('galactapedia', syncGalactapedia);
     await updateStep('uex_vehicles', syncUexVehicles);
     await updateStep('terminals', syncUexTerminals);
+    await updateStep('items', syncUexItemPrices);
 
     embed.title = '✅ API Sync Complete';
     embed.color = 0x00ff99;

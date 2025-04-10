@@ -63,7 +63,7 @@ async function syncAllEndpoints() {
     const syncUexCommodityPriceResult = await syncUexCommodityPrices();
     results.push(syncUexCommodityPriceResult);
   }catch (error){
-    results.push({endpoint: 'commodities', success: false, erro: error.message });
+    results.push({endpoint: 'commodities_prices_all', success: false, erro: error.message });
   }
 
   return results;

@@ -1,30 +1,51 @@
-const { fetchUexData } = require('../../utils/fetchUexData');
+const { fetchUexData } = require('../fetchUexData');
 const { UexItemPrice } = require('../../config/database');
-async function syncUexItemPrices(sequelize) {
+
+async function syncUexItemPrices() {
+  console.log('[API SYNC] Syncing UEX item prices...');
+
+  let created = 0;
+  let updated = 0;
+  let skipped = 0;
+
   try {
-    const response = await fetchUexData('/items_prices_all');
-    console.log(`✅ API returned ${response?.data?.length || 0} items`);
-    
-    const records = response?.data;
+    const response = await fetchUexData('items_prices_all');
+    const items = response?.data;
 
-    if (!Array.isArray(records)) {
-      throw new Error('Invalid data structure from items_prices_all');
+    if (!Array.isArray(items)) {
+      throw new Error('Expected an array of item prices');
     }
-    console.log('🔍 Sample record:', records[0]);
 
-    const upsertPromises = records.map(record => {
-      return UexItemPrice.upsert(record);
-    });
+    for (const entry of items) {
+      if (!entry.id || !entry.item_name) {
+        console.warn('[SKIPPED] Missing ID or item_name:', entry);
+        skipped++;
+        continue;
+      }
 
-    await Promise.all(upsertPromises);
-    console.log('✅ Upsert complete');
+      const [record, wasCreated] = await UexItemPrice.upsert({
+        id: entry.id,
+        id_item: entry.id_item,
+        id_category: entry.id_category,
+        id_terminal: entry.id_terminal,
+        price_buy: entry.price_buy,
+        price_sell: entry.price_sell,
+        date_added: entry.date_added,
+        date_modified: entry.date_modified,
+        item_name: entry.item_name,
+        item_uuid: entry.item_uuid,
+        terminal_name: entry.terminal_name
+      });
 
-    console.log(`✅ Synced ${records.length} item price records.`);
-    return { success: true, count: records.length };
-  } catch (error) {
-    console.error('❌ Failed to sync UEX item prices:', error);
-    return { success: false, error: error.message };
+      wasCreated ? created++ : updated++;
+    }
+
+    console.log(`[API SYNC] Synced UEX item prices - Created: ${created}, Updated: ${updated}, Skipped: ${skipped}`);
+    return { created, updated, skipped, total: items.length };
+  } catch (err) {
+    console.error('[API SYNC] Error syncing UEX item prices:', err);
+    throw err;
   }
-};
+}
 
 module.exports = { syncUexItemPrices };

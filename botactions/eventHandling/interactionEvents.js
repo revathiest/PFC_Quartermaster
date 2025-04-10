@@ -5,19 +5,16 @@ const { UsageLog } = require('../../config/database');
 
 let pendingChannelSelection = {};
 
-
 async function handleInteraction(interaction, client) {
-
-    if (!interaction){
+    if (!interaction) {
         console.error('Interaction is null or undefined');
         return;
     }
 
-    const serverId = interaction.guild.id; // Get the server ID
+    const serverId = interaction.guild?.id ?? 'unknown';
 
     if (interaction.isCommand()) {
         try {
-            // Log the command usage to the database
             await UsageLog.create({
                 user_id: interaction.user.id,
                 interaction_type: 'command',
@@ -33,52 +30,55 @@ async function handleInteraction(interaction, client) {
         }
 
         await handleCommand(interaction, client);
-    } else if (interaction.isButton()) {
+    }
+
+    else if (interaction.isButton()) {
         try {
-            // Log the button interaction to the database
+            const commandName = interaction.message?.interaction?.commandName || 'unknown';
+    
             await UsageLog.create({
                 user_id: interaction.user.id,
                 interaction_type: 'button',
                 event_type: 'button_click',
-                command_name: interaction.message.interaction.commandName,
+                command_name: commandName,
                 channel_id: interaction.channel.id,
                 server_id: serverId,
                 event_time: new Date(),
             });
-            console.log('Button click logged successfully');
+            console.log(`Button click logged for command: ${commandName}`);
         } catch (error) {
             console.error('Error logging button click:', error);
         }
-
+    
         await handleButton(interaction, client);
-    } else if (interaction.isStringSelectMenu()) {
+    }
+    
+
+    else if (interaction.isStringSelectMenu()) {
         try {
-            // Log the select menu interaction to the database
+            const commandName = interaction.message?.interaction?.commandName || 'unknown';
+
             await UsageLog.create({
                 user_id: interaction.user.id,
                 interaction_type: 'select_menu',
                 event_type: 'select_menu_select',
-                command_name: interaction.message.interaction.commandName,
+                command_name: commandName,
                 channel_id: interaction.channel.id,
                 server_id: serverId,
                 event_time: new Date(),
             });
-            console.log('Select menu interaction logged successfully');
+            console.log(`Select menu interaction logged for command: ${commandName}`);
         } catch (error) {
             console.error('Error logging select menu interaction:', error);
         }
 
         await handleSelectMenu(interaction, client);
-    } else if (interaction.isModalSubmit()) {
-        try {
-            let commandName = 'unknown';
-            try{
-                commandName = interaction.message.interaction.commandName;
-            } catch (error){
-                console.error('Command not known for Select Menu');
-            };
+    }
 
-            // Log the modal submit interaction to the database
+    else if (interaction.isModalSubmit()) {
+        try {
+            const commandName = interaction.message?.interaction?.commandName || 'unknown';
+
             await UsageLog.create({
                 user_id: interaction.user.id,
                 interaction_type: 'modal_submit',
@@ -92,8 +92,11 @@ async function handleInteraction(interaction, client) {
         } catch (error) {
             console.error('Error logging modal submit interaction:', error);
         }
+
         await handleModalSubmit(interaction, client);
-    } else {
+    }
+
+    else {
         console.log('Received an unsupported interaction type.');
     }
 }
@@ -104,9 +107,9 @@ async function handleCommand(interaction, client) {
     if (interaction.options._hoistedOptions[0]) {
         message += ` with options **${interaction.options._hoistedOptions[0].value}**`;
     }
-    client.channels.cache.get(client.chanBotLog).send(message);
 
-    // Check if the command requires specific roles
+    client.channels.cache.get(client.chanBotLog)?.send(message);
+
     if (command && command.roles) {
         const hasRole = interaction.member.roles.cache.some(role => command.roles.includes(role.name));
         if (!hasRole) {
@@ -140,59 +143,54 @@ async function handleCommand(interaction, client) {
 
 async function handleButton(interaction, client) {
     try {
-      const commandName = interaction.message?.interaction?.commandName || 'unknown';
-      const command = client.commands.get(commandName);
-  
-      const message = `${interaction.user.username} clicked button **${interaction.customId}** for command **${commandName}**`;
-      client.channels.cache.get(client.chanBotLog)?.send(message);
-  
-      if (command && typeof command.button === 'function') {
-        await command.button(interaction, client);
-      } else {
-        console.warn(`[WARN] No button handler found for command: ${commandName}`);
-      }
-  
+        const commandName = interaction.message?.interaction?.commandName || 'unknown';
+        const command = client.commands.get(commandName);
+
+        const message = `${interaction.user.username} clicked button **${interaction.customId}** for command **${commandName}**`;
+        client.channels.cache.get(client.chanBotLog)?.send(message);
+
+        if (command && typeof command.button === 'function') {
+            await command.button(interaction, client);
+        } else {
+            console.warn(`[WARN] No button handler found for command: ${commandName}`);
+        }
+
     } catch (error) {
-      console.error('[ERROR] handleButton failed:', error);
-      if (!interaction.replied && !interaction.deferred) {
-        await interaction.reply({ content: '❌ Something went wrong handling that button.', ephemeral: true });
-      }
+        console.error('[ERROR] handleButton failed:', error);
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ content: '❌ Something went wrong handling that button.', ephemeral: true });
+        }
     }
-  }
-  
+}
 
 async function handleSelectMenu(interaction, client) {
     const userSelection = pendingChannelSelection[interaction.user.id];
     const selectedValue = interaction.values[0];
-    const isChannelId = /^\d{17,19}$/.test(selectedValue); // Discord Snowflakes are 17-19 digit numbers
+    const isChannelId = /^\d{17,19}$/.test(selectedValue);
 
-if (isChannelId) {
-  const selectedChannelId = selectedValue;
-  const selectedChannel = await interaction.guild.channels.fetch(selectedChannelId);
-  const userSelection = pendingChannelSelection[interaction.user.id];
+    if (isChannelId) {
+        const selectedChannelId = selectedValue;
+        const selectedChannel = await interaction.guild.channels.fetch(selectedChannelId);
 
-  if (userSelection) {
-    const embedData = {
-      title: userSelection.title,
-      description: userSelection.description,
-      author: userSelection.author
-    };
-    const time = userSelection.time;
+        if (userSelection) {
+            const embedData = {
+                title: userSelection.title,
+                description: userSelection.description,
+                author: userSelection.author
+            };
+            const time = moment(userSelection.time, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
 
-    const formattedTime = moment(time, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+            await saveAnnouncementToDatabase(selectedChannelId, interaction.guild.id, embedData, time, client);
 
-    await saveAnnouncementToDatabase(selectedChannelId, interaction.guild.id, embedData, formattedTime, client);
+            await interaction.update({
+                content: `Announcement scheduled for ${time} in channel ${selectedChannel.name}`,
+                components: []
+            });
 
-    await interaction.update({
-      content: `Announcement scheduled for ${formattedTime} in channel ${selectedChannel.name}`,
-      components: []
-    });
-
-    delete pendingChannelSelection[interaction.user.id];
-    return;
-  }
-}
-
+            delete pendingChannelSelection[interaction.user.id];
+            return;
+        }
+    }
 
     if (userSelection) {
         const embedData = {
@@ -200,22 +198,26 @@ if (isChannelId) {
             description: userSelection.description,
             author: userSelection.author
         };
-        const time = userSelection.time;
+        const time = moment(userSelection.time, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
 
-        // Ensure time is formatted correctly
-        const formattedTime = moment(time, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+        await saveAnnouncementToDatabase(selectedValue, interaction.guild.id, embedData, time, client);
 
-        await saveAnnouncementToDatabase(selectedChannelId, interaction.guild.id, embedData, formattedTime, client);
+        const selectedChannel = await interaction.guild.channels.fetch(selectedValue);
 
-        await interaction.update({ content: `Announcement scheduled for ${formattedTime} in channel ${selectedChannel.name}`, components: [] });
+        await interaction.update({
+            content: `Announcement scheduled for ${time} in channel ${selectedChannel.name}`,
+            components: []
+        });
 
         delete pendingChannelSelection[interaction.user.id];
     } else {
-        const command = client.commands.get(interaction.message.interaction.commandName);
-        const message = `${interaction.user.username} selected option **${interaction.values[0]}** for command **${interaction.message.interaction.commandName}**`;
-        client.channels.cache.get(client.chanBotLog).send(message);
+        const commandName = interaction.message?.interaction?.commandName || 'unknown';
+        const command = client.commands.get(commandName);
 
-        if (command && command.option) {
+        const message = `${interaction.user.username} selected option **${interaction.values[0]}** for command **${commandName}**`;
+        client.channels.cache.get(client.chanBotLog)?.send(message);
+
+        if (command && typeof command.option === 'function') {
             await command.option(interaction, client);
         } else {
             console.error('Select menu handler not found.');
@@ -230,16 +232,13 @@ async function handleModalSubmit(interaction, client) {
         const author = 'PFC Quartermaster';
         const time = interaction.fields.getTextInputValue('time');
 
-        // Validate the time format
         if (!moment(time, 'YYYY-MM-DD HH:mm:ss', true).isValid()) {
             await interaction.reply({ content: 'Invalid time format. Please use YYYY-MM-DD HH:mm:ss', ephemeral: true });
             return;
         }
 
-        // Store the pending data to use after channel selection
         pendingChannelSelection[interaction.user.id] = { title, description, author, time };
 
-        // Create and send the select menu for channel selection based on roles defined in channelSelector.js
         const selectMenu = await createChannelSelectMenu(interaction.guild);
         await interaction.reply({ content: 'Please select a channel:', components: [selectMenu], ephemeral: true });
     }
@@ -247,4 +246,4 @@ async function handleModalSubmit(interaction, client) {
 
 module.exports = {
     handleInteraction
-}
+};

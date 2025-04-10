@@ -81,8 +81,8 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
   }if (endpoint === 'commodities_prices') {
     console.log(`[DEBUG] Formatting commodities_prices`);
   
-    const header = `| Commodity               |     Buy |    Sell |`;
-    const divider = `|------------------------|---------|---------|`;
+    const header = `| Commodity                |     Buy |    Sell |`;
+    const divider = `|--------------------------|---------|---------|`;
   
     const rows = chunk.map(item =>
       `| ${item.commodity_name.padEnd(24)} | ${String(item.price_buy ?? 'N/A').padStart(7)} | ${String(item.price_sell ?? 'N/A').padStart(7)} |`

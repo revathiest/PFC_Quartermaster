@@ -30,6 +30,7 @@ const UexVehicle = require('../models/uexVehicle')(sequelize);
 const UexTerminal = require('../models/uexTerminal')(sequelize);
 const UexItemPrice = require('../models/uexItemPrice')(sequelize);
 const UexCategory = require('../models/uexCategory')(sequelize);
+const UexCommodityPrice = require('../models/uexCommodityPrice')(sequelize);
 
 const initializeDatabase = async () => {
     try {

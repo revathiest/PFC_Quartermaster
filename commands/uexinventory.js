@@ -157,12 +157,12 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
   if (chunks.length > 1) {
     const navButtons = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId(`uexinv_prev::${terminal.id}::${page}`)
+        .setCustomId(`uexinv_prev::${terminal.id}::${page}::${isPublic}`)
         .setLabel('◀️ Prev')
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(page === 0),
       new ButtonBuilder()
-        .setCustomId(`uexinv_next::${terminal.id}::${page}`)
+        .setCustomId(`uexinv_next::${terminal.id}::${page}::${isPublic}`)
         .setLabel('▶️ Next')
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(page === chunks.length - 1)
@@ -170,9 +170,7 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
     components.push(navButtons);
   }
 
-  const isEphemeral = !isPublic && (interaction.ephemeral ?? true);
-
-  if (isEphemeral) {
+  if (!isPublic) {
     const publishButton = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId(`uexinv_public::${terminal.id}::${page}`)
@@ -181,7 +179,6 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
     );
     components.push(publishButton);
   }
-  
 
   const payload = {
     embeds: [embed],
@@ -202,8 +199,7 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
       });
     }
   }
-  
-  
+
   console.log(`[DEBUG] Sending embed payload. Replied: ${interaction.replied}, Deferred: ${interaction.deferred}`);
 
   if (interaction.replied || interaction.deferred) {

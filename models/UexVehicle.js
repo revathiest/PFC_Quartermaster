@@ -99,8 +99,6 @@ module.exports = (sequelize) => {
       type: DataTypes.TEXT,
       allowNull: true,
     },
-
-    // Boolean flags (updated formatting)
     is_spaceship: {
       type: DataTypes.BOOLEAN,
       allowNull: true,

@@ -102,23 +102,27 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
   }
 
   if (endpoint === 'vehicles_rentals_prices') {
-    console.log('[DEBUG] Entered vehicle_rental_prices block');
+    console.log('[DEBUG] Formatting vehicles_rentals_prices');
   
-    const sample = chunk?.[0];
-    console.log('[DEBUG] Raw sample rental item:', sample);
+    const vehicleIds = chunk.map(item => item.id_vehicle);
+    const vehicleRecords = await db.UexVehicle.findAll({
+      where: { id: vehicleIds },
+      attributes: ['id', 'name']
+    });
+    const vehicleMap = Object.fromEntries(vehicleRecords.map(v => [v.id, v.name]));
   
-    const previewEmbed = new EmbedBuilder()
-      .setTitle('🚧 Vehicle Rental Debug')
-      .setDescription(sample
-        ? '```json\n' + JSON.stringify(sample, null, 2).slice(0, 4000) + '\n```'
-        : 'No data in chunk[0]')
-      .setColor(0xff6600);
+    const header = `| Vehicle                  |  Rental |`;
+    const divider = `|--------------------------|---------|`;
   
-    return interaction.reply({ embeds: [previewEmbed], ephemeral: true });
+    const rows = chunk.map(item => {
+      const name = vehicleMap[item.id_vehicle] ?? `Vehicle #${item.id_vehicle ?? '??'}`;
+      return `| ${name.padEnd(26)} | ${String(item.price_rent ?? 'N/A').padStart(7)} |`;
+    });
+  
+    const table = '```markdown\n' + [header, divider, ...rows].join('\n') + '\n```';
+    embed.setDescription(table);
   }
   
-  
-
   if (endpoint === 'vehicles_purchases_prices') {
     const vehicleIds = chunk.map(item => item.id_vehicle);
     const vehicleRecords = await db.UexVehicle.findAll({

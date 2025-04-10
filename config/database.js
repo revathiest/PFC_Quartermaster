@@ -62,5 +62,6 @@ module.exports = {
     UexVehicle,
     UexTerminal,
     UexItemPrice,
-    UexCategory
+    UexCategory,
+    UexCommodityPrice
 };

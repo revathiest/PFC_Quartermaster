@@ -151,11 +151,15 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
 
   console.log(`[DEBUG] Sending embed payload. Replied: ${interaction.replied}, Deferred: ${interaction.deferred}`);
 
-  if (interaction.replied || interaction.deferred) {
+  if (interaction.isButton() || interaction.isSelectMenu()) {
+    await interaction.update(payload);
+  } else if (interaction.replied || interaction.deferred) {
     await interaction.editReply(payload);
   } else {
     await interaction.reply(payload);
   }
+  
+  
 }
 
 module.exports = {
@@ -231,7 +235,7 @@ module.exports = {
         });
       }
   
-      return fetchInventoryEmbed(interaction, terminal);
+      await fetchInventoryEmbed(interaction, terminal);
     }
   
     // Existing logic for uexinv_type_menu

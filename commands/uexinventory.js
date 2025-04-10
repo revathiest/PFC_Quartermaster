@@ -190,23 +190,19 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
   };
 
   if (isPublic) {
-    const method = (interaction.replied || interaction.deferred) ? 'followUp' : 'reply';
-    await interaction[method]({
-      ...payload,
-      ephemeral: false
-    });
-  
-    // Wipe the ephemeral message
     if (interaction.replied || interaction.deferred) {
-      try {
-        await interaction.editReply({ content: '✅ Public embed posted.', embeds: [], components: [] });
-      } catch (err) {
-        console.warn('[WARN] Failed to clear ephemeral message:', err);
-      }
+      return interaction.followUp({
+        ...payload,
+        ephemeral: false
+      });
+    } else {
+      return interaction.reply({
+        ...payload,
+        ephemeral: false
+      });
     }
-  
-    return;
   }
+  
   
   console.log(`[DEBUG] Sending embed payload. Replied: ${interaction.replied}, Deferred: ${interaction.deferred}`);
 

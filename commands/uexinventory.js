@@ -170,7 +170,9 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
     components.push(navButtons);
   }
 
-  if (!isPublic) {
+  const isEphemeral = !isPublic && (interaction.ephemeral ?? true);
+
+  if (isEphemeral) {
     const publishButton = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId(`uexinv_public::${terminal.id}::${page}`)
@@ -179,6 +181,7 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
     );
     components.push(publishButton);
   }
+  
 
   const payload = {
     embeds: [embed],
@@ -187,20 +190,24 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
   };
 
   if (isPublic) {
+    const method = (interaction.replied || interaction.deferred) ? 'followUp' : 'reply';
+    await interaction[method]({
+      ...payload,
+      ephemeral: false
+    });
+  
+    // Wipe the ephemeral message
     if (interaction.replied || interaction.deferred) {
-      return interaction.followUp({
-        ...payload,
-        ephemeral: false
-      });
-    } else {
-      return interaction.reply({
-        ...payload,
-        ephemeral: false
-      });
+      try {
+        await interaction.editReply({ content: '✅ Public embed posted.', embeds: [], components: [] });
+      } catch (err) {
+        console.warn('[WARN] Failed to clear ephemeral message:', err);
+      }
     }
+  
+    return;
   }
   
-
   console.log(`[DEBUG] Sending embed payload. Replied: ${interaction.replied}, Deferred: ${interaction.deferred}`);
 
   if (interaction.replied || interaction.deferred) {

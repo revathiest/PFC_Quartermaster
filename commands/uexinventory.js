@@ -68,9 +68,10 @@ async function fetchInventoryEmbed(interaction, terminal, page = 0, isPublic = f
     .setTimestamp();
 
   if (endpoint === 'items_prices') {
-    const header = `| Item                      |     Buy |    Sell |\n|---------------------------|---------|---------|`;
+    const header = `| Item                                |    Sell |     Buy |
+|-------------------------------------|---------|---------|`;
     const rows = chunk.map(item =>
-      `| ${item.item_name.padEnd(25)} | ${String(item.price_buy ?? 'N/A').padStart(7)} | ${String(item.price_sell ?? 'N/A').padStart(7)} |`
+      `| ${item.item_name.padEnd(35)} | ${String(item.price_sell ?? 'N/A').padStart(7)} | ${String(item.price_buy ?? 'N/A').padStart(7)} |`
     );
     const table = '```markdown\n' + [header, ...rows].join('\n') + '\n```';
     embed.setDescription(table);

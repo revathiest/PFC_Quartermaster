@@ -139,16 +139,27 @@ async function handleCommand(interaction, client) {
 }
 
 async function handleButton(interaction, client) {
-    const command = client.commands.get(interaction.message.interaction.commandName);
-    const message = `${interaction.user.username} clicked button **${interaction.customId}** for command **${interaction.message.interaction.commandName}**`;
-    client.channels.cache.get(client.chanBotLog).send(message);
-
-    if (command && command.button) {
+    try {
+      const commandName = interaction.message?.interaction?.commandName || 'unknown';
+      const command = client.commands.get(commandName);
+  
+      const message = `${interaction.user.username} clicked button **${interaction.customId}** for command **${commandName}**`;
+      client.channels.cache.get(client.chanBotLog)?.send(message);
+  
+      if (command && typeof command.button === 'function') {
         await command.button(interaction, client);
-    } else {
-        console.error('Button handler not found.');
+      } else {
+        console.warn(`[WARN] No button handler found for command: ${commandName}`);
+      }
+  
+    } catch (error) {
+      console.error('[ERROR] handleButton failed:', error);
+      if (!interaction.replied && !interaction.deferred) {
+        await interaction.reply({ content: '❌ Something went wrong handling that button.', ephemeral: true });
+      }
     }
-}
+  }
+  
 
 async function handleSelectMenu(interaction, client) {
     const userSelection = pendingChannelSelection[interaction.user.id];

@@ -1,12 +1,14 @@
 // File: commands/uexfinditem.js
 const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, EmbedBuilder } = require('discord.js');
-const { Op, DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const { Op } = require('sequelize');
 
-const ItemsPricesAll = require('../models/uexItemPrice')(sequelize, DataTypes);
-const CommoditiesPricesAll = require('../models/uexCommodityPrice')(sequelize, DataTypes);
-const VehiclesPurchasesPricesAll = require('../models/uexVehiclePurchasePrice')(sequelize, DataTypes);
-const UexTerminal = require('../models/uexTerminal')(sequelize, DataTypes);
+const {
+  UexItemPrice,
+  UexCommodityPrice,
+  UexVehiclePurchasePrice,
+  UexTerminal
+} = require('../config/database');
+
 const { buildUexAvailabilityEmbed } = require('../components/embedBuilders/uexAvailabilityEmbed');
 
 module.exports = {
@@ -24,15 +26,15 @@ module.exports = {
     await interaction.deferReply({ ephemeral: true });
 
     const [items, commodities, vehicles] = await Promise.all([
-      ItemsPricesAll.findAll({
+      UexItemPrice.findAll({
         where: { description: { [Op.like]: `%${query}%` } },
         limit: 25
       }),
-      CommoditiesPricesAll.findAll({
+      UexCommodityPrice.findAll({
         where: { description: { [Op.like]: `%${query}%` } },
         limit: 25
       }),
-      VehiclesPurchasesPricesAll.findAll({
+      UexVehiclePurchasePrice.findAll({
         where: { name: { [Op.like]: `%${query}%` } },
         limit: 25
       })
@@ -74,21 +76,21 @@ async function handleSelection(interaction, selection) {
 
   switch (type) {
     case 'item':
-      records = await ItemsPricesAll.findAll({
+      records = await UexItemPrice.findAll({
         where: { item_id: id },
         include: { model: UexTerminal, as: 'terminal' },
         order: [['price', 'ASC']]
       });
       break;
     case 'commodity':
-      records = await CommoditiesPricesAll.findAll({
+      records = await UexCommodityPrice.findAll({
         where: { commodity_id: id },
         include: { model: UexTerminal, as: 'terminal' },
         order: [['price', 'ASC']]
       });
       break;
     case 'vehicle':
-      records = await VehiclesPurchasesPricesAll.findAll({
+      records = await UexVehiclePurchasePrice.findAll({
         where: { vehicle_id: id },
         include: { model: UexTerminal, as: 'terminal' },
         order: [['price', 'ASC']]

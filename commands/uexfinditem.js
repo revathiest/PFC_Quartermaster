@@ -88,42 +88,44 @@ module.exports = {
 
   async handleSelect(interaction) {
     const [type, id] = interaction.values[0].split(':');
-    await handleSelection(interaction, { type, id });
+    await handleSelection(interaction, { type, id: parseInt(id, 10) });
   }
+  
 };
 
 async function handleSelection(interaction, selection) {
-  const { type, id } = selection;
-  let records;
-
-  switch (type) {
-    case 'item':
-      records = await UexItemPrice.findAll({
-        where: { item_id: id },
-        include: { model: UexTerminal, as: 'terminal' },
-        order: [['price', 'ASC']]
-      });
-      break;
-    case 'commodity':
-      records = await UexCommodityPrice.findAll({
-        where: { commodity_id: id },
-        include: { model: UexTerminal, as: 'terminal' },
-        order: [['price', 'ASC']]
-      });
-      break;
-    case 'vehicle':
-      records = await UexVehiclePurchasePrice.findAll({
-        where: { vehicle_id: id },
-        include: { model: UexTerminal, as: 'terminal' },
-        order: [['price', 'ASC']]
-      });
-      break;
+    const { type, id } = selection;
+    let records;
+  
+    switch (type) {
+      case 'item':
+        records = await UexItemPrice.findAll({
+          where: { item_id: id },
+          include: { model: UexTerminal, as: 'terminal' },
+          order: [['price', 'ASC']]
+        });
+        break;
+      case 'commodity':
+        records = await UexCommodityPrice.findAll({
+          where: { commodity_id: id },
+          include: { model: UexTerminal, as: 'terminal' },
+          order: [['price', 'ASC']]
+        });
+        break;
+      case 'vehicle':
+        records = await UexVehiclePurchasePrice.findAll({
+          where: { vehicle_id: id },
+          include: { model: UexTerminal, as: 'terminal' },
+          order: [['price', 'ASC']]
+        });
+        break;
+    }
+  
+    if (!records || records.length === 0) {
+      return interaction.editReply('No location data found for that entry.');
+    }
+  
+    const embed = buildUexAvailabilityEmbed(type, records);
+    return interaction.editReply({ embeds: [embed], components: [] });
   }
-
-  if (!records || records.length === 0) {
-    return interaction.editReply('No location data found for that entry.');
-  }
-
-  const embed = buildUexAvailabilityEmbed(type, records);
-  return interaction.editReply({ embeds: [embed], components: [] });
-}
+  

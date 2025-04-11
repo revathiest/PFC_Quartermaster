@@ -1,8 +1,14 @@
-quartermaster_prompt.txt
-runbot.cmd
-config.json
+# Environment and secrets
 .env
+config.json
+quartermaster_prompt.txt
+
+# System/tool-specific files
 .vscode/launch.json
-variables.json
-*.zip
+
+# Dependency and build artifacts
 node_modules/
+*.zip
+bot.log
+*.log
+logs/

@@ -22,9 +22,12 @@ module.exports = {
     ),
 
   async execute(interaction) {
+    console.log('[COMMAND] /uexfinditem invoked');
     const query = interaction.options.getString('description');
+    console.log('[DEBUG] Search query:', query);
     await interaction.deferReply({ ephemeral: true });
 
+    console.log('[DEBUG] Searching UexItemPrice, UexCommodityPrice, and UexVehiclePurchasePrice');
     const [items, commodities, vehicles] = await Promise.all([
       UexItemPrice.findAll({
         where: { item_name: { [Op.like]: `%${query}%` } },
@@ -45,22 +48,29 @@ module.exports = {
     const vehicleMap = new Map();
 
     items.forEach(i => {
+      console.log('[DEBUG] Item row:', i.toJSON());
       if (!itemMap.has(i.item_name)) {
-        itemMap.set(i.item_name, { type: 'item', id: i.id, label: `🧪 ${i.item_name}` });
+        itemMap.set(i.item_name, { type: 'item', id: i.id_item, label: `🧪 ${i.item_name}` });
       }
     });
 
     commodities.forEach(c => {
+      console.log('[DEBUG] Commodity row:', c.toJSON());
       if (!commodityMap.has(c.commodity_name)) {
-        commodityMap.set(c.commodity_name, { type: 'commodity', id: c.id, label: `💰 ${c.commodity_name}` });
+        commodityMap.set(c.commodity_name, { type: 'commodity', id: c.id_commodity, label: `💰 ${c.commodity_name}` });
       }
     });
 
     vehicles.forEach(v => {
+      console.log('[DEBUG] Vehicle row:', v.toJSON());
       if (!vehicleMap.has(v.vehicle_name)) {
-        vehicleMap.set(v.vehicle_name, { type: 'vehicle', id: v.id, label: `🚀 ${v.vehicle_name}` });
+        vehicleMap.set(v.vehicle_name, { type: 'vehicle', id: v.id_vehicle, label: `🚀 ${v.vehicle_name}` });
       }
     });
+
+    console.log('[DEBUG] itemMap keys:', Array.from(itemMap.keys()));
+    console.log('[DEBUG] commodityMap keys:', Array.from(commodityMap.keys()));
+    console.log('[DEBUG] vehicleMap keys:', Array.from(vehicleMap.keys()));
 
     const results = [
       ...itemMap.values(),
@@ -69,9 +79,11 @@ module.exports = {
     ];
 
     if (results.length === 0) {
-      return interaction.editReply('No matches found. Try refining your search, love.');
+      console.log('[DEBUG] No matches found after filtering.');
+    return interaction.editReply('No matches found. Try refining your search, love.');
     } else if (results.length === 1) {
-      return handleSelection(interaction, results[0]);
+      console.log('[DEBUG] One unique result found:', results[0]);
+    return handleSelection(interaction, results[0]);
     }
 
     const selectMenu = new StringSelectMenuBuilder()
@@ -83,11 +95,14 @@ module.exports = {
       })));
 
     const row = new ActionRowBuilder().addComponents(selectMenu);
+    console.log('[DEBUG] Multiple unique matches found. Presenting select menu:', results);
     return interaction.editReply({ content: 'Multiple matches found:', components: [row] });
   },
 
   async handleSelect(interaction) {
+    console.log('[DEBUG] Raw selection value:', interaction.values[0]);
     const [type, id] = interaction.values[0].split(':');
+    console.log('[DEBUG] Parsed type:', type, '| Parsed id:', id);
     await handleSelection(interaction, { type, id: parseInt(id, 10) });
   }
 };
@@ -95,35 +110,38 @@ module.exports = {
 async function handleSelection(interaction, selection) {
   const { type, id } = selection;
   let records;
+  console.log('[DEBUG] handleSelection called with:', { type, id });
 
   switch (type) {
     case 'item':
       records = await UexItemPrice.findAll({
-        where: { item_id: id },
+        where: { id_item: id },
         include: { model: UexTerminal, as: 'terminal' },
         order: [['price', 'ASC']]
       });
       break;
     case 'commodity':
       records = await UexCommodityPrice.findAll({
-        where: { commodity_id: id },
+        where: { id_commodity: id },
         include: { model: UexTerminal, as: 'terminal' },
         order: [['price', 'ASC']]
       });
       break;
     case 'vehicle':
       records = await UexVehiclePurchasePrice.findAll({
-        where: { vehicle_id: id },
+        where: { id_vehicle: id },
         include: { model: UexTerminal, as: 'terminal' },
         order: [['price', 'ASC']]
       });
       break;
   }
 
+  console.log('[DEBUG] Retrieved records:', records);
   if (!records || records.length === 0) {
     return interaction.editReply('No location data found for that entry.');
   }
 
+  console.log('[DEBUG] Building embed with type:', type, 'and records count:', records.length);
   const embed = buildUexAvailabilityEmbed(type, records);
   return interaction.editReply({ embeds: [embed], components: [] });
 }

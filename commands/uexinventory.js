@@ -48,8 +48,15 @@ async function buildInventoryEmbed(interaction, terminal, type, page = 0, isPubl
     });
   }
 
-  const records = await model.findAll({ where: { terminal_name: terminal.name } });
-  console.log(`[DEBUG] Records retrieved for ${terminal.name}: ${records.length}`);
+  const records = await model.findAll({
+    where: {
+      [Op.or]: [
+        { terminal_name: terminal.name },
+        { id_terminal: terminal.id }
+      ]
+    }
+  });
+  console.log(`[DEBUG] Records retrieved for ${terminal.name} (by name or id): ${records.length}`);
 
   if (!records.length) {
     return interaction.reply({

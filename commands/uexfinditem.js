@@ -115,7 +115,7 @@ module.exports = {
     console.log('[DEBUG] Parsed type:', type, '| Parsed id:', id);
     await handleSelection(interaction, { type, id: parseInt(id, 10) });
   },
-  
+
   option: async function(interaction, client) {
     return module.exports.handleSelect(interaction, client);
   }
@@ -132,21 +132,21 @@ async function handleSelection(interaction, selection) {
       records = await UexItemPrice.findAll({
         where: { id_item: id },
         include: { model: UexTerminal, as: 'terminal' },
-        order: [['price', 'ASC']]
+        order: [['price_buy', 'ASC']]
       });
       break;
     case 'commodity':
       records = await UexCommodityPrice.findAll({
         where: { id_commodity: id },
         include: { model: UexTerminal, as: 'terminal' },
-        order: [['price', 'ASC']]
+        order: [['price_buy', 'ASC']]
       });
       break;
     case 'vehicle':
       records = await UexVehiclePurchasePrice.findAll({
         where: { id_vehicle: id },
         include: { model: UexTerminal, as: 'terminal' },
-        order: [['price', 'ASC']]
+        order: [['price_buy', 'ASC']]
       });
       break;
   }

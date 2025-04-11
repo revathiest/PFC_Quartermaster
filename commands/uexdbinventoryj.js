@@ -5,7 +5,7 @@ const {
   UexFuelPrice,
   UexVehiclePurchasePrice,
   UexVehicleRentalPrice
-} = require('../../config/database');
+} = require('../config/database'); // Adjusted relative path
 
 module.exports = {
   data: new SlashCommandBuilder()

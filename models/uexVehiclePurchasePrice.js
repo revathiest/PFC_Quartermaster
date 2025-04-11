@@ -21,6 +21,13 @@ module.exports = (sequelize) => {
     collate: 'utf8mb4_unicode_ci',
     timestamps: false
   });
+  
+  UexVehiclePurchasePrice.associate = (models) => {
+    UexVehiclePurchasePrice.belongsTo(models.UexTerminal, {
+      foreignKey: 'id_terminal',
+      as: 'terminal'
+    });
+  };
 
   return UexVehiclePurchasePrice
 };

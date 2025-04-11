@@ -27,23 +27,23 @@ module.exports = {
 
     const [items, commodities, vehicles] = await Promise.all([
       UexItemPrice.findAll({
-        where: { description: { [Op.like]: `%${query}%` } },
+        where: { item_name: { [Op.like]: `%${query}%` } },
         limit: 25
       }),
       UexCommodityPrice.findAll({
-        where: { description: { [Op.like]: `%${query}%` } },
+        where: { commodity_name: { [Op.like]: `%${query}%` } },
         limit: 25
       }),
       UexVehiclePurchasePrice.findAll({
-        where: { name: { [Op.like]: `%${query}%` } },
+        where: { vehicle_name: { [Op.like]: `%${query}%` } },
         limit: 25
       })
     ]);
 
     const results = [
-      ...items.map(i => ({ type: 'item', id: i.item_id, label: `🧪 ${i.description}` })),
-      ...commodities.map(c => ({ type: 'commodity', id: c.commodity_id, label: `💰 ${c.description}` })),
-      ...vehicles.map(v => ({ type: 'vehicle', id: v.vehicle_id, label: `🚀 ${v.name}` }))
+      ...items.map(i => ({ type: 'item', id: i.item_id, label: `🧪 ${i.item_name}` })),
+      ...commodities.map(c => ({ type: 'commodity', id: c.commodity_id, label: `💰 ${c.commodity_name}` })),
+      ...vehicles.map(v => ({ type: 'vehicle', id: v.vehicle_id, label: `🚀 ${v.vehicle_name}` }))
     ];
 
     if (results.length === 0) {

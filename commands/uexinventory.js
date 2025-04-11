@@ -151,7 +151,7 @@ module.exports = {
 
     const types = [...new Set(terminals.map(t => t.type).filter(Boolean))];
     const select = new StringSelectMenuBuilder()
-      .setCustomId(`uexinvdb_type_menu::${location}`)
+      .setCustomId(`uexinv_type_menu::${location}`)
       .setPlaceholder('Select a terminal type')
       .addOptions(types.map(t => ({ label: t, value: t })));
 

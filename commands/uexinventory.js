@@ -46,13 +46,14 @@ async function buildInventoryEmbed(interaction, terminal, type, page = 0, isPubl
   const records = await model.findAll({ where: { terminal_name: terminal.name } });
   if (!records.length) {
     return interaction.reply({
-      content: `❌ No inventory found for terminal \`${terminal.name}\`.`,
+      content: `❌ No inventory data found for terminal \`${terminal.name}\`.`,
       ephemeral: !isPublic
     });
   }
 
-  const pages = chunkInventory(records);
-  const chunk = pages[page];
+  const chunks = chunkInventory(records);
+  const chunk = chunks[page];
+
   const embed = new EmbedBuilder()
     .setTitle(`📦 Inventory: ${terminal.name}`)
     .setFooter({ text: `Terminal ID: ${terminal.id} • Game Version: ${terminal.game_version || 'N/A'}` })
@@ -63,7 +64,7 @@ async function buildInventoryEmbed(interaction, terminal, type, page = 0, isPubl
     if (type === 'item') {
       return `| ${formatColumn(row.item_name, 30)} | ${String(row.price_buy ?? 'N/A').padStart(7)} | ${String(row.price_sell ?? 'N/A').padStart(7)} |`;
     }
-    if (type === 'commodity' || type === 'refinery') {
+    if (type === 'commodity') {
       return `| ${formatColumn(row.commodity_name, 30)} | ${String(row.price_buy ?? 'N/A').padStart(7)} | ${String(row.price_sell ?? 'N/A').padStart(7)} |`;
     }
     if (type === 'fuel') {
@@ -90,38 +91,51 @@ async function buildInventoryEmbed(interaction, terminal, type, page = 0, isPubl
 
   const components = [];
 
-  if (pages.length > 1) {
+  if (chunks.length > 1) {
     components.push(new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId(`uexpage_prev::${terminal.id}::${type}::${page}::${isPublic}`)
+        .setCustomId(`uexinv_prev::${terminal.id}::${type}::${page}::${isPublic}`)
         .setLabel('◀️ Prev')
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(page === 0),
       new ButtonBuilder()
-        .setCustomId(`uexpage_next::${terminal.id}::${type}::${page}::${isPublic}`)
+        .setCustomId(`uexinv_next::${terminal.id}::${type}::${page}::${isPublic}`)
         .setLabel('▶️ Next')
         .setStyle(ButtonStyle.Secondary)
-        .setDisabled(page === pages.length - 1)
+        .setDisabled(page === chunks.length - 1)
     ));
   }
 
   if (!isPublic) {
     components.push(new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId(`uexpage_public::${terminal.id}::${type}::${page}`)
+        .setCustomId(`uexinv_public::${terminal.id}::${type}::${page}`)
         .setLabel('📢 Make Public')
         .setStyle(ButtonStyle.Primary)
     ));
   }
 
-  const payload = { embeds: [embed], components, ephemeral: !isPublic };
-  return interaction.reply(payload);
+  const payload = {
+    embeds: [embed],
+    components,
+    ephemeral: !isPublic
+  };
+
+  if (isPublic && interaction.isButton()) {
+    return interaction.replied || interaction.deferred
+      ? interaction.followUp({ ...payload, ephemeral: false })
+      : interaction.reply({ ...payload, ephemeral: false });
+  }
+
+  return interaction.replied || interaction.deferred
+    ? null
+    : interaction.reply(payload);
 }
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('uexinventory')
-    .setDescription('Browse UEX inventory from local database')
+    .setDescription('Browse terminal inventory by location')
     .addStringOption(option =>
       option.setName('location')
         .setDescription('Planet, station, or system')
@@ -217,15 +231,15 @@ module.exports = {
   button: async (interaction) => {
     const [action, terminalId, type, pageStr, isPublicRaw] = interaction.customId.split('::');
     const page = parseInt(pageStr, 10);
-    const isPublic = isPublicRaw === 'true' || action === 'uexpage_public';
+    const isPublic = isPublicRaw === 'true' || action === 'uexinv_public';
 
     const terminal = await db.UexTerminal.findByPk(terminalId);
     if (!terminal) {
       return interaction.reply({ content: '❌ Terminal not found.', ephemeral: true });
     }
 
-    const newPage = action === 'uexpage_prev' ? page - 1
-                    : action === 'uexpage_next' ? page + 1
+    const newPage = action === 'uexinv_prev' ? page - 1
+                    : action === 'uexinv_next' ? page + 1
                     : page;
 
     return buildInventoryEmbed(interaction, terminal, type, newPage, isPublic);

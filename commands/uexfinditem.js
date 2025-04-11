@@ -28,22 +28,44 @@ module.exports = {
     const [items, commodities, vehicles] = await Promise.all([
       UexItemPrice.findAll({
         where: { item_name: { [Op.like]: `%${query}%` } },
-        limit: 25
+        limit: 50
       }),
       UexCommodityPrice.findAll({
         where: { commodity_name: { [Op.like]: `%${query}%` } },
-        limit: 25
+        limit: 50
       }),
       UexVehiclePurchasePrice.findAll({
         where: { vehicle_name: { [Op.like]: `%${query}%` } },
-        limit: 25
+        limit: 50
       })
     ]);
 
+    const itemMap = new Map();
+    const commodityMap = new Map();
+    const vehicleMap = new Map();
+
+    items.forEach(i => {
+      if (!itemMap.has(i.item_name)) {
+        itemMap.set(i.item_name, { type: 'item', id: i.item_id, label: `🧪 ${i.item_name}` });
+      }
+    });
+
+    commodities.forEach(c => {
+      if (!commodityMap.has(c.commodity_name)) {
+        commodityMap.set(c.commodity_name, { type: 'commodity', id: c.commodity_id, label: `💰 ${c.commodity_name}` });
+      }
+    });
+
+    vehicles.forEach(v => {
+      if (!vehicleMap.has(v.vehicle_name)) {
+        vehicleMap.set(v.vehicle_name, { type: 'vehicle', id: v.vehicle_id, label: `🚀 ${v.vehicle_name}` });
+      }
+    });
+
     const results = [
-      ...items.map(i => ({ type: 'item', id: i.item_id, label: `🧪 ${i.item_name}` })),
-      ...commodities.map(c => ({ type: 'commodity', id: c.commodity_id, label: `💰 ${c.commodity_name}` })),
-      ...vehicles.map(v => ({ type: 'vehicle', id: v.vehicle_id, label: `🚀 ${v.vehicle_name}` }))
+      ...itemMap.values(),
+      ...commodityMap.values(),
+      ...vehicleMap.values()
     ];
 
     if (results.length === 0) {
@@ -55,9 +77,9 @@ module.exports = {
     const selectMenu = new StringSelectMenuBuilder()
       .setCustomId('uexfinditem-select')
       .setPlaceholder('Select the item you meant')
-      .addOptions(results.map(res => ({
+      .addOptions(results.map((res, index) => ({
         label: res.label,
-        value: `${res.type}:${res.id}`
+        value: `${res.type}:${res.id}:${index}` // ensure uniqueness
       })));
 
     const row = new ActionRowBuilder().addComponents(selectMenu);

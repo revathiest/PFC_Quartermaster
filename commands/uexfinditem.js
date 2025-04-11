@@ -77,7 +77,6 @@ module.exports = {
       }
     });
 
-            
     console.log('[DEBUG] itemMap keys:', Array.from(itemMap.keys()));
     console.log('[DEBUG] commodityMap keys:', Array.from(commodityMap.keys()));
     console.log('[DEBUG] vehicleMap keys:', Array.from(vehicleMap.keys()));
@@ -90,10 +89,10 @@ module.exports = {
 
     if (results.length === 0) {
       console.log('[DEBUG] No matches found after filtering.');
-    return interaction.editReply('No matches found. Try refining your search, love.');
+      return interaction.editReply('No matches found. Try refining your search, love.');
     } else if (results.length === 1) {
       console.log('[DEBUG] One unique result found:', results[0]);
-    return handleSelection(interaction, results[0]);
+      return handleSelection(interaction, results[0]);
     }
 
     const selectMenu = new StringSelectMenuBuilder()
@@ -101,7 +100,7 @@ module.exports = {
       .setPlaceholder('Select the item you meant')
       .addOptions(results.map((res, index) => ({
         label: res.label,
-        value: `${res.type}:${res.id}:${index}` // ensure uniqueness
+        value: `${res.type}:${res.id}:${index}`
       })));
 
     const row = new ActionRowBuilder().addComponents(selectMenu);
@@ -113,9 +112,9 @@ module.exports = {
     console.log('[DEBUG] Raw selection value:', interaction.values[0]);
     const [type, id] = interaction.values[0].split(':');
     console.log('[DEBUG] Parsed type:', type, '| Parsed id:', id);
-  
-    await interaction.deferReply({ ephemeral: true }); // 🔧 This is the missing line
-  
+
+    await interaction.deferReply({ ephemeral: true });
+
     await handleSelection(interaction, { type, id: parseInt(id, 10) });
   }
   ,
@@ -160,7 +159,26 @@ async function handleSelection(interaction, selection) {
     return interaction.editReply('No location data found for that entry.');
   }
 
+  const locations = [];
+  const prices = [];
+  const quantities = [];
+
+  records.forEach(record => {
+    const qty = record.quantity ?? null;
+    if (!qty || qty <= 0) return;
+    locations.push(record.terminal_name || record.terminal?.name || 'Unknown');
+    prices.push(`${record.price_buy ?? 0} aUEC`);
+    quantities.push(qty.toString());
+  });
+
+  const embed = new EmbedBuilder()
+    .setTitle('Availability')
+    .addFields(
+      { name: 'Location', value: locations.join('\n'), inline: true },
+      { name: 'Price', value: prices.join('\n'), inline: true },
+      { name: 'Qty', value: quantities.join('\n'), inline: true }
+    );
+
   console.log('[DEBUG] Building embed with type:', type, 'and records count:', records.length);
-  const embed = buildUexAvailabilityEmbed(type, records);
   return interaction.editReply({ embeds: [embed], components: [] });
 }

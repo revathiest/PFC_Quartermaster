@@ -1,4 +1,4 @@
-// NOTE: This is the DB-backed version of the /uexinventory command
+// NOTE: This is the DB-backed version of the /uexinventory command with extremely verbose logging
 
 const {
   SlashCommandBuilder,
@@ -26,25 +26,36 @@ function chunkInventory(items) {
   for (let i = 0; i < items.length; i += PAGE_SIZE) {
     pages.push(items.slice(i, i + PAGE_SIZE));
   }
+  console.log(`[DEBUG] chunkInventory - Total items: ${items.length}, Pages created: ${pages.length}`);
   return pages;
 }
 
 function formatColumn(text, width) {
   if (!text) return ''.padEnd(width);
-  return text.length > width ? text.slice(0, width - 1) + '…' : text.padEnd(width);
+  const formatted = text.length > width ? text.slice(0, width - 1) + '…' : text.padEnd(width);
+  console.log(`[DEBUG] formatColumn - Original: "${text}", Width: ${width}, Result: "${formatted}"`);
+  return formatted;
 }
 
 async function buildInventoryEmbed(interaction, terminal, type, page = 0, isPublic = false) {
+  console.log(`[DEBUG] buildInventoryEmbed - Terminal: ${terminal.name}, Type: ${type}, Page: ${page}, Public: ${isPublic}`);
+
   const model = TypeToModelMap[type];
   if (!model) {
+    console.warn(`[WARN] Unsupported terminal type: ${type}`);
     return interaction.reply({
       content: `❌ Unsupported terminal type: \`${type}\``,
       ephemeral: !isPublic
     });
   }
 
+  console.log(`[DEBUG] Using model: ${model.name || 'Unknown'} for type: ${type}`);
+
   const records = await model.findAll({ where: { terminal_name: terminal.name } });
+  console.log(`[DEBUG] Fetched ${records.length} records from database for terminal: ${terminal.name}`);
+
   if (!records.length) {
+    console.log('[DEBUG] No records found - replying with empty message');
     return interaction.reply({
       content: `❌ No inventory data found for terminal \`${terminal.name}\`.`,
       ephemeral: !isPublic
@@ -53,6 +64,7 @@ async function buildInventoryEmbed(interaction, terminal, type, page = 0, isPubl
 
   const chunks = chunkInventory(records);
   const chunk = chunks[page];
+  console.log(`[DEBUG] Page info - Total pages: ${chunks.length}, Current page length: ${chunk.length}`);
 
   const embed = new EmbedBuilder()
     .setTitle(`📦 Inventory: ${terminal.name}`)
@@ -61,6 +73,7 @@ async function buildInventoryEmbed(interaction, terminal, type, page = 0, isPubl
     .setTimestamp();
 
   const formatRow = (row) => {
+    console.log(`[DEBUG] Formatting row for type: ${type}`);
     if (type === 'item') {
       return `| ${formatColumn(row.item_name, 30)} | ${String(row.price_buy ?? 'N/A').padStart(7)} | ${String(row.price_sell ?? 'N/A').padStart(7)} |`;
     }
@@ -88,10 +101,12 @@ async function buildInventoryEmbed(interaction, terminal, type, page = 0, isPubl
   const rows = chunk.map(formatRow);
   const table = '```markdown\n' + [header, divider, ...rows].join('\n') + '\n```';
   embed.setDescription(table);
+  console.log('[DEBUG] Inventory table constructed');
 
   const components = [];
 
   if (chunks.length > 1) {
+    console.log('[DEBUG] Adding pagination buttons');
     components.push(new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId(`uexinv_prev::${terminal.id}::${type}::${page}::${isPublic}`)
@@ -107,6 +122,7 @@ async function buildInventoryEmbed(interaction, terminal, type, page = 0, isPubl
   }
 
   if (!isPublic) {
+    console.log('[DEBUG] Adding Make Public button');
     components.push(new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId(`uexinv_public::${terminal.id}::${type}::${page}`)
@@ -121,127 +137,17 @@ async function buildInventoryEmbed(interaction, terminal, type, page = 0, isPubl
     ephemeral: !isPublic
   };
 
+  console.log('[DEBUG] Prepared payload for interaction response');
+
   if (isPublic && interaction.isButton()) {
+    console.log('[DEBUG] Interaction is a button, sending public payload...');
     return interaction.replied || interaction.deferred
       ? interaction.followUp({ ...payload, ephemeral: false })
       : interaction.reply({ ...payload, ephemeral: false });
   }
 
+  console.log('[DEBUG] Sending reply payload...');
   return interaction.replied || interaction.deferred
     ? null
     : interaction.reply(payload);
 }
-
-module.exports = {
-  data: new SlashCommandBuilder()
-    .setName('uexinventory')
-    .setDescription('Browse terminal inventory by location')
-    .addStringOption(option =>
-      option.setName('location')
-        .setDescription('Planet, station, or system')
-        .setRequired(true)
-    ),
-
-  async execute(interaction) {
-    const location = interaction.options.getString('location');
-    const locationFilter = { [Op.like]: `%${location}%` };
-
-    const terminals = await db.UexTerminal.findAll({
-      where: {
-        [Op.or]: [
-          { star_system_name: locationFilter },
-          { planet_name: locationFilter },
-          { orbit_name: locationFilter },
-          { space_station_name: locationFilter },
-          { outpost_name: locationFilter },
-          { city_name: locationFilter }
-        ]
-      }
-    });
-
-    if (!terminals.length) {
-      return interaction.reply({ content: `❌ No terminals found at "${location}".`, ephemeral: true });
-    }
-
-    const types = [...new Set(terminals.map(t => t.type).filter(Boolean))];
-    const select = new StringSelectMenuBuilder()
-      .setCustomId(`uexinv_type_menu::${location}`)
-      .setPlaceholder('Select a terminal type')
-      .addOptions(types.map(t => ({ label: t, value: t })));
-
-    return interaction.reply({
-      content: `Found **${terminals.length}** terminals at **${location}**. Choose a type:`,
-      components: [new ActionRowBuilder().addComponents(select)],
-      ephemeral: true
-    });
-  },
-
-  option: async (interaction) => {
-    const [, location] = interaction.customId.split('::');
-    const selectedType = interaction.values[0];
-
-    const locationFilter = { [Op.like]: `%${location}%` };
-    const terminals = await db.UexTerminal.findAll({
-      where: {
-        type: selectedType,
-        [Op.or]: [
-          { star_system_name: locationFilter },
-          { planet_name: locationFilter },
-          { orbit_name: locationFilter },
-          { space_station_name: locationFilter },
-          { outpost_name: locationFilter },
-          { city_name: locationFilter }
-        ]
-      },
-      order: [['name', 'ASC']]
-    });
-
-    if (!terminals.length) {
-      return interaction.update({
-        content: `❌ No terminals of type \`${selectedType}\` found at **${location}**.`,
-        components: [],
-        ephemeral: true
-      });
-    }
-
-    if (terminals.length === 1) {
-      return buildInventoryEmbed(interaction, terminals[0], selectedType);
-    }
-
-    const terminalOptions = terminals.slice(0, 25).map(term => ({
-      label: term.name || term.nickname || term.code,
-      value: `uexinv_terminal::${term.id}::${selectedType}`
-    }));
-
-    const row = new ActionRowBuilder().addComponents(
-      new StringSelectMenuBuilder()
-        .setCustomId(`uexinv_terminal_menu`)
-        .setPlaceholder('Select a terminal')
-        .addOptions(terminalOptions)
-    );
-
-    return interaction.update({
-      content: `Terminals of type \`${selectedType}\` at **${location}**:`,
-      components: [row],
-      embeds: [],
-      ephemeral: true
-    });
-  },
-
-  button: async (interaction) => {
-    const [action, terminalId, type, pageStr, isPublicRaw] = interaction.customId.split('::');
-    const page = parseInt(pageStr, 10);
-    const isPublic = isPublicRaw === 'true' || action === 'uexinv_public';
-
-    const terminal = await db.UexTerminal.findByPk(terminalId);
-    if (!terminal) {
-      return interaction.reply({ content: '❌ Terminal not found.', ephemeral: true });
-    }
-
-    const newPage = action === 'uexinv_prev' ? page - 1
-                    : action === 'uexinv_next' ? page + 1
-                    : page;
-
-    return buildInventoryEmbed(interaction, terminal, type, newPage, isPublic);
-  }
-};

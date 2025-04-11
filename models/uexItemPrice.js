@@ -52,6 +52,13 @@ module.exports = (sequelize) => {
     collate: 'utf8mb4_unicode_ci',
     timestamps: false,
   });
+  
+  UexItemPrice.associate = (models) => {
+    UexItemPrice.belongsTo(models.UexTerminal, {
+      foreignKey: 'id_terminal',
+      as: 'terminal'
+    });
+  };
 
   return UexItemPrice;
 };

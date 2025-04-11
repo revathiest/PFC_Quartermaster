@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
-  return sequelize.define('UexCommodityPrice', {
+  const UexCommodityPrice = sequelize.define('UexCommodityPrice', {
     id: { type: DataTypes.INTEGER, primaryKey: true },
 
     id_commodity: { type: DataTypes.INTEGER, allowNull: true },
@@ -35,4 +35,13 @@ module.exports = (sequelize) => {
     collate: 'utf8mb4_unicode_ci',
     timestamps: false
   });
+
+  UexCommodityPrice.associate = (models) => {
+    UexCommodityPrice.belongsTo(models.UexTerminal, {
+      foreignKey: 'id_terminal',
+      as: 'terminal'
+    });
+  };  
+
+  return UexCommodityPrice;
 };

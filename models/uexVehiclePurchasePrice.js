@@ -1,7 +1,8 @@
 const { DataTypes } = require('sequelize');
+const { UexVehiclePurchasePrice } = require('../config/database');
 
 module.exports = (sequelize) => {
-  return sequelize.define('UexVehiclePurchasePrice', {
+  const UexVehiclePurchasePrice = sequelize.define('UexVehiclePurchasePrice', {
     id: { type: DataTypes.INTEGER, primaryKey: true },
 
     id_vehicle: { type: DataTypes.INTEGER, allowNull: true },
@@ -20,4 +21,6 @@ module.exports = (sequelize) => {
     collate: 'utf8mb4_unicode_ci',
     timestamps: false
   });
+
+  return UexVehiclePurchasePrice
 };

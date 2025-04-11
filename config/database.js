@@ -35,6 +35,12 @@ const UexFuelPrice = require('../models/uexFuelPrice')(sequelize);
 const UexVehiclePurchasePrice = require('../models/uexVehiclePurchasePrice')(sequelize);
 const UexVehicleRentalPrice = require('../models/uexVehicleRentalPrice')(sequelize);
 
+Object.values(sequelize.models).forEach(model => {
+    if (typeof model.associate === 'function') {
+      model.associate(sequelize.models);
+    }
+  });
+
 const initializeDatabase = async () => {
     try {
         await sequelize.sync({ force: false });  // Set to true only if you want to drop and recreate tables

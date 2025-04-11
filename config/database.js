@@ -33,6 +33,7 @@ const UexCategory = require('../models/uexCategory')(sequelize);
 const UexCommodityPrice = require('../models/uexCommodityPrice')(sequelize);
 const UexFuelPrice = require('../models/uexFuelPrice')(sequelize);
 const UexVehiclePurchasePrice = require('../models/uexVehiclePurchasePrice')(sequelize);
+const UexVehicleRentalPrice = require('../models/uexVehicleRentalPrice')(sequelize);
 
 const initializeDatabase = async () => {
     try {
@@ -67,5 +68,6 @@ module.exports = {
     UexCategory,
     UexCommodityPrice,
     UexFuelPrice,
-    UexVehiclePurchasePrice
+    UexVehiclePurchasePrice,
+    UexVehicleRentalPrice
 };

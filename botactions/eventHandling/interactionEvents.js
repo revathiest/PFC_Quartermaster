@@ -145,10 +145,20 @@ async function handleCommand(interaction, client) {
         }
     } catch (error) {
         console.error(error);
-        await interaction.reply({
-            content: 'There was an error while executing this command!',
-            ephemeral: true
-        });
+        try {
+            if (!interaction.replied && !interaction.deferred) {
+                await interaction.reply({
+                    content: '❌ There was an error while executing this command!',
+                    ephemeral: true
+                });
+            } else {
+                await interaction.editReply({
+                    content: '❌ There was an error while executing this command!',
+                });
+            }
+        } catch (replyError) {
+            console.error('❗ Failed to send error message to interaction:', replyError);
+        }
     }
 }
 

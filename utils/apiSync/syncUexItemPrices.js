@@ -1,5 +1,5 @@
 const { fetchUexData } = require('../fetchUexData');
-const { UexItemPrice } = require('../../config/database');
+const { UexItemPrices } = require('../../config/database');
 
 async function syncUexItemPrices() {
   console.log('[API SYNC] Syncing UEX item prices...');
@@ -23,7 +23,7 @@ async function syncUexItemPrices() {
         continue;
       }
 
-      const [record, wasCreated] = await UexItemPrice.upsert({
+      const [record, wasCreated] = await UexItemPrices.upsert({
         id: entry.id,
         id_item: entry.id_item,
         id_category: entry.id_category,

@@ -1,5 +1,5 @@
 const { fetchUexData } = require('../fetchUexData');
-const { UexFuelPrice } = require('../../config/database');
+const { UexFuelPrices } = require('../../config/database');
 
 async function syncUexFuelPrices() {
   console.log('[API SYNC] Syncing UEX fuel prices...');

@@ -152,4 +152,13 @@ async function buildInventoryEmbed(interaction, terminal, type, page = 0, isPubl
     : interaction.reply(payload);
 }
 
-module.exports = { buildInventoryEmbed };
+const data = new SlashCommandBuilder()
+  .setName('uexinventory')
+  .setDescription('Browse terminal inventory by location')
+  .addStringOption(option =>
+    option.setName('location')
+      .setDescription('Planet, station, or system')
+      .setRequired(true)
+  );
+
+module.exports = { data, buildInventoryEmbed };

@@ -52,13 +52,13 @@ module.exports = {
 
     commodities.forEach(c => {
       if (!commodityMap.has(c.commodity_name)) {
-        commodityMap.set(c.commodity_name, { type: 'commodity', id: c.commodity_id, label: `💰 ${c.commodity_name}` });
+        commodityMap.set(c.commodity_name, { type: 'commodity', id: c.id, label: `💰 ${c.commodity_name}` });
       }
     });
 
     vehicles.forEach(v => {
       if (!vehicleMap.has(v.vehicle_name)) {
-        vehicleMap.set(v.vehicle_name, { type: 'vehicle', id: v.vehicle_id, label: `🚀 ${v.vehicle_name}` });
+        vehicleMap.set(v.vehicle_name, { type: 'vehicle', id: v.id, label: `🚀 ${v.vehicle_name}` });
       }
     });
 
@@ -90,42 +90,40 @@ module.exports = {
     const [type, id] = interaction.values[0].split(':');
     await handleSelection(interaction, { type, id: parseInt(id, 10) });
   }
-  
 };
 
 async function handleSelection(interaction, selection) {
-    const { type, id } = selection;
-    let records;
-  
-    switch (type) {
-      case 'item':
-        records = await UexItemPrice.findAll({
-          where: { item_id: id },
-          include: { model: UexTerminal, as: 'terminal' },
-          order: [['price', 'ASC']]
-        });
-        break;
-      case 'commodity':
-        records = await UexCommodityPrice.findAll({
-          where: { commodity_id: id },
-          include: { model: UexTerminal, as: 'terminal' },
-          order: [['price', 'ASC']]
-        });
-        break;
-      case 'vehicle':
-        records = await UexVehiclePurchasePrice.findAll({
-          where: { vehicle_id: id },
-          include: { model: UexTerminal, as: 'terminal' },
-          order: [['price', 'ASC']]
-        });
-        break;
-    }
-  
-    if (!records || records.length === 0) {
-      return interaction.editReply('No location data found for that entry.');
-    }
-  
-    const embed = buildUexAvailabilityEmbed(type, records);
-    return interaction.editReply({ embeds: [embed], components: [] });
+  const { type, id } = selection;
+  let records;
+
+  switch (type) {
+    case 'item':
+      records = await UexItemPrice.findAll({
+        where: { item_id: id },
+        include: { model: UexTerminal, as: 'terminal' },
+        order: [['price', 'ASC']]
+      });
+      break;
+    case 'commodity':
+      records = await UexCommodityPrice.findAll({
+        where: { commodity_id: id },
+        include: { model: UexTerminal, as: 'terminal' },
+        order: [['price', 'ASC']]
+      });
+      break;
+    case 'vehicle':
+      records = await UexVehiclePurchasePrice.findAll({
+        where: { vehicle_id: id },
+        include: { model: UexTerminal, as: 'terminal' },
+        order: [['price', 'ASC']]
+      });
+      break;
   }
-  
+
+  if (!records || records.length === 0) {
+    return interaction.editReply('No location data found for that entry.');
+  }
+
+  const embed = buildUexAvailabilityEmbed(type, records);
+  return interaction.editReply({ embeds: [embed], components: [] });
+}

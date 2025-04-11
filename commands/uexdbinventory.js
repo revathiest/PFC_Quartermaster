@@ -67,7 +67,8 @@ module.exports = {
   },
 
   async handleSelect(interaction) {
-    const [prefix, location] = interaction.customId.split(':');
+    const [prefix, ...rest] = interaction.customId.split(':');
+    const location = rest.join(':');
     const selectedType = interaction.values[0];
 
     console.log(`[INTERACTION] Select Menu used by ${interaction.user.tag} (${interaction.user.id}) - Prefix: ${prefix}, Location: ${location}, Selected Type: ${selectedType}`);
@@ -118,7 +119,8 @@ module.exports = {
   },
 
   async handleButton(interaction) {
-    const [, selectedType, location] = interaction.customId.split(':');
+    const [, selectedType, ...rest] = interaction.customId.split(':');
+    const location = rest.join(':');
     console.log(`[INTERACTION] Button clicked by ${interaction.user.tag} (${interaction.user.id}) - Type: ${selectedType}, Location: ${location}`);
 
     const tableMap = {

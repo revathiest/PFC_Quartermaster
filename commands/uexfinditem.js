@@ -1,7 +1,10 @@
 // File: commands/uexfinditem.js
 const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, EmbedBuilder } = require('discord.js');
 const { Op } = require('sequelize');
-const { ItemsPricesAll, CommoditiesPricesAll, VehiclesPurchasesPricesAll, UexTerminal } = require('../models');
+const ItemsPricesAll = require('../models/itemsPricesAll');
+const CommoditiesPricesAll = require('../models/commoditiesPricesAll');
+const VehiclesPurchasesPricesAll = require('../models/vehiclesPurchasesPricesAll');
+const UexTerminal = require('../models/uexTerminal');
 const { buildUexAvailabilityEmbed } = require('../components/embedBuilders/uexAvailabilityEmbed');
 
 module.exports = {

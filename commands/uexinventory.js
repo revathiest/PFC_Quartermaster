@@ -130,15 +130,13 @@ const data = new SlashCommandBuilder()
       .setRequired(true)
   );
 
-async function option(interaction) {
-  const [, location] = interaction.customId.split('::');
-  const selectedType = interaction.values[0];
+async function execute(interaction) {
+  const location = interaction.options.getString('location');
   const locationFilter = { [Op.like]: `%${location}%` };
-  console.log(`[DEBUG] option - Selected Type: ${selectedType}, Location: ${location}`);
+  console.log(`[DEBUG] execute - Location: ${location}`);
 
   const terminals = await db.UexTerminal.findAll({
     where: {
-      type: selectedType,
       [Op.or]: [
         { star_system_name: locationFilter },
         { planet_name: locationFilter },
@@ -147,60 +145,26 @@ async function option(interaction) {
         { outpost_name: locationFilter },
         { city_name: locationFilter }
       ]
-    },
-    order: [['name', 'ASC']]
+    }
   });
 
-  console.log(`[DEBUG] option - Matching Terminals: ${terminals.length}`);
+  console.log(`[DEBUG] execute - Terminals found: ${terminals.length}`);
 
   if (!terminals.length) {
-    return interaction.update({
-      content: `❌ No terminals of type \`${selectedType}\` found at **${location}**.`,
-      components: [],
-      ephemeral: true
-    });
+    return interaction.reply({ content: `❌ No terminals found at "${location}".`, ephemeral: true });
   }
 
-  if (terminals.length === 1) {
-    return buildInventoryEmbed(interaction, terminals[0], selectedType);
-  }
+  const types = [...new Set(terminals.map(t => t.type).filter(Boolean))];
+  const select = new StringSelectMenuBuilder()
+    .setCustomId(`uexinv_type_menu::${location}`)
+    .setPlaceholder('Select a terminal type')
+    .addOptions(types.map(t => ({ label: t, value: t })));
 
-  const terminalOptions = terminals.slice(0, 25).map(term => ({
-    label: term.name || term.nickname || term.code,
-    value: `uexinv_terminal::${term.id}::${selectedType}`
-  }));
-
-  const row = new ActionRowBuilder().addComponents(
-    new StringSelectMenuBuilder()
-      .setCustomId('uexinv_terminal_menu')
-      .setPlaceholder('Select a terminal')
-      .addOptions(terminalOptions)
-  );
-
-  return interaction.update({
-    content: `Terminals of type \`${selectedType}\` at **${location}**:`,
-    components: [row],
-    embeds: [],
+  return interaction.reply({
+    content: `Found **${terminals.length}** terminals at **${location}**. Choose a type:`,
+    components: [new ActionRowBuilder().addComponents(select)],
     ephemeral: true
   });
-}
-
-async function button(interaction) {
-  const [action, terminalId, type, pageStr, isPublicRaw] = interaction.customId.split('::');
-  const page = parseInt(pageStr, 10);
-  const isPublic = isPublicRaw === 'true' || action === 'uexinv_public';
-  console.log(`[DEBUG] button - Action: ${action}, TerminalID: ${terminalId}, Page: ${page}, Public: ${isPublic}`);
-
-  const terminal = await db.UexTerminal.findByPk(terminalId);
-  if (!terminal) {
-    return interaction.reply({ content: '❌ Terminal not found.', ephemeral: true });
-  }
-
-  const newPage = action === 'uexinv_prev' ? page - 1
-                  : action === 'uexinv_next' ? page + 1
-                  : page;
-
-  return buildInventoryEmbed(interaction, terminal, type, newPage, isPublic);
 }
 
 module.exports = { data, execute, option, button };

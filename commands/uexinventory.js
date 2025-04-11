@@ -168,6 +168,22 @@ async function execute(interaction) {
 }
 
 async function option(interaction) {
+  if (interaction.customId === 'uexinv_terminal_menu') {
+    const [prefix, terminalId, selectedType] = interaction.values[0].split('::');
+    console.log(`[DEBUG] option - Terminal Select: terminalId=${terminalId}, selectedType=${selectedType}`);
+
+    const terminal = await db.UexTerminal.findByPk(terminalId);
+    if (!terminal) {
+      return interaction.update({
+        content: '❌ Terminal not found.',
+        components: [],
+        ephemeral: true
+      });
+    }
+
+    return buildInventoryEmbed(interaction, terminal, selectedType);
+  }
+
   const [, location] = interaction.customId.split('::');
   const selectedType = interaction.values[0];
   const locationFilter = { [Op.like]: `%${location}%` };
@@ -196,10 +212,6 @@ async function option(interaction) {
       components: [],
       ephemeral: true
     });
-  }
-
-  if (terminals.length === 1) {
-    return buildInventoryEmbed(interaction, terminals[0], selectedType);
   }
 
   const terminalOptions = terminals.slice(0, 25).map(term => ({

@@ -99,27 +99,26 @@ async function handleSelection(interaction, selection) {
   switch (type) {
     case 'item':
       records = await UexItemPrice.findAll({
-        where: { id_item: id },
+        where: { item_id: id },
         include: { model: UexTerminal, as: 'terminal' },
-        order: [['price_buy', 'ASC']]
+        order: [['price', 'ASC']]
       });
       break;
     case 'commodity':
       records = await UexCommodityPrice.findAll({
-        where: { id_commodity: id },
+        where: { commodity_id: id },
         include: { model: UexTerminal, as: 'terminal' },
-        order: [['price_buy', 'ASC']]
+        order: [['price', 'ASC']]
       });
       break;
     case 'vehicle':
       records = await UexVehiclePurchasePrice.findAll({
-        where: { id_vehicle: id },
+        where: { vehicle_id: id },
         include: { model: UexTerminal, as: 'terminal' },
-        order: [['price_buy', 'ASC']]
+        order: [['price', 'ASC']]
       });
       break;
   }
-  
 
   if (!records || records.length === 0) {
     return interaction.editReply('No location data found for that entry.');

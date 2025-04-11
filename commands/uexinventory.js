@@ -1,153 +1,159 @@
-// NOTE: This is the DB-backed version of the /uexinventory command with extremely verbose logging
-
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } = require('discord.js');
 const {
-  SlashCommandBuilder,
-  ActionRowBuilder,
-  StringSelectMenuBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  EmbedBuilder
-} = require('discord.js');
-const { Op } = require('sequelize');
-const db = require('../config/database');
+  UexItemPrice,
+  UexCommodityPrice,
+  UexFuelPrice,
+  UexVehiclePurchasePrice,
+  UexVehicleRentalPrice
+} = require('../config/database');
 
-const PAGE_SIZE = 10;
+module.exports = {
+  data: new SlashCommandBuilder()
+    .setName('uexdbinventory')
+    .setDescription('View UEX inventory from the database')
+    .addStringOption(option =>
+      option.setName('location')
+        .setDescription('Enter a terminal/location name')
+        .setRequired(true)
+    ),
 
-const TypeToModelMap = {
-  item: db.UexItemPrice,
-  commodity: db.UexCommodityPrice,
-  fuel: db.UexFuelPrice,
-  vehicle_buy: db.UexVehiclePurchasePrice,
-  vehicle_rent: db.UexVehicleRentalPrice
-};
+  async execute(interaction) {
+    const location = interaction.options.getString('location');
+    console.log(`[COMMAND] /uexdbinventory used by ${interaction.user.tag} (${interaction.user.id}) - Location:`, location);
 
-function chunkInventory(items) {
-  const pages = [];
-  for (let i = 0; i < items.length; i += PAGE_SIZE) {
-    pages.push(items.slice(i, i + PAGE_SIZE));
-  }
-  console.log(`[DEBUG] chunkInventory - Total items: ${items.length}, Pages created: ${pages.length}`);
-  return pages;
-}
+    await interaction.deferReply({ ephemeral: true });
 
-function formatColumn(text, width) {
-  if (!text) return ''.padEnd(width);
-  const formatted = text.length > width ? text.slice(0, width - 1) + '…' : text.padEnd(width);
-  console.log(`[DEBUG] formatColumn - Original: "${text}", Width: ${width}, Result: "${formatted}"`);
-  return formatted;
-}
+    const datasets = await Promise.all([
+      UexItemPrice.findAll({ where: { terminal_name: location } }),
+      UexCommodityPrice.findAll({ where: { terminal_name: location } }),
+      UexFuelPrice.findAll({ where: { terminal_name: location } }),
+      UexVehiclePurchasePrice.findAll({ where: { terminal_name: location } }),
+      UexVehicleRentalPrice.findAll({ where: { terminal_name: location } })
+    ]);
 
-async function buildInventoryEmbed(interaction, terminal, type, page = 0, isPublic = false) {
-  console.log(`[DEBUG] buildInventoryEmbed - Terminal: ${terminal.name}, Type: ${type}, Page: ${page}, Public: ${isPublic}`);
-
-  const model = TypeToModelMap[type];
-  if (!model) {
-    console.warn(`[WARN] Unsupported terminal type: ${type}`);
-    return interaction.reply({
-      content: `❌ Unsupported terminal type: \`${type}\``,
-      ephemeral: !isPublic
+    const [items, commodities, fuel, purchases, rentals] = datasets;
+    console.log('[DEBUG] Inventory Counts:', {
+      items: items.length,
+      commodities: commodities.length,
+      fuel: fuel.length,
+      purchases: purchases.length,
+      rentals: rentals.length
     });
-  }
 
-  console.log(`[DEBUG] Using model: ${model.name || 'Unknown'} for type: ${type}`);
+    const options = [];
+    if (items.length) options.push({ label: 'Items', value: 'items' });
+    if (commodities.length) options.push({ label: 'Commodities', value: 'commodities' });
+    if (fuel.length) options.push({ label: 'Fuel', value: 'fuel' });
+    if (purchases.length) options.push({ label: 'Vehicle Purchases', value: 'purchases' });
+    if (rentals.length) options.push({ label: 'Vehicle Rentals', value: 'rentals' });
 
-  const records = await model.findAll({ where: { terminal_name: terminal.name } });
-  console.log(`[DEBUG] Fetched ${records.length} records from database for terminal: ${terminal.name}`);
+    console.log('[DEBUG] Menu Options:', options);
 
-  if (!records.length) {
-    console.log('[DEBUG] No records found - replying with empty message');
-    return interaction.reply({
-      content: `❌ No inventory data found for terminal \`${terminal.name}\`.`,
-      ephemeral: !isPublic
+    if (!options.length) {
+      return interaction.editReply(`❌ No inventory found at **${location}**.`);
+    }
+
+    const selectMenu = new ActionRowBuilder().addComponents(
+      new StringSelectMenuBuilder()
+        .setCustomId(`select_inventory_type:${location}`)
+        .setPlaceholder('Select inventory type')
+        .addOptions(options)
+    );
+
+    await interaction.editReply({
+      content: `📍 Found inventory at **${location}**. Choose a type:`,
+      components: [selectMenu]
     });
-  }
+  },
 
-  const chunks = chunkInventory(records);
-  const chunk = chunks[page];
-  console.log(`[DEBUG] Page info - Total pages: ${chunks.length}, Current page length: ${chunk.length}`);
+  async handleSelect(interaction) {
+    const [prefix, ...rest] = interaction.customId.split(':');
+    const location = rest.join(':');
+    const selectedType = interaction.values[0];
 
-  const embed = new EmbedBuilder()
-    .setTitle(`📦 Inventory: ${terminal.name}`)
-    .setFooter({ text: `Terminal ID: ${terminal.id} • Game Version: ${terminal.game_version || 'N/A'}` })
-    .setColor(0x0088cc)
-    .setTimestamp();
+    console.log(`[INTERACTION] Select Menu used by ${interaction.user.tag} (${interaction.user.id}) - Prefix: ${prefix}, Location: ${location}, Selected Type: ${selectedType}`);
 
-  const formatRow = (row) => {
-    console.log(`[DEBUG] Formatting row for type: ${type}`);
-    if (type === 'item') {
-      return `| ${formatColumn(row.item_name, 30)} | ${String(row.price_buy ?? 'N/A').padStart(7)} | ${String(row.price_sell ?? 'N/A').padStart(7)} |`;
+    const tableMap = {
+      items: UexItemPrice,
+      commodities: UexCommodityPrice,
+      fuel: UexFuelPrice,
+      purchases: UexVehiclePurchasePrice,
+      rentals: UexVehicleRentalPrice
+    };
+
+    const table = tableMap[selectedType];
+    console.log('[DEBUG] Table selected:', table ? table.name : 'undefined');
+
+    if (!table || !location) {
+      return interaction.reply({ content: 'Invalid selection or missing location.', ephemeral: true });
     }
-    if (type === 'commodity') {
-      return `| ${formatColumn(row.commodity_name, 30)} | ${String(row.price_buy ?? 'N/A').padStart(7)} | ${String(row.price_sell ?? 'N/A').padStart(7)} |`;
-    }
-    if (type === 'fuel') {
-      return `| ${formatColumn(row.commodity_name, 30)} | ${String(row.price_buy ?? 'N/A').padStart(7)} |`;
-    }
-    if (type === 'vehicle_buy') {
-      return `| ${formatColumn(row.vehicle_name, 30)} | ${String(row.price_buy ?? 'N/A').padStart(8)} |`;
-    }
-    if (type === 'vehicle_rent') {
-      return `| ${formatColumn(row.vehicle_name, 30)} | ${String(row.price_rent ?? 'N/A').padStart(7)} |`;
-    }
-    return 'Unknown row';
-  };
 
-  let header = '| Name                           |     Buy |    Sell |';
-  if (type === 'fuel') header = '| Fuel Type                      |     Buy |';
-  if (type === 'vehicle_buy') header = '| Vehicle                        |      Buy |';
-  if (type === 'vehicle_rent') header = '| Vehicle                        |  Rental |';
+    const records = await table.findAll({ where: { terminal_name: location } });
+    console.log(`[DEBUG] Records found for ${selectedType} at ${location}:`, records.length);
 
-  const divider = '|'.padEnd(header.length - 1, '-') + '|';
-  const rows = chunk.map(formatRow);
-  const table = '```markdown\n' + [header, divider, ...rows].join('\n') + '\n```';
-  embed.setDescription(table);
-  console.log('[DEBUG] Inventory table constructed');
+    if (!records.length) {
+      return interaction.update({ content: `❌ No ${selectedType} inventory found at **${location}**.`, components: [], embeds: [] });
+    }
 
-  const components = [];
+    const embed = new EmbedBuilder()
+      .setTitle(`${selectedType.charAt(0).toUpperCase() + selectedType.slice(1)} at ${location}`)
+      .setColor(0x00bfff)
+      .setDescription(
+        records.map(entry => {
+          if (entry.item_name) return `**${entry.item_name}**: ${entry.price_buy} aUEC`;
+          if (entry.commodity_name) return `**${entry.commodity_name}**: ${entry.price_sell ?? entry.price_buy} aUEC`;
+          if (entry.vehicle_name) return `**${entry.vehicle_name}**: ${entry.price_buy ?? entry.price_rent} aUEC`;
+          return 'Unknown entry';
+        }).slice(0, 20).join('\n')
+      )
+      .setFooter({ text: `Results truncated to 20 entries` });
 
-  if (chunks.length > 1) {
-    console.log('[DEBUG] Adding pagination buttons');
-    components.push(new ActionRowBuilder().addComponents(
+    const actionRow = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId(`uexinv_prev::${terminal.id}::${type}::${page}::${isPublic}`)
-        .setLabel('◀️ Prev')
-        .setStyle(ButtonStyle.Secondary)
-        .setDisabled(page === 0),
-      new ButtonBuilder()
-        .setCustomId(`uexinv_next::${terminal.id}::${type}::${page}::${isPublic}`)
-        .setLabel('▶️ Next')
-        .setStyle(ButtonStyle.Secondary)
-        .setDisabled(page === chunks.length - 1)
-    ));
-  }
-
-  if (!isPublic) {
-    console.log('[DEBUG] Adding Make Public button');
-    components.push(new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId(`uexinv_public::${terminal.id}::${type}::${page}`)
+        .setCustomId(`make_public:${selectedType}:${location}`)
         .setLabel('📢 Make Public')
         .setStyle(ButtonStyle.Primary)
-    ));
+    );
+
+    await interaction.update({ embeds: [embed], components: [actionRow] });
+  },
+
+  async handleButton(interaction) {
+    const [, selectedType, ...rest] = interaction.customId.split(':');
+    const location = rest.join(':');
+    console.log(`[INTERACTION] Button clicked by ${interaction.user.tag} (${interaction.user.id}) - Type: ${selectedType}, Location: ${location}`);
+
+    const tableMap = {
+      items: UexItemPrice,
+      commodities: UexCommodityPrice,
+      fuel: UexFuelPrice,
+      purchases: UexVehiclePurchasePrice,
+      rentals: UexVehicleRentalPrice
+    };
+
+    const table = tableMap[selectedType];
+    console.log('[DEBUG] Table selected for button:', table ? table.name : 'undefined');
+
+    if (!table || !location) {
+      return interaction.reply({ content: 'Invalid button or missing context.', ephemeral: true });
+    }
+
+    const records = await table.findAll({ where: { terminal_name: location } });
+    console.log(`[DEBUG] Button-triggered record count: ${records.length}`);
+
+    const embed = new EmbedBuilder()
+      .setTitle(`${selectedType.charAt(0).toUpperCase() + selectedType.slice(1)} at ${location}`)
+      .setColor(0x00bfff)
+      .setDescription(
+        records.map(entry => {
+          if (entry.item_name) return `**${entry.item_name}**: ${entry.price_buy} aUEC`;
+          if (entry.commodity_name) return `**${entry.commodity_name}**: ${entry.price_sell ?? entry.price_buy} aUEC`;
+          if (entry.vehicle_name) return `**${entry.vehicle_name}**: ${entry.price_buy ?? entry.price_rent} aUEC`;
+          return 'Unknown entry';
+        }).slice(0, 20).join('\n')
+      )
+      .setFooter({ text: `Results truncated to 20 entries` });
+
+    await interaction.reply({ embeds: [embed], ephemeral: false });
   }
-
-  const payload = {
-    embeds: [embed],
-    components,
-    ephemeral: !isPublic
-  };
-
-  console.log('[DEBUG] Prepared payload for interaction response');
-
-  if (isPublic && interaction.isButton()) {
-    console.log('[DEBUG] Interaction is a button, sending public payload...');
-    return interaction.replied || interaction.deferred
-      ? interaction.followUp({ ...payload, ephemeral: false })
-      : interaction.reply({ ...payload, ephemeral: false });
-  }
-
-  console.log('[DEBUG] Sending reply payload...');
-  return interaction.replied || interaction.deferred
-    ? null
-    : interaction.reply(payload);
-}
+};

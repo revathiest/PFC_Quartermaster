@@ -159,21 +159,17 @@ async function handleSelection(interaction, selection) {
 
   const locations = [];
   const prices = [];
-  const quantities = [];
 
   records.forEach(record => {
-    const qty = record.quantity ?? null;
-    if (!qty || qty <= 0) return;
+    if (!record.price_buy || record.price_buy <= 0) return;
     locations.push(record.terminal_name || record.terminal?.name || 'Unknown');
-    prices.push(`${record.price_buy ?? 0} aUEC`);
-    quantities.push(qty.toString());
+    prices.push(`${record.price_buy} aUEC`);
   });
 
   const fields = [
     { name: 'Location', value: locations.join('\n'), inline: true },
-    { name: 'Price', value: prices.join('\n'), inline: true },
-    { name: 'Qty', value: quantities.join('\n'), inline: true }
-  ].filter(f => f.name?.length > 0 && f.value?.length > 0);
+    { name: 'Price', value: prices.join('\n'), inline: true }
+  ];
 
   const embed = new EmbedBuilder()
     .setTitle('Availability')

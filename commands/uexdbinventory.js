@@ -19,6 +19,7 @@ module.exports = {
 
   async execute(interaction) {
     const location = interaction.options.getString('location');
+    console.log(`[COMMAND] /uexdbinventory used by ${interaction.user.tag} (${interaction.user.id}) - Location:`, location);
 
     await interaction.deferReply({ ephemeral: true });
 
@@ -31,6 +32,13 @@ module.exports = {
     ]);
 
     const [items, commodities, fuel, purchases, rentals] = datasets;
+    console.log('[DEBUG] Inventory Counts:', {
+      items: items.length,
+      commodities: commodities.length,
+      fuel: fuel.length,
+      purchases: purchases.length,
+      rentals: rentals.length
+    });
 
     const options = [];
     if (items.length) options.push({ label: 'Items', value: 'items' });
@@ -38,6 +46,8 @@ module.exports = {
     if (fuel.length) options.push({ label: 'Fuel', value: 'fuel' });
     if (purchases.length) options.push({ label: 'Vehicle Purchases', value: 'purchases' });
     if (rentals.length) options.push({ label: 'Vehicle Rentals', value: 'rentals' });
+
+    console.log('[DEBUG] Menu Options:', options);
 
     if (!options.length) {
       return interaction.editReply(`❌ No inventory found at **${location}**.`);
@@ -60,6 +70,8 @@ module.exports = {
     const [prefix, location] = interaction.customId.split(':');
     const selectedType = interaction.values[0];
 
+    console.log(`[INTERACTION] Select Menu used by ${interaction.user.tag} (${interaction.user.id}) - Prefix: ${prefix}, Location: ${location}, Selected Type: ${selectedType}`);
+
     const tableMap = {
       items: UexItemPrice,
       commodities: UexCommodityPrice,
@@ -69,11 +81,14 @@ module.exports = {
     };
 
     const table = tableMap[selectedType];
+    console.log('[DEBUG] Table selected:', table ? table.name : 'undefined');
+
     if (!table || !location) {
       return interaction.reply({ content: 'Invalid selection or missing location.', ephemeral: true });
     }
 
     const records = await table.findAll({ where: { terminal_name: location } });
+    console.log(`[DEBUG] Records found for ${selectedType} at ${location}:`, records.length);
 
     if (!records.length) {
       return interaction.update({ content: `❌ No ${selectedType} inventory found at **${location}**.`, components: [], embeds: [] });
@@ -104,6 +119,7 @@ module.exports = {
 
   async handleButton(interaction) {
     const [, selectedType, location] = interaction.customId.split(':');
+    console.log(`[INTERACTION] Button clicked by ${interaction.user.tag} (${interaction.user.id}) - Type: ${selectedType}, Location: ${location}`);
 
     const tableMap = {
       items: UexItemPrice,
@@ -114,11 +130,14 @@ module.exports = {
     };
 
     const table = tableMap[selectedType];
+    console.log('[DEBUG] Table selected for button:', table ? table.name : 'undefined');
+
     if (!table || !location) {
       return interaction.reply({ content: 'Invalid button or missing context.', ephemeral: true });
     }
 
     const records = await table.findAll({ where: { terminal_name: location } });
+    console.log(`[DEBUG] Button-triggered record count: ${records.length}`);
 
     const embed = new EmbedBuilder()
       .setTitle(`${selectedType.charAt(0).toUpperCase() + selectedType.slice(1)} at ${location}`)

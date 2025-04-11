@@ -116,13 +116,11 @@ module.exports = {
     await interaction.deferReply({ ephemeral: true });
 
     await handleSelection(interaction, { type, id: parseInt(id, 10) });
-  }
-  ,
+  },
 
   option: async function(interaction, client) {
     return module.exports.handleSelect(interaction, client);
   }
-  
 };
 
 async function handleSelection(interaction, selection) {
@@ -171,13 +169,15 @@ async function handleSelection(interaction, selection) {
     quantities.push(qty.toString());
   });
 
+  const fields = [
+    { name: 'Location', value: locations.join('\n'), inline: true },
+    { name: 'Price', value: prices.join('\n'), inline: true },
+    { name: 'Qty', value: quantities.join('\n'), inline: true }
+  ].filter(f => f.name?.length > 0 && f.value?.length > 0);
+
   const embed = new EmbedBuilder()
     .setTitle('Availability')
-    .addFields(
-      { name: 'Location', value: locations.join('\n'), inline: true },
-      { name: 'Price', value: prices.join('\n'), inline: true },
-      { name: 'Qty', value: quantities.join('\n'), inline: true }
-    );
+    .addFields(fields);
 
   console.log('[DEBUG] Building embed with type:', type, 'and records count:', records.length);
   return interaction.editReply({ embeds: [embed], components: [] });

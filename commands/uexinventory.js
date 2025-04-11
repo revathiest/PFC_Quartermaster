@@ -160,5 +160,74 @@ module.exports = {
       components: [new ActionRowBuilder().addComponents(select)],
       ephemeral: true
     });
+  },
+
+  option: async (interaction) => {
+    const [, location] = interaction.customId.split('::');
+    const selectedType = interaction.values[0];
+
+    const locationFilter = { [Op.like]: `%${location}%` };
+    const terminals = await db.UexTerminal.findAll({
+      where: {
+        type: selectedType,
+        [Op.or]: [
+          { star_system_name: locationFilter },
+          { planet_name: locationFilter },
+          { orbit_name: locationFilter },
+          { space_station_name: locationFilter },
+          { outpost_name: locationFilter },
+          { city_name: locationFilter }
+        ]
+      },
+      order: [['name', 'ASC']]
+    });
+
+    if (!terminals.length) {
+      return interaction.update({
+        content: `❌ No terminals of type \`${selectedType}\` found at **${location}**.`,
+        components: [],
+        ephemeral: true
+      });
+    }
+
+    if (terminals.length === 1) {
+      return buildInventoryEmbed(interaction, terminals[0], selectedType);
+    }
+
+    const terminalOptions = terminals.slice(0, 25).map(term => ({
+      label: term.name || term.nickname || term.code,
+      value: `uexinv_terminal::${term.id}::${selectedType}`
+    }));
+
+    const row = new ActionRowBuilder().addComponents(
+      new StringSelectMenuBuilder()
+        .setCustomId(`uexinv_terminal_menu`)
+        .setPlaceholder('Select a terminal')
+        .addOptions(terminalOptions)
+    );
+
+    return interaction.update({
+      content: `Terminals of type \`${selectedType}\` at **${location}**:`,
+      components: [row],
+      embeds: [],
+      ephemeral: true
+    });
+  },
+
+  button: async (interaction) => {
+    const [action, terminalId, type, pageStr, isPublicRaw] = interaction.customId.split('::');
+    const page = parseInt(pageStr, 10);
+    const isPublic = isPublicRaw === 'true' || action === 'uexpage_public';
+
+    const terminal = await db.UexTerminal.findByPk(terminalId);
+    if (!terminal) {
+      return interaction.reply({ content: '❌ Terminal not found.', ephemeral: true });
+    }
+
+    const newPage = action === 'uexpage_prev' ? page - 1
+                    : action === 'uexpage_next' ? page + 1
+                    : page;
+
+    return buildInventoryEmbed(interaction, terminal, type, newPage, isPublic);
   }
 };

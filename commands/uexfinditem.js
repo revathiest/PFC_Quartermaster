@@ -48,6 +48,9 @@ module.exports = {
     const vehicleMap = new Map();
 
     items.forEach(i => {
+      console.log('[DEBUG] Item i.id:', i.id);
+      console.log('[DEBUG] Item i.item_name:', i.item_name);
+      console.log('[DEBUG] Item i.id_item:', i.id_item);
       console.log('[DEBUG] Item row:', i.toJSON());
       if (!itemMap.has(i.item_name)) {
         itemMap.set(i.item_name, { type: 'item', id: i.id_item, label: `🧪 ${i.item_name}` });
@@ -55,6 +58,9 @@ module.exports = {
     });
 
     commodities.forEach(c => {
+      console.log('[DEBUG] Commodity c.id:', c.id);
+      console.log('[DEBUG] Commodity c.commodity_name:', c.commodity_name);
+      console.log('[DEBUG] Commodity c.id_commodity:', c.id_commodity);
       console.log('[DEBUG] Commodity row:', c.toJSON());
       if (!commodityMap.has(c.commodity_name)) {
         commodityMap.set(c.commodity_name, { type: 'commodity', id: c.id_commodity, label: `💰 ${c.commodity_name}` });
@@ -62,12 +68,16 @@ module.exports = {
     });
 
     vehicles.forEach(v => {
+      console.log('[DEBUG] Vehicle v.id:', v.id);
+      console.log('[DEBUG] Vehicle v.vehicle_name:', v.vehicle_name);
+      console.log('[DEBUG] Vehicle v.id_vehicle:', v.id_vehicle);
       console.log('[DEBUG] Vehicle row:', v.toJSON());
       if (!vehicleMap.has(v.vehicle_name)) {
         vehicleMap.set(v.vehicle_name, { type: 'vehicle', id: v.id_vehicle, label: `🚀 ${v.vehicle_name}` });
       }
     });
 
+            
     console.log('[DEBUG] itemMap keys:', Array.from(itemMap.keys()));
     console.log('[DEBUG] commodityMap keys:', Array.from(commodityMap.keys()));
     console.log('[DEBUG] vehicleMap keys:', Array.from(vehicleMap.keys()));

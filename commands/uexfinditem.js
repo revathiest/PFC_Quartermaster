@@ -3,10 +3,10 @@ const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, EmbedBui
 const { Op, Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const ItemsPricesAll = require('../models/uexItemPrice')(sequelize, DataTypes);
-const CommoditiesPricesAll = require('../models/uexCommodityPrice')(sequelize, DataTypes);
-const VehiclesPurchasesPricesAll = require('../models/uexVehiclePurchasePrice')(sequelize, DataTypes);
-const UexTerminal = require('../models/uexTerminal')(sequelize, DataTypes);
+const ItemsPricesAll = require('../models/uexItemPrice')(sequelize);
+const CommoditiesPricesAll = require('../models/uexCommodityPrice')(sequelize);
+const VehiclesPurchasesPricesAll = require('../models/uexVehiclePurchasePrice')(sequelize);
+const UexTerminal = require('../models/uexTerminal')(sequelize);
 const { buildUexAvailabilityEmbed } = require('../components/embedBuilders/uexAvailabilityEmbed');
 
 module.exports = {

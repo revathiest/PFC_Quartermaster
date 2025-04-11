@@ -126,7 +126,7 @@ async function handleSelection(interaction, selection) {
     case 'item':
       records = await UexItemPrice.findAll({
         where: { id_item: id },
-        include: { model: UexTerminal, as: 'terminal' },
+        //include: { model: UexTerminal, as: 'terminal' },
         order: [['price', 'ASC']]
       });
       break;

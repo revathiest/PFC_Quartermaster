@@ -1,6 +1,7 @@
 # Environment and secrets
 .env
 config.json
+databaseConfig.json
 quartermaster_prompt.txt
 
 # System/tool-specific files

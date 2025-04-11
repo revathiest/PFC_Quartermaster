@@ -46,7 +46,7 @@ module.exports = {
 
     items.forEach(i => {
       if (!itemMap.has(i.item_name)) {
-        itemMap.set(i.item_name, { type: 'item', id: i.item_id, label: `🧪 ${i.item_name}` });
+        itemMap.set(i.item_name, { type: 'item', id: i.id, label: `🧪 ${i.item_name}` });
       }
     });
 

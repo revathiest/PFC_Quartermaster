@@ -113,8 +113,12 @@ module.exports = {
     console.log('[DEBUG] Raw selection value:', interaction.values[0]);
     const [type, id] = interaction.values[0].split(':');
     console.log('[DEBUG] Parsed type:', type, '| Parsed id:', id);
+  
+    await interaction.deferReply({ ephemeral: true }); // 🔧 This is the missing line
+  
     await handleSelection(interaction, { type, id: parseInt(id, 10) });
-  },
+  }
+  ,
 
   option: async function(interaction, client) {
     return module.exports.handleSelect(interaction, client);

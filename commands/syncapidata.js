@@ -8,7 +8,8 @@ const {
   syncUexItemPrices,
   syncUexCategories,
   syncUexCommodityPrices,
-  syncUexFuelPrices
+  syncUexFuelPrices,
+  syncUexVehiclePurchasePrices
 } = require('../botactions/api/syncEndpoints');
 const { isAdmin } = require('../botactions/userManagement/permissions');
 
@@ -89,6 +90,7 @@ module.exports = {
     await updateStep('category', syncUexCategories);
     await updateStep('commodities', syncUexCommodityPrices);
     await updateStep('fuel', syncUexFuelPrices);
+    await updateStep('vehicle_price', syncUexVehiclePurchasePrices);
 
     embed.title = '✅ API Sync Complete';
     embed.color = 0x00ff99;

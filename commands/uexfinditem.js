@@ -114,7 +114,12 @@ module.exports = {
     const [type, id] = interaction.values[0].split(':');
     console.log('[DEBUG] Parsed type:', type, '| Parsed id:', id);
     await handleSelection(interaction, { type, id: parseInt(id, 10) });
+  },
+  
+  option: async function(interaction, client) {
+    return module.exports.handleSelect(interaction, client);
   }
+  
 };
 
 async function handleSelection(interaction, selection) {
@@ -126,7 +131,7 @@ async function handleSelection(interaction, selection) {
     case 'item':
       records = await UexItemPrice.findAll({
         where: { id_item: id },
-        //include: { model: UexTerminal, as: 'terminal' },
+        include: { model: UexTerminal, as: 'terminal' },
         order: [['price', 'ASC']]
       });
       break;

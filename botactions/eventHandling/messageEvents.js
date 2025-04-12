@@ -3,13 +3,14 @@ const filter = require('../../messages.json');
 const OpenAI = require('openai');
 const fs = require('fs');
 const path = require('path');
+const knownRoles = require('../../knownRoles.json');
 
-let quartermasterPrompt = ''
+let quartermasterPrompt = '';
 try {
     quartermasterPrompt = fs.readFileSync(
         path.join(__dirname, '../../quartermaster_prompt.txt'),
         'utf8'
-    )
+    );
 } catch (err) {
     console.error('[PROMPT LOAD ERROR]', err);
     quartermasterPrompt = 'You are a helpful and friendly bot.'; // Fallback
@@ -29,19 +30,46 @@ module.exports = {
             if (!prompt) return;
 
             const model = process.env.OPENAI_MODEL;
-        
+
+            // 🧠 Determine user role level by checking their roles
+            const memberRoles = message.member?.roles?.cache;
+            let userRoleLevel = 'default';
+
+            if (memberRoles) {
+                const roleNames = memberRoles.map(role => role.name);
+
+                if (roleNames.some(role => knownRoles.leader.includes(role))) {
+                    userRoleLevel = 'leader';
+                } else if (roleNames.some(role => knownRoles.officer.includes(role))) {
+                    userRoleLevel = 'officer';
+                } else if (roleNames.some(role => knownRoles.quartermaster.includes(role))) {
+                    userRoleLevel = 'quartermaster';
+                }
+            }
+
+            // 🪖 Adjust prompt with rank-based respect
+            let rolePrompt = quartermasterPrompt;
+
+            if (userRoleLevel === 'leader') {
+                rolePrompt += `\n\nYou are speaking to one of the organization's top-ranking officers. Mind your tone. Show respect — not with sweetness, but with recognition. They've bled for this crew. You don’t sass command.`;
+            } else if (userRoleLevel === 'officer') {
+                rolePrompt += `\n\nYou are speaking to a ranking officer in the organization. Watch your mouth. They’re not command, but they’ve held the line long enough to deserve your respect. You can be blunt — but keep it clean.`;
+            } else if (userRoleLevel === 'quartermaster') {
+                rolePrompt += `\n\nYou're speaking to a fellow Quartermaster. Speak like someone who's shared too many supply runs and not enough rations. Mutual respect, but still rough around the edges.`;
+            }
+
             try {
                 const completion = await openai.chat.completions.create({
                     model: model,
                     messages: [
-                        { role: "system", content: quartermasterPrompt },
+                        { role: "system", content: rolePrompt },
                         { role: "user", content: prompt }
                     ],
                     temperature: 0.7,
                 });
-        
+
                 const reply = completion?.choices?.[0]?.message?.content;
-        
+
                 if (reply) {
                     await message.reply(reply);
                 } else {
@@ -53,8 +81,9 @@ module.exports = {
                 await message.reply("Sorry, I couldn't fetch a reply right now.");
             }
             return;
-        }      
+        }
 
+        // 📜 Log the message
         try {
             await UsageLog.create({
                 user_id: message.author.id,
@@ -71,6 +100,7 @@ module.exports = {
             console.error('Error logging message:', error);
         }
 
+        // 🚨 Trigger filtering
         const content = message.content;
         const lowerCaseContent = content.toLowerCase();
         const personalTriggers = [];
@@ -105,7 +135,7 @@ module.exports = {
                 console.log('Matched regex: ' + regex);
                 if (module.exports.performAction(message, client, filter.regex[regex])) return;
             }
-        }  
+        }
     },
 
     performAction: function (message, client, actionDetail) {

@@ -47,7 +47,7 @@ module.exports = {
       }
 
       const selectMenu = new StringSelectMenuBuilder()
-        .setCustomId('select-vehicle')
+        .setCustomId('shipdetails_select')
         .setPlaceholder('Select the specific ship you meant')
         .addOptions(matches.map(ship => ({
           label: ship.name,

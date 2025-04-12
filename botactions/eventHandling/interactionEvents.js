@@ -165,7 +165,12 @@ async function handleCommand(interaction, client) {
 async function handleButton(interaction, client) {
     try {
         const prefix = getPrefixFromCustomId(interaction.customId);
-        const command = [...client.commands.values()].find(cmd => typeof cmd.button === 'function' && interaction.customId.startsWith(prefix));
+        const command = [...client.commands.values()].find(cmd =>
+            typeof cmd.button === 'function' &&
+            cmd.data?.name &&
+            interaction.customId.startsWith(cmd.data.name)
+          );
+          
 
         if (command) {
             await command.button(interaction, client);
@@ -188,27 +193,49 @@ async function handleButton(interaction, client) {
 
 async function handleSelectMenu(interaction, client) {
     try {
-        const prefix = getPrefixFromCustomId(interaction.customId);
-        const command = [...client.commands.values()].find(cmd => typeof cmd.option === 'function' && interaction.customId.startsWith(prefix));
-
-        if (command) {
-            await command.option(interaction, client);
-        } else {
-            console.warn(`[WARN] No select menu handler found for prefix: ${prefix}`);
-            if (!interaction.replied && !interaction.deferred) {
-                await interaction.reply({
-                    content: '❌ Select menu handler not found.',
-                    ephemeral: true
-                });
-            }
-        }
-    } catch (err) {
-        console.error('[ERROR] handleSelectMenu() failed:', err);
+      const id = interaction.customId;
+  
+      const command = [...client.commands.values()].find(cmd =>
+        typeof cmd.option === 'function' &&
+        cmd.data?.name &&
+        id.startsWith(cmd.data.name)
+      );
+  
+      const commandName = command?.data?.name || 'unknown';
+  
+      await UsageLog.create({
+        user_id: interaction.user.id,
+        interaction_type: 'select_menu',
+        event_type: 'select_menu_select',
+        command_name: commandName,
+        channel_id: interaction.channel.id,
+        server_id: interaction.guild?.id ?? 'unknown',
+        event_time: new Date(),
+      });
+  
+      console.log(`[DEBUG] Select menu interaction logged for command: ${commandName}`);
+      console.log(`[DEBUG] customId received: ${id}`);
+  
+      if (command) {
+        console.log(`[DEBUG] Routing to option() handler in: ${commandName}`);
+        await command.option(interaction, client);
+      } else {
+        console.warn(`[WARN] No select menu handler matched for customId: ${id}`);
         if (!interaction.replied && !interaction.deferred) {
-            await interaction.reply({ content: '❌ Something went wrong.', ephemeral: true });
+          await interaction.reply({
+            content: '❌ Select menu handler not found.',
+            ephemeral: true
+          });
         }
+      }
+    } catch (err) {
+      console.error('[ERROR] handleSelectMenu() failed:', err);
+      if (!interaction.replied && !interaction.deferred) {
+        await interaction.reply({ content: '❌ Something went wrong.', ephemeral: true });
+      }
     }
-}
+  }
+  
 
 async function handleModalSubmit(interaction, client) {
     if (interaction.customId === 'scheduleModal') {

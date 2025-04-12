@@ -1,136 +1,192 @@
 const {
-    SlashCommandBuilder,
-    EmbedBuilder,
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle
-  } = require('discord.js');
-  const { Op } = require('sequelize');
-  const db = require('../config/database');
-  
-  // We'll pass this to the button handler
-  function buildTerminalEmbed(location, matches) {
-    // Group terminals by type
-    const grouped = {};
-    for (const term of matches) {
-      const type = term.type || 'unknown';
-      if (!grouped[type]) grouped[type] = [];
-      grouped[type].push(term);
-    }
-  
-    const embed = new EmbedBuilder()
-      .setTitle(`📍 Terminals in: ${location}`)
-      .setColor(0x00bcd4)
-      .setFooter({ text: `Found ${matches.length} terminal(s)` })
-      .setTimestamp();
-  
-    const descriptionParts = [];
-  
-    for (const [type, terminals] of Object.entries(grouped)) {
-      descriptionParts.push(`**🔹 ${type.charAt(0).toUpperCase() + type.slice(1)} Terminals**`);
-      for (const term of terminals) {
-        const label = term.name || term.nickname || term.code;
-        const locationLabel =
-          term.space_station_name || term.orbit_name || term.planet_name || 'Unknown location';
-        descriptionParts.push(`• \`${term.code}\` - **${label}** at *${locationLabel}*`);
-      }
-      descriptionParts.push('');
-    }
-  
-    embed.setDescription(descriptionParts.join('\n'));
-    return embed;
+  SlashCommandBuilder,
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle
+} = require('discord.js');
+const { Op } = require('sequelize');
+const db = require('../config/database');
+const { fn, col, where } = require('sequelize');
+
+const PAGE_SIZE = 15;
+
+function chunkArray(array, size) {
+  const pages = [];
+  for (let i = 0; i < array.length; i += size) {
+    pages.push(array.slice(i, i + size));
   }
-  
-  module.exports = {
-    data: new SlashCommandBuilder()
-      .setName('uexterminals')
-      .setDescription('List all UEX terminals at a specific location')
-      .addStringOption(option =>
-        option.setName('location')
-          .setDescription('System, planet, or station name')
-          .setRequired(true)
-      ),
-  
+  return pages;
+}
+
+function escapeAndTruncate(str, max) {
+  if (!str) return ''.padEnd(max);
+  const safe = str.replace(/[_*~`]/g, '\\$&'); // Escape _ * ~ `
+  return safe.length > max ? safe.slice(0, max - 1) + '…' : safe.padEnd(max);
+}
+
+
+function buildTerminalTableEmbed(location, terminals, page = 0, isPublic = false) {
+  const chunks = chunkArray(terminals, PAGE_SIZE);
+  const chunk = chunks[page] || [];
+
+  const embed = new EmbedBuilder()
+    .setTitle(`📍 Terminals in: ${location}`)
+    .setColor(0x00bcd4)
+    .setFooter({
+      text: `Page ${page + 1} of ${chunks.length} • Total: ${terminals.length} terminals`
+    })
+    .setTimestamp();
+
+    const header = '| Code   | Terminal Name        | Location           |';
+    const divider = '|--------|----------------------|--------------------|';
+    const rows = chunk.map(term => {
+      const code = escapeAndTruncate(term.code || 'N/A', 6);
+      const name = escapeAndTruncate(term.name || term.nickname || 'Unnamed Terminal', 20);
+      const loc = escapeAndTruncate(
+        term.space_station_name || term.orbit_name || term.planet_name || 'Unknown',
+        18
+      );
+      
+      return `| ${code} | ${name} | ${loc} |`;
+    });
+    embed.setDescription('```' + [header, divider, ...rows].join('\n') + '```');
+
+  const buttons = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`uexterminals_page::${location}::${page - 1}::${isPublic}`)
+      .setLabel('◀️ Prev')
+      .setStyle(ButtonStyle.Secondary)
+      .setDisabled(page === 0),
+    new ButtonBuilder()
+      .setCustomId(`uexterminals_page::${location}::${page + 1}::${isPublic}`)
+      .setLabel('▶️ Next')
+      .setStyle(ButtonStyle.Secondary)
+      .setDisabled(page === chunks.length - 1)
+  );
+
+  const components = [buttons];
+
+  if (!isPublic) {
+    components.push(new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId(`uexterminals_make_public::${location}`)
+        .setLabel('📢 Make Public')
+        .setStyle(ButtonStyle.Primary)
+    ));
+  }
+
+  return { embed, components, totalPages: chunks.length };
+}
+
+module.exports = {
+  data: new SlashCommandBuilder()
+    .setName('uexterminals')
+    .setDescription('List all UEX terminals at a specific location')
+    .addStringOption(option =>
+      option.setName('location')
+        .setDescription('System, planet, or station name')
+        .setRequired(true)
+    ),
+
     async execute(interaction) {
       const location = interaction.options.getString('location');
-      const locationFilter = { [Op.like]: `%${location}%` };
-  
+      const lowered = location.toLowerCase();
+      console.log(`[DEBUG] execute - Location input: "${location}", Lowered: "${lowered}"`);
+    
+      const locationFilter = (field) =>
+        where(fn('LOWER', col(field)), {
+          [Op.like]: `%${lowered}%`
+        });
+    
       const matches = await db.UexTerminal.findAll({
         where: {
           [Op.or]: [
-            { star_system_name: locationFilter },
-            { planet_name: locationFilter },
-            { orbit_name: locationFilter },
-            { space_station_name: locationFilter },
-            { outpost_name: locationFilter },
-            { city_name: locationFilter }
+            locationFilter('star_system_name'),
+            locationFilter('planet_name'),
+            locationFilter('orbit_name'),
+            locationFilter('space_station_name'),
+            locationFilter('outpost_name'),
+            locationFilter('city_name')
           ]
         },
         order: [['type', 'ASC'], ['name', 'ASC']],
-        limit: 100
+        limit: 1000
       });
-  
-      if (matches.length === 0) {
+    
+      console.log(`[DEBUG] execute - Terminals matched: ${matches.length}`);
+      if (!matches.length) {
         return interaction.reply({
           content: `❌ No terminals found matching "${location}".`,
           ephemeral: true
         });
       }
-  
-      const embed = buildTerminalEmbed(location, matches);
-  
-      const row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-          .setCustomId(`make_public::${location}`)
-          .setLabel('📢 Make Public')
-          .setStyle(ButtonStyle.Primary)
-      );
-  
+    
+      const { embed, components } = buildTerminalTableEmbed(location, matches, 0, false);
+    
       return interaction.reply({
         embeds: [embed],
-        components: [row],
+        components,
         ephemeral: true
       });
-    },
-  
-    // Handle the button
-    async button(interaction, client) {
-      const [prefix, location] = interaction.customId.split('::');
-  
-      if (prefix !== 'make_public') return;
-  
-      const locationFilter = { [Op.like]: `%${location}%` };
-  
-      const matches = await db.UexTerminal.findAll({
-        where: {
-          [Op.or]: [
-            { star_system_name: locationFilter },
-            { planet_name: locationFilter },
-            { orbit_name: locationFilter },
-            { space_station_name: locationFilter },
-            { outpost_name: locationFilter },
-            { city_name: locationFilter }
-          ]
-        },
-        order: [['type', 'ASC'], ['name', 'ASC']],
-        limit: 100
-      });
-  
-      if (matches.length === 0) {
-        return interaction.update({
-          content: `❌ Terminals not found or data unavailable.`,
-          components: [],
-          embeds: [],
-          ephemeral: true
-        });
-      }
-  
-      const embed = buildTerminalEmbed(location, matches);
-  
-      return interaction.channel.send({
-        content: `Here are the public terminals for **${location}**:`,
-        embeds: [embed]
+    },   
+
+  async button(interaction) {
+    const [action, location, pageStr, isPublicRaw] = interaction.customId.split('::');
+    const page = parseInt(pageStr, 10) || 0;
+    const actionName = action.replace('uexterminals_', '');
+    const isPublic = isPublicRaw === 'true' || actionName === 'make_public';   
+
+    const locationFilter = { [Op.like]: `%${location}%` };
+    const matches = await db.UexTerminal.findAll({
+      where: {
+        [Op.or]: [
+          { star_system_name: locationFilter },
+          { planet_name: locationFilter },
+          { orbit_name: locationFilter },
+          { space_station_name: locationFilter },
+          { outpost_name: locationFilter },
+          { city_name: locationFilter }
+        ]
+      },
+      order: [['type', 'ASC'], ['name', 'ASC']],
+      limit: 1000
+    });
+    
+
+    if (!matches.length) {
+      return interaction.reply({
+        content: `❌ No terminals found at "${location}".`,
+        ephemeral: true
       });
     }
-  };
-  
+    
+    const { embed, components } = buildTerminalTableEmbed(location, matches, page, isPublic);
+
+    if (isPublic) {
+      if (interaction.message.interaction) {
+        await interaction.deferUpdate();
+
+        // First message (from /uexterminals command)
+        return interaction.channel.send({
+          content: `📍 Terminals for **${location}**:`,
+          embeds: [embed],
+          components
+        });
+      } else {
+        // We're paginating a public embed — just update it
+        return interaction.update({
+          embeds: [embed],
+          components
+        });
+      }
+    }
+    
+    
+    return interaction.update({
+      embeds: [embed],
+      components,
+      ephemeral: true
+    });
+  }
+};

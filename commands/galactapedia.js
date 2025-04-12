@@ -57,7 +57,7 @@ const {
         }
   
         const select = new StringSelectMenuBuilder()
-          .setCustomId('select-galactapedia')
+          .setCustomId('galactapedia_select')
           .setPlaceholder('Select an entry')
           .addOptions(matches.map(match => ({
             label: match.title.slice(0, 100),

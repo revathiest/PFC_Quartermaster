@@ -10,14 +10,14 @@ const {
   module.exports = {
     data: new SlashCommandBuilder()
       .setName('usagestats')
-      .setDescription('Show usage stats for yourself or another user (admin only)')
+      .setDescription('Show usage stats for yourself or another user.')
       .addUserOption(option =>
         option.setName('user')
           .setDescription('The user to show stats for (admin only)')
           .setRequired(false)
       ),
     help: 'Shows a summary of a user’s message, command, and voice usage across the server (past 30 days). Admins can query others.',
-    category: 'Admin',      
+    category: 'Discord',      
   
     async execute(interaction) {
       const targetUser = interaction.options.getUser('user') || interaction.user;

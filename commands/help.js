@@ -22,11 +22,13 @@ module.exports = {
         continue;
       }
 
+      // Skip commands with no help description
+      if (!command.help) continue;
+
       const category = command.category || 'Uncategorized';
-      const helpText = command.help || 'No description provided.';
 
       if (!categories[category]) categories[category] = [];
-      categories[category].push(`**/${command.data.name}**: ${helpText}`);
+      categories[category].push(`**/${command.data.name}**: ${command.help}`);
     }
 
     const embed = new EmbedBuilder()

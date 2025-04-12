@@ -93,6 +93,8 @@ module.exports = {
         .setDescription('Part or full name of the vehicle')
         .setRequired(true)
     ),
+    help: "Get detailed information about a specific vehicle, including price and purchase location",
+    category: "Star Citizen",
 
   async execute(interaction) {
     const name = interaction.options.getString('name');
@@ -135,15 +137,12 @@ module.exports = {
 
   async option(interaction) {
     const selectedId = interaction.values[0];
-    console.log(`[DEBUG] Vehicle selected from menu: ID = ${selectedId}`);
   
     const vehicle = await db.UexVehicle.findByPk(selectedId);
     if (!vehicle) {
       console.warn(`[WARN] Vehicle ID ${selectedId} not found in UexVehicle`);
       return interaction.update({ content: 'That vehicle could not be found.', components: [] });
     }
-  
-    console.log(`[DEBUG] Found vehicle: ${vehicle.name} (ID: ${vehicle.id})`);
   
     const embed = buildVehicleEmbed(vehicle);
   
@@ -153,12 +152,9 @@ module.exports = {
       order: [['price_buy', 'ASC']]
     });
   
-    console.log(`[DEBUG] Found ${purchaseLocations.length} purchase locations for vehicle ID ${vehicle.id}`);
-  
     if (purchaseLocations.length) {
       const locationList = purchaseLocations.map(p => {
         const terminalName = p.terminal?.name || 'Unknown';
-        console.log(`[DEBUG] Purchase location: ${terminalName} — ${p.price_buy} aUEC`);
         return `• ${terminalName} — ${p.price_buy} aUEC`;
       }).join('\n');
   

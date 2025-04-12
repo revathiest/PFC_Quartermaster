@@ -88,11 +88,12 @@ module.exports = {
         .setDescription('System, planet, or station name')
         .setRequired(true)
     ),
+  help: "List all terminals (shops) in the system, planet or station name provided.",
+  category: "Star Citizen",
 
     async execute(interaction) {
       const location = interaction.options.getString('location');
       const lowered = location.toLowerCase();
-      console.log(`[DEBUG] execute - Location input: "${location}", Lowered: "${lowered}"`);
     
       const locationFilter = (field) =>
         where(fn('LOWER', col(field)), {
@@ -114,7 +115,6 @@ module.exports = {
         limit: 1000
       });
     
-      console.log(`[DEBUG] execute - Terminals matched: ${matches.length}`);
       if (!matches.length) {
         return interaction.reply({
           content: `❌ No terminals found matching "${location}".`,

@@ -110,164 +110,149 @@ async function buildInventoryEmbed(interaction, terminal, type, page = 0, isPubl
   return { embed, components };
 }
 
-const data = new SlashCommandBuilder()
-  .setName('uexinventory')
-  .setDescription('Browse terminal inventory by location')
-  .addStringOption(option =>
-    option.setName('location')
-      .setDescription('Planet, station, or system')
-      .setRequired(true)
-  );
+module.exports = {
+  data: new SlashCommandBuilder()
+    .setName('uexinventory')
+    .setDescription('Browse terminal inventory by location')
+    .addStringOption(option =>
+      option.setName('location')
+        .setDescription('Planet, station, or system')
+        .setRequired(true)
+    ),
 
-async function execute(interaction) {
-  const location = interaction.options.getString('location');
-  const locationFilter = { [Op.like]: `%${location}%` };
+    help: "Find the inventory for any terminal (shop)",
+    category: "Star Citizen",
 
-  const terminals = await db.UexTerminal.findAll({
-    where: {
-      [Op.or]: [
-        { star_system_name: locationFilter },
-        { planet_name: locationFilter },
-        { orbit_name: locationFilter },
-        { space_station_name: locationFilter },
-        { outpost_name: locationFilter },
-        { city_name: locationFilter }
-      ]
+  async execute(interaction) {
+    const location = interaction.options.getString('location');
+    const locationFilter = { [Op.like]: `%${location}%` };
+
+    const terminals = await db.UexTerminal.findAll({
+      where: {
+        [Op.or]: [
+          { star_system_name: locationFilter },
+          { planet_name: locationFilter },
+          { orbit_name: locationFilter },
+          { space_station_name: locationFilter },
+          { outpost_name: locationFilter },
+          { city_name: locationFilter }
+        ]
+      }
+    });
+
+    if (!terminals.length) {
+      return interaction.reply({ content: `❌ No terminals found at "${location}".`, ephemeral: true });
     }
-  });
 
-  if (!terminals.length) {
-    return interaction.reply({ content: `❌ No terminals found at "${location}".`, ephemeral: true });
-  }
+    const types = [...new Set(terminals.map(t => t.type).filter(Boolean))];
+    const select = new StringSelectMenuBuilder()
+      .setCustomId(`uexinventory_type::${location}`)
+      .setPlaceholder('Select a terminal type')
+      .addOptions(types.map(t => ({ label: t, value: t })));
 
-  const types = [...new Set(terminals.map(t => t.type).filter(Boolean))];
-  const select = new StringSelectMenuBuilder()
-    .setCustomId(`uexinventory_type::${location}`)
-    .setPlaceholder('Select a terminal type')
-    .addOptions(types.map(t => ({ label: t, value: t })));
+    return interaction.reply({
+      content: `Found **${terminals.length}** terminals at **${location}**. Choose a type:`,
+      components: [new ActionRowBuilder().addComponents(select)],
+      ephemeral: true
+    });
+  },
 
-  return interaction.reply({
-    content: `Found **${terminals.length}** terminals at **${location}**. Choose a type:`,
-    components: [new ActionRowBuilder().addComponents(select)],
-    ephemeral: true
-  });
-}
+  async option(interaction) {
+    if (interaction.customId === 'uexinventory_terminal') {
+      const [prefix, terminalId, selectedType] = interaction.values[0].split('::');
 
-// ...[imports and setup unchanged]
+      const terminal = await db.UexTerminal.findByPk(terminalId);
+      if (!terminal) {
+        console.warn(`[WARN] Terminal ID ${terminalId} not found in DB`);
+        return interaction.update({
+          content: '❌ Terminal not found.',
+          components: [],
+          ephemeral: true
+        });
+      }
 
-async function option(interaction) {
+      const { embed, components } = await buildInventoryEmbed(interaction, terminal, selectedType);
+      return interaction.update({ embeds: [embed], components });
+    }
 
-  if (interaction.customId === 'uexinventory_terminal') {
-    const [prefix, terminalId, selectedType] = interaction.values[0].split('::');
+    const [, location] = interaction.customId.split('::');
+    const selectedType = interaction.values[0];
+    const locationFilter = { [Op.like]: `%${location}%` };
 
-    const terminal = await db.UexTerminal.findByPk(terminalId);
-    if (!terminal) {
-      console.warn(`[WARN] Terminal ID ${terminalId} not found in DB`);
+    const terminals = await db.UexTerminal.findAll({
+      where: {
+        type: selectedType,
+        [Op.or]: [
+          { star_system_name: locationFilter },
+          { planet_name: locationFilter },
+          { orbit_name: locationFilter },
+          { space_station_name: locationFilter },
+          { outpost_name: locationFilter },
+          { city_name: locationFilter }
+        ]
+      },
+      order: [['name', 'ASC']]
+    });
+
+    if (!terminals.length) {
       return interaction.update({
-        content: '❌ Terminal not found.',
+        content: `❌ No terminals of type \`${selectedType}\` found at **${location}**.`,
         components: [],
         ephemeral: true
       });
     }
 
-    const { embed, components } = await buildInventoryEmbed(interaction, terminal, selectedType);
+    const terminalOptions = terminals.slice(0, 25).map(term => ({
+      label: term.name || term.nickname || term.code,
+      value: `uexinventory_terminal::${term.id}::${selectedType}`
+    }));
+
+    const row = new ActionRowBuilder().addComponents(
+      new StringSelectMenuBuilder()
+        .setCustomId('uexinventory_terminal')
+        .setPlaceholder('Select a terminal')
+        .addOptions(terminalOptions)
+    );
+
     return interaction.update({
-      embeds: [embed],
-      components
-    });
-    
-  }
-
-  const [, location] = interaction.customId.split('::');
-  const selectedType = interaction.values[0];
-
-  const locationFilter = { [Op.like]: `%${location}%` };
-  const terminals = await db.UexTerminal.findAll({
-    where: {
-      type: selectedType,
-      [Op.or]: [
-        { star_system_name: locationFilter },
-        { planet_name: locationFilter },
-        { orbit_name: locationFilter },
-        { space_station_name: locationFilter },
-        { outpost_name: locationFilter },
-        { city_name: locationFilter }
-      ]
-    },
-    order: [['name', 'ASC']]
-  });
-
-  if (!terminals.length) {
-    return interaction.update({
-      content: `❌ No terminals of type \`${selectedType}\` found at **${location}**.`,
-      components: [],
+      content: `Terminals of type \`${selectedType}\` at **${location}**:`,
+      components: [row],
+      embeds: [],
       ephemeral: true
     });
+  },
+
+  async button(interaction) {
+    const [action, terminalId, type, pageStr, isPublicRaw] = interaction.customId.split('::');
+    const page = parseInt(pageStr, 10);
+    const isPublic = isPublicRaw === 'true' || action === 'uexinventory_public';
+
+    const terminal = await db.UexTerminal.findByPk(terminalId);
+    if (!terminal) {
+      return interaction.reply({ content: '❌ Terminal not found.', ephemeral: true });
+    }
+
+    const newPage =
+      action === 'uexinventory_prev' ? page - 1 :
+      action === 'uexinventory_next' ? page + 1 :
+      page;
+
+    const { embed, components, error } = await buildInventoryEmbed(interaction, terminal, type, newPage, isPublic);
+
+    if (error) {
+      return interaction.reply({ content: error, ephemeral: true });
+    }
+
+    if (action === 'uexinventory_public') {
+      await interaction.channel.send({
+        content: `📦 **Public inventory for ${terminal.name}**`,
+        embeds: [embed],
+        components
+      });
+
+      return interaction.update({ embeds: [embed], components });
+    }
+
+    return interaction.update({ embeds: [embed], components });
   }
-
-  const terminalOptions = terminals.slice(0, 25).map(term => ({
-    label: term.name || term.nickname || term.code,
-    value: `uexinventory_terminal::${term.id}::${selectedType}`
-  }));
-
-  const row = new ActionRowBuilder().addComponents(
-    new StringSelectMenuBuilder()
-      .setCustomId('uexinventory_terminal')
-      .setPlaceholder('Select a terminal')
-      .addOptions(terminalOptions)
-  );
-
-  return interaction.update({
-    content: `Terminals of type \`${selectedType}\` at **${location}**:`,
-    components: [row],
-    embeds: [],
-    ephemeral: true
-  });
-}
-
-
-async function button(interaction) {
-  const [action, terminalId, type, pageStr, isPublicRaw] = interaction.customId.split('::');
-  const page = parseInt(pageStr, 10);
-  const isPublic = isPublicRaw === 'true' || action === 'uexinventory_public';
-
-  const terminal = await db.UexTerminal.findByPk(terminalId);
-  if (!terminal) {
-    return interaction.reply({ content: '❌ Terminal not found.', ephemeral: true });
-  }
-
-  const newPage =
-    action === 'uexinventory_prev' ? page - 1 :
-    action === 'uexinventory_next' ? page + 1 :
-    page;
-
-  const { embed, components, error } = await buildInventoryEmbed(interaction, terminal, type, newPage, isPublic);
-
-  if (error) {
-    return interaction.reply({ content: error, ephemeral: true });
-  }
-
-  if (action === 'uexinventory_public') {
-    // First send the public post to the channel
-    await interaction.channel.send({
-      content: `📦 **Public inventory for ${terminal.name}**`,
-      embeds: [embed],
-      components
-    });
-
-    // Then update the original ephemeral message to reflect the change
-    return interaction.update({
-      embeds: [embed],
-      components // this no longer includes the Make Public button
-    });
-  }
-
-  // Default update for other button interactions
-  return interaction.update({
-    embeds: [embed],
-    components
-  });
-}
-
-
-module.exports = { data, execute, option, button };
+};

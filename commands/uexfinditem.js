@@ -20,10 +20,11 @@ module.exports = {
         .setDescription('Enter part of the item/commodity/vehicle name')
         .setRequired(true)
     ),
+  help: "Find all locations where you can buy or sell a specific item, commodity or vehicle.",
+  category: "Star Citizen",
 
   async execute(interaction) {
     const query = interaction.options.getString('description');
-    console.log(`[DEBUG] /uexfinditem query: ${query}`);
     await interaction.deferReply({ ephemeral: true });
 
     const [items, commodities, vehicles] = await Promise.all([
@@ -40,8 +41,6 @@ module.exports = {
         limit: 50
       })
     ]);
-
-    console.log(`[DEBUG] Found items: ${items.length}, commodities: ${commodities.length}, vehicles: ${vehicles.length}`);
 
     const itemMap = new Map();
     const commodityMap = new Map();
@@ -71,8 +70,6 @@ module.exports = {
       ...vehicleMap.values()
     ];
 
-    console.log(`[DEBUG] Total unique results: ${results.length}`);
-
     if (results.length === 0) {
       return interaction.editReply('No matches found. Try refining your search, love.');
     } else if (results.length === 1) {
@@ -92,9 +89,7 @@ module.exports = {
   },
 
   async handleSelect(interaction) {
-    console.log(`[DEBUG] handleSelect triggered: values =`, interaction.values);
     const [type, id] = interaction.values[0].split(':');
-    console.log(`[DEBUG] Parsed type: ${type}, id: ${id}`);
 
     await interaction.deferReply({ ephemeral: true });
 
@@ -115,7 +110,6 @@ module.exports = {
 
 async function handleSelection(interaction, selection, page = 0, sourceInteraction) {
   const { type, id } = selection;
-  console.log(`[DEBUG] handleSelection for type: ${type}, id: ${id}`);
   let records;
 
   switch (type) {
@@ -141,8 +135,6 @@ async function handleSelection(interaction, selection, page = 0, sourceInteracti
       });
       break;
   }
-
-  console.log(`[DEBUG] Retrieved records: ${records?.length}`);
 
   if (!records || records.length === 0) {
     return interaction.editReply('No location data found for that entry.');

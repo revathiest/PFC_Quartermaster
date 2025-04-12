@@ -1,5 +1,5 @@
 // File: commands/uexfinditem.js
-const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { Op } = require('sequelize');
 
 const {
@@ -8,6 +8,8 @@ const {
   UexVehiclePurchasePrice,
   UexTerminal
 } = require('../config/database');
+
+const PAGE_SIZE = 20;
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -21,6 +23,7 @@ module.exports = {
 
   async execute(interaction) {
     const query = interaction.options.getString('description');
+    console.log(`[DEBUG] /uexfinditem query: ${query}`);
     await interaction.deferReply({ ephemeral: true });
 
     const [items, commodities, vehicles] = await Promise.all([
@@ -37,6 +40,8 @@ module.exports = {
         limit: 50
       })
     ]);
+
+    console.log(`[DEBUG] Found items: ${items.length}, commodities: ${commodities.length}, vehicles: ${vehicles.length}`);
 
     const itemMap = new Map();
     const commodityMap = new Map();
@@ -66,10 +71,12 @@ module.exports = {
       ...vehicleMap.values()
     ];
 
+    console.log(`[DEBUG] Total unique results: ${results.length}`);
+
     if (results.length === 0) {
       return interaction.editReply('No matches found. Try refining your search, love.');
     } else if (results.length === 1) {
-      return handleSelection(interaction, results[0]);
+      return handleSelection(interaction, results[0], 0, interaction);
     }
 
     const selectMenu = new StringSelectMenuBuilder()
@@ -85,11 +92,20 @@ module.exports = {
   },
 
   async handleSelect(interaction) {
+    console.log(`[DEBUG] handleSelect triggered: values =`, interaction.values);
     const [type, id] = interaction.values[0].split(':');
+    console.log(`[DEBUG] Parsed type: ${type}, id: ${id}`);
 
     await interaction.deferReply({ ephemeral: true });
 
-    await handleSelection(interaction, { type, id: parseInt(id, 10) });
+    await handleSelection(interaction, { type, id: parseInt(id, 10) }, 0, interaction);
+  },
+
+  async button(interaction) {
+    const [prefix, type, id, pageStr] = interaction.customId.split('::');
+    const page = parseInt(pageStr, 10);
+    await interaction.deferUpdate();
+    await handleSelection(interaction, { type, id: parseInt(id, 10) }, page, interaction);
   },
 
   option: async function(interaction, client) {
@@ -97,8 +113,9 @@ module.exports = {
   }
 };
 
-async function handleSelection(interaction, selection) {
+async function handleSelection(interaction, selection, page = 0, sourceInteraction) {
   const { type, id } = selection;
+  console.log(`[DEBUG] handleSelection for type: ${type}, id: ${id}`);
   let records;
 
   switch (type) {
@@ -125,27 +142,47 @@ async function handleSelection(interaction, selection) {
       break;
   }
 
+  console.log(`[DEBUG] Retrieved records: ${records?.length}`);
+
   if (!records || records.length === 0) {
     return interaction.editReply('No location data found for that entry.');
   }
 
-  const locations = [];
-  const prices = [];
+  const filtered = records.filter(record => (record.price_buy > 0 || record.price_sell > 0));
+  const chunks = [];
+  for (let i = 0; i < filtered.length; i += PAGE_SIZE) {
+    chunks.push(filtered.slice(i, i + PAGE_SIZE));
+  }
+  const chunk = chunks[page] || [];
 
-  records.forEach(record => {
-    if (!record.price_buy || record.price_buy <= 0) return;
-    locations.push(record.terminal_name || record.terminal?.name || 'Unknown');
-    prices.push(`${record.price_buy} aUEC`);
+  const rows = chunk.map(record => {
+    const location = (record.terminal?.name || record.terminal_name || 'Unknown').padEnd(26).slice(0, 26);
+    const buy = record.price_buy > 0 ? record.price_buy.toLocaleString().padStart(8) : '     N/A';
+    const sell = record.price_sell > 0 ? record.price_sell.toLocaleString().padStart(8) : '     N/A';
+    return `| ${location} | ${buy} | ${sell} |`;
   });
 
-  const fields = [
-    { name: 'Location', value: locations.join('\n'), inline: true },
-    { name: 'Price', value: prices.join('\n'), inline: true }
-  ];
+  const header = '| Location                   |      Buy |     Sell |';
+  const divider = '|----------------------------|----------|----------|';
+  const table = '```markdown\n' + [header, divider, ...rows].join('\n') + '\n```';
 
   const embed = new EmbedBuilder()
     .setTitle('Availability')
-    .addFields(fields);
+    .setDescription(table)
+    .setFooter({ text: `Page ${page + 1} of ${chunks.length}` });
 
-  return interaction.editReply({ embeds: [embed], components: [] });
+  const buttons = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`uexfinditem::${type}::${id}::${page - 1}`)
+      .setLabel('◀️ Prev')
+      .setStyle(ButtonStyle.Secondary)
+      .setDisabled(page === 0),
+    new ButtonBuilder()
+      .setCustomId(`uexfinditem::${type}::${id}::${page + 1}`)
+      .setLabel('▶️ Next')
+      .setStyle(ButtonStyle.Secondary)
+      .setDisabled(page >= chunks.length - 1)
+  );
+
+  return interaction.editReply({ embeds: [embed], components: [buttons] });
 }

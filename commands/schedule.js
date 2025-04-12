@@ -6,8 +6,8 @@ module.exports = {
         .setDescription('Schedules an announcement as an embed')
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
     roles: ['Fleet Admiral', 'Admiral'],
-    help: 'Opens a modal to schedule a rich embedded announcement for later posting.',
-    category: 'Admin',
+    help: 'Opens a modal to schedule a rich embedded announcement for later posting. (Admin Only)',
+    category: 'Discord',
     async execute(interaction) {
         const modal = new ModalBuilder()
             .setCustomId('scheduleModal')

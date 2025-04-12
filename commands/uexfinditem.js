@@ -30,15 +30,12 @@ module.exports = {
     const [items, commodities, vehicles] = await Promise.all([
       UexItemPrice.findAll({
         where: { item_name: { [Op.like]: `%${query}%` } },
-        limit: 50
       }),
       UexCommodityPrice.findAll({
         where: { commodity_name: { [Op.like]: `%${query}%` } },
-        limit: 50
       }),
       UexVehiclePurchasePrice.findAll({
         where: { vehicle_name: { [Op.like]: `%${query}%` } },
-        limit: 50
       })
     ]);
 

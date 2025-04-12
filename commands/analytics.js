@@ -23,8 +23,8 @@ module.exports = {
                 .setRequired(false)
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-        help: 'Generates analytics reports for text usage, voice activity, or specific channel events.',
-        category: 'Admin',        
+        help: 'Generates analytics reports for text usage, voice activity, or specific channel events. (Admin Only)',
+        category: 'Discord',        
     async execute(interaction, client) {
         const memberRoles = interaction.member.roles.cache.map(role => role.name);
         if (!allowedRoles.some(role => memberRoles.includes(role))) {

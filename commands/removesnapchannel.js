@@ -13,8 +13,8 @@ module.exports = {
                 .setDescription('The snap channel to remove')
                 .setRequired(true))
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-    help: 'Removes a channel from the snap purge list.',
-    category: 'Admin',
+    help: 'Removes a channel from the snap purge list. (Admin Only)',
+    category: 'Discord',
 
     async execute(interaction) {
         const memberRoles = interaction.member.roles.cache.map(role => role.name);

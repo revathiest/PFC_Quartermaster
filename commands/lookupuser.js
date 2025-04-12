@@ -10,7 +10,7 @@ module.exports = {
         .setRequired(true)
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-    help: 'Fetches a user’s display name and tag using their Discord ID. Useful for admin lookups.',
+    help: 'Fetches a user’s display name and tag using their Discord ID. Useful for admin lookups. (Admin Only)',
     category: 'Admin',
     
   async execute(interaction) {

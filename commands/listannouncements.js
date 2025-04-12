@@ -9,8 +9,8 @@ module.exports = {
         .setDescription('List all scheduled announcements')
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
         
-    help: 'Lists all snap channels configured for automatic purge.',
-    category: 'Admin',        
+    help: 'Lists all snap channels configured for automatic purge. (Admin Only)',
+    category: 'Discord',        
     async execute(interaction) {
         const memberRoles = interaction.member.roles.cache.map(role => role.name);
         if (!allowedRoles.some(role => memberRoles.includes(role))) {

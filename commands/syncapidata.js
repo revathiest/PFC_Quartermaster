@@ -20,7 +20,7 @@ module.exports = {
     .setName('syncapidata')
     .setDescription('Sync all Star Citizen API data into the database (admin only)')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-  help: 'Admin-only command to sync all Star Citizen API data into the bot database. Displays live progress as it works.',
+  help: 'Admin-only command to sync all Star Citizen API data into the bot database. Displays live progress as it works. (Admin Only)',
   category: 'Admin',
 
   async execute(interaction) {

@@ -12,8 +12,8 @@ module.exports = {
                 .setDescription('The ID of the announcement to delete')
                 .setRequired(true))// Already includes:
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-    help: 'Deletes a scheduled announcement by its ID. Only available to Admirals and Fleet Admirals.',
-    category: 'Admin',                
+    help: 'Deletes a scheduled announcement by its ID. Only available to Admirals and Fleet Admirals. (Admin Only)',
+    category: 'Discord',                
     async execute(interaction) {
         const memberRoles = interaction.member.roles.cache.map(role => role.name);
         if (!allowedRoles.some(role => memberRoles.includes(role))) {

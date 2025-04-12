@@ -10,7 +10,8 @@ const {
   syncUexCommodityPrices,
   syncUexFuelPrices,
   syncUexVehiclePurchasePrices,
-  syncUexVehicleRentalPrices
+  syncUexVehicleRentalPrices,
+  syncUexPois
 } = require('../botactions/api/syncEndpoints');
 const { isAdmin } = require('../botactions/userManagement/permissions');
 
@@ -36,7 +37,7 @@ module.exports = {
     const getFormattedTable = () => {
       const pad = (str, len) => String(str).padEnd(len, ' ');
       const headers = ['Endpoint', 'New', 'Updated', 'Skipped', 'Total'];
-      const colWidths = [15, 6, 8, 8, 6];
+      const colWidths = [18, 6, 8, 8, 6];
     
       const formatRow = (row) =>
         '| ' + row.map((val, i) => pad(val, colWidths[i])).join('|') + '|';
@@ -82,17 +83,18 @@ module.exports = {
       await interaction.editReply({ embeds: [embed] });
     };
 
-    await updateStep('manufacturers', syncManufacturers);
-    await updateStep('vehicles', syncVehicles);
-    await updateStep('galactapedia', syncGalactapedia);
-    await updateStep('uex_vehicles', syncUexVehicles);
-    await updateStep('terminals', syncUexTerminals);
-    await updateStep('items', syncUexItemPrices);
-    await updateStep('category', syncUexCategories);
-    await updateStep('commodities', syncUexCommodityPrices);
-    await updateStep('fuel', syncUexFuelPrices);
-    await updateStep('vehicle_price', syncUexVehiclePurchasePrices);
-    await updateStep('vehicle_rental', syncUexVehicleRentalPrices);
+    await updateStep('Shops', syncUexTerminals);
+    await updateStep('Manufacturers', syncManufacturers);
+    await updateStep('Galactapedia', syncGalactapedia);
+    await updateStep('Vehicles (wiki)', syncVehicles);
+    await updateStep('Vehicles (uex)', syncUexVehicles);
+    await updateStep('Items', syncUexItemPrices);
+    await updateStep('Categories', syncUexCategories);
+    await updateStep('Commodities', syncUexCommodityPrices);
+    await updateStep('Fuel', syncUexFuelPrices);
+    await updateStep('Vehicle Prices', syncUexVehiclePurchasePrices);
+    await updateStep('Vehicle Rentals', syncUexVehicleRentalPrices);
+    await updateStep('Points of Interest', syncUexPois);
 
     embed.title = '✅ API Sync Complete';
     embed.color = 0x00ff99;

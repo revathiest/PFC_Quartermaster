@@ -4,7 +4,7 @@
   "description": "The Pyro Freelancer Corps Discord Bot",
   "main": "bot.js",
   "scripts": {
-    "prestart": "cls && npm install",
+    "prestart": "node -e \"process.stdout.write('\\x1Bc')\" && npm install",
     "start": "node bot.js"
   },
   "author": "Kenneth Hart",

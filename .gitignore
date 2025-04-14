@@ -2,6 +2,7 @@
 .env
 config.json
 databaseConfig.json
+userPrompts.json
 quartermaster_prompt.txt
 
 # System/tool-specific files

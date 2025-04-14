@@ -3,20 +3,14 @@ const filter = require('../../messages.json');
 const OpenAI = require('openai');
 const fs = require('fs');
 const path = require('path');
-const knownRoles = require('../../knownRoles.json');
-
-let quartermasterPrompt = '';
-try {
-    quartermasterPrompt = fs.readFileSync(
-        path.join(__dirname, '../../quartermaster_prompt.txt'),
-        'utf8'
-    );
-} catch (err) {
-    console.error('[PROMPT LOAD ERROR]', err);
-    quartermasterPrompt = 'You are a helpful and friendly bot.'; // Fallback
-}
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// 📜 Convert array-based prompts into clean strings
+function normalizePrompt(input) {
+    if (!input) return '';
+    return Array.isArray(input) ? input.join('\n') : input;
+}
 
 module.exports = {
     handleMessageCreate: async function (message, client) {
@@ -24,46 +18,62 @@ module.exports = {
 
         const serverId = message.guild.id;
 
-        // 🔥 NEW: If bot is mentioned, reply with OpenAI
+        // 🔥 OpenAI Trigger — Bot Mentioned
         if (message.mentions.has(client.user)) {
-            const prompt = message.content.replace(/<@!?(\d+)>/, '').trim();
-            if (!prompt) return;
+            const promptText = message.content.replace(/<@!?(\d+)>/, '').trim();
+            if (!promptText) return;
 
             const model = process.env.OPENAI_MODEL;
 
-            // 🧠 Determine user role level by checking their roles
+            // 🧠 Load prompt data
+            let prompts = {};
+            try {
+                prompts = JSON.parse(
+                    fs.readFileSync(path.join(__dirname, '../../userPrompts.json'), 'utf8')
+                );
+            } catch (err) {
+                console.warn('[PROMPT LOAD ERROR]', err);
+                prompts = { default: ["You are a helpful and friendly AI assistant."] };
+            }
+
+            const userId = message.author.id;
             const memberRoles = message.member?.roles?.cache;
-            let userRoleLevel = 'default';
+            let finalPrompt = '';
 
-            if (memberRoles) {
+            // 1️⃣ Specific User Prompt
+            if (prompts.users?.[userId]) {
+                finalPrompt = normalizePrompt(prompts.users[userId]);
+                console.log(`[PROMPT] Using custom prompt for user ${userId}`);
+
+            // 2️⃣ Role-Based Prompt (dynamic)
+            } else if (memberRoles) {
                 const roleNames = memberRoles.map(role => role.name);
+                const roleMappings = prompts.roleMappings || {};
+                const basePrompt = normalizePrompt(prompts.default);
+                let roleAddition = '';
 
-                if (roleNames.some(role => knownRoles.leader.includes(role))) {
-                    userRoleLevel = 'leader';
-                } else if (roleNames.some(role => knownRoles.officer.includes(role))) {
-                    userRoleLevel = 'officer';
-                } else if (roleNames.some(role => knownRoles.quartermaster.includes(role))) {
-                    userRoleLevel = 'quartermaster';
+                for (const [roleKey, mappedNames] of Object.entries(roleMappings)) {
+                    if (mappedNames.some(mappedRole => roleNames.includes(mappedRole))) {
+                        roleAddition = normalizePrompt(prompts.roles?.[roleKey]);
+                        console.log(`[PROMPT] Matched role "${roleKey}" via "${mappedNames}"`);
+                        break;
+                    }
                 }
+
+                finalPrompt = [basePrompt, roleAddition].filter(Boolean).join('\n\n');
+
+            // 3️⃣ Default Fallback
+            } else {
+                finalPrompt = normalizePrompt(prompts.default);
             }
 
-            // 🪖 Adjust prompt with rank-based respect
-            let rolePrompt = quartermasterPrompt;
-
-            if (userRoleLevel === 'leader') {
-                rolePrompt += `\n\nYou are speaking to one of the organization's top-ranking officers. Mind your tone. Show respect — not with sweetness, but with recognition. They've bled for this crew. You don’t sass command.`;
-            } else if (userRoleLevel === 'officer') {
-                rolePrompt += `\n\nYou are speaking to a ranking officer in the organization. Watch your mouth. They’re not command, but they’ve held the line long enough to deserve your respect. You can be blunt — but keep it clean.`;
-            } else if (userRoleLevel === 'quartermaster') {
-                rolePrompt += `\n\nYou're speaking to a fellow Quartermaster. Speak like someone who's shared too many supply runs and not enough rations. Mutual respect, but still rough around the edges.`;
-            }
-
+            // 💬 ChatGPT Response
             try {
                 const completion = await openai.chat.completions.create({
                     model: model,
                     messages: [
-                        { role: "system", content: rolePrompt },
-                        { role: "user", content: prompt }
+                        { role: "system", content: finalPrompt },
+                        { role: "user", content: promptText }
                     ],
                     temperature: 0.7,
                 });

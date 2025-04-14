@@ -68,7 +68,7 @@ module.exports = {
     ];
 
     if (results.length === 0) {
-      return interaction.editReply('No matches found. Try refining your search, love.');
+      return interaction.editReply('No matches found. Try refining your search.');
     } else if (results.length === 1) {
       return handleSelection(interaction, results[0], 0, interaction);
     }

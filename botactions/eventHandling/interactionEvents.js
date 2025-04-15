@@ -213,11 +213,7 @@ async function handleSelectMenu(interaction, client) {
         event_time: new Date(),
       });
   
-      console.log(`[DEBUG] Select menu interaction logged for command: ${commandName}`);
-      console.log(`[DEBUG] customId received: ${id}`);
-  
       if (command) {
-        console.log(`[DEBUG] Routing to option() handler in: ${commandName}`);
         await command.option(interaction, client);
       } else {
         console.warn(`[WARN] No select menu handler matched for customId: ${id}`);

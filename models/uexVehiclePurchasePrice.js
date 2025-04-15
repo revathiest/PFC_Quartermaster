@@ -1,5 +1,4 @@
 const { DataTypes } = require('sequelize');
-const { UexVehiclePurchasePrice } = require('../config/database');
 
 module.exports = (sequelize) => {
   const UexVehiclePurchasePrice = sequelize.define('UexVehiclePurchasePrice', {

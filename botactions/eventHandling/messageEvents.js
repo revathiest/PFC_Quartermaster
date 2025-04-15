@@ -20,11 +20,6 @@ module.exports = {
 
         // 🔥 OpenAI Trigger — Bot Mentioned
         if (message.mentions.has(client.user)) {
-            const promptText = message.content.replace(/<@!?(\d+)>/, '').trim();
-            if (!promptText) return;
-
-            const model = process.env.OPENAI_MODEL;
-
             // 🧠 Load prompt data
             let prompts = {};
             try {
@@ -35,6 +30,39 @@ module.exports = {
                 console.warn('[PROMPT LOAD ERROR]', err);
                 prompts = { default: ["You are a helpful and friendly AI assistant."] };
             }
+        
+            // 🛡️ Channel name check
+            const allowedChannelNames = prompts.allowedChannelNames || [];
+            const channelName = message.channel.name;
+            if (!allowedChannelNames.includes(channelName)) {
+                console.log(`[AI BLOCKED] Message in disallowed channel: ${channelName}`);
+            
+                const fallbackChannelName = allowedChannelNames[0];
+                const fallbackChannel = message.guild.channels.cache.find(
+                    ch => ch.name === fallbackChannelName && ch.isTextBased?.()
+                );
+            
+                let reply = "Not here, crewman.";
+                if (fallbackChannel) {
+                    reply += ` Take it to ${fallbackChannel} if you've got something worth sayin’.`;
+                } else {
+                    reply += " Take it to an approved channel if you've got something worth sayin’.";
+                }
+            
+                try {
+                    await message.reply(reply);
+                } catch (err) {
+                    console.error('[REPLY ERROR] Could not send fallback channel notice:', err);
+                }
+            
+                return;
+            }
+                      
+        
+            const promptText = message.content.replace(/<@!?(\d+)>/, '').trim();
+            if (!promptText) return;
+        
+            const model = process.env.OPENAI_MODEL;        
 
             const userId = message.author.id;
             const memberRoles = message.member?.roles?.cache;

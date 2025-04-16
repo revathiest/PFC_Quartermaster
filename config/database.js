@@ -35,6 +35,7 @@ const UexFuelPrice = require('../models/uexFuelPrice')(sequelize);
 const UexVehiclePurchasePrice = require('../models/uexVehiclePurchasePrice')(sequelize);
 const UexVehicleRentalPrice = require('../models/uexVehicleRentalPrice')(sequelize);
 const UexPoi = require('../models/uexPoi')(sequelize);
+const Accolade = require('../models/accolade')(sequelize);
 
 Object.values(sequelize.models).forEach(model => {
     if (typeof model.associate === 'function') {
@@ -42,14 +43,25 @@ Object.values(sequelize.models).forEach(model => {
     }
   });
 
-const initializeDatabase = async () => {
+  const initializeDatabase = async () => {
     try {
-        await sequelize.sync({ force: false });  // Set to true only if you want to drop and recreate tables
-        console.log('Database synchronized');
+      console.log('Starting database synchronization...\n');
+  
+      for (const [modelName, model] of Object.entries(sequelize.models)) {
+        try {
+          await model.sync({ alter: false }); // You can change to force: true or alter: true if needed
+          console.log(`✅ Synced model: ${modelName}`);
+        } catch (modelError) {
+          console.error(`❌ Failed to sync model: ${modelName}`, modelError);
+        }
+      }
+  
+      console.log('\n✅ All models synchronized');
     } catch (error) {
-        console.error('Unable to synchronize the database:', error);
+      console.error('❌ Unable to synchronize the database:', error);
     }
-};
+  };
+  
 
 module.exports = {
     sequelize,
@@ -77,5 +89,6 @@ module.exports = {
     UexFuelPrice,
     UexVehiclePurchasePrice,
     UexVehicleRentalPrice,
-    UexPoi
+    UexPoi,
+    Accolade
 };

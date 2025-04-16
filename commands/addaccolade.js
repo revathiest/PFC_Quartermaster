@@ -5,6 +5,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('addaccolade')
     .setDescription('Register a role as an accolade and post it to the Wall of Fame.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addRoleOption(option => 
       option.setName('role')
         .setDescription('The role to designate as an accolade')

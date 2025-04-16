@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { Accolade } = require('../config/database'); // Adjust path to your model
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 
 module.exports = {
   data: new SlashCommandBuilder()

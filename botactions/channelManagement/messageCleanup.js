@@ -1,5 +1,9 @@
 const { SnapChannel } = require('../../config/database');
 
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function deleteMessages(client) {
     console.log('🧹 Starting snapchannel cleanup process...');
 
@@ -64,21 +68,30 @@ async function deleteMessages(client) {
 
                     if (tooOld.size > 0) {
                         console.log(`⏳ Deleting ${tooOld.size} old messages individually in #${channel.name}`);
-                        function delay(ms) {
-                            return new Promise(resolve => setTimeout(resolve, ms));
-                        }
-                        
+
+                        let counter = 1;
                         for (const [id, msg] of tooOld) {
+                            console.log(`⏳ [${counter}/${tooOld.size}] Attempting to delete message ${msg.id}...`);
+
                             try {
                                 await msg.delete();
-                                console.log(`🗑️ Deleted old message: ${msg.id}`);
-                                await delay(1000); // 1 second pause between deletes
+                                console.log(`✅ Deleted message ${msg.id}`);
                             } catch (err) {
-                                console.error(`❌ Failed to delete old message ${msg.id}:`, err);
-                                await delay(1500); // wait longer after an error, just in case
+                                console.error(`❌ Failed to delete message ${msg.id} — ${err.code || err.message}`);
+
+                                if (err.code === 50013) {
+                                    console.error(`🔒 Missing permissions to delete message in #${channel.name}`);
+                                } else if (err.code === 10008) {
+                                    console.error(`👻 Message already deleted (ghost): ${msg.id}`);
+                                }
+
+                                await delay(1500);
+                                continue;
                             }
+
+                            await delay(1000);
+                            counter++;
                         }
-                        
                     }
 
                     if (deletable.size === 0 && tooOld.size === 0) {

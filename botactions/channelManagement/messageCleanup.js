@@ -6,6 +6,7 @@ function delay(ms) {
 
 async function deleteMessages(client) {
     console.log('🧹 Starting snapchannel cleanup process...');
+    console.log(`🤖 Logged in as ${client.user.tag} (${client.user.id})`);
 
     try {
         for (const [guildId, guild] of client.guilds.cache) {
@@ -32,7 +33,8 @@ async function deleteMessages(client) {
                 }
 
                 if (channel && (channel.type === 0 || channel.type === 5)) {
-                    console.log(`📨 Fetching messages in #${channel.name}`);
+                    const botHasPerms = channel.permissionsFor(client.user)?.has('ManageMessages');
+                    console.log(`🔐 Bot ${botHasPerms ? 'HAS' : 'DOES NOT HAVE'} Manage Messages in #${channel.name}`);
 
                     let messages;
                     try {
@@ -72,6 +74,9 @@ async function deleteMessages(client) {
                         let counter = 1;
                         for (const [id, msg] of tooOld) {
                             console.log(`⏳ [${counter}/${tooOld.size}] Attempting to delete message ${msg.id}...`);
+                            console.log(`   📄 Author: ${msg.author.tag} (${msg.author.id})`);
+                            console.log(`   🤖 Bot is author? ${msg.author.id === client.user.id}`);
+                            console.log(`   🧾 Message created at: ${new Date(msg.createdTimestamp).toISOString()}`);
 
                             try {
                                 await msg.delete();
@@ -83,6 +88,8 @@ async function deleteMessages(client) {
                                     console.error(`🔒 Missing permissions to delete message in #${channel.name}`);
                                 } else if (err.code === 10008) {
                                     console.error(`👻 Message already deleted (ghost): ${msg.id}`);
+                                } else {
+                                    console.error(`💥 Unexpected error deleting ${msg.id}:`, err);
                                 }
 
                                 await delay(1500);

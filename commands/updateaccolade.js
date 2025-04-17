@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { Accolade } = require('../config/database');
+const { buildAccoladeEmbed } = require('../utils/accoladeEmbedBuilder');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -18,7 +19,7 @@ module.exports = {
       option.setName('description')
         .setDescription('New description for the accolade')
         .setRequired(false)),
-  
+
   help: 'Admin-only command to update an existing accolade\'s emoji or description.',
   category: 'Admin',
 
@@ -46,24 +47,30 @@ module.exports = {
     if (emoji) accolade.emoji = emoji;
     if (description) accolade.description = description;
     accolade.date_modified = Math.floor(Date.now() / 1000);
-
     await accolade.save();
 
-    // Update the existing message in the Wall of Fame
     try {
       const guild = interaction.guild;
       const channel = await guild.channels.fetch(accolade.channel_id);
       if (channel && (channel.type === 0 || channel.type === 'GUILD_TEXT')) {
-        await guild.members.fetch(); // Refresh cache
+        await guild.members.fetch();
+
         const recipients = guild.members.cache
           .filter(member => member.roles.cache.has(accolade.role_id))
-          .map(member => `• ${member}`)
-          .join('\n') || '_No current recipients_';
+          .map(member => member);
 
-        const updatedContent = `${accolade.emoji || ''} **[ACCOLADE: ${accolade.name}]**\n_${accolade.description}_\n\n**Recipients:**\n${recipients}\n_Updated: <t:${Math.floor(Date.now() / 1000)}:F>_`;
+        const embed = buildAccoladeEmbed(accolade, recipients);
+        const oldMessage = await channel.messages.fetch(accolade.message_id).catch(() => null);
 
-        const message = await channel.messages.fetch(accolade.message_id);
-        if (message) await message.edit(updatedContent);
+        if (oldMessage) {
+          await oldMessage.edit({ embeds: [embed], content: '' });
+          console.log(`📝 Edited message for ${accolade.name}`);
+        } else {
+          const newMessage = await channel.send({ embeds: [embed] });
+          accolade.message_id = newMessage.id;
+          await accolade.save();
+          console.log(`📬 Sent new message for ${accolade.name}`);
+        }
       }
     } catch (err) {
       console.error('❌ Failed to update accolade message:', err);

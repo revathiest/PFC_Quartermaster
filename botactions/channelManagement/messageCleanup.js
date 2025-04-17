@@ -17,7 +17,7 @@ async function deleteMessages(client) {
             }
 
             for (const channelInfo of channels) {
-                console.log(`🔄 Processing channel ID: ${channelInfo.channelId}`); // DEBUG
+                console.log(`🔄 Processing channel ID: ${channelInfo.channelId}`);
 
                 let channel;
                 try {
@@ -28,7 +28,7 @@ async function deleteMessages(client) {
                 }
 
                 if (channel && (channel.type === 0 || channel.type === 5)) {
-                    console.log(`📨 Fetching messages in #${channel.name}`); // DEBUG
+                    console.log(`📨 Fetching messages in #${channel.name}`);
 
                     let messages;
                     try {
@@ -40,30 +40,44 @@ async function deleteMessages(client) {
 
                     const purgeTime = new Date();
                     purgeTime.setDate(purgeTime.getDate() - channelInfo.purgeTimeInDays);
-                    console.log(`📅 Deleting messages older than: ${purgeTime.toISOString()}`); // DEBUG
+                    console.log(`📅 Deleting messages older than: ${purgeTime.toISOString()}`);
 
                     const messagesToDelete = messages.filter(msg =>
                         !msg.pinned && msg.createdTimestamp <= purgeTime.getTime()
                     );
 
+                    const deletable = messagesToDelete.filter(msg =>
+                        Date.now() - msg.createdTimestamp <= 14 * 24 * 60 * 60 * 1000
+                    );
                     const tooOld = messagesToDelete.filter(msg =>
                         Date.now() - msg.createdTimestamp > 14 * 24 * 60 * 60 * 1000
                     );
 
-                    if (tooOld.size > 0) {
-                        console.log(`⚠️ ${tooOld.size} messages too old to bulk delete in #${channel.name}`);
+                    if (deletable.size > 0) {
+                        try {
+                            await channel.bulkDelete(deletable, true);
+                            console.log(`✅ Bulk deleted ${deletable.size} messages in #${channel.name}`);
+                        } catch (deleteErr) {
+                            console.error(`❌ Error during bulk delete in #${channel.name}:`, deleteErr);
+                        }
                     }
 
-                    if (messagesToDelete.size > 0) {
-                        try {
-                            await channel.bulkDelete(messagesToDelete, true);
-                            console.log(`✅ Deleted ${messagesToDelete.size} messages in #${channel.name}`);
-                        } catch (deleteErr) {
-                            console.error(`❌ Error deleting messages in #${channel.name}:`, deleteErr);
+                    if (tooOld.size > 0) {
+                        console.log(`⏳ Deleting ${tooOld.size} old messages individually in #${channel.name}`);
+                        for (const [id, msg] of tooOld) {
+                            try {
+                                await msg.delete();
+                                console.log(`🗑️ Deleted old message: ${msg.id}`);
+                            } catch (err) {
+                                console.error(`❌ Failed to delete old message ${msg.id}:`, err);
+                            }
                         }
-                    } else {
+                    }
+
+                    if (deletable.size === 0 && tooOld.size === 0) {
                         console.log(`ℹ️ No messages to delete in #${channel.name}`);
                     }
+
                 } else {
                     console.log(`⚠️ Invalid or unsupported channel type for ID: ${channelInfo.channelId}`);
                 }

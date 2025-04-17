@@ -109,6 +109,7 @@ const initializeBot = async () => {
             try {
                 setInterval(() => checkEvents(client), 60000);
                 console.log('Check Events interval successfully started');
+                await deleteMessages(client);
                 setInterval(() => deleteMessages(client), 86400000);
                 console.log('Delete Messages interval successfully started');
             } catch (error) {

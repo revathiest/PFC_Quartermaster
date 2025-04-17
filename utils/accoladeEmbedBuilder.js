@@ -5,29 +5,35 @@ function buildAccoladeEmbed(accolade, recipients) {
 
   const thumbnailUrl = accolade.thumbnail_url || 'https://i.imgur.com/5sZV5QN.png';
   const footerIcon = accolade.footer_icon_url || 'https://i.imgur.com/5sZV5QN.png';
+  const embedColor = accolade.color || 0xD4AF37; // Prestige gold
+
+  // 🏅 Elegant Title: Emoji + Bold Name
+  const title = `${accolade.emoji || ''}  **${accolade.name}**`;
+
+  // 📝 Italic Description
+  const description = accolade.description
+    ? `*${accolade.description.trim()}*`
+    : '*No description set.*';
 
   if (!recipients || recipients.length === 0) {
     return new EmbedBuilder()
-      .setColor('#0099ff')
-      .setTitle(`${accolade.emoji || ''} Accolade: ${accolade.name}`)
-      .setDescription(accolade.description || 'No description set.')
+      .setColor(embedColor)
+      .setTitle(title)
+      .setDescription(description)
       .addFields({ name: 'Recipients', value: '_No current recipients_' })
       .setThumbnail(thumbnailUrl)
       .setTimestamp()
-      .setFooter({ text: 'Official PFC Recognition', iconURL: footerIcon });
+      .setFooter({ text: 'PFC Accolade Registry', iconURL: footerIcon });
   }
 
-  // Split into 3 roughly equal columns
   const chunkSize = Math.ceil(recipients.length / 3);
   const columns = [[], [], []];
 
   recipients.forEach((member, index) => {
     const colIndex = Math.floor(index / chunkSize);
 
-    // 🔍 Strip leading tags like [FOO], (FOO), etc.
+    // 🎯 Clean display name: remove [TAGS] and prevent wrap
     const cleanedName = member.displayName.replace(/^[\[\(\{<][^\]\)\}>]+[\]\)\}>]\s*/g, '');
-
-    // ⛔ Prevent line wrapping by replacing spaces with non-breaking spaces
     const noWrapName = cleanedName.replace(/ /g, '\u00A0');
 
     columns[colIndex].push(`• ${noWrapName}`);
@@ -36,19 +42,19 @@ function buildAccoladeEmbed(accolade, recipients) {
   const fields = columns
     .filter(col => col.length > 0)
     .map(col => ({
-      name: '\u200B',
+      name: '\u200B', // Invisible field title for 3-column layout
       value: col.join('\n').slice(0, maxFieldLength),
       inline: true
     }));
 
   return new EmbedBuilder()
-    .setColor('#0099ff')
-    .setTitle(`${accolade.emoji || ''} Accolade: ${accolade.name}`)
-    .setDescription(accolade.description || 'No description set.')
+    .setColor(embedColor)
+    .setTitle(title)
+    .setDescription(description)
     .addFields(fields)
     .setThumbnail(thumbnailUrl)
     .setTimestamp()
-    .setFooter({ text: 'Official PFC Recognition', iconURL: footerIcon });
+    .setFooter({ text: 'PFC Accolade Registry', iconURL: footerIcon });
 }
 
 module.exports = { buildAccoladeEmbed };

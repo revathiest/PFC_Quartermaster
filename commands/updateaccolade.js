@@ -25,7 +25,18 @@ module.exports = {
 
   async execute(interaction) {
     const role = interaction.options.getRole('role');
-    const emoji = interaction.options.getString('emoji');
+    const rawEmoji = interaction.options.getString('emoji')?.trim();
+    const isValidEmoji = !rawEmoji || /^<a?:\w+:\d+>$|^\p{Extended_Pictographic}$/u.test(rawEmoji);
+    
+    if (rawEmoji && !isValidEmoji) {
+      return interaction.reply({
+        content: '❌ Please provide a valid emoji (Unicode or custom Discord emoji).',
+        ephemeral: true
+      });
+    }
+    
+    const emoji = rawEmoji;
+    
     const description = interaction.options.getString('description');
 
     const accolade = await Accolade.findOne({ where: { role_id: role.id } });

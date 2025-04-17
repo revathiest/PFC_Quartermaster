@@ -20,7 +20,7 @@
     "sequelize": "^6.37.3",
     "openai": "^4.0.0"
   },
-  "nodeVersion": "21.6.2",
+  "nodeVersion": "22.14.0",
   "devDependencies": {
     "@tsconfig/node10": "^1.0.9"
   }

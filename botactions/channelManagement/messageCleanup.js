@@ -80,7 +80,22 @@ async function deleteMessages(client) {
 
                             try {
                                 await msg.delete();
-                                console.log(`✅ Deleted message ${msg.id}`);
+                                await delay(500);
+
+                                let check = null;
+                                try {
+                                    check = await channel.messages.fetch(msg.id);
+                                } catch (err) {
+                                    if (err.code === 10008) {
+                                        console.log(`✅ Confirmed deletion of message ${msg.id}`);
+                                    } else {
+                                        console.error(`❓ Error when confirming deletion of message ${msg.id}:`, err);
+                                    }
+                                }
+
+                                if (check) {
+                                    console.warn(`🚨 Deletion failed silently — message ${msg.id} still exists!`);
+                                }
                             } catch (err) {
                                 console.error(`❌ Failed to delete message ${msg.id} — ${err.code || err.message}`);
 
@@ -88,8 +103,6 @@ async function deleteMessages(client) {
                                     console.error(`🔒 Missing permissions to delete message in #${channel.name}`);
                                 } else if (err.code === 10008) {
                                     console.error(`👻 Message already deleted (ghost): ${msg.id}`);
-                                } else {
-                                    console.error(`💥 Unexpected error deleting ${msg.id}:`, err);
                                 }
 
                                 await delay(1500);

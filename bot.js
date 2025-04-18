@@ -1,5 +1,7 @@
 // Require the necessary discord.js classes
 require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
 const { initClient } = require('./botactions/initClient');
 const { interactionHandler, handleMessageCreate, handleReactionAdd, handleReactionRemove, handleVoiceStateUpdate } = require('./botactions/eventHandling');
 const { registerChannels, deleteMessages } = require('./botactions/channelManagement');
@@ -12,8 +14,20 @@ const { handleCreateEvent, handleUpdateEvent, handleDeleteEvent, syncEventsInDat
 
 const botType = process.env.BOT_TYPE;
 
-const fs = require('fs');
-const logStream = fs.createWriteStream('bot.log', { flags: 'a' });
+const logDir = path.join(__dirname, 'logs');
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir);
+}
+
+const now = new Date();
+const pad = (n) => n.toString().padStart(2, '0');
+const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}`;
+
+const logFileName = `bot-${timestamp}.log`;
+const logFilePath = path.join(logDir, logFileName);
+
+const logStream = fs.createWriteStream(logFilePath, { flags: 'a' });
+
 
 const origConsoleError = console.error;
 const origConsoleLog = console.log;
@@ -27,6 +41,7 @@ console.log = (...args) => {
   logStream.write('[LOG] ' + args.join(' ') + '\n');
   origConsoleLog(...args);
 };
+
 
 
 // Load configuration before initializing the client

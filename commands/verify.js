@@ -104,11 +104,13 @@ const {
             // Update role if user has Recruit
             const recruitRole = interaction.guild.roles.cache.find(r => r.name === 'Recruit');
             const ensignRole = interaction.guild.roles.cache.find(r => r.name === 'Ensign');
+            const pfcRole = interaction.guild.roles.cache.find(r => r.name === 'Pyro Freelancer Corps');
             
             if (recruitRole && ensignRole && member.roles.cache.has(recruitRole.id)) {
                 try {
                     await member.roles.remove(recruitRole);
                     await member.roles.add(ensignRole);
+                    await member.roles.add(pfcRole);
                     console.log(`[VERIFY BUTTON] Role updated: Recruit → Ensign`);
                 } catch (err) {
                     console.warn(`[VERIFY BUTTON] Couldn't update roles:`, err.message);

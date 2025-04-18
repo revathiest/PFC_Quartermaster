@@ -8,11 +8,8 @@ const cheerio = require('cheerio');
  */
 async function fetchRsiProfileInfo(rsiHandle) {
   const url = `https://robertsspaceindustries.com/citizens/${rsiHandle}`;
-  console.log(`[SCRAPER] Fetching profile for: ${rsiHandle}`);
-  console.log(`[SCRAPER] URL: ${url}`);
 
   const res = await fetch(url);
-  console.log(`[SCRAPER] Status: ${res.status}`);
 
   if (!res.ok) {
     throw new Error(`Failed to fetch RSI profile: ${res.status}`);
@@ -23,7 +20,6 @@ async function fetchRsiProfileInfo(rsiHandle) {
 
   // ✅ Extract Bio
   const bio = $('.entry.bio .value').text().trim();
-  console.log(`[SCRAPER] Bio found: ${bio || '[None]'}`);
 
   // ✅ Extract Org ID (Spectrum Identification)
   const sidLabel = $('span.label').filter((i, el) =>
@@ -32,8 +28,6 @@ async function fetchRsiProfileInfo(rsiHandle) {
   const orgId = sidLabel.length > 0
     ? sidLabel.next('strong').text().trim().toUpperCase()
     : null;
-
-  console.log(`[SCRAPER] Org ID found: ${orgId || '[None]'}`);
 
   return { bio, orgId };
 }

@@ -78,8 +78,6 @@ const {
   
       try {
         const { bio, orgId } = await fetchRsiProfileInfo(rsiHandle);
-        console.log(`[VERIFY BUTTON] Bio: ${bio}`);
-        console.log(`[VERIFY BUTTON] Org ID: ${orgId}`);
   
         if (!bio || !bio.includes(code)) {
           return interaction.editReply({
@@ -98,7 +96,6 @@ const {
   
           try {
             await member.setNickname(newNick);
-            console.log(`[VERIFY BUTTON] Nickname updated to: ${newNick}`);
           } catch (err) {
             console.warn(`[VERIFY BUTTON] Couldn't update nickname:`, err.message);
           }

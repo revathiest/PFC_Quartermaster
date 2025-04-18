@@ -8,6 +8,7 @@ const {
   UexVehiclePurchasePrice,
   UexTerminal
 } = require('../config/database');
+const { isUserVerified } = require('../utils/verifyGuard');
 
 const PAGE_SIZE = 20;
 
@@ -24,6 +25,14 @@ module.exports = {
   category: "Star Citizen",
 
   async execute(interaction) {
+
+    if (!(await isUserVerified(interaction.user.id))) {
+      return interaction.reply({
+        content: '❌ You must verify your RSI profile using `/verify` before using this command.',
+        ephemeral: true
+      });
+    }
+    
     const query = interaction.options.getString('description');
     await interaction.deferReply({ ephemeral: true });
 

@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, EmbedBuilder } = require('discord.js');
 const db = require('../config/database');
 const { Op } = require('sequelize');
+const { isUserVerified } = require('../utils/verifyGuard');
 
 const VEHICLE_ROLES = {
   is_spaceship: 'Spaceship',
@@ -97,8 +98,15 @@ module.exports = {
     category: "Star Citizen",
 
   async execute(interaction) {
-    const name = interaction.options.getString('name');
 
+    if (!(await isUserVerified(interaction.user.id))) {
+      return interaction.reply({
+        content: '❌ You must verify your RSI profile using `/verify` before using this command.',
+        ephemeral: true
+      });
+    }
+
+    const name = interaction.options.getString('name');
     const matches = await db.UexVehicle.findAll({
       where: {
         name: {

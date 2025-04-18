@@ -6,6 +6,7 @@ const {
   const { UsageLog, VoiceLog } = require('../config/database');
   const { Op } = require('sequelize');
   const { isAdmin } = require('../botactions/userManagement/permissions');
+  const { isUserVerified } = require('../utils/verifyGuard');
   
   module.exports = {
     data: new SlashCommandBuilder()
@@ -20,6 +21,13 @@ const {
     category: 'Discord',      
   
     async execute(interaction) {
+
+      if (!(await isUserVerified(interaction.user.id))) {
+        return interaction.reply({
+          content: '❌ You must verify your RSI profile using `/verify` before using this command.',
+          ephemeral: true
+        });
+      }
       const targetUser = interaction.options.getUser('user') || interaction.user;
       const isUserAdmin = await isAdmin(interaction.member);
       const serverId = interaction.guildId;

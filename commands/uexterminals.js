@@ -8,6 +8,7 @@ const {
 const { Op } = require('sequelize');
 const db = require('../config/database');
 const { fn, col, where } = require('sequelize');
+const { isUserVerified } = require('../utils/verifyGuard');
 
 const PAGE_SIZE = 15;
 
@@ -92,6 +93,14 @@ module.exports = {
   category: "Star Citizen",
 
     async execute(interaction) {
+
+      if (!(await isUserVerified(interaction.user.id))) {
+        return interaction.reply({
+          content: '❌ You must verify your RSI profile using `/verify` before using this command.',
+          ephemeral: true
+        });
+      }
+      
       const location = interaction.options.getString('location');
       const lowered = location.toLowerCase();
     

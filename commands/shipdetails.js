@@ -2,6 +2,7 @@ const { SlashCommandBuilder, StringSelectMenuBuilder, ActionRowBuilder, Componen
 const { Vehicle, VehicleDetail } = require('../config/database');
 const { fetchSCDataByUrl } = require('../utils/fetchSCData');
 const { Op } = require('sequelize');
+const { isUserVerified } = require('../utils/verifyGuard');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -16,6 +17,14 @@ module.exports = {
   category: 'Star Citizen',
   
   async execute(interaction) {
+
+    if (!(await isUserVerified(interaction.user.id))) {
+      return interaction.reply({
+        content: '❌ You must verify your RSI profile using `/verify` before using this command.',
+        ephemeral: true
+      });
+    }
+    
     const query = interaction.options.getString('ship');
     await interaction.deferReply();
 

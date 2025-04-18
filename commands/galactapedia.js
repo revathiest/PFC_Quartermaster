@@ -15,6 +15,7 @@ const {
     GalactapediaRelatedArticle
   } = require('../config/database');
   const { fetchSCDataByUrl } = require('../utils/fetchSCData');
+  const { isUserVerified } = require('../utils/verifyGuard');
   
   module.exports = {
     data: new SlashCommandBuilder()
@@ -29,6 +30,14 @@ const {
       category: 'Star Citizen',
   
     async execute(interaction) {
+
+      if (!(await isUserVerified(interaction.user.id))) {
+        return interaction.reply({
+          content: '❌ You must verify your RSI profile using `/verify` before using this command.',
+          ephemeral: true
+        });
+      }
+      
       const query = interaction.options.getString('query');
       await interaction.deferReply();
   

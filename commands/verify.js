@@ -73,7 +73,7 @@ const {
       const [_, rsiHandle, code] = interaction.customId.split('::');
       const user = interaction.user;
       const member = interaction.member;
-  
+      
       await interaction.deferUpdate(); // We'll just update the original reply silently
   
       try {
@@ -99,6 +99,21 @@ const {
           } catch (err) {
             console.warn(`[VERIFY BUTTON] Couldn't update nickname:`, err.message);
           }
+        }
+        if (orgId === 'PFCS'){
+            // Update role if user has Recruit
+            const recruitRole = interaction.guild.roles.cache.find(r => r.name === 'Recruit');
+            const ensignRole = interaction.guild.roles.cache.find(r => r.name === 'Ensign');
+            
+            if (recruitRole && ensignRole && member.roles.cache.has(recruitRole.id)) {
+                try {
+                    await member.roles.remove(recruitRole);
+                    await member.roles.add(ensignRole);
+                    console.log(`[VERIFY BUTTON] Role updated: Recruit → Ensign`);
+                } catch (err) {
+                    console.warn(`[VERIFY BUTTON] Couldn't update roles:`, err.message);
+                }
+            }
         }
   
         await VerifiedUser.upsert({

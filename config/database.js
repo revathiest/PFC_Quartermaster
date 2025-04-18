@@ -36,6 +36,9 @@ const UexVehiclePurchasePrice = require('../models/uexVehiclePurchasePrice')(seq
 const UexVehicleRentalPrice = require('../models/uexVehicleRentalPrice')(sequelize);
 const UexPoi = require('../models/uexPoi')(sequelize);
 const Accolade = require('../models/accolade')(sequelize);
+const OrgTag = require('../models/orgTag')(sequelize);
+const VerificationCode = require('../models/verificationCode')(sequelize);
+const VerifiedUser = require('../models/verifiedUser')(sequelize);
 
 Object.values(sequelize.models).forEach(model => {
     if (typeof model.associate === 'function') {
@@ -90,5 +93,8 @@ module.exports = {
     UexVehiclePurchasePrice,
     UexVehicleRentalPrice,
     UexPoi,
-    Accolade
+    Accolade,
+    OrgTag,
+    VerificationCode,
+    VerifiedUser
 };

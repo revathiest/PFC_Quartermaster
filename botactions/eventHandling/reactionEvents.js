@@ -18,9 +18,9 @@ module.exports = {
                 server_id: serverId,
                 event_time: new Date(),
             });
-            console.log('Reaction add logged successfully');
+            console.log('➕ Reaction add logged successfully');
         } catch (error) {
-            console.error('Error logging reaction add:', error);
+            console.error('❌ Error logging reaction add:', error);
         }
     },
     handleReactionRemove: async function(reaction, user) {
@@ -39,9 +39,9 @@ module.exports = {
                 server_id: serverId,
                 event_time: new Date(),
             });
-            console.log('Reaction remove logged successfully');
+            console.log('➖ Reaction remove logged successfully');
         } catch (error) {
-            console.error('Error logging reaction remove:', error);
+            console.error('❌ Error logging reaction remove:', error);
         }
     }
 };

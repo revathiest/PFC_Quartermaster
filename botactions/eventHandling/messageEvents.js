@@ -26,8 +26,9 @@ module.exports = {
                 prompts = JSON.parse(
                     fs.readFileSync(path.join(__dirname, '../../userPrompts.json'), 'utf8')
                 );
+                console.log('🧠 Loaded prompt data successfully');
             } catch (err) {
-                console.warn('[PROMPT LOAD ERROR]', err);
+                console.warn('⚠️ [PROMPT LOAD ERROR]', err);
                 prompts = { default: ["You are a helpful and friendly AI assistant."] };
             }
         
@@ -35,7 +36,7 @@ module.exports = {
             const allowedChannelNames = prompts.allowedChannelNames || [];
             const channelName = message.channel.name;
             if (!allowedChannelNames.includes(channelName)) {
-                console.log(`[AI BLOCKED] Message in disallowed channel: ${channelName}`);
+                console.log(`🚫 [AI BLOCKED] Message in disallowed channel: ${channelName}`);
             
                 const fallbackChannelName = allowedChannelNames[0];
                 const fallbackChannel = message.guild.channels.cache.find(
@@ -52,13 +53,12 @@ module.exports = {
                 try {
                     await message.reply(reply);
                 } catch (err) {
-                    console.error('[REPLY ERROR] Could not send fallback channel notice:', err);
+                    console.error('❌ [REPLY ERROR] Could not send fallback channel notice:', err);
                 }
             
                 return;
             }
-                      
-        
+                       
             const promptText = message.content.replace(/<@!?(\d+)>/, '').trim();
             if (!promptText) return;
         
@@ -71,7 +71,7 @@ module.exports = {
             // 1️⃣ Specific User Prompt
             if (prompts.users?.[userId]) {
                 finalPrompt = normalizePrompt(prompts.users[userId]);
-                console.log(`[PROMPT] Using custom prompt for user ${userId}`);
+                console.log(`👤 [PROMPT] Using custom prompt for user ${userId}`);
 
             // 2️⃣ Role-Based Prompt (dynamic)
             } else if (memberRoles) {
@@ -83,7 +83,7 @@ module.exports = {
                 for (const [roleKey, mappedNames] of Object.entries(roleMappings)) {
                     if (mappedNames.some(mappedRole => roleNames.includes(mappedRole))) {
                         roleAddition = normalizePrompt(prompts.roles?.[roleKey]);
-                        console.log(`[PROMPT] Matched role "${roleKey}" via "${mappedNames}"`);
+                        console.log(`🎭 [PROMPT] Matched role "${roleKey}" via "${mappedNames}"`);
                         break;
                     }
                 }
@@ -111,11 +111,11 @@ module.exports = {
                 if (reply) {
                     await message.reply(reply);
                 } else {
-                    console.warn('[OPENAI WARNING] No valid response from OpenAI.');
+                    console.warn('⚠️ [OPENAI WARNING] No valid response from OpenAI.');
                     await message.reply("Hmm, I didn’t quite catch that. Try again?");
                 }
             } catch (err) {
-                console.error('[OPENAI ERROR]', err);
+                console.error('❌ [OPENAI ERROR]', err);
                 await message.reply("Sorry, I couldn't fetch a reply right now.");
             }
             return;
@@ -133,9 +133,9 @@ module.exports = {
                 server_id: serverId,
                 event_time: new Date(),
             });
-            console.log('Message logged successfully');
+            console.log('🗒️ Message logged successfully');
         } catch (error) {
-            console.error('Error logging message:', error);
+            console.error('❌ Error logging message:', error);
         }
 
         // 🚨 Trigger filtering
@@ -155,14 +155,14 @@ module.exports = {
 
         for (const phrase of personalTriggers) {
             if (lowerCaseContent.includes(phrase)) {
-                console.log('Checking personal trigger for "' + phrase + '"');
+                console.log(`👤 Checking personal trigger for "${phrase}"`);
                 if (module.exports.performAction(message, client, filter.words[phrase])) return;
             }
         }
 
         for (const phrase of regularTriggers) {
             if (lowerCaseContent.includes(phrase)) {
-                console.log('Checking regular trigger for "' + phrase + '"');
+                console.log(`🔎 Checking regular trigger for "${phrase}"`);
                 if (module.exports.performAction(message, client, filter.words[phrase])) return;
             }
         }
@@ -170,7 +170,7 @@ module.exports = {
         for (const regex in filter.regex) {
             const regexObj = new RegExp(regex, "i");
             if (regexObj.test(content) && allowMessage) {
-                console.log('Matched regex: ' + regex);
+                console.log(`🧪 Matched regex: ${regex}`);
                 if (module.exports.performAction(message, client, filter.regex[regex])) return;
             }
         }
@@ -185,7 +185,7 @@ module.exports = {
                 message.channel.send(actionDetail.response);
                 return true;
             } else {
-                console.log("Personal action ignored: User does not match");
+                console.log("🙅 Personal action ignored: User does not match");
                 return false;
             }
         } else if (actionDetail.action === "respond") {
@@ -194,7 +194,7 @@ module.exports = {
         } else if (actionDetail.action === "delete") {
             const channelName = message.channel.name;
             const username = message.author.username;
-            const deletionMessage = `The following message has been deleted from channel ${channelName}. Sender - ${username}`;
+            const deletionMessage = `🗑️ The following message has been deleted from channel ${channelName}. Sender - ${username}`;
             const responseChannel = client.channels.cache.get(client.chanProfanityAlert);
             if (responseChannel && responseChannel.isTextBased?.()) {
                 responseChannel.send(deletionMessage);

@@ -17,9 +17,9 @@ async function handleCreateEvent (guildScheduledEvent, client) {
 
     try {
         await saveEventToDatabase(event);
-        console.log('Scheduled event created and saved to database.');
+        console.log('📌 Scheduled event created and saved to database.');
     } catch (error) {
-        console.error('Error saving scheduled event to database:', error);
+        console.error('❌ Error saving scheduled event to database:', error);
     }
 
 }
@@ -32,13 +32,13 @@ async function handleUpdateEvent(oldGuildScheduledEvent, newGuildScheduledEvent,
         case 'ended':
         case 'canceled':
 
-            console.log('Attempting to delete event from database.');
+            console.log('🗑️ Attempting to delete event from database.');
             handleDeleteEvent(newGuildScheduledEvent);
             return;
         default:
     }
 
-    console.log('Updating event in database.')
+    console.log('🔄 Updating event in database.')
 
     const eventId = oldGuildScheduledEvent.id; // Use the scheduled event ID
 
@@ -54,9 +54,9 @@ async function handleUpdateEvent(oldGuildScheduledEvent, newGuildScheduledEvent,
 
     try {
         await updateEventInDatabase(eventId, updatedEvent);
-        console.log('Scheduled event updated in database.');
+        console.log('✅ Scheduled event updated in database.');
     } catch (error) {
-        console.error('Error updating scheduled event in database:', error);
+        console.error('❌ Error updating scheduled event in database:', error);
     }
 }
 
@@ -65,9 +65,9 @@ async function handleDeleteEvent(guildScheduledEvent) {
     
     try {
         await deleteEventFromDatabase(eventId);
-        console.log('Scheduled event deleted from database.');
+        console.log('🗑️ Scheduled event deleted from database.');
     } catch (error) {
-        console.error('Error deleting scheduled event from database:', error);
+        console.error('❌ Error deleting scheduled event from database:', error);
     }
 }
 function getStatus(numericStatus) {

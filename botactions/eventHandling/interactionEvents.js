@@ -9,7 +9,7 @@ function getPrefixFromCustomId(customId) {
 
 async function handleInteraction(interaction, client) {
     if (!interaction) {
-        console.error('Interaction is null or undefined');
+        console.error('❌ Interaction is null or undefined');
         return;
     }
 
@@ -26,9 +26,9 @@ async function handleInteraction(interaction, client) {
                 server_id: serverId,
                 event_time: new Date(),
             });
-            console.log('Command usage logged successfully');
+            console.log('✅ Command usage logged successfully');
         } catch (error) {
-            console.error('Error logging command usage:', error);
+            console.error('❌ Error logging command usage:', error);
         }
 
         await handleCommand(interaction, client);
@@ -36,7 +36,6 @@ async function handleInteraction(interaction, client) {
         try {
             let commandName = interaction.message?.interaction?.commandName;
 
-            // Generic fallback if not part of an interaction-based message
             if (!commandName) {
                 const id = interaction.customId;
                 const prefix = getPrefixFromCustomId(id);
@@ -56,9 +55,9 @@ async function handleInteraction(interaction, client) {
                 event_time: new Date(),
             });
 
-            console.log(`Button click logged for command: ${commandName}`);
+            console.log(`🔘 Button click logged for command: ${commandName}`);
         } catch (error) {
-            console.error('Error logging button click:', error);
+            console.error('❌ Error logging button click:', error);
         }
 
         await handleButton(interaction, client);
@@ -80,9 +79,9 @@ async function handleInteraction(interaction, client) {
                 server_id: serverId,
                 event_time: new Date(),
             });
-            console.log(`Select menu interaction logged for command: ${commandName}`);
+            console.log(`📑 Select menu interaction logged for command: ${commandName}`);
         } catch (error) {
-            console.error('Error logging select menu interaction:', error);
+            console.error('❌ Error logging select menu interaction:', error);
         }
 
         await handleSelectMenu(interaction, client);
@@ -99,14 +98,14 @@ async function handleInteraction(interaction, client) {
                 server_id: serverId,
                 event_time: new Date(),
             });
-            console.log('Modal submit interaction logged successfully');
+            console.log('📝 Modal submit interaction logged successfully');
         } catch (error) {
-            console.error('Error logging modal submit interaction:', error);
+            console.error('❌ Error logging modal submit interaction:', error);
         }
 
         await handleModalSubmit(interaction, client);
     } else {
-        console.log('Received an unsupported interaction type.');
+        console.log('⚠️ Received an unsupported interaction type.');
     }
 }
 
@@ -131,7 +130,7 @@ async function handleCommand(interaction, client) {
     }
 
     if (!command) {
-        await interaction.reply('Unable to find command...');
+        await interaction.reply('❌ Unable to find command...');
         return;
     }
 
@@ -142,7 +141,7 @@ async function handleCommand(interaction, client) {
             command(interaction);
         }
     } catch (error) {
-        console.error(error);
+        console.error('❌ Error executing command:', error);
         try {
             if (!interaction.replied && !interaction.deferred) {
                 await interaction.reply({
@@ -167,13 +166,12 @@ async function handleButton(interaction, client) {
             typeof cmd.button === 'function' &&
             cmd.data?.name &&
             interaction.customId.startsWith(cmd.data.name)
-          );
-          
+        );
 
         if (command) {
             await command.button(interaction, client);
         } else {
-            console.warn(`[WARN] No button handler found for prefix: ${prefix}`);
+            console.warn(`⚠️ No button handler found for prefix: ${prefix}`);
             if (!interaction.replied && !interaction.deferred) {
                 await interaction.reply({
                     content: '❌ Button handler not found.',
@@ -182,7 +180,7 @@ async function handleButton(interaction, client) {
             }
         }
     } catch (err) {
-        console.error('[ERROR] handleButton() failed:', err);
+        console.error('❌ [ERROR] handleButton() failed:', err);
         if (!interaction.replied && !interaction.deferred) {
             await interaction.reply({ content: '❌ Something went wrong.', ephemeral: true });
         }
@@ -191,52 +189,51 @@ async function handleButton(interaction, client) {
 
 async function handleSelectMenu(interaction, client) {
     try {
-      const id = interaction.customId;
-  
-      const command = [...client.commands.values()].find(cmd =>
-        typeof cmd.option === 'function' &&
-        cmd.data?.name &&
-        id.startsWith(cmd.data.name)
-      );
-  
-      const commandName = command?.data?.name || 'unknown';
-  
-      await UsageLog.create({
-        user_id: interaction.user.id,
-        interaction_type: 'select_menu',
-        event_type: 'select_menu_select',
-        command_name: commandName,
-        channel_id: interaction.channel.id,
-        server_id: interaction.guild?.id ?? 'unknown',
-        event_time: new Date(),
-      });
-  
-      if (command) {
-        await command.option(interaction, client);
-      } else {
-        console.warn(`[WARN] No select menu handler matched for customId: ${id}`);
-        if (!interaction.replied && !interaction.deferred) {
-          await interaction.reply({
-            content: '❌ Select menu handler not found.',
-            ephemeral: true
-          });
+        const id = interaction.customId;
+
+        const command = [...client.commands.values()].find(cmd =>
+            typeof cmd.option === 'function' &&
+            cmd.data?.name &&
+            id.startsWith(cmd.data.name)
+        );
+
+        const commandName = command?.data?.name || 'unknown';
+
+        await UsageLog.create({
+            user_id: interaction.user.id,
+            interaction_type: 'select_menu',
+            event_type: 'select_menu_select',
+            command_name: commandName,
+            channel_id: interaction.channel.id,
+            server_id: interaction.guild?.id ?? 'unknown',
+            event_time: new Date(),
+        });
+
+        if (command) {
+            await command.option(interaction, client);
+        } else {
+            console.warn(`⚠️ No select menu handler matched for customId: ${id}`);
+            if (!interaction.replied && !interaction.deferred) {
+                await interaction.reply({
+                    content: '❌ Select menu handler not found.',
+                    ephemeral: true
+                });
+            }
         }
-      }
     } catch (err) {
-      console.error('[ERROR] handleSelectMenu() failed:', err);
-      if (!interaction.replied && !interaction.deferred) {
-        await interaction.reply({ content: '❌ Something went wrong.', ephemeral: true });
-      }
+        console.error('❌ [ERROR] handleSelectMenu() failed:', err);
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ content: '❌ Something went wrong.', ephemeral: true });
+        }
     }
-  }
-  
-  async function handleModalSubmit(interaction, client) {
+}
+
+async function handleModalSubmit(interaction, client) {
     if (interaction.customId === 'scheduleModal') {
         const title = interaction.fields.getTextInputValue('title');
         const description = interaction.fields.getTextInputValue('description');
         const author = 'PFC Quartermaster';
         const time = interaction.fields.getTextInputValue('time');
-
 
         const parsedTime = chrono.parseDate(time);
         if (!parsedTime || isNaN(parsedTime)) {
@@ -255,7 +252,6 @@ async function handleSelectMenu(interaction, client) {
 
         const formattedTime = formatDateToLocalSQL(parsedTime);
 
-
         pendingChannelSelection[interaction.user.id] = {
             title,
             description,
@@ -265,7 +261,7 @@ async function handleSelectMenu(interaction, client) {
 
         const selectMenu = await createChannelSelectMenu(interaction.guild, 'schedule');
         await interaction.reply({
-            content: 'Please select a channel:',
+            content: '📢 Please select a channel:',
             components: [selectMenu],
             ephemeral: true
         });

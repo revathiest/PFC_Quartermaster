@@ -4,30 +4,39 @@ const fs = require('fs');
 const path = require('path');
 const { clientId, guildId, token } = require('../config.json');
 
-async function registerCommands(client) {
-    const commands = [];
-    const commandsPath = path.join(__dirname, '../commands');
-    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+function loadCommandsRecursively(dir, commandList = [], commandMap = new Map()) {
+    const files = fs.readdirSync(dir, { withFileTypes: true });
 
-    client.commands = new Map();
+    for (const file of files) {
+        const fullPath = path.join(dir, file.name);
 
-    for (const file of commandFiles) {
-        const filePath = path.join(commandsPath, file);
+        if (file.isDirectory()) {
+            loadCommandsRecursively(fullPath, commandList, commandMap);
+        } else if (file.isFile() && file.name.endsWith('.js')) {
+            try {
+                const command = require(fullPath);
 
-        try {
-            const command = require(filePath);
+                if (!command.data || typeof command.data.toJSON !== 'function') {
+                    throw new TypeError(`Missing 'data' or 'toJSON' in ${file.name}`);
+                }
 
-            if (!command.data || typeof command.data.toJSON !== 'function') {
-                throw new TypeError(`File "${file}" is missing a valid 'data' property or toJSON method.`);
+                commandMap.set(command.data.name, command);
+                commandList.push(command.data.toJSON());
+                console.log(`✅ Registered command: ${command.data.name}`);
+            } catch (err) {
+                console.warn(`⚠️ Skipping "${file.name}": ${err.message}`);
             }
-
-            client.commands.set(command.data.name, command);
-            commands.push(command.data.toJSON());
-            console.log(`✅ Registered command: ${command.data.name}`);
-        } catch (err) {
-            console.warn(`⚠️ Skipping "${file}": ${err.message}`);
         }
     }
+
+    return { commandList, commandMap };
+}
+
+async function registerCommands(client) {
+    const commandsPath = path.join(__dirname, '../commands');
+    const { commandList, commandMap } = loadCommandsRecursively(commandsPath);
+
+    client.commands = commandMap;
 
     const rest = new REST({ version: '10' }).setToken(token);
 
@@ -35,7 +44,7 @@ async function registerCommands(client) {
         console.log('🔁 Syncing commands with Discord...');
         await rest.put(
             Routes.applicationGuildCommands(clientId, guildId),
-            { body: commands }
+            { body: commandList }
         );
         console.log('✅ Successfully registered all commands.');
     } catch (error) {

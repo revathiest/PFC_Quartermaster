@@ -1,11 +1,13 @@
-const { checkScheduledAnnouncements } = require('./scheduling/announcementScheduler');
+//const { checkScheduledAnnouncements } = require('./scheduling/announcementScheduler');
 const { checkEvents } = require('./scheduling/eventReminder');
-const { saveAnnouncementToDatabase, getScheduledAnnouncements, deleteScheduledAnnouncement,} = require('./scheduling/scheduleHandler');
+//const { saveAnnouncementToDatabase, getScheduledAnnouncements, deleteScheduledAnnouncement,} = require('./scheduling/scheduleHandler');
+const { startScheduledAnnouncementEngine } = require('./scheduling/scheduledAnnouncementEngine');
 
 module.exports = {
-    checkScheduledAnnouncements,
+    //checkScheduledAnnouncements,
     checkEvents,
-    saveAnnouncementToDatabase,
-    getScheduledAnnouncements,
-    deleteScheduledAnnouncement
+    //saveAnnouncementToDatabase,
+    //getScheduledAnnouncements,
+    //deleteScheduledAnnouncement,
+    startScheduledAnnouncementEngine
 }

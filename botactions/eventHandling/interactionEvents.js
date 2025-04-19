@@ -1,9 +1,7 @@
-const { saveAnnouncementToDatabase } = require('../scheduling/scheduleHandler');
 const { createChannelSelectMenu } = require('../commandHandling/channelSelector');
-const moment = require('moment');
 const { UsageLog } = require('../../config/database');
-
-let pendingChannelSelection = {};
+const chrono = require('chrono-node');
+const { pendingChannelSelection } = require('../../utils/pendingSelections');
 
 function getPrefixFromCustomId(customId) {
     return customId.split('::')[0];
@@ -232,23 +230,45 @@ async function handleSelectMenu(interaction, client) {
     }
   }
   
-
-async function handleModalSubmit(interaction, client) {
+  async function handleModalSubmit(interaction, client) {
     if (interaction.customId === 'scheduleModal') {
         const title = interaction.fields.getTextInputValue('title');
         const description = interaction.fields.getTextInputValue('description');
         const author = 'PFC Quartermaster';
         const time = interaction.fields.getTextInputValue('time');
 
-        if (!moment(time, 'YYYY-MM-DD HH:mm:ss', true).isValid()) {
-            await interaction.reply({ content: 'Invalid time format. Please use YYYY-MM-DD HH:mm:ss', ephemeral: true });
+
+        const parsedTime = chrono.parseDate(time);
+        if (!parsedTime || isNaN(parsedTime)) {
+            await interaction.reply({
+                content: '❌ Could not understand that time. Try something like "tomorrow at 5pm" or "in 15 minutes".',
+                ephemeral: true
+            });
             return;
         }
 
-        pendingChannelSelection[interaction.user.id] = { title, description, author, time };
+        const pad = (num) => num.toString().padStart(2, '0');
+        const formatDateToLocalSQL = (date) => {
+            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ` +
+                `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+        };
 
-        const selectMenu = await createChannelSelectMenu(interaction.guild);
-        await interaction.reply({ content: 'Please select a channel:', components: [selectMenu], ephemeral: true });
+        const formattedTime = formatDateToLocalSQL(parsedTime);
+
+
+        pendingChannelSelection[interaction.user.id] = {
+            title,
+            description,
+            author,
+            time: formattedTime
+        };
+
+        const selectMenu = await createChannelSelectMenu(interaction.guild, 'schedule');
+        await interaction.reply({
+            content: 'Please select a channel:',
+            components: [selectMenu],
+            ephemeral: true
+        });
     }
 }
 

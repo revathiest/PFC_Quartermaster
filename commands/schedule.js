@@ -1,4 +1,7 @@
 const { SlashCommandBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, PermissionFlagsBits } = require('discord.js');
+const chrono = require('chrono-node');
+const { pendingChannelSelection } = require('../utils/pendingSelections');
+const { saveAnnouncementToDatabase } = require('../botactions/scheduling/scheduleHandler');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -28,11 +31,12 @@ module.exports = {
             .setRequired(true);
 
         const timeInput = new TextInputBuilder()
-            .setCustomId('time')
-            .setLabel('Schedule Time (YYYY-MM-DD HH:mm:ss)')
-            .setStyle(TextInputStyle.Short)
-            .setPlaceholder('Enter the time')
-            .setRequired(true);
+        .setCustomId('time')
+        .setLabel('Schedule Time')
+        .setStyle(TextInputStyle.Short)
+        .setPlaceholder('e.g., tomorrow at 5pm, in 15 minutes')
+        .setRequired(true);
+    
 
         modal.addComponents(
             new ActionRowBuilder().addComponents(titleInput),
@@ -42,4 +46,41 @@ module.exports = {
 
         await interaction.showModal(modal);
     },
+    
+    option: async function (interaction, client) {
+        const selectedChannelId = interaction.values[0];
+        const pending = pendingChannelSelection[interaction.user.id];
+    
+        if (!pending) {
+            return interaction.reply({ content: '❌ No pending announcement found.', ephemeral: true });
+        }
+    
+        // Double-check: selectedChannelId should be a string
+        if (typeof selectedChannelId !== 'string') {
+            console.error('Channel ID is not a string:', selectedChannelId);
+            return interaction.reply({ content: '❌ Invalid channel selected.', ephemeral: true });
+        }
+    
+        try {
+            console.log('💾 Saving announcement with footer:', pending.author);
+
+            await saveAnnouncementToDatabase(
+                selectedChannelId,
+                interaction.guild.id,
+                {
+                    title: pending.title,
+                    description: pending.description,
+                    author: pending.author
+                },
+                pending.time,
+                client
+            );            
+    
+            delete pendingChannelSelection[interaction.user.id];
+            await interaction.reply({ content: '✅ Announcement scheduled successfully!', ephemeral: true });
+        } catch (error) {
+            console.error('Error saving announcement to database:', error);
+            await interaction.reply({ content: '❌ Failed to schedule announcement. Check logs for details.', ephemeral: true });
+        }
+    }    
 };

@@ -103,7 +103,6 @@ async function sendAmbientMessages(client) {
         }
     }
 
-    console.log(`✅ [ENGINE COMPLETE] ${new Date().toISOString()}\n`);
 }
 
 async function startAmbientEngine(client) {

@@ -41,6 +41,7 @@ const VerificationCode = require('../models/verificationCode')(sequelize);
 const VerifiedUser = require('../models/verifiedUser')(sequelize);
 const AmbientMessage = require('../models/ambiEntMessage')(sequelize);
 const AmbientChannel = require('../models/ambientChannel')(sequelize);
+const AmbientSetting = require('../models/ambientSetting')(sequelize);
 
 Object.values(sequelize.models).forEach(model => {
     if (typeof model.associate === 'function') {
@@ -99,5 +100,6 @@ module.exports = {
     VerificationCode,
     VerifiedUser,
     AmbientMessage,
-    AmbientChannel
+    AmbientChannel,
+    AmbientSetting
 };

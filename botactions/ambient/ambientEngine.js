@@ -1,17 +1,19 @@
-const { AmbientMessage, AmbientChannel } = require('../../config/database');
+const { AmbientMessage, AmbientChannel, AmbientSetting } = require('../../config/database');
 
 const channelActivity = new Map(); // channelId => { count, lastSent, sinceLastBot, lastMessage }
-const allowedChannelIds = new Set();
+const allowedChannelIds = new Set(); // Only allow ambient in these channels
 
-const MIN_MESSAGES_SINCE_LAST = 5;
-const FRESH_WINDOW = 3 * 60 * 1000; // 3 minutes
+let ambientConfig = {
+    minMessagesSinceLast: 5,
+    freshWindowMs: 3 * 60 * 1000, // 3 minutes
+};
 
 async function refreshAllowedChannels() {
     try {
         const entries = await AmbientChannel.findAll();
         allowedChannelIds.clear();
         for (const entry of entries) {
-            allowedChannelIds.add(entry.channelId);
+            allowedChannelIds.add(String(entry.channelId));
         }
         console.log(`✅ Loaded ${allowedChannelIds.size} allowed ambient channels.`);
     } catch (err) {
@@ -19,13 +21,31 @@ async function refreshAllowedChannels() {
     }
 }
 
-function trackChannelActivity(message) {
-    if (!message.guild || message.author.bot) return;
-    if (!allowedChannelIds.has(message.channel.id)) return;
+async function refreshAmbientSettings() {
+    try {
+        const setting = await AmbientSetting.findOne();
+        if (setting) {
+            ambientConfig.minMessagesSinceLast = setting.minMessagesSinceLast;
+            ambientConfig.freshWindowMs = setting.freshWindowMs;
+            console.log(`🔧 Loaded ambient config → minMessagesSinceLast: ${setting.minMessagesSinceLast}, freshWindowMs: ${setting.freshWindowMs}`);
+        } else {
+            console.warn('⚠️ No ambient settings found in DB. Using defaults.');
+        }
+    } catch (err) {
+        console.error('❌ Failed to load ambient settings:', err);
+    }
+}
 
-    const id = message.channel.id;
+function trackChannelActivity(message) {
+    if (message.author.bot) return;
+
+    const channelId = message.channel.id;
+    if (!allowedChannelIds.has(channelId)) {
+        return;
+    }
+
     const now = Date.now();
-    const data = channelActivity.get(id) || {
+    const data = channelActivity.get(channelId) || {
         count: 0,
         lastSent: 0,
         sinceLastBot: 0,
@@ -36,39 +56,38 @@ function trackChannelActivity(message) {
     data.sinceLastBot += 1;
     data.lastMessage = now;
 
-    channelActivity.set(id, data);
-}
-
-function getIntervalForActivity(count) {
-    if (count > 50) return 10 * 60 * 1000;   // 10 min
-    if (count > 20) return 30 * 60 * 1000;   // 30 min
-    if (count > 5)  return 60 * 60 * 1000;   // 1 hour
-    return null;
+    channelActivity.set(channelId, data);
 }
 
 async function sendAmbientMessages(client) {
     const now = Date.now();
 
     for (const [channelId, data] of channelActivity.entries()) {
-        if (!allowedChannelIds.has(channelId)) continue;
-
-        const interval = getIntervalForActivity(data.count);
-        if (!interval) continue;
-
-        const sinceLast = now - data.lastSent;
-        if (sinceLast < interval) continue;
-
-        const freshActivity = now - data.lastMessage < FRESH_WINDOW;
-        const enoughMessages = data.sinceLastBot >= MIN_MESSAGES_SINCE_LAST;
-
-        if (!freshActivity || !enoughMessages) continue;
-
         const channel = client.channels.cache.get(channelId);
-        if (!channel || !channel.isTextBased?.()) continue;
+        if (!channel || !channel.isTextBased?.()) {
+            continue;
+        }
+
+        if (!allowedChannelIds.has(channelId)) {
+            continue;
+        }
+
+        const timeSinceLastPost = now - data.lastSent;
+        const timeSinceLastMessage = now - data.lastMessage;
+
+        const fresh = timeSinceLastMessage < ambientConfig.freshWindowMs;
+        const enough = data.sinceLastBot >= ambientConfig.minMessagesSinceLast;
+
+        if (!fresh || !enough) {
+            continue;
+        }
 
         try {
             const messages = await AmbientMessage.findAll();
-            if (!messages.length) return;
+            if (!messages.length) {
+                console.warn(`⚠️ No ambient messages available in DB.`);
+                return;
+            }
 
             const msg = messages[Math.floor(Math.random() * messages.length)];
             await channel.send(msg.content);
@@ -78,20 +97,28 @@ async function sendAmbientMessages(client) {
             data.sinceLastBot = 0;
             channelActivity.set(channelId, data);
 
-            console.log(`💬 Sent ambient message to #${channel.name}`);
+            console.log(`✅ Ambient message sent to #${channel.name}`);
         } catch (err) {
-            console.error(`❌ Failed to send ambient message to channel ${channelId}:`, err);
+            console.error(`❌ Failed to send message to #${channel.name}`, err);
         }
     }
+
+    console.log(`✅ [ENGINE COMPLETE] ${new Date().toISOString()}\n`);
 }
 
-function startAmbientEngine(client) {
-    client.on('messageCreate', trackChannelActivity);
+async function startAmbientEngine(client) {
+    console.log('🌀 Ambient engine starting...');
+    await refreshAllowedChannels();
+    await refreshAmbientSettings();
+
     setInterval(() => sendAmbientMessages(client), 60 * 1000);
-    refreshAllowedChannels();
     setInterval(refreshAllowedChannels, 5 * 60 * 1000);
+    setInterval(refreshAmbientSettings, 5 * 60 * 1000);
 
-    console.log('🌀 Ambient engine started');
+    console.log('🚀 Ambient engine fully online.');
 }
 
-module.exports = { startAmbientEngine };
+module.exports = {
+    startAmbientEngine,
+    trackChannelActivity,
+};

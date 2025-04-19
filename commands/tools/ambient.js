@@ -1,5 +1,5 @@
-const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
-const { AmbientMessage, AmbientChannel } = require('../../config/database');
+const { SlashCommandBuilder, PermissionFlagsBits, ChannelType, MessageFlags } = require('discord.js');
+const { AmbientMessage, AmbientChannel, AmbientSetting } = require('../../config/database');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -63,6 +63,18 @@ module.exports = {
       sub.setName('listchannels')
         .setDescription('List all allowed ambient message channels')
     )
+    .addSubcommand(sub =>
+      sub.setName('config')
+        .setDescription('Configure ambient message thresholds')
+        .addIntegerOption(opt =>
+          opt.setName('minmessages')
+            .setDescription('Minimum messages since last bot post (e.g. 5)')
+            .setRequired(false))
+        .addIntegerOption(opt =>
+          opt.setName('freshwindow')
+            .setDescription('Fresh window in minutes')
+            .setRequired(false))
+    )    
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   help: 'Manage the pool of ambient messages the bot can use to enhance active channels.',
@@ -174,6 +186,40 @@ module.exports = {
       } catch (err) {
         console.error('❌ Error listing ambient channels:', err);
         await interaction.reply('❌ Failed to list allowed channels.');
+      }
+    } else if (sub === 'config') {
+      const guildId = interaction.guild.id;
+      const minMessages = interaction.options.getInteger('minmessages');
+      const freshWindowMin = interaction.options.getInteger('freshwindow'); // ✅ properly declared
+    
+      if (minMessages === null && freshWindowMin === null) {
+        return interaction.reply({
+          content: '⚠️ You must provide at least one setting to update.',
+          flags: MessageFlags.Ephemeral
+        });
+      }
+    
+      const freshWindowMs = freshWindowMin != null ? freshWindowMin * 60 * 1000 : null;
+    
+      try {
+        const [setting, created] = await AmbientSetting.findOrCreate({
+          where: { guildId },
+          defaults: {
+            minMessagesSinceLast: minMessages ?? 5,
+            freshWindowMs: freshWindowMs ?? 3 * 60 * 1000
+          }
+        });
+    
+        if (!created) {
+          if (minMessages !== null) setting.minMessagesSinceLast = minMessages;
+          if (freshWindowMs !== null) setting.freshWindowMs = freshWindowMs;
+          await setting.save();
+        }
+    
+        await interaction.reply(`🔧 Ambient config updated:\n• Minimum messages: \`${setting.minMessagesSinceLast}\`\n• Fresh window: \`${Math.floor(setting.freshWindowMs / 60000)} min\``);
+      } catch (err) {
+        console.error('❌ Error updating ambient config:', err);
+        await interaction.reply('❌ Failed to update ambient settings.');
       }
     }
   }

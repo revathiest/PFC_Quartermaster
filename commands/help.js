@@ -1,9 +1,21 @@
-const { SlashCommandBuilder, PermissionsBitField, EmbedBuilder } = require('discord.js');
+// commands/help.js
+const {
+  SlashCommandBuilder,
+  EmbedBuilder,
+  ActionRowBuilder,
+  StringSelectMenuBuilder,
+  ComponentType,
+  PermissionsBitField,
+} = require('discord.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('help')
-    .setDescription('Displays a categorized list of available commands'),
+    .setDescription('Displays a categorized help menu with interactive options')
+    .setDefaultMemberPermissions(PermissionsBitField.Flags.SendMessages),
+
+  category: 'System',
+  help: 'Displays available commands you have access to.',
 
   async execute(interaction, client) {
     const userPerms = interaction.member.permissions;
@@ -13,50 +25,72 @@ module.exports = {
 
     for (const command of commands.values()) {
       const permBitfield = command.data.default_member_permissions;
-
-      // If the command has required permissions and the user doesn't have them, skip it
-      if (
-        permBitfield &&
-        !userPerms.has(PermissionsBitField.resolve(permBitfield))
-      ) {
-        continue;
-      }
-
-      // Skip commands with no help description
-      if (!command.help) continue;
+      if (permBitfield && !userPerms.has(PermissionsBitField.resolve(permBitfield))) continue;
+      if (!command.help || typeof command.help !== 'string') continue;
 
       const category = command.category || 'Uncategorized';
-
       if (!categories[category]) categories[category] = [];
+
       categories[category].push(`**/${command.data.name}**: ${command.help}`);
     }
+
+    const categoryOptions = Object.keys(categories).map((cat) => ({
+      label: cat,
+      value: cat,
+      description: `View commands in ${cat}`,
+    }));
+
+    const selectMenu = new StringSelectMenuBuilder()
+      .setCustomId('helpCategorySelect')
+      .setPlaceholder('Select a command category')
+      .addOptions(categoryOptions);
+
+    const row = new ActionRowBuilder().addComponents(selectMenu);
 
     const embed = new EmbedBuilder()
       .setColor('#0099ff')
       .setTitle('📘 Quartermaster Command Help')
-      .setDescription('These are the commands you currently have access to.')
-      .setFooter({ text: 'Use /help anytime to see this again.' })
+      .setDescription('Select a category below to view available commands.')
+      .setFooter({ text: 'Use the menu to browse categories. Escape or click away to exit.' })
       .setTimestamp();
 
-    for (const [category, entries] of Object.entries(categories)) {
-      let chunk = '';
-      for (const line of entries) {
-        if ((chunk + line + '\n').length > 1024) {
-          embed.addFields({ name: `📂 ${category}`, value: chunk });
-          chunk = '';
-        }
-        chunk += `${line}\n`;
+    await interaction.deferReply({ ephemeral: true });
+    const reply = await interaction.followUp({ embeds: [embed], components: [row], fetchReply: true });
+
+    const collector = reply.createMessageComponentCollector({
+      componentType: ComponentType.StringSelect,
+      time: 5 * 60 * 1000,
+    });
+
+    collector.on('collect', async (i) => {
+      if (i.user.id !== interaction.user.id) {
+        return i.reply({ content: 'This menu isn’t for you.', ephemeral: true });
       }
 
-      if (chunk.length > 0) {
-        embed.addFields({ name: `📂 ${category}`, value: chunk });
+      const selectedCategory = i.values[0];
+      const commandsList = categories[selectedCategory];
+
+      const categoryEmbed = new EmbedBuilder()
+        .setColor('#0099ff')
+        .setTitle(`📂 ${selectedCategory} Commands`)
+        .setDescription(commandsList.join('\n'))
+        .setFooter({ text: 'Use the menu to switch categories. Escape or click away to exit.' })
+        .setTimestamp();
+
+      await i.update({ embeds: [categoryEmbed], components: [row] });
+    });
+
+    collector.on('end', async () => {
+      if (!reply.editable) return;
+      try {
+        await reply.edit({ components: [] });
+      } catch (err) {
+        console.error('❌ Failed to disable help menu:', err);
       }
-    }
+    });
+  },
 
-    if (!embed.data.fields || embed.data.fields.length === 0) {
-      embed.setDescription('You don’t currently have access to any commands.');
-    }
-
-    await interaction.reply({ embeds: [embed], ephemeral: true });
-  }
+  option: async (interaction) => {
+    if (interaction.customId === 'helpCategorySelect') return;
+  },
 };

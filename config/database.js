@@ -40,6 +40,7 @@ const OrgTag = require('../models/orgTag')(sequelize);
 const VerificationCode = require('../models/verificationCode')(sequelize);
 const VerifiedUser = require('../models/verifiedUser')(sequelize);
 const AmbientMessage = require('../models/ambiEntMessage')(sequelize);
+const AmbientChannel = require('../models/ambientChannel')(sequelize);
 
 Object.values(sequelize.models).forEach(model => {
     if (typeof model.associate === 'function') {
@@ -97,5 +98,6 @@ module.exports = {
     OrgTag,
     VerificationCode,
     VerifiedUser,
-    AmbientMessage
+    AmbientMessage,
+    AmbientChannel
 };

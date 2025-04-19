@@ -1,5 +1,5 @@
-const { SlashCommandBuilder } = require('discord.js');
-const { AmbientMessage } = require('../../config/database');
+const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
+const { AmbientMessage, AmbientChannel } = require('../../config/database');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -40,13 +40,37 @@ module.exports = {
           opt.setName('id')
             .setDescription('ID of the message to delete')
             .setRequired(true))
-    ),
+    )
+    .addSubcommand(sub =>
+      sub.setName('allowchannel')
+        .setDescription('Allow ambient messages in a channel')
+        .addChannelOption(opt =>
+          opt.setName('channel')
+            .setDescription('Channel to allow ambient messages')
+            .addChannelTypes(ChannelType.GuildText)
+            .setRequired(true))
+    )
+    .addSubcommand(sub =>
+      sub.setName('disallowchannel')
+        .setDescription('Disallow ambient messages in a channel')
+        .addChannelOption(opt =>
+          opt.setName('channel')
+            .setDescription('Channel to disallow ambient messages')
+            .addChannelTypes(ChannelType.GuildText)
+            .setRequired(true))
+    )
+    .addSubcommand(sub =>
+      sub.setName('listchannels')
+        .setDescription('List all allowed ambient message channels')
+    )
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   help: 'Manage the pool of ambient messages the bot can use to enhance active channels.',
   category: 'Tools',
 
   async execute(interaction) {
     const sub = interaction.options.getSubcommand();
+    const guildId = interaction.guild.id;
 
     if (sub === 'add') {
       const content = interaction.options.getString('content');
@@ -63,12 +87,10 @@ module.exports = {
     } else if (sub === 'list') {
       try {
         const messages = await AmbientMessage.findAll();
-        if (!messages.length) {
-          return interaction.reply('⚠️ No ambient messages found.');
-        }
+        if (!messages.length) return interaction.reply('⚠️ No ambient messages found.');
 
         const list = messages.map(msg => `• [${msg.id}] ${msg.content}${msg.tag ? ` _(tag: ${msg.tag})_` : ''}`);
-        const chunk = list.join('\n').slice(0, 2000); // keep under Discord's message limit
+        const chunk = list.join('\n').slice(0, 2000);
         await interaction.reply(`🗃️ Ambient Messages:\n\n${chunk}`);
       } catch (err) {
         console.error('❌ Error listing ambient messages:', err);
@@ -102,6 +124,56 @@ module.exports = {
       } catch (err) {
         console.error('❌ Error deleting ambient message:', err);
         await interaction.reply('❌ Failed to delete ambient message.');
+      }
+
+    } else if (sub === 'allowchannel') {
+      const channel = interaction.options.getChannel('channel');
+
+      try {
+        const [entry, created] = await AmbientChannel.findOrCreate({
+          where: { guildId, channelId: channel.id }
+        });
+
+        if (created) {
+          await interaction.reply(`✅ Ambient messages **enabled** in <#${channel.id}>.`);
+        } else {
+          await interaction.reply(`ℹ️ Ambient messages were already enabled in <#${channel.id}>.`);
+        }
+      } catch (err) {
+        console.error('❌ Error allowing channel:', err);
+        await interaction.reply('❌ Failed to allow ambient messages in that channel.');
+      }
+
+    } else if (sub === 'disallowchannel') {
+      const channel = interaction.options.getChannel('channel');
+
+      try {
+        const removed = await AmbientChannel.destroy({
+          where: { guildId, channelId: channel.id }
+        });
+
+        if (removed) {
+          await interaction.reply(`🚫 Ambient messages **disabled** in <#${channel.id}>.`);
+        } else {
+          await interaction.reply(`ℹ️ Ambient messages weren’t active in <#${channel.id}>.`);
+        }
+      } catch (err) {
+        console.error('❌ Error disallowing channel:', err);
+        await interaction.reply('❌ Failed to disallow ambient messages in that channel.');
+      }
+
+    } else if (sub === 'listchannels') {
+      try {
+        const entries = await AmbientChannel.findAll({ where: { guildId } });
+        if (!entries.length) {
+          return interaction.reply('📭 No channels currently allow ambient messages.');
+        }
+
+        const list = entries.map(row => `<#${row.channelId}>`).join('\n');
+        await interaction.reply(`📢 Ambient messages are currently allowed in:\n${list}`);
+      } catch (err) {
+        console.error('❌ Error listing ambient channels:', err);
+        await interaction.reply('❌ Failed to list allowed channels.');
       }
     }
   }

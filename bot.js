@@ -11,6 +11,7 @@ const { loadConfiguration } = require('./botactions/configLoader');
 const { checkScheduledAnnouncements, checkEvents } = require('./botactions/scheduling');
 const { getInactiveUsersWithSingleRole, handleRoleAssignment } = require('./botactions/userManagement');
 const { handleCreateEvent, handleUpdateEvent, handleDeleteEvent, syncEventsInDatabase } = require('./botactions/eventHandling/scheduledEvents');
+const { startAmbientEngine } = require("./botactions/ambient/ambientEngine");
 
 const botType = process.env.BOT_TYPE;
 
@@ -93,6 +94,7 @@ const initializeBot = async () => {
             await registerCommands(client);
             await getInactiveUsersWithSingleRole(client);
             await syncEventsInDatabase(client);
+            startAmbientEngine(client);
             setInterval(() => checkScheduledAnnouncements(client), 60000);
             console.log('🚀 Bot setup complete and ready to go!');
 

@@ -12,8 +12,8 @@ const {
   syncUexVehiclePurchasePrices,
   syncUexVehicleRentalPrices,
   syncUexPois
-} = require('../botactions/api/syncEndpoints');
-const { isAdmin } = require('../botactions/userManagement/permissions');
+} = require('../../botactions/api/syncEndpoints');
+const { isAdmin } = require('../../botactions/userManagement/permissions');
 
 module.exports = {
   data: new SlashCommandBuilder()

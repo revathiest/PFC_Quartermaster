@@ -8,8 +8,8 @@ const {
   MessageFlags
 } = require('discord.js');
 const { Op } = require('sequelize');
-const db = require('../config/database');
-const { isUserVerified } = require('../utils/verifyGuard');
+const db = require('../../config/database');
+const { isUserVerified } = require('../../utils/verifyGuard');
 
 const PAGE_SIZE = 10;
 

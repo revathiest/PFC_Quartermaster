@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
-const { fetchRsiProfileInfo } = require('../utils/rsiProfileScraper');
+const { fetchRsiProfileInfo } = require('../../utils/rsiProfileScraper');
 
 module.exports = {
   data: new SlashCommandBuilder()

@@ -14,9 +14,9 @@ const {
     GalactapediaProperty,
     GalactapediaRelated,
     GalactapediaRelatedArticle
-  } = require('../config/database');
-  const { fetchSCDataByUrl } = require('../utils/fetchSCData');
-  const { isUserVerified } = require('../utils/verifyGuard');
+  } = require('../../config/database');
+  const { fetchSCDataByUrl } = require('../../utils/fetchSCData');
+  const { isUserVerified } = require('../../utils/verifyGuard');
   
   module.exports = {
     data: new SlashCommandBuilder()

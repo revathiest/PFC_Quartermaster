@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
-const { generateUsageReport, generateVoiceActivityReport, generateReportByChannel } = require('./analytics/generateAnalytics');
+const { generateUsageReport, generateVoiceActivityReport, generateReportByChannel } = require('../analytics/generateAnalytics');
 
 const allowedRoles = ['Admiral', 'Fleet Admiral'];
 

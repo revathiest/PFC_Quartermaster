@@ -6,8 +6,8 @@ const {
     MessageFlags
   } = require('discord.js');
   const crypto = require('crypto');
-  const { VerificationCode, VerifiedUser, OrgTag } = require('../config/database');
-  const { fetchRsiProfileInfo } = require('../utils/rsiProfileScraper');
+  const { VerificationCode, VerifiedUser, OrgTag } = require('../../config/database');
+  const { fetchRsiProfileInfo } = require('../../utils/rsiProfileScraper');
   
   module.exports = {
     data: new SlashCommandBuilder()

@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
-const parseDice = require('../utils/parseDice'); // We'll build this next
+const parseDice = require('../../utils/parseDice'); // We'll build this next
 
 module.exports = {
   data: new SlashCommandBuilder()

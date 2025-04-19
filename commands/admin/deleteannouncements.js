@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
-const { deleteScheduledAnnouncement } = require('../botactions/scheduling/scheduleHandler');
+const { deleteScheduledAnnouncement } = require('../../botactions/scheduling/scheduleHandler');
 
 const allowedRoles = ['Admiral', 'Fleet Admiral'];
 

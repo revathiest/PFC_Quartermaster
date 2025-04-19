@@ -7,8 +7,8 @@ const {
   UexCommodityPrice,
   UexVehiclePurchasePrice,
   UexTerminal
-} = require('../config/database');
-const { isUserVerified } = require('../utils/verifyGuard');
+} = require('../../config/database');
+const { isUserVerified } = require('../../utils/verifyGuard');
 
 const PAGE_SIZE = 20;
 

@@ -1,7 +1,7 @@
 // commands/admin/sync-org-ranks.js
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const { VerifiedUser } = require('../config/database');
-const { fetchRsiProfileInfo } = require('../utils/rsiProfileScraper');
+const { VerifiedUser } = require('../../config/database');
+const { fetchRsiProfileInfo } = require('../../utils/rsiProfileScraper');
 
 module.exports = {
   data: new SlashCommandBuilder()

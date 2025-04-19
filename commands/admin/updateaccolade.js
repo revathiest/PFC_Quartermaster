@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
-const { Accolade } = require('../config/database');
-const { buildAccoladeEmbed } = require('../utils/accoladeEmbedBuilder');
+const { Accolade } = require('../../config/database');
+const { buildAccoladeEmbed } = require('../../utils/accoladeEmbedBuilder');
 
 module.exports = {
   data: new SlashCommandBuilder()

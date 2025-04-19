@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { PermissionFlagsBits, MessageFlags } = require('discord.js');
-const { addSnapChannel } = require('../botactions/channelManagement/snapChannels');
+const { addSnapChannel } = require('../../botactions/channelManagement/snapChannels');
 
 const allowedRoles = ['Admiral', 'Fleet Admiral'];
 

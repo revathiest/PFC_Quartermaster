@@ -1,6 +1,6 @@
-const { Accolade } = require('../config/database');
+const { Accolade } = require('../../config/database');
 const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
-const { buildAccoladeEmbed } = require('../utils/accoladeEmbedBuilder');
+const { buildAccoladeEmbed } = require('../../utils/accoladeEmbedBuilder');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -43,7 +43,7 @@ module.exports = {
       return interaction.reply({ content: 'That role is already registered as an accolade.', flags: MessageFlags.Ephemeral });
     }
 
-    const config = require('../config.json');
+    const config = require('../../config.json');
     const channelId = config.wallOfFameChannelId;
     const channel = await guild.channels.fetch(channelId);
 

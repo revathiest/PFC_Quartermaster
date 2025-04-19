@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const chrono = require('chrono-node');
-const { pendingChannelSelection } = require('../utils/pendingSelections');
-const { saveAnnouncementToDatabase } = require('../botactions/scheduling/scheduleHandler');
+const { pendingChannelSelection } = require('../../utils/pendingSelections');
+const { saveAnnouncementToDatabase } = require('../../botactions/scheduling/scheduleHandler');
 
 module.exports = {
     data: new SlashCommandBuilder()

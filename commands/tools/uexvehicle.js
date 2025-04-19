@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
-const db = require('../config/database');
+const db = require('../../config/database');
 const { Op } = require('sequelize');
-const { isUserVerified } = require('../utils/verifyGuard');
+const { isUserVerified } = require('../../utils/verifyGuard');
 
 const VEHICLE_ROLES = {
   is_spaceship: 'Spaceship',

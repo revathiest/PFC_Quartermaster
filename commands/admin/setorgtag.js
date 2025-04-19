@@ -1,6 +1,6 @@
 // commands/admin/setOrgTag.js
 const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
-const { OrgTag } = require('../config/database'); // Sequelize model you created
+const { OrgTag } = require('../../config/database'); // Sequelize model you created
 
 module.exports = {
   data: new SlashCommandBuilder()

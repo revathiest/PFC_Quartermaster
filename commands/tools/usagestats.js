@@ -4,10 +4,10 @@ const {
     EmbedBuilder,
     MessageFlags
   } = require('discord.js');
-  const { UsageLog, VoiceLog } = require('../config/database');
+  const { UsageLog, VoiceLog } = require('../../config/database');
   const { Op } = require('sequelize');
-  const { isAdmin } = require('../botactions/userManagement/permissions');
-  const { isUserVerified } = require('../utils/verifyGuard');
+  const { isAdmin } = require('../../botactions/userManagement/permissions');
+  const { isUserVerified } = require('../../utils/verifyGuard');
   
   module.exports = {
     data: new SlashCommandBuilder()

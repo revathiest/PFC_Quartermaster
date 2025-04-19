@@ -1,4 +1,4 @@
-const { formatDuration } = require('../../botactions/utilityFunctions')
+const { formatDuration } = require('../../botactions/utilityFunctions');
 
 async function getInactiveUsersWithSingleRole(client) {
     const server = client.guilds.cache.first();
@@ -6,7 +6,7 @@ async function getInactiveUsersWithSingleRole(client) {
     const twoWeeksInMs = 14 * 24 * 60 * 60 * 1000; // Two weeks in milliseconds
 
     if (!server) {
-        console.log("No active server found.");
+        console.log("🛑 No active server found.");
         return;
     }
 
@@ -24,22 +24,24 @@ async function getInactiveUsersWithSingleRole(client) {
             });
 
             member.kick()
-                .then(kickedMember => console.log(`Kicked user: ${kickedMember.user.username}`))
-                .catch(console.error);
+                .then(kickedMember => console.log(`👢 Kicked user: ${kickedMember.user.username}`))
+                .catch(error => console.error(`❌ Failed to kick user: ${member.user.username}`, error));
         }
     });
 
     if (usersWithSingleRole.length > 0) {
         const formattedUsers = usersWithSingleRole.map(user => `${user.username} - ${formatDuration(user.inactiveDuration)}`);
-        const message = `Users with a single role, joined for more than one week, have been kicked from the server:\n\n${formattedUsers.join('\n')}`;
+        const message = `🧹 Users with a single role, joined for more than two weeks, have been kicked from the server:\n\n${formattedUsers.join('\n')}`;
         const logChannel = client.channels.cache.get(client.chanBotLog);
         if (logChannel) {
             logChannel.send(message)
-                .then(() => console.log(`Inactive users with single role list sent to channel ${logChannel.name}`))
-                .catch(console.error);
+                .then(() => console.log(`📨 Inactive user list sent to #${logChannel.name}`))
+                .catch(error => console.error(`❌ Failed to send log message to #${logChannel.name}`, error));
         } else {
-            console.log(`Channel ${client.chanBotLog} not found.`);
+            console.log(`⚠️ Log channel (ID: ${client.chanBotLog}) not found.`);
         }
+    } else {
+        console.log("✅ No inactive users with a single role found.");
     }
 }
 

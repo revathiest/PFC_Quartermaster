@@ -15,21 +15,21 @@ module.exports = {
         client.channels.cache.each(channel => {
             if (channel.type === 0 && channelMappings[channel.name]) {
                 client[channelMappings[channel.name]] = channel.id;
-                console.log(`Channel ${channel.name} registered with ID ${channel.id}.`);
+                console.log(`📌 Channel '${channel.name}' registered with ID ${channel.id}`);
             }
         });
 
         for (const key in channelMappings) {
             if (!client[channelMappings[key]]) {
-                console.warn(`Warning: '${key}' channel not found and is not registered.`);
+                console.warn(`⚠️ Channel '${key}' not found — registration skipped.`);
                 allChannelsRegistered = false;
             }
         }
 
         if (allChannelsRegistered) {
-            console.log("All channels were successfully registered.");
+            console.log("✅ All channels successfully registered.");
         } else {
-            console.error("One or more channels could not be found and registered. Check channel names and server settings.");
+            console.error("❌ One or more channels could not be found. Check names and server settings.");
         }
 
         return allChannelsRegistered;

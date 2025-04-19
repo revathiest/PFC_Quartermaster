@@ -3,9 +3,10 @@ const { Event } = require('../config/database');
 const saveEventToDatabase = async (event) => {
     try {
         const newEvent = await Event.create(event);
+        console.log(`📅 Event "${event.name}" saved to database.`);
         return newEvent;
     } catch (error) {
-        console.error('Error saving event to database:', error);
+        console.error('❌ Error saving event to database:', error);
     }
 };
 
@@ -14,13 +15,14 @@ const updateEventInDatabase = async (event_id, updatedEvent) => {
         const event = await Event.findByPk(event_id);
         if (event) {
             await event.update(updatedEvent);
+            console.log(`📝 Event "${updatedEvent.name}" updated in database.`);
             return event;
         } else {
-            console.log('Event not found');
+            console.log('⚠️ Event not found for update.');
             return null;
         }
     } catch (error) {
-        console.error('Error updating event in database:', error);
+        console.error('❌ Error updating event in database:', error);
     }
 };
 
@@ -29,30 +31,31 @@ const deleteEventFromDatabase = async (event_id) => {
         const event = await Event.findByPk(event_id);
         if (event) {
             await event.destroy();
+            console.log(`🗑️ Event "${event.name}" deleted from database.`);
             return event;
         } else {
-            console.log('Event not found');
+            console.log('⚠️ Event not found for deletion.');
             return null;
         }
     } catch (error) {
-        console.error('Error deleting event from database:', error);
+        console.error('❌ Error deleting event from database:', error);
     }
 };
 
 const getAllEventsFromDatabase = async () => {
     try {
         const events = await Event.findAll();
+        console.log(`📦 Retrieved ${events.length} event(s) from database.`);
         return events;
     } catch (error) {
-        console.error('Error retrieving all events from database:', error);
+        console.error('❌ Error retrieving all events from database:', error);
     }
 };
 
 async function getAllScheduledEventsFromClient(client) {
     try {
         let allEvents = [];
-        
-        // Iterate over each guild the client is connected to
+
         for (const [guildId, guild] of client.guilds.cache) {
             const events = await guild.scheduledEvents.fetch();
             const eventList = events.map(event => ({
@@ -68,37 +71,30 @@ async function getAllScheduledEventsFromClient(client) {
             }));
             allEvents = allEvents.concat(eventList);
         }
-        
+
+        console.log(`🔍 Fetched ${allEvents.length} scheduled event(s) from Discord client.`);
         return allEvents;
     } catch (error) {
-        console.error('Error fetching events:', error);
+        console.error('❌ Error fetching events from client:', error);
         throw new Error('There was an error fetching the events.');
     }
 };
-
 
 async function syncEventsInDatabase(client) {
     try {
         const serverId = client.guilds.cache.first().id;
 
-        // Fetch events from the database
         const dbEvents = await Event.findAll();
-
-        // Fetch events from the client
         const servEvents = await getAllScheduledEventsFromClient(client);
 
-        // Create a map of database events by ID for quick lookup
         const dbEventsMap = new Map(dbEvents.map(event => [event.event_id, event]));
 
-        // Create or update events in the database
         for (const servEvent of servEvents) {
             const dbEvent = dbEventsMap.get(servEvent.id);
 
-            console.log('Syncing event:', servEvent.id);
-            console.log(servEvent.name);
+            console.log(`🔄 Syncing event: ${servEvent.name} (${servEvent.id})`);
             try {
                 if (dbEvent) {
-                    // If the event exists in the database, update it
                     await Event.update({
                         name: servEvent.name,
                         description: servEvent.description,
@@ -110,8 +106,8 @@ async function syncEventsInDatabase(client) {
                     }, {
                         where: { event_id: servEvent.id }
                     });
+                    console.log(`✅ Updated event: ${servEvent.name}`);
                 } else {
-                    // If the event does not exist in the database, create it
                     await Event.create({
                         event_id: servEvent.id,
                         server_id: servEvent.guildId,
@@ -122,25 +118,26 @@ async function syncEventsInDatabase(client) {
                         event_coordinator: servEvent.coordinator,
                         location: servEvent.location
                     });
+                    console.log(`➕ Created new event: ${servEvent.name}`);
                 }
             } catch {
-                console.log('Unable to sync... continuing...');
+                console.log('⚠️ Unable to sync event... continuing...');
             }
         }
 
-        // Delete events from the database that no longer exist on the server
         const servEventsMap = new Map(servEvents.map(event => [event.id, event]));
         for (const dbEvent of dbEvents) {
             if (!servEventsMap.has(dbEvent.event_id)) {
                 await Event.destroy({
                     where: { event_id: dbEvent.event_id, server_id: serverId }
                 });
+                console.log(`🗑️ Removed stale event: ${dbEvent.name}`);
             }
         }
 
-        console.log('Database synchronized with client events.');
+        console.log('✅ Database synchronized with client events.');
     } catch (error) {
-        console.error('Error synchronizing events:', error);
+        console.error('❌ Error synchronizing events:', error);
     }
 };
 

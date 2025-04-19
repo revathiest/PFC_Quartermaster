@@ -48,17 +48,13 @@ console.log = (...args) => {
 const initializeBot = async () => {
     const config = await loadConfiguration(botType);
 
-    // Extract the token from the loaded config
     const token = config.token || fileToken;
     if (!token) {
-        console.error('No token found in configuration.');
+        console.error('❌ No token found in configuration.');
         return;
     }
 
-    // Initialize the client with the loaded config
     const client = initClient();
-
-    // Update client configuration with loaded config
     client.config = config;
 
     client.on('interactionCreate', async interaction => {
@@ -66,84 +62,68 @@ const initializeBot = async () => {
     });
 
     client.on("messageCreate", message => handleMessageCreate(message, client));
-
     client.on('messageReactionAdd', (reaction, user) => handleReactionAdd(reaction, user));
-  
     client.on('messageReactionRemove', (reaction, user) => handleReactionRemove(reaction, user));
-
     client.on("voiceStateUpdate", (oldState, newState) => handleVoiceStateUpdate(oldState, newState, client));
-
-    // Event listener for scheduled event creation
     client.on('guildScheduledEventCreate', async (guildScheduledEvent) => handleCreateEvent(guildScheduledEvent, client));
-    
-    client.on('guildScheduledEventUpdate', async (oldGuildScheduledEvent, newGuildScheduledEvent) => handleUpdateEvent(oldGuildScheduledEvent,newGuildScheduledEvent, client));
-    
-    // Event listener for scheduled event deletion
+    client.on('guildScheduledEventUpdate', async (oldEvent, newEvent) => handleUpdateEvent(oldEvent, newEvent, client));
     client.on('guildScheduledEventDelete', async (guildScheduledEvent) => handleDeleteEvent(guildScheduledEvent, client));
-
-    //***********************************************************/
-    //Client Setup
-    //***********************************************************/
 
     client.on('error', (error) => {
         const logChannel = client.channels.cache.get(client.chanBotLog);
         if (logChannel) {
-            logChannel.send('Error: (client)' + error.stack);
+            logChannel.send('⚠️ Error: (client)' + error.stack);
         }
-        console.error('Error event:', error);
+        console.error('💥 Client error event:', error);
     });
 
     client.on("userUpdate", function (oldMember, newMember) {
-        console.log(`A guild member's presence changes`);
+        console.log(`🔄 A guild member's presence changed`);
     });
 
     client.on("guildMemberUpdate", async (oldMember, newMember) => {
         await handleRoleAssignment(oldMember, newMember, client);
     });
 
-    // When the client is ready, run this code (only once)
     client.once('ready', async () => {
-        console.log('Discord client is ready!');
+        console.log('🟢 Discord client is ready!');
         try {
-
-            await initializeDatabase();  // Initialize and sync database
-            await registerChannels(client);  // Register channels
+            await initializeDatabase();
+            await registerChannels(client);
             await registerCommands(client);
             await getInactiveUsersWithSingleRole(client);
             await syncEventsInDatabase(client);
             setInterval(() => checkScheduledAnnouncements(client), 60000);
-            console.log('Bot setup complete and ready to go!');
+            console.log('🚀 Bot setup complete and ready to go!');
 
             const logChannel = client.channels.cache.get(client.chanBotLog);
             if (logChannel) {
-                logChannel.send('Startup Complete!');
+                logChannel.send('✅ Startup Complete!');
             } else {
-                console.error('Log channel not found.');
+                console.error('⚠️ Log channel not found.');
             }
 
             try {
                 setInterval(() => checkEvents(client), 60000);
-                console.log('Check Events interval successfully started');
+                console.log('⏱️ Check Events interval successfully started');
+
                 await deleteMessages(client);
                 setInterval(() => deleteMessages(client), 86400000);
-                console.log('Delete Messages interval successfully started');
+                console.log('🧹 Delete Messages interval successfully started');
             } catch (error) {
-                console.error(`Error setting up interval: ${error}`);
+                console.error(`❌ Error setting up interval: ${error}`);
             }
 
         } catch (error) {
-            console.error('Error during channel registration:', error);
+            console.error('❗ Error during bot setup:', error);
         }
-
     });
 
-    // Login to Discord with your client's token
     try {
         await client.login(token);
     } catch (error) {
-        console.error('Failed to login:', error);
+        console.error('🚫 Failed to login:', error);
     }
-
 };
 
 // Start the bot

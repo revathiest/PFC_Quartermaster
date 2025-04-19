@@ -42,29 +42,28 @@ const VerifiedUser = require('../models/verifiedUser')(sequelize);
 
 Object.values(sequelize.models).forEach(model => {
     if (typeof model.associate === 'function') {
-      model.associate(sequelize.models);
+        model.associate(sequelize.models);
     }
-  });
+});
 
-  const initializeDatabase = async () => {
+const initializeDatabase = async () => {
     try {
-      console.log('Starting database synchronization...\n');
-  
-      for (const [modelName, model] of Object.entries(sequelize.models)) {
-        try {
-          await model.sync({ alter: false }); // You can change to force: true or alter: true if needed
-          console.log(`✅ Synced model: ${modelName}`);
-        } catch (modelError) {
-          console.error(`❌ Failed to sync model: ${modelName}`, modelError);
+        console.log('🧩 Starting database synchronization...\n');
+
+        for (const [modelName, model] of Object.entries(sequelize.models)) {
+            try {
+                await model.sync({ alter: false }); // Change to force: true or alter: true if needed
+                console.log(`📦 Synced model: ${modelName}`);
+            } catch (modelError) {
+                console.error(`❌ Failed to sync model: ${modelName}`, modelError);
+            }
         }
-      }
-  
-      console.log('\n✅ All models synchronized');
+
+        console.log('\n✅ All models synchronized');
     } catch (error) {
-      console.error('❌ Unable to synchronize the database:', error);
+        console.error('🚫 Unable to synchronize the database:', error);
     }
-  };
-  
+};
 
 module.exports = {
     sequelize,

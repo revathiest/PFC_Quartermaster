@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { PermissionFlagsBits } = require('discord.js');
+const { PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { addSnapChannel } = require('../botactions/channelManagement/snapChannels');
 
 const allowedRoles = ['Admiral', 'Fleet Admiral'];
@@ -23,7 +23,7 @@ module.exports = {
     async execute(interaction) {
         const memberRoles = interaction.member.roles.cache.map(role => role.name);
         if (!allowedRoles.some(role => memberRoles.includes(role))) {
-            await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+            await interaction.reply({ content: 'You do not have permission to use this command.', flags: MessageFlags.Ephemeral });
             return;
         }
         try {
@@ -34,10 +34,10 @@ module.exports = {
             const serverId = guild.id;
 
             await addSnapChannel(channelId, purgeTimeInDays, serverId);
-            await interaction.reply({ content: `Snap channel ${channel.name} added with a purge time of ${purgeTimeInDays} days.`, ephemeral: true });
+            await interaction.reply({ content: `Snap channel ${channel.name} added with a purge time of ${purgeTimeInDays} days.`, flags: MessageFlags.Ephemeral });
         } catch (error) {
             console.error(error);
-            await interaction.reply({ content: 'There was an error while adding the snap channel.', ephemeral: true });
+            await interaction.reply({ content: 'There was an error while adding the snap channel.', flags: MessageFlags.Ephemeral });
         }
     },
 };

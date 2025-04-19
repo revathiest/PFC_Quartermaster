@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { Accolade } = require('../config/database');
 const { buildAccoladeEmbed } = require('../utils/accoladeEmbedBuilder');
 
@@ -31,7 +31,7 @@ module.exports = {
     if (rawEmoji && !isValidEmoji) {
       return interaction.reply({
         content: '❌ Please provide a valid emoji (Unicode or custom Discord emoji).',
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
     
@@ -44,14 +44,14 @@ module.exports = {
     if (!accolade) {
       return interaction.reply({
         content: '❌ That role is not registered as an accolade.',
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
 
     if (!emoji && !description) {
       return interaction.reply({
         content: '⚠️ You must provide at least one field to update (emoji or description).',
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
 
@@ -89,7 +89,7 @@ module.exports = {
 
     return interaction.reply({
       content: `✅ Accolade **${accolade.name}** has been updated.`,
-      ephemeral: true
+      flags: MessageFlags.Ephemeral
     });
   }
 };

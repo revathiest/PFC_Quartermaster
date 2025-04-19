@@ -3,7 +3,8 @@ const {
   EmbedBuilder,
   ActionRowBuilder,
   ButtonBuilder,
-  ButtonStyle
+  ButtonStyle,
+  MessageFlags
 } = require('discord.js');
 const { Op } = require('sequelize');
 const db = require('../config/database');
@@ -97,7 +98,7 @@ module.exports = {
       if (!(await isUserVerified(interaction.user.id))) {
         return interaction.reply({
           content: '❌ You must verify your RSI profile using `/verify` before using this command.',
-          ephemeral: true
+          flags: MessageFlags.Ephemeral
         });
       }
       
@@ -127,7 +128,7 @@ module.exports = {
       if (!matches.length) {
         return interaction.reply({
           content: `❌ No terminals found matching "${location}".`,
-          ephemeral: true
+          flags: MessageFlags.Ephemeral
         });
       }
     
@@ -136,7 +137,7 @@ module.exports = {
       return interaction.reply({
         embeds: [embed],
         components,
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     },   
 
@@ -166,7 +167,7 @@ module.exports = {
     if (!matches.length) {
       return interaction.reply({
         content: `❌ No terminals found at "${location}".`,
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
     
@@ -195,7 +196,7 @@ module.exports = {
     return interaction.update({
       embeds: [embed],
       components,
-      ephemeral: true
+      flags: MessageFlags.Ephemeral
     });
   }
 };

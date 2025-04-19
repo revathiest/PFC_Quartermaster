@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const db = require('../config/database');
 const { Op } = require('sequelize');
 const { isUserVerified } = require('../utils/verifyGuard');
@@ -102,7 +102,7 @@ module.exports = {
     if (!(await isUserVerified(interaction.user.id))) {
       return interaction.reply({
         content: '❌ You must verify your RSI profile using `/verify` before using this command.',
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
 
@@ -117,12 +117,12 @@ module.exports = {
     });
 
     if (matches.length === 0) {
-      return interaction.reply({ content: `No vehicles found matching "${name}".`, ephemeral: true });
+      return interaction.reply({ content: `No vehicles found matching "${name}".`, flags: MessageFlags.Ephemeral });
     }
 
     if (matches.length === 1) {
       const embed = buildVehicleEmbed(matches[0]);
-      return interaction.reply({ embeds: [embed], ephemeral: false });
+      return interaction.reply({ embeds: [embed],  });
     }
 
     const menu = new StringSelectMenuBuilder()
@@ -139,7 +139,7 @@ module.exports = {
     await interaction.reply({
       content: `Found ${matches.length} vehicles. Please choose one:`,
       components: [row],
-      ephemeral: false
+      
     });
   },
 

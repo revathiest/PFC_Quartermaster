@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -24,7 +24,7 @@ module.exports = {
 
       await interaction.reply({
         content: `🕵️‍♂️ **User ID**: \`${userId}\`\n🏷️ **Display Name**: \`${displayName}\`\n👤 **Tag**: \`${tag}\``,
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
 
     } catch (error) {
@@ -35,13 +35,13 @@ module.exports = {
         const user = await interaction.client.users.fetch(userId);
         await interaction.reply({
           content: `⚠️ User not found in this server.\n🕵️‍♂️ **User ID**: \`${user.id}\`\n👤 **Username**: \`${user.tag}\``,
-          ephemeral: true
+          flags: MessageFlags.Ephemeral
         });
       } catch (fallbackError) {
         console.error(`Also failed to fetch global user ${userId}:`, fallbackError);
         await interaction.reply({
           content: `❌ Couldn't fetch user with ID \`${userId}\`.`,
-          ephemeral: true
+          flags: MessageFlags.Ephemeral
         });
       }
     }

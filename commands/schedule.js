@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const chrono = require('chrono-node');
 const { pendingChannelSelection } = require('../utils/pendingSelections');
 const { saveAnnouncementToDatabase } = require('../botactions/scheduling/scheduleHandler');
@@ -52,13 +52,13 @@ module.exports = {
         const pending = pendingChannelSelection[interaction.user.id];
     
         if (!pending) {
-            return interaction.reply({ content: '❌ No pending announcement found.', ephemeral: true });
+            return interaction.reply({ content: '❌ No pending announcement found.', flags: MessageFlags.Ephemeral });
         }
     
         // Double-check: selectedChannelId should be a string
         if (typeof selectedChannelId !== 'string') {
             console.error('Channel ID is not a string:', selectedChannelId);
-            return interaction.reply({ content: '❌ Invalid channel selected.', ephemeral: true });
+            return interaction.reply({ content: '❌ Invalid channel selected.', flags: MessageFlags.Ephemeral });
         }
     
         try {
@@ -77,10 +77,10 @@ module.exports = {
             );            
     
             delete pendingChannelSelection[interaction.user.id];
-            await interaction.reply({ content: '✅ Announcement scheduled successfully!', ephemeral: true });
+            await interaction.reply({ content: '✅ Announcement scheduled successfully!', flags: MessageFlags.Ephemeral });
         } catch (error) {
             console.error('Error saving announcement to database:', error);
-            await interaction.reply({ content: '❌ Failed to schedule announcement. Check logs for details.', ephemeral: true });
+            await interaction.reply({ content: '❌ Failed to schedule announcement. Check logs for details.', flags: MessageFlags.Ephemeral });
         }
     }    
 };

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const {
   syncManufacturers,
   syncVehicles,
@@ -27,11 +27,11 @@ module.exports = {
     if (!(await isAdmin(interaction.member))) {
       return interaction.reply({
         content: '❌ You do not have permission to run this command.',
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const results = {};
     const getFormattedTable = () => {

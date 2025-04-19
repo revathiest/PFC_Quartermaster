@@ -2,7 +2,8 @@ const {
     SlashCommandBuilder,
     ActionRowBuilder,
     ButtonBuilder,
-    ButtonStyle
+    ButtonStyle,
+    MessageFlags
   } = require('discord.js');
   const crypto = require('crypto');
   const { VerificationCode, VerifiedUser, OrgTag } = require('../config/database');
@@ -29,7 +30,7 @@ const {
       const now = new Date();
       const expiresAt = new Date(now.getTime() + 15 * 60 * 1000);
   
-      await interaction.deferReply({ ephemeral: true });
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
   
       try {
         const existing = await VerifiedUser.findOne({ where: { rsiHandle } });

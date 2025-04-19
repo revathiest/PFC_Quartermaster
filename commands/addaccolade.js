@@ -1,5 +1,5 @@
 const { Accolade } = require('../config/database');
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { buildAccoladeEmbed } = require('../utils/accoladeEmbedBuilder');
 
 module.exports = {
@@ -28,7 +28,7 @@ module.exports = {
     if (rawEmoji && !isValidEmoji) {
       return interaction.reply({
         content: '❌ Please provide a valid emoji (Unicode or custom Discord emoji).',
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
     
@@ -39,7 +39,7 @@ module.exports = {
 
     const existing = await Accolade.findOne({ where: { role_id: role.id } });
     if (existing) {
-      return interaction.reply({ content: 'That role is already registered as an accolade.', ephemeral: true });
+      return interaction.reply({ content: 'That role is already registered as an accolade.', flags: MessageFlags.Ephemeral });
     }
 
     const config = require('../config.json');
@@ -49,7 +49,7 @@ module.exports = {
     if (!channel || (channel.type !== 0 && channel.type !== 'GUILD_TEXT')) {
       return interaction.reply({
         content: '❌ The configured Wall of Fame channel is either missing or not text-based.',
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
 
@@ -79,6 +79,6 @@ module.exports = {
       date_added: Math.floor(Date.now() / 1000),
     });
 
-    return interaction.reply({ content: `✅ Accolade **${role.name}** registered and posted to the Wall of Fame!`, ephemeral: true });
+    return interaction.reply({ content: `✅ Accolade **${role.name}** registered and posted to the Wall of Fame!`, flags: MessageFlags.Ephemeral });
   }
 };

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, StringSelectMenuBuilder, ActionRowBuilder, ComponentType } = require('discord.js');
+const { SlashCommandBuilder, StringSelectMenuBuilder, ActionRowBuilder, ComponentType, MessageFlags } = require('discord.js');
 const { Vehicle, VehicleDetail } = require('../config/database');
 const { fetchSCDataByUrl } = require('../utils/fetchSCData');
 const { Op } = require('sequelize');
@@ -21,7 +21,7 @@ module.exports = {
     if (!(await isUserVerified(interaction.user.id))) {
       return interaction.reply({
         content: '❌ You must verify your RSI profile using `/verify` before using this command.',
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
     

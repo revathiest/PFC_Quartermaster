@@ -3,6 +3,7 @@ const {
     StringSelectMenuBuilder,
     ActionRowBuilder,
     ComponentType,
+    MessageFlags
   } = require('discord.js');
   const { Op } = require('sequelize');
   const {
@@ -34,7 +35,7 @@ const {
       if (!(await isUserVerified(interaction.user.id))) {
         return interaction.reply({
           content: '❌ You must verify your RSI profile using `/verify` before using this command.',
-          ephemeral: true
+          flags: MessageFlags.Ephemeral
         });
       }
       

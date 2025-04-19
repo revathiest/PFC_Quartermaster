@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { fetchRsiProfileInfo } = require('../utils/rsiProfileScraper');
 
 module.exports = {
@@ -26,14 +26,14 @@ module.exports = {
           `> 🧠 **Bio:** ${bio ? bio : '_[No bio found]_'}`,
           `> 🏷️ **Org ID:** ${orgId ? orgId : '_[None found]_'}`,
         ].join('\n'),
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
 
     } catch (err) {
       console.error(`Error scraping profile for ${rsiHandle}:`, err.message);
       await interaction.reply({
         content: `❌ Failed to fetch profile for \`${rsiHandle}\`. Check the name and try again.`,
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
   }

@@ -4,7 +4,8 @@ const {
   StringSelectMenuBuilder,
   ButtonBuilder,
   ButtonStyle,
-  EmbedBuilder
+  EmbedBuilder,
+  MessageFlags
 } = require('discord.js');
 const { Op } = require('sequelize');
 const db = require('../config/database');
@@ -129,7 +130,7 @@ module.exports = {
     if (!(await isUserVerified(interaction.user.id))) {
       return interaction.reply({
         content: '❌ You must verify your RSI profile using `/verify` before using this command.',
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
     
@@ -150,7 +151,7 @@ module.exports = {
     });
 
     if (!terminals.length) {
-      return interaction.reply({ content: `❌ No terminals found at "${location}".`, ephemeral: true });
+      return interaction.reply({ content: `❌ No terminals found at "${location}".`, flags: MessageFlags.Ephemeral });
     }
 
     const types = [...new Set(terminals.map(t => t.type).filter(Boolean))];
@@ -162,7 +163,7 @@ module.exports = {
     return interaction.reply({
       content: `Found **${terminals.length}** terminals at **${location}**. Choose a type:`,
       components: [new ActionRowBuilder().addComponents(select)],
-      ephemeral: true
+      flags: MessageFlags.Ephemeral
     });
   },
 
@@ -176,7 +177,7 @@ module.exports = {
         return interaction.update({
           content: '❌ Terminal not found.',
           components: [],
-          ephemeral: true
+          flags: MessageFlags.Ephemeral
         });
       }
 
@@ -207,7 +208,7 @@ module.exports = {
       return interaction.update({
         content: `❌ No terminals of type \`${selectedType}\` found at **${location}**.`,
         components: [],
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
 
@@ -227,7 +228,7 @@ module.exports = {
       content: `Terminals of type \`${selectedType}\` at **${location}**:`,
       components: [row],
       embeds: [],
-      ephemeral: true
+      flags: MessageFlags.Ephemeral
     });
   },
 
@@ -238,7 +239,7 @@ module.exports = {
 
     const terminal = await db.UexTerminal.findByPk(terminalId);
     if (!terminal) {
-      return interaction.reply({ content: '❌ Terminal not found.', ephemeral: true });
+      return interaction.reply({ content: '❌ Terminal not found.', flags: MessageFlags.Ephemeral });
     }
 
     const newPage =
@@ -249,7 +250,7 @@ module.exports = {
     const { embed, components, error } = await buildInventoryEmbed(interaction, terminal, type, newPage, isPublic);
 
     if (error) {
-      return interaction.reply({ content: error, ephemeral: true });
+      return interaction.reply({ content: error, flags: MessageFlags.Ephemeral });
     }
 
     if (action === 'uexinventory_public') {

@@ -1,5 +1,5 @@
 // commands/admin/setOrgTag.js
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { OrgTag } = require('../config/database'); // Sequelize model you created
 
 module.exports = {
@@ -25,7 +25,7 @@ module.exports = {
     if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
         return interaction.reply({
           content: '❌ Only administrators can use this command.',
-          ephemeral: true
+          flags: MessageFlags.Ephemeral
         });
       }      
 
@@ -37,13 +37,13 @@ module.exports = {
 
       await interaction.reply({
         content: `✅ Mapped RSI org \`${rsiOrgId}\` to tag \`[${tag}]\`.`,
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     } catch (error) {
       console.error('Error saving org tag:', error);
       await interaction.reply({
         content: `❌ Something went wrong while saving that tag. Try again later.`,
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
   }

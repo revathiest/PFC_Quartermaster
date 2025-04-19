@@ -2,6 +2,7 @@
 const {
     SlashCommandBuilder,
     EmbedBuilder,
+    MessageFlags
   } = require('discord.js');
   const { UsageLog, VoiceLog } = require('../config/database');
   const { Op } = require('sequelize');
@@ -25,7 +26,7 @@ const {
       if (!(await isUserVerified(interaction.user.id))) {
         return interaction.reply({
           content: '❌ You must verify your RSI profile using `/verify` before using this command.',
-          ephemeral: true
+          flags: MessageFlags.Ephemeral
         });
       }
       const targetUser = interaction.options.getUser('user') || interaction.user;
@@ -36,7 +37,7 @@ const {
       if (targetUser.id !== interaction.user.id && !isUserAdmin) {
         return interaction.reply({
           content: '❌ Only admins can view stats for other users.',
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
   

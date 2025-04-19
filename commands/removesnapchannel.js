@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { PermissionFlagsBits } = require('discord.js');
+const { PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { removeSnapChannel } = require('../botactions/channelManagement/snapChannels');
 
 const allowedRoles = ['Admiral', 'Fleet Admiral'];
@@ -19,7 +19,7 @@ module.exports = {
     async execute(interaction) {
         const memberRoles = interaction.member.roles.cache.map(role => role.name);
         if (!allowedRoles.some(role => memberRoles.includes(role))) {
-            await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+            await interaction.reply({ content: 'You do not have permission to use this command.', flags: MessageFlags.Ephemeral });
             return;
         }
         try {
@@ -28,10 +28,10 @@ module.exports = {
             const channelId = channel.id;
 
             await removeSnapChannel(channelId);
-            await interaction.reply({ content: `Snap channel ${channel.name} removed.`, ephemeral: true });
+            await interaction.reply({ content: `Snap channel ${channel.name} removed.`, flags: MessageFlags.Ephemeral });
         } catch (error) {
             console.error(error);
-            await interaction.reply({ content: 'There was an error while removing the snap channel.', ephemeral: true });
+            await interaction.reply({ content: 'There was an error while removing the snap channel.', flags: MessageFlags.Ephemeral });
         }
     },
 };

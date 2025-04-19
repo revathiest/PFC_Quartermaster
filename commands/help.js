@@ -6,6 +6,7 @@ const {
   StringSelectMenuBuilder,
   ComponentType,
   PermissionsBitField,
+  MessageFlags
 } = require('discord.js');
 
 module.exports = {
@@ -54,7 +55,7 @@ module.exports = {
       .setFooter({ text: 'Use the menu to browse categories. Escape or click away to exit.' })
       .setTimestamp();
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     const reply = await interaction.followUp({ embeds: [embed], components: [row], fetchReply: true });
 
     const collector = reply.createMessageComponentCollector({
@@ -64,7 +65,7 @@ module.exports = {
 
     collector.on('collect', async (i) => {
       if (i.user.id !== interaction.user.id) {
-        return i.reply({ content: 'This menu isn’t for you.', ephemeral: true });
+        return i.reply({ content: 'This menu isn’t for you.', flags: MessageFlags.Ephemeral });
       }
 
       const selectedCategory = i.values[0];

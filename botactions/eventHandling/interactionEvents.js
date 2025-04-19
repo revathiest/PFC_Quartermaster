@@ -1,6 +1,7 @@
 const { createChannelSelectMenu } = require('../commandHandling/channelSelector');
 const { UsageLog } = require('../../config/database');
 const chrono = require('chrono-node');
+const { MessageFlags } = require('discord.js');
 const { pendingChannelSelection } = require('../../utils/pendingSelections');
 
 function getPrefixFromCustomId(customId) {
@@ -123,7 +124,7 @@ async function handleCommand(interaction, client) {
         if (!hasRole) {
             await interaction.reply({
                 content: "You don't have the required role to use this command.",
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -146,7 +147,7 @@ async function handleCommand(interaction, client) {
             if (!interaction.replied && !interaction.deferred) {
                 await interaction.reply({
                     content: '❌ There was an error while executing this command!',
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             } else {
                 await interaction.editReply({
@@ -175,14 +176,14 @@ async function handleButton(interaction, client) {
             if (!interaction.replied && !interaction.deferred) {
                 await interaction.reply({
                     content: '❌ Button handler not found.',
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             }
         }
     } catch (err) {
         console.error('❌ [ERROR] handleButton() failed:', err);
         if (!interaction.replied && !interaction.deferred) {
-            await interaction.reply({ content: '❌ Something went wrong.', ephemeral: true });
+            await interaction.reply({ content: '❌ Something went wrong.', flags: MessageFlags.Ephemeral });
         }
     }
 }
@@ -216,14 +217,14 @@ async function handleSelectMenu(interaction, client) {
             if (!interaction.replied && !interaction.deferred) {
                 await interaction.reply({
                     content: '❌ Select menu handler not found.',
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             }
         }
     } catch (err) {
         console.error('❌ [ERROR] handleSelectMenu() failed:', err);
         if (!interaction.replied && !interaction.deferred) {
-            await interaction.reply({ content: '❌ Something went wrong.', ephemeral: true });
+            await interaction.reply({ content: '❌ Something went wrong.', flags: MessageFlags.Ephemeral });
         }
     }
 }
@@ -239,7 +240,7 @@ async function handleModalSubmit(interaction, client) {
         if (!parsedTime || isNaN(parsedTime)) {
             await interaction.reply({
                 content: '❌ Could not understand that time. Try something like "tomorrow at 5pm" or "in 15 minutes".',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -263,7 +264,7 @@ async function handleModalSubmit(interaction, client) {
         await interaction.reply({
             content: '📢 Please select a channel:',
             components: [selectMenu],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }

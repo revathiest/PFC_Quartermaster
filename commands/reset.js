@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { PermissionFlagsBits } = require('discord.js');
+const { PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -13,7 +13,7 @@ module.exports = {
     if (!interaction.member.permissions.has('ADMINISTRATOR')) {
       return interaction.reply({
         content: 'Only an administrator can do that. Your attempt has been logged.',
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
 
@@ -45,7 +45,7 @@ module.exports = {
       try {
         await interaction.editReply({
           content: 'An error occurred while trying to shut down the bot.',
-          ephemeral: true
+          flags: MessageFlags.Ephemeral
         });
       } catch (editError) {
         console.error('Failed to edit the interaction reply:', editError);

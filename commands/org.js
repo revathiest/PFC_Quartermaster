@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { botPermsReq } = require('../config.json');
-const { EmbedBuilder } = require('discord.js'); // required to send the embed to Discord
+const { EmbedBuilder, MessageFlags } = require('discord.js'); // required to send the embed to Discord
 const Builder = new SlashCommandBuilder();
 
 Builder.type = 1;
@@ -40,7 +40,7 @@ module.exports = {
             const org = JSON.parse(answer);
 
             if (!org?.data) {
-                interaction.reply({ content: org.message, ephemeral: true });
+                interaction.reply({ content: org.message, flags: MessageFlags.Ephemeral });
                 console.log('Organization not found:', org.message); // Debug statement
                 return;
             }
@@ -62,11 +62,11 @@ module.exports = {
                 .setDescription(orgBio)
                 .addFields({ name: 'Recruiting Status: ', value: orgRecruiting });
 
-            await interaction.reply({ embeds: [responseEmbed], ephemeral: true });
+            await interaction.reply({ embeds: [responseEmbed], flags: MessageFlags.Ephemeral });
             console.log('Successfully sent org info'); // Debug statement
         } catch (error) {
             console.error('Error executing org command:', error); // Debug statement
-            await interaction.reply({ content: 'There was an error executing the org command.', ephemeral: true });
+            await interaction.reply({ content: 'There was an error executing the org command.', flags: MessageFlags.Ephemeral });
         }
     }
 };

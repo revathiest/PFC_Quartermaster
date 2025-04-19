@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const parseDice = require('../utils/parseDice'); // We'll build this next
 
 module.exports = {
@@ -41,7 +41,7 @@ module.exports = {
 
     } catch (err) {
       console.error(err);
-      await interaction.reply({ content: `❌ Invalid dice formula: \`${formula}\``, ephemeral: true });
+      await interaction.reply({ content: `❌ Invalid dice formula: \`${formula}\``, flags: MessageFlags.Ephemeral });
     }
   }
 };

@@ -1,5 +1,6 @@
 const { saveAnnouncementToDatabase } = require('../scheduling/scheduleHandler');
 const moment = require('moment');
+const { MessageFlags } = require('discord.js');
 
 module.exports = {
     name: 'interactionCreate',
@@ -17,7 +18,7 @@ module.exports = {
 
             // Validate the time format
             if (!moment(time, 'YYYY-MM-DD HH:mm:ss', true).isValid()) {
-                await interaction.reply({ content: 'Invalid time format. Please use YYYY-MM-DD HH:mm:ss', ephemeral: true });
+                await interaction.reply({ content: 'Invalid time format. Please use YYYY-MM-DD HH:mm:ss', flags: MessageFlags.Ephemeral });
                 return;
             }
 
@@ -25,7 +26,7 @@ module.exports = {
             const embedData = { title, description, color, author, footer };
             await saveAnnouncementToDatabase(channelId, embedData, time);
 
-            await interaction.reply({ content: `Announcement scheduled for ${time} in channel ${channelId}`, ephemeral: true });
+            await interaction.reply({ content: `Announcement scheduled for ${time} in channel ${channelId}`, flags: MessageFlags.Ephemeral });
         }
     },
 };

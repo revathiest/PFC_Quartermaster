@@ -1,5 +1,5 @@
 // File: commands/uexfinditem.js
-const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const { Op } = require('sequelize');
 
 const {
@@ -29,12 +29,12 @@ module.exports = {
     if (!(await isUserVerified(interaction.user.id))) {
       return interaction.reply({
         content: '❌ You must verify your RSI profile using `/verify` before using this command.',
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
     
     const query = interaction.options.getString('description');
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const [items, commodities, vehicles] = await Promise.all([
       UexItemPrice.findAll({
@@ -97,7 +97,7 @@ module.exports = {
   async handleSelect(interaction) {
     const [type, id] = interaction.values[0].split(':');
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     await handleSelection(interaction, { type, id: parseInt(id, 10) }, 0, interaction);
   },

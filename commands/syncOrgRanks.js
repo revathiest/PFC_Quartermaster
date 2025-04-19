@@ -8,8 +8,8 @@ module.exports = {
     .setName('sync-org-ranks')
     .setDescription('Compare RSI org ranks with Discord roles for verified PFCS members.')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
-  category: 'admin',
+  help: 'Checks all verified PFCS members and compares their RSI org rank with their current Discord roles. Flags mismatches so admins can correct them.',
+  category: 'Admin',
 
   async execute(interaction) {
     await interaction.deferReply({ flags: 1 << 6 }); // ephemeral

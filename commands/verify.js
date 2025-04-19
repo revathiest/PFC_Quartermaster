@@ -18,7 +18,8 @@ const {
           .setDescription('Your RSI handle (case-sensitive!)')
           .setRequired(true)
       ),
-    category: 'user',
+    help: 'Links your RSI profile to your Discord account using a temporary code. Adds org tags to your nickname and updates roles if you belong to a registered organization.',
+    category: 'User',
   
     async execute(interaction) {
       const discordUserId = interaction.user.id;

@@ -19,7 +19,8 @@ module.exports = {
       option.setName('description')
         .setDescription('Write-up or explanation for the accolade')
         .setRequired(false)),
-
+  help: 'Registers a role as an accolade and posts it to the Wall of Fame. Includes optional emoji and description. Only members with the role will be shown. This is typically used to spotlight achievements or honors.',
+  category: 'Admin',
   async execute(interaction) {
     const role = interaction.options.getRole('role');
     const rawEmoji = interaction.options.getString('emoji')?.trim() || '';

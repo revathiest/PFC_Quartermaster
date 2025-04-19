@@ -15,8 +15,8 @@ module.exports = {
         .setDescription('The nickname tag to use, e.g. "PFC"')
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
-  category: 'admin',
+  help: 'Links an RSI organization ID to a Discord nickname tag. Used to automatically tag users during verification based on their org membership (e.g. [PFC]).',
+  category: 'Admin',
 
   async execute(interaction) {
     const rsiOrgId = interaction.options.getString('rsi_org_id').toUpperCase();

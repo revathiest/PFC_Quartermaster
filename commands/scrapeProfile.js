@@ -11,8 +11,8 @@ module.exports = {
         .setRequired(true)
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
-  category: 'admin',
+  help: 'Utility command to scrape profile info from the RSI site for a given user',
+  category: 'Admin',
 
   async execute(interaction) {
     const rsiHandle = interaction.options.getString('rsi_handle');

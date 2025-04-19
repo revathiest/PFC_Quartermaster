@@ -15,7 +15,6 @@ async function refreshAllowedChannels() {
         for (const entry of entries) {
             allowedChannelIds.add(String(entry.channelId));
         }
-        console.log(`✅ Loaded ${allowedChannelIds.size} allowed ambient channels.`);
     } catch (err) {
         console.error('❌ Failed to load allowed ambient channels:', err);
     }
@@ -27,7 +26,6 @@ async function refreshAmbientSettings() {
         if (setting) {
             ambientConfig.minMessagesSinceLast = setting.minMessagesSinceLast;
             ambientConfig.freshWindowMs = setting.freshWindowMs;
-            console.log(`🔧 Loaded ambient config → minMessagesSinceLast: ${setting.minMessagesSinceLast}, freshWindowMs: ${setting.freshWindowMs}`);
         } else {
             console.warn('⚠️ No ambient settings found in DB. Using defaults.');
         }

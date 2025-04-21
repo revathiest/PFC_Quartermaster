@@ -28,7 +28,7 @@ async function sweepVerifiedNicknames(client) {
       : null;
 
     const currentDisplayName = member.displayName;
-    const expectedNickname = formatVerifiedNickname(currentDisplayName, tag);
+    const expectedNickname = formatVerifiedNickname(currentDisplayName);
 
     if (member.nickname !== expectedNickname) {
       try {

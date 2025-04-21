@@ -1,29 +1,26 @@
 /**
- * Ensures a nickname includes the ✅ and an optional [TAG] in the correct order.
- * 
- * @param {string} displayName - The user's display name (always defined).
- * @param {string|null} tag - The org tag (e.g. 'PFC'), or null if none.
- * @returns {string} - The corrected nickname.
+ * Formats a verified nickname:
+ * - Removes ✅ no matter what
+ * - Adds [TAG] only if a tag is provided (e.g. during /verify)
+ *
+ * @param {string} displayName - The user's current display name
+ * @param {string|null} tag - Optional tag to apply (e.g. during initial verification)
+ * @returns {string} - The cleaned and optionally tagged nickname
  */
  function formatVerifiedNickname(displayName, tag = null) {
     if (!displayName) return '';
   
-    let newNick;
+    // Remove ✅ (anywhere it appears)
+    const noCheck = displayName.replace(/\s*✅\s*/g, '').trim();
   
-    if (tag && displayName.startsWith(`[${tag}]`)) {
-      const hasCheck = displayName.includes('✅');
-      newNick = hasCheck
-        ? displayName
-        : displayName.replace(/^\[.*?\]/, match => `${match} ✅`);
-    } else if (tag) {
-      newNick = `[${tag}] ✅ ${displayName}`;
-    } else {
-      newNick = displayName.includes('✅')
-        ? displayName
-        : `✅ ${displayName}`;
+    // If tag is provided, strip any existing [TAG] and add the correct one
+    if (tag) {
+      const stripped = noCheck.replace(/^\[.*?]\s*/i, '').trim();
+      return `[${tag}] ${stripped}`;
     }
   
-    return newNick;
+    // No tag provided, just return the name without ✅
+    return noCheck;
   }
   
   module.exports = { formatVerifiedNickname };

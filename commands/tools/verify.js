@@ -8,6 +8,7 @@ const {
   const crypto = require('crypto');
   const { VerificationCode, VerifiedUser, OrgTag } = require('../../config/database');
   const { fetchRsiProfileInfo } = require('../../utils/rsiProfileScraper');
+  const { formatVerifiedNickname } = require('../../utils/formatVerifiedNickname');
   
   module.exports = {
     data: new SlashCommandBuilder()
@@ -92,16 +93,18 @@ const {
           ? (await OrgTag.findByPk(orgId.toUpperCase()))?.tag || null
           : null;
   
-        if (tag) {
-          const currentNick = member.nickname || member.user.username;
-          const newNick = currentNick.startsWith(`[${tag}]`) ? currentNick : `[${tag}] ${currentNick}`;
-  
-          try {
-            await member.setNickname(newNick);
-          } catch (err) {
-            console.warn(`[VERIFY BUTTON] Couldn't update nickname:`, err.message);
+          if (tag) {
+            const currentNick = member.displayName;
+          
+            const newNick = formatVerifiedNickname(currentNick, tag);
+          
+            try {
+              await member.setNickname(newNick);
+            } catch (err) {
+              console.warn(`[VERIFY BUTTON] Couldn't update nickname:`, err.message);
+            }
           }
-        }
+
         if (orgId === 'PFCS'){
             // Update role if user has Recruit
             const recruitRole = interaction.guild.roles.cache.find(r => r.name === 'Recruit');

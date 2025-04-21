@@ -10,7 +10,7 @@ const registerCommands = require('./utils/commandRegistration');
 const { initializeDatabase } = require('./config/database');
 const { loadConfiguration } = require('./botactions/configLoader');
 const { checkEvents, startScheduledAnnouncementEngine } = require('./botactions/scheduling');
-const { getInactiveUsersWithSingleRole, handleRoleAssignment } = require('./botactions/userManagement');
+const { getInactiveUsersWithSingleRole, handleRoleAssignment, enforceNicknameFormat, sweepVerifiedNicknames } = require('./botactions/userManagement');
 const { handleCreateEvent, handleUpdateEvent, handleDeleteEvent, syncEventsInDatabase } = require('./botactions/eventHandling/scheduledEvents');
 const { startAmbientEngine } = require('./botactions/ambient/ambientEngine');
 const { deleteOldLogs } = require('./botactions/maintenance/logCleanup');
@@ -85,6 +85,7 @@ const initializeBot = async () => {
 
   client.on("guildMemberUpdate", async (oldMember, newMember) => {
     await handleRoleAssignment(oldMember, newMember, client);
+    await enforceNicknameFormat(oldMember, newMember);
   });
 
   // ✅ Bot Ready
@@ -97,6 +98,7 @@ const initializeBot = async () => {
       await registerCommands(client);
       await getInactiveUsersWithSingleRole(client);
       await syncEventsInDatabase(client);
+      await sweepVerifiedNicknames(client);
       startAmbientEngine(client);
       startScheduledAnnouncementEngine(client);
 

@@ -26,7 +26,7 @@ async function enforceNicknameFormat(oldMember, newMember) {
     console.log(`[NICK ENFORCE] Display name:`, currentDisplayName);
     console.log(`[NICK ENFORCE] Tag:`, tag);
 
-    const expectedNickname = formatVerifiedNickname(currentDisplayName, tag);
+    const expectedNickname = formatVerifiedNickname(currentDisplayName);
 
     console.log(`[NICK ENFORCE] Expected nickname:`, expectedNickname);
 

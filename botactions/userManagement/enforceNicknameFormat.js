@@ -32,10 +32,8 @@ async function enforceNicknameFormat(oldMember, newMember) {
     const expectedNickname = formatVerifiedNickname(currentDisplayName, isVerified, tag);
 
     if (newMember.nickname !== expectedNickname) {
-      console.log(`[NICK ENFORCE] Updating nickname for ${newMember.user.tag} to: ${expectedNickname}`);
       await newMember.setNickname(expectedNickname);
     } else {
-      console.log(`[NICK ENFORCE] No change needed for ${newMember.user.tag}.`);
     }
   } catch (err) {
     console.warn(`[NICK ENFORCE] Error processing nickname for ${newMember.user.tag}:`, err.message);

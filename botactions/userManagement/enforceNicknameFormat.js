@@ -47,6 +47,7 @@ async function enforceNicknameFormat(oldMember, newMember) {
     if (newMember.nickname !== expectedNickname) {
       console.log(`[NICK ENFORCE] Updating nickname to: ${expectedNickname}`);
       await newMember.setNickname(expectedNickname);
+      return
     } else {
       console.log(`[NICK ENFORCE] No change needed.`);
     }

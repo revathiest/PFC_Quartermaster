@@ -46,9 +46,8 @@ async function sweepVerifiedNicknames(client) {
     const currentNickname = member.nickname || member.user.username;
 
     // Clean only the current nickname (formatter already handles expected)
-    const normalizedCurrentNickname = currentNickname.replace(trailingMarkerPattern, '').trim();
+    if ((member.nickname || member.user.username) !== expectedNickname) {
 
-    if (normalizedCurrentNickname !== expectedNickname) {
       try {
         await member.setNickname(expectedNickname);
         console.log(`[SWEEP] Updated ${member.user.tag} → ${expectedNickname}`);

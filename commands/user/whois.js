@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const { VerifiedUser } = require('../../config/database');
 const { fetchRsiProfileInfo } = require('../../utils/rsiProfileScraper');
 
@@ -18,13 +18,10 @@ module.exports = {
     const targetUser = interaction.options.getUser('target');
     const targetMember = interaction.guild.members.cache.get(targetUser.id);
 
-    await interaction.deferReply({ ephemeral: true });
-
-    console.log(`[WHOIS] Command called for user: ${targetUser.tag} (${targetUser.id})`);
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const verified = await VerifiedUser.findByPk(targetUser.id);
     if (!verified) {
-      console.log(`[WHOIS] User ${targetUser.tag} is not verified.`);
       return interaction.editReply({
         content: `❌ ${targetUser.tag} has not verified their RSI profile.`,
       });
@@ -32,7 +29,6 @@ module.exports = {
 
     try {
       const profile = await fetchRsiProfileInfo(verified.rsiHandle);
-      console.log(`[WHOIS] Scraper results:`, profile);
 
       const embed = new EmbedBuilder()
         .setColor(0x00AE86)

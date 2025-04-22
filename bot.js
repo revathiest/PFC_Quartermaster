@@ -14,6 +14,7 @@ const { getInactiveUsersWithSingleRole, handleRoleAssignment, enforceNicknameFor
 const { handleCreateEvent, handleUpdateEvent, handleDeleteEvent, syncEventsInDatabase } = require('./botactions/eventHandling/scheduledEvents');
 const { startAmbientEngine } = require('./botactions/ambient/ambientEngine');
 const { deleteOldLogs } = require('./botactions/maintenance/logCleanup');
+const { handleMemberJoin } = require('./botactions/eventHandling/memberJoinEvent');
 
 const botType = process.env.BOT_TYPE;
 
@@ -72,6 +73,7 @@ const initializeBot = async () => {
   client.on('guildScheduledEventCreate', async (event) => handleCreateEvent(event, client));
   client.on('guildScheduledEventUpdate', async (oldEvent, newEvent) => handleUpdateEvent(oldEvent, newEvent, client));
   client.on('guildScheduledEventDelete', async (event) => handleDeleteEvent(event, client));
+  client.on('guildMemberAdd', async (member) => handleMemberJoin(member));
 
   client.on('error', (error) => {
     const logChannel = client.channels.cache.get(client.chanBotLog);

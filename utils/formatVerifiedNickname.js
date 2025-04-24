@@ -47,14 +47,27 @@
     if (!formatted.endsWith(UNVERIFIED_SYMBOL.trim())) {
       formatted += UNVERIFIED_SYMBOL;
     }
-
+  
     // Truncate if too long
     if (formatted.length > MAX_NICKNAME_LENGTH) {
-      const maxBaseLength = MAX_NICKNAME_LENGTH - UNVERIFIED_SYMBOL.length;
-      const truncatedBase = formatted.slice(0, maxBaseLength).trim();
-      formatted = `${truncatedBase}${UNVERIFIED_SYMBOL}`;
+    
+      const emojiGraphemes = Array.from(UNVERIFIED_SYMBOL.trim());
+      const emojiLength = emojiGraphemes.length + 1; // 1 space before emoji
+      const prefix = tag ? `[${tag}] ` : '';
+      const prefixGraphemes = Array.from(prefix);
+      const prefixLength = prefixGraphemes.length;
+      const baseGraphemes = Array.from(baseName);
+    
+      const maxBaseLength = MAX_NICKNAME_LENGTH - prefixLength - emojiLength;
+    
+      const truncatedBaseGraphemes = baseGraphemes.slice(0, maxBaseLength);
+      const truncatedBase = truncatedBaseGraphemes.join('').trim();
+    
+      formatted = `${prefix}${truncatedBase}${UNVERIFIED_SYMBOL}`;
     }
+      
   }
+  
 
   return formatted;
 }

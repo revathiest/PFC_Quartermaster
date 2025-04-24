@@ -4,35 +4,42 @@ const { fetchRsiProfileInfo } = require('../../utils/rsiProfileScraper');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('scrape-profile')
-    .setDescription('Scrape an RSI profile for bio and org ID (admin only).')
+    .setDescription('Scrape an RSI profile for bio, org info, and avatar (admin only).')
     .addStringOption(option =>
       option.setName('rsi_handle')
-        .setDescription('The RSI handle to look up.')
+        .setDescription('The RSI handle to look up (case-sensitive).')
         .setRequired(true)
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-  help: 'Utility command to scrape profile info from the RSI site for a given user',
+  help: 'Utility command to scrape full profile info from the RSI site for a given user.',
   category: 'Admin',
 
   async execute(interaction) {
     const rsiHandle = interaction.options.getString('rsi_handle');
 
     try {
-      const { bio, orgId } = await fetchRsiProfileInfo(rsiHandle);
+      const { handle, bio, enlisted, avatar, orgRank, orgName, orgId } = await fetchRsiProfileInfo(rsiHandle);
 
-      await interaction.reply({
-        content: [
-          `🔍 **Profile info for** \`${rsiHandle}\`:`,
-          `> 🧠 **Bio:** ${bio ? bio : '_[No bio found]_'}`,
-          `> 🏷️ **Org ID:** ${orgId ? orgId : '_[None found]_'}`,
-        ].join('\n'),
-        flags: MessageFlags.Ephemeral
-      });
+      const embed = {
+        title: `RSI Profile: ${handle}`,
+        thumbnail: avatar ? { url: avatar } : undefined,
+        fields: [
+          { name: 'Enlisted', value: enlisted || 'N/A', inline: true },
+          { name: 'Organization', value: orgName || 'N/A', inline: true },
+          { name: 'Org Rank', value: orgRank || 'N/A', inline: true },
+          { name: 'Org Tag', value: orgId || 'N/A', inline: true},
+          { name: 'Bio', value: bio || 'No bio provided.' }
+        ],
+        color: 0x00AEEF,
+        footer: { text: 'Scraped directly from RSI public profile' }
+      };
+
+      await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 
     } catch (err) {
-      console.error(`Error scraping profile for ${rsiHandle}:`, err.message);
+      console.error(`[SCRAPE PROFILE] Error scraping profile for ${rsiHandle}:`, err.message);
       await interaction.reply({
-        content: `❌ Failed to fetch profile for \`${rsiHandle}\`. Check the name and try again.`,
+        content: `❌ Failed to fetch profile for \`${rsiHandle}\`. Check the handle and try again.`,
         flags: MessageFlags.Ephemeral
       });
     }

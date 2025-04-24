@@ -42,13 +42,5 @@ module.exports = (sequelize) => {
       as: 'terminal'
     });
   };  
-  
-  UexCommodityPrice.associate = (models) => {
-    UexCommodityPrice.belongsTo(models.UexTerminal, {
-      foreignKey: 'id_terminal',
-      as: 'terminal'
-    });
-  };
-
   return UexCommodityPrice;
 };

@@ -12,35 +12,44 @@ async function fetchRsiProfileInfo(rsiHandle) {
 
   const res = await fetch(url);
   if (!res.ok) {
-    throw new Error(`Failed to fetch RSI profile: ${res.status}`);
+    throw new Error(`Unable to fetch RSI profile for handle: ${rsiHandle}`);
   }
 
   const html = await res.text();
   const $ = cheerio.load(html);
 
-  // Proper handle from profile page (preserves casing)
-  const handle = $('.account-profile .info strong.value').first().text().trim();
-  const bio = $('.entry.bio .value').text().trim();
-  const enlisted = $('.left-col .entry:contains("Enlisted") .value').text().trim();
+  const handle = $('.account-profile .info p.entry')
+    .filter((_, el) => $(el).find('.label').text().trim().includes('Handle name'))
+    .find('strong.value')
+    .text()
+    .trim();
+
+  if (!handle) {
+    throw new Error(`Could not parse RSI profile for handle: ${rsiHandle}`);
+  }
+
+  const bio = $('.entry.bio .value').text().trim() || '';
+  const enlisted = $('.left-col .entry')
+    .filter((_, el) => $(el).find('.label').text().trim() === 'Enlisted')
+    .find('strong.value')
+    .text()
+    .trim() || '';
 
   const avatarRel = $('.account-profile .thumb img').attr('src');
   const avatar = avatarRel ? `https://robertsspaceindustries.com${avatarRel}` : null;
 
-  let orgId = null, orgRank = null, orgName = null;
-
-  // Org Rank and Org ID (SID)
+  let orgId = null, orgRank = null;
   $('p.entry').each((_, el) => {
     const label = $(el).find('span.label').text().trim();
     if (label.includes('Spectrum Identification')) {
-      orgId = $(el).find('strong.value').text().trim(); // Org Tag / SID
+      orgId = $(el).find('strong.value').text().trim() || null;
     }
     if (label.includes('Organization rank')) {
-      orgRank = $(el).find('strong.value').text().trim();
+      orgRank = $(el).find('strong.value').text().trim() || null;
     }
   });
 
-  // Org Name (using main org box)
-  orgName = $('.main-org .info .entry a.value').text().trim();
+  const orgName = $('.main-org .info .entry a.value').text().trim() || '';
 
   console.log(`[RSI SCRAPER] Org name: ${orgName}, SID: ${orgId}, Rank: ${orgRank}`);
 

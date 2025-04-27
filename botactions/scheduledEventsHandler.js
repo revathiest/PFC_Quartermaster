@@ -53,11 +53,16 @@ const getAllEventsFromDatabase = async () => {
 };
 
 async function getAllScheduledEventsFromClient(client) {
+
     try {
         let allEvents = [];
+        console.log('client.guilds.cache:', client.guilds.cache);
 
         for (const [guildId, guild] of client.guilds.cache) {
+            console.log(`Processing guild: ${guildId} (${guild.name})`);
             const events = await guild.scheduledEvents.fetch();
+            console.log('Raw fetched events:', events);
+            
             const eventList = events.map(event => ({
                 guildId: guildId,
                 guildName: guild.name,
@@ -69,6 +74,7 @@ async function getAllScheduledEventsFromClient(client) {
                 location: event.location || 'No location',
                 coordinator: event.creator ? event.creator.username : 'Unknown'
             }));
+            console.log('Final allEvents array:', allEvents);
             allEvents = allEvents.concat(eventList);
         }
 
@@ -146,5 +152,6 @@ module.exports = {
     updateEventInDatabase,
     deleteEventFromDatabase,
     getAllEventsFromDatabase,
-    syncEventsInDatabase
+    syncEventsInDatabase,
+    getAllScheduledEventsFromClient
 };

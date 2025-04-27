@@ -29,7 +29,18 @@ module.exports = {
     const verifiedHandles = verifiedUsers.map(v => v.rsiHandle.toLowerCase());
 
     // Step 3: Get Discord Members with Target Roles
-    const targetRoles = ['Recruit', 'Ensign', 'Lieutenant'];
+    const targetRoles = [
+        'Recruit',
+        'Ensign',
+        'Lieutenant',
+        'Commander',
+        'Captain',
+        'Commodore',
+        'Admiral',
+        'Fleet Admiral',
+        'Retired Commander',
+        'Retired Captain'
+      ];      
     const roleMembers = await getGuildMembersWithRoles(guild, targetRoles);
     const roleMemberIds = roleMembers.map(m => m.id);
 

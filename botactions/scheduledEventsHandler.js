@@ -56,7 +56,6 @@ async function getAllScheduledEventsFromClient(client) {
 
     try {
         let allEvents = [];
-        console.log('client.guilds.cache:', client.guilds.cache);
 
         for (const [guildId, guild] of client.guilds.cache) {
             console.log(`Processing guild: ${guildId} (${guild.name})`);

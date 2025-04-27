@@ -15,6 +15,7 @@ const { handleCreateEvent, handleUpdateEvent, handleDeleteEvent, syncEventsInDat
 const { startAmbientEngine } = require('./botactions/ambient/ambientEngine');
 const { deleteOldLogs } = require('./botactions/maintenance/logCleanup');
 const { handleMemberJoin } = require('./botactions/eventHandling/memberJoinEvent');
+const { startOrgTagSyncScheduler } = require('./botactions/orgTagSync/syncScheduler');
 
 const botType = process.env.BOT_TYPE;
 
@@ -103,6 +104,7 @@ const initializeBot = async () => {
       await sweepVerifiedNicknames(client);
       startAmbientEngine(client);
       startScheduledAnnouncementEngine(client);
+      startOrgTagSyncScheduler(client);
 
       console.log('🚀 Bot setup complete and ready to go!');
 

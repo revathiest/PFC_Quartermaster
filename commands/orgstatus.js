@@ -43,6 +43,8 @@ module.exports = {
       ];      
     const roleMembers = await getGuildMembersWithRoles(guild, targetRoles);
     const roleMemberIds = roleMembers.map(m => m.id);
+    const verifiedMatchesWithRole = verifiedUsers.filter(v => roleMemberIds.includes(v.discordUserId));
+    const verifiedWithoutRole = verifiedUsers.filter(v => !roleMemberIds.includes(v.discordUserId));
 
     // Step 4: Matchups and Discrepancy Detection
     const verifiedDiscordIds = verifiedUsers.map(v => v.discordUserId);

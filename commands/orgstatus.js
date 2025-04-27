@@ -25,7 +25,15 @@ module.exports = {
     const rsiHandles = rsiMembers.map(m => m.handle.toLowerCase());
 
     // Step 2: Get Verified Users from DB
-    const verifiedUsers = await VerifiedUser.findAll({ where: { rsiOrgId: orgId } });
+    // All verified users in the database
+    const allVerifiedUsers = await VerifiedUser.findAll();
+
+    // Filter those who are in *your* org
+    const verifiedUsers = allVerifiedUsers.filter(v => v.rsiOrgId === orgId);
+
+    // Filter those who are NOT in your org
+    const verifiedOutsideOrg = allVerifiedUsers.filter(v => v.rsiOrgId !== orgId);
+
     const verifiedHandles = verifiedUsers.map(v => v.rsiHandle.toLowerCase());
 
     // Step 3: Get Discord Members with Target Roles
@@ -63,14 +71,13 @@ module.exports = {
       { name: 'Discord Server Total Members', value: `${guild.memberCount}`, inline: true },
       { name: 'Discord Members with PFC Roles', value: `${roleMembers.length}`, inline: true },
       { name: 'Verified PFC Members (with role)', value: `${verifiedMatchesWithRole.length}`, inline: true },
-      { name: 'Verified Members (no PFC role)', value: `${verifiedWithoutRole.length}`, inline: true }, // 🆕 Added this!
+      { name: 'Verified Members (no PFC role)', value: `${verifiedWithoutRole.length}`, inline: true },
+      { name: 'Verified Members (in other orgs)', value: `${verifiedOutsideOrg.length}`, inline: true }, // 🆕 Here!
       { name: 'Unverified in Discord (with role)', value: `${unverifiedRoleMembers.length}`, inline: true },
       { name: 'In RSI Org but Not Verified', value: `${rsiOnlyHandles.length}`, inline: true },
     )
     .setTimestamp();
-  
     
-
     await interaction.editReply({ embeds: [reportEmbed] });
   }
 };

@@ -14,7 +14,8 @@ describe('syncOrgTags', () => {
     mockMember = {
       displayName: 'WrongName',
       setNickname: jest.fn().mockResolvedValue(true),
-      user: { id: 'user1', username: 'VerifiedUser', tag: 'VerifiedUser#1234' }
+      user: { id: 'user1', username: 'VerifiedUser', tag: 'VerifiedUser#1234' },
+      manageable: true
     };
 
     mockGuild = {
@@ -37,8 +38,8 @@ describe('syncOrgTags', () => {
       { discordUserId: 'user1', rsiHandle: 'VerifiedUser', rsiOrgId: 'OLDORG' }
     ]);
   
-    rsiProfileScraper.fetchRsiProfileInfo.mockResolvedValue({ orgId: 'PFCS' });  // RSI org ID scraped
-    OrgTag.findByPk.mockResolvedValue({ tag: 'PFC' });                           // Nickname tag from DB
+    rsiProfileScraper.fetchRsiProfileInfo.mockResolvedValue({ orgId: 'PFCS' });
+    OrgTag.findByPk.mockResolvedValue({ tag: 'PFC' });
   
     await syncOrgTags(mockClient);
   
@@ -46,7 +47,7 @@ describe('syncOrgTags', () => {
       { rsiOrgId: 'PFCS' },
       { where: { discordUserId: 'user1' } }
     );
-    expect(mockMember.setNickname).toHaveBeenCalledWith('[PFC] WrongName');  // ✅ Correct tag now!
+    expect(mockMember.setNickname).toHaveBeenCalledWith('[PFC] WrongName');
   });
 
   it('does not update nickname if already correct', async () => {
@@ -57,21 +58,21 @@ describe('syncOrgTags', () => {
     ]);
   
     rsiProfileScraper.fetchRsiProfileInfo.mockResolvedValue({ orgId: 'PFCS' });
-    OrgTag.findByPk.mockResolvedValue({ tag: 'PFC' });  // ✅ Added this line!
+    OrgTag.findByPk.mockResolvedValue({ tag: 'PFC' });
   
     await syncOrgTags(mockClient);
   
     expect(VerifiedUser.update).not.toHaveBeenCalled();
     expect(mockMember.setNickname).not.toHaveBeenCalled();
   });
-  
+
   it('skips nickname changes for users outside predefined orgs but updates DB', async () => {
     VerifiedUser.findAll.mockResolvedValue([
       { discordUserId: 'user1', rsiHandle: 'VerifiedUser', rsiOrgId: 'PFCS' }
     ]);
   
     rsiProfileScraper.fetchRsiProfileInfo.mockResolvedValue({ orgId: 'OUTLAW' });  // Not in predefined orgs
-    OrgTag.findByPk.mockResolvedValue(null);  // ✅ Mock no matching tag in org_tags DB
+    OrgTag.findByPk.mockResolvedValue(null);  // No tag for OUTLAW
   
     await syncOrgTags(mockClient);
   
@@ -79,9 +80,8 @@ describe('syncOrgTags', () => {
       { rsiOrgId: 'OUTLAW' },
       { where: { discordUserId: 'user1' } }
     );
-    expect(mockMember.setNickname).not.toHaveBeenCalled();  // ✅ Now this should pass!
+    expect(mockMember.setNickname).not.toHaveBeenCalled();
   });
-  
 
   it('logs and skips if no guild found', async () => {
     const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
@@ -104,10 +104,10 @@ describe('syncOrgTags', () => {
       { discordUserId: 'user1', rsiHandle: 'VerifiedUser', rsiOrgId: 'PFCS' }
     ]);
 
-    rsiProfileScraper.fetchRsiProfileInfo.mockResolvedValue({ orgId: 'PFCS' });  // FIXED here
+    rsiProfileScraper.fetchRsiProfileInfo.mockResolvedValue({ orgId: 'PFCS' });
 
     await expect(syncOrgTags(mockClient)).resolves.not.toThrow();
-    expect(VerifiedUser.update).not.toHaveBeenCalled(); // Because member not found
+    expect(VerifiedUser.update).not.toHaveBeenCalled(); 
   });
 
   it('continues processing if scraping fails for a user', async () => {
@@ -117,13 +117,35 @@ describe('syncOrgTags', () => {
       { discordUserId: 'user1', rsiHandle: 'VerifiedUser', rsiOrgId: 'PFCS' }
     ]);
 
-    rsiProfileScraper.fetchRsiProfileInfo.mockRejectedValue(new Error('Scrape failed'));  // FIXED here
+    rsiProfileScraper.fetchRsiProfileInfo.mockRejectedValue(new Error('Scrape failed'));  
 
     await syncOrgTags(mockClient);
 
     expect(consoleSpy).toHaveBeenCalledWith(
       expect.stringContaining('[SYNC] Failed to process VerifiedUser'),
       expect.any(Error)
+    );
+    consoleSpy.mockRestore();
+  });
+
+  // 🟢 New test for "profile not found → remove + unverify"
+  it('removes user from DB and updates nickname if RSI profile not found', async () => {
+    const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+    VerifiedUser.findAll.mockResolvedValue([
+      { discordUserId: 'user1', rsiHandle: 'VerifiedUser', rsiOrgId: 'PFCS' }
+    ]);
+
+    rsiProfileScraper.fetchRsiProfileInfo.mockRejectedValue(new Error('Unable to fetch RSI profile for handle: VerifiedUser'));
+
+    await syncOrgTags(mockClient);
+
+    expect(VerifiedUser.destroy).toHaveBeenCalledWith({
+      where: { discordUserId: 'user1' }
+    });
+    expect(mockMember.setNickname).toHaveBeenCalledWith('WrongName ⛔');
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('RSI profile not found for VerifiedUser')
     );
     consoleSpy.mockRestore();
   });

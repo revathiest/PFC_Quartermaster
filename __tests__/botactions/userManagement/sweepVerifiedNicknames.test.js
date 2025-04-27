@@ -11,6 +11,12 @@ describe('sweepVerifiedNicknames', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    OrgTag.findAll.mockResolvedValue([
+      { tag: 'PFCS' },
+      { tag: 'DEFN' },
+      { tag: 'PFC' }, // Add any other known tags you’re using
+    ]);  
+
     mockMembers = new Map();
     const createMockMember = (id, username, nickname = null, isBot = false) => ({
       id,
@@ -130,4 +136,131 @@ describe('sweepVerifiedNicknames', () => {
     expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Updated:'));
     mockConsoleLog.mockRestore();
   });
+
+  it('corrects wrong predefined tag for verified user', async () => {
+    VerifiedUser.findAll.mockResolvedValue([
+      { discordUserId: 'user1', rsiOrgId: 'PFCS' },
+    ]);
+    OrgTag.findByPk.mockResolvedValue({ tag: 'PFCS' });
+
+    // Pretend the user currently has the wrong known tag
+    mockMembers.get('user1').nickname = '[DEFN] VerifiedUser';
+    mockMembers.get('user1').displayName = '[DEFN] VerifiedUser';
+
+    formatVerifiedNickname.mockImplementation(() => '[PFCS] VerifiedUser');
+
+    await sweepVerifiedNicknames(mockClient);
+
+    expect(mockMembers.get('user1').setNickname).toHaveBeenCalledWith('[PFCS] VerifiedUser');
+  });
+
+  it('removes predefined tag if verified user has no matching org', async () => {
+    VerifiedUser.findAll.mockResolvedValue([
+      { discordUserId: 'user1', rsiOrgId: 'MISSING' },
+    ]);
+    OrgTag.findByPk.mockResolvedValue(null);  // Simulates missing OrgTag entry
+
+    mockMembers.get('user1').nickname = '[DEFN] VerifiedUser';
+    mockMembers.get('user1').displayName = '[DEFN] VerifiedUser';
+
+    formatVerifiedNickname.mockImplementation(() => 'VerifiedUser'); // No tag applied
+
+    await sweepVerifiedNicknames(mockClient);
+
+    expect(mockMembers.get('user1').setNickname).toHaveBeenCalledWith('VerifiedUser');
+  });
+
+  it('leaves unknown tag alone if verified user org not in known list', async () => {
+    VerifiedUser.findAll.mockResolvedValue([
+      { discordUserId: 'user1', rsiOrgId: 'OUTLAW' },
+    ]);
+    OrgTag.findByPk.mockResolvedValue(null);  // Org not in predefined list
+
+    mockMembers.get('user1').nickname = '[LOL] VerifiedUser';
+    mockMembers.get('user1').displayName = '[LOL] VerifiedUser';
+
+    formatVerifiedNickname.mockImplementation(() => '[LOL] VerifiedUser'); // Leaves unknown tag alone
+
+    await sweepVerifiedNicknames(mockClient);
+
+    expect(mockMembers.get('user1').setNickname).not.toHaveBeenCalled();
+  });
+
+  it('leaves unknown tag but adds ⛔ for unverified user', async () => {
+    VerifiedUser.findAll.mockResolvedValue([]);  // No verified users!
+
+    mockMembers.get('user2').nickname = '[LOL] UnverifiedUser';
+    mockMembers.get('user2').displayName = '[LOL] UnverifiedUser';
+
+    formatVerifiedNickname.mockImplementation(() => '[LOL] UnverifiedUser ⛔');
+
+    await sweepVerifiedNicknames(mockClient);
+
+    expect(mockMembers.get('user2').setNickname).toHaveBeenCalledWith('[LOL] UnverifiedUser ⛔');
+  });
+
+  it('should not remove unknown tag for verified user', async () => {
+    VerifiedUser.findAll.mockResolvedValue([
+      { discordUserId: 'user1', rsiOrgId: 'OUTLAW' }, // Org not in predefined list
+    ]);
+    OrgTag.findByPk.mockResolvedValue(null);  // No matching tag
+  
+    mockMembers.get('user1').nickname = '[LOL] VerifiedUser';
+    mockMembers.get('user1').displayName = '[LOL] VerifiedUser';
+  
+    formatVerifiedNickname.mockImplementation(() => 'VerifiedUser'); // Simulates current broken behavior
+  
+    await sweepVerifiedNicknames(mockClient);
+  
+    formatVerifiedNickname.mockImplementation((baseName, isVerified, tagToUse) => {
+      return tagToUse ? `[${tagToUse}] ${baseName}` : `${baseName}${isVerified ? '' : ' ⛔'}`;
+    });    
+  });
+
+  it('removes predefined tag and adds ⛔ for unverified user', async () => {
+    VerifiedUser.findAll.mockResolvedValue([]);  // User is NOT verified!
+  
+    mockMembers.get('user2').nickname = '[PFC] UnverifiedUser';
+    mockMembers.get('user2').displayName = '[PFC] UnverifiedUser';
+  
+    formatVerifiedNickname.mockImplementation(() => 'UnverifiedUser ⛔'); 
+  
+    await sweepVerifiedNicknames(mockClient);
+  
+    expect(mockMembers.get('user2').setNickname).toHaveBeenCalledWith('UnverifiedUser ⛔');
+  });
+  
+  it('removes known tag if org is not in known org list', async () => {
+    VerifiedUser.findAll.mockResolvedValue([
+      { discordUserId: 'user1', rsiOrgId: 'OUTLAW' }, // Org not in org_tags
+    ]);
+    OrgTag.findByPk.mockResolvedValue(null);  // Not a known org!
+  
+    mockMembers.get('user1').nickname = '[PFC] VerifiedUser';
+    mockMembers.get('user1').displayName = '[PFC] VerifiedUser';
+  
+    formatVerifiedNickname.mockImplementation(() => 'VerifiedUser');  // Should strip tag
+  
+    await sweepVerifiedNicknames(mockClient);
+  
+    expect(mockMembers.get('user1').setNickname).toHaveBeenCalledWith('VerifiedUser');
+  });
+  
+  it('removes predefined tag for verified user with no org', async () => {
+    VerifiedUser.findAll.mockResolvedValue([
+      { discordUserId: 'user1', rsiOrgId: null },  // ✅ Verified user, but no org!
+    ]);
+  
+    OrgTag.findByPk.mockResolvedValue(null);  // Simulates no org entry found in org_tags
+  
+    mockMembers.get('user1').nickname = '[PFC] VerifiedUser';
+    mockMembers.get('user1').displayName = '[PFC] VerifiedUser';
+  
+    formatVerifiedNickname.mockImplementation(() => 'VerifiedUser');  // Should strip the tag
+  
+    await sweepVerifiedNicknames(mockClient);
+  
+    expect(mockMembers.get('user1').setNickname).toHaveBeenCalledWith('VerifiedUser');
+  });
+  
 });

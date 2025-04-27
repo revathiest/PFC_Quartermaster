@@ -1,20 +1,24 @@
 jest.mock('../../botactions/orgTagSync/syncOrgTags');
 jest.mock('../../botactions/orgTagSync/syncCooldownTracker');
+
 jest.mock('discord.js', () => ({
-    SlashCommandBuilder: jest.fn(() => ({
-      setName: jest.fn().mockReturnThis(),
-      setDescription: jest.fn().mockReturnThis(),
-      setDefaultMemberPermissions: jest.fn().mockReturnThis(),
-    })),
-    PermissionFlagsBits: {
-      Administrator: 0x00000008,
-    },
-  }));
-  
+  SlashCommandBuilder: jest.fn(() => ({
+    setName: jest.fn().mockReturnThis(),
+    setDescription: jest.fn().mockReturnThis(),
+    setDefaultMemberPermissions: jest.fn().mockReturnThis(),
+  })),
+  PermissionFlagsBits: {
+    Administrator: 0x00000008,
+  },
+  MessageFlags: {
+    Ephemeral: 1 << 6, // 64 (Discord's Ephemeral flag)
+  },
+}));
 
 const command = require('../../commands/sync-org-tags');
 const { syncOrgTags } = require('../../botactions/orgTagSync/syncOrgTags');
 const cooldownTracker = require('../../botactions/orgTagSync/syncCooldownTracker');
+const { MessageFlags } = require('discord.js'); // ✅ Pull it in to use below
 
 describe('/sync-org-tags command', () => {
   let mockInteraction;
@@ -36,7 +40,7 @@ describe('/sync-org-tags command', () => {
 
     expect(mockInteraction.reply).toHaveBeenCalledWith({
       content: 'Sync was run recently. Please wait before running again.',
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral, // ✅ Updated here!
     });
     expect(syncOrgTags).not.toHaveBeenCalled();
     expect(cooldownTracker.markManualSyncRun).not.toHaveBeenCalled();
@@ -49,13 +53,13 @@ describe('/sync-org-tags command', () => {
 
     expect(mockInteraction.reply).toHaveBeenCalledWith({
       content: 'Running org tag sync now...',
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral, // ✅ Updated here!
     });
     expect(syncOrgTags).toHaveBeenCalledWith(mockInteraction.client);
     expect(cooldownTracker.markManualSyncRun).toHaveBeenCalled();
     expect(mockInteraction.followUp).toHaveBeenCalledWith({
       content: 'Org tag sync completed successfully.',
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral, // ✅ Updated here!
     });
   });
 });

@@ -53,18 +53,20 @@ module.exports = {
     // Step 5: Build Report Embed
     const { EmbedBuilder } = require('discord.js');
     const reportEmbed = new EmbedBuilder()
-      .setTitle('Org Membership Verification Report')
-      .setColor(0x3498db)
-      .addFields(
-        { name: 'RSI Org Total Members', value: `${rsiHandles.length}`, inline: true },
-        { name: 'Redacted RSI Members', value: `${redactedCount}`, inline: true },
-        { name: 'Discord Server Total Members', value: `${guild.memberCount}`, inline: true }, // 🆕 Added this!
-        { name: 'Discord Members with Roles', value: `${roleMembers.length}`, inline: true },
-        { name: 'Verified Matches', value: `${verifiedUsers.filter(v => roleMemberIds.includes(v.discordUserId)).length}`, inline: true },
-        { name: 'Unverified in Discord (with role)', value: `${unverifiedRoleMembers.length}`, inline: true },
-        { name: 'In RSI Org but Not Verified', value: `${rsiOnlyHandles.length}`, inline: true },
-      )
-      .setTimestamp();
+    .setTitle('Org Membership Verification Report')
+    .setColor(0x3498db)
+    .addFields(
+      { name: 'RSI Org Total Public Members', value: `${rsiHandles.length}`, inline: true },
+      { name: 'RSI Org Total Redacted Members', value: `${redactedCount}`, inline: true },
+      { name: 'Discord Server Total Members', value: `${guild.memberCount}`, inline: true },
+      { name: 'Discord Members with PFC Roles', value: `${roleMembers.length}`, inline: true },
+      { name: 'Verified PFC Members (with role)', value: `${verifiedMatchesWithRole.length}`, inline: true },
+      { name: 'Verified Members (no PFC role)', value: `${verifiedWithoutRole.length}`, inline: true }, // 🆕 Added this!
+      { name: 'Unverified in Discord (with role)', value: `${unverifiedRoleMembers.length}`, inline: true },
+      { name: 'In RSI Org but Not Verified', value: `${rsiOnlyHandles.length}`, inline: true },
+    )
+    .setTimestamp();
+  
     
 
     await interaction.editReply({ embeds: [reportEmbed] });

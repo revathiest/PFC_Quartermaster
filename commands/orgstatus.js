@@ -47,12 +47,14 @@ module.exports = {
       .addFields(
         { name: 'RSI Org Total Members', value: `${rsiHandles.length}`, inline: true },
         { name: 'Redacted RSI Members', value: `${redactedCount}`, inline: true },
+        { name: 'Discord Server Total Members', value: `${guild.memberCount}`, inline: true }, // 🆕 Added this!
         { name: 'Discord Members with Roles', value: `${roleMembers.length}`, inline: true },
         { name: 'Verified Matches', value: `${verifiedUsers.filter(v => roleMemberIds.includes(v.discordUserId)).length}`, inline: true },
         { name: 'Unverified in Discord (with role)', value: `${unverifiedRoleMembers.length}`, inline: true },
         { name: 'In RSI Org but Not Verified', value: `${rsiOnlyHandles.length}`, inline: true },
       )
       .setTimestamp();
+    
 
     await interaction.editReply({ embeds: [reportEmbed] });
   }

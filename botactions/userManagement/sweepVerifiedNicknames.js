@@ -13,8 +13,6 @@ async function sweepVerifiedNicknames(client) {
     return;
   }
 
-  console.log('[SWEEP] Starting nickname sweep...');
-
   const verifiedUsers = await VerifiedUser.findAll();
   const verifiedUserIds = new Set(verifiedUsers.map(u => u.discordUserId));
 
@@ -67,15 +65,12 @@ async function sweepVerifiedNicknames(client) {
     if (currentNickname !== expectedNickname) {
       try {
         await member.setNickname(expectedNickname);
-        console.log(`[SWEEP] Updated ${member.user.tag} → ${expectedNickname}`);
         updated++;
       } catch (err) {
         console.warn(`[SWEEP] Could not update ${member.user.tag}:`, err.message);
       }
     }
   }
-
-  console.log(`[SWEEP] Finished. Checked: ${checked}, Updated: ${updated}`);
 }
 
 module.exports = { sweepVerifiedNicknames };

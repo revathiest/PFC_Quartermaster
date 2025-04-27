@@ -35,7 +35,6 @@ describe('formatVerifiedNickname', () => {
           const result = formatVerifiedNickname(displayName, verified, tag);
           expect(result).toBe(expected);
           // Optional: Log the result for your own sanity (remove in production)
-          console.log(`Result for "${displayName}": ${result}`);
         }
       );
     });

@@ -8,7 +8,6 @@ const cheerio = require('cheerio');
  */
 async function fetchRsiProfileInfo(rsiHandle) {
   const url = `https://robertsspaceindustries.com/citizens/${rsiHandle}`;
-  console.log(`[RSI SCRAPER] Fetching profile for handle: ${rsiHandle} from ${url}`);
 
   const res = await fetch(url);
   if (!res.ok) {
@@ -50,8 +49,6 @@ async function fetchRsiProfileInfo(rsiHandle) {
   });
 
   const orgName = $('.main-org .info .entry a.value').text().trim() || '';
-
-  console.log(`[RSI SCRAPER] Org name: ${orgName}, SID: ${orgId}, Rank: ${orgRank}`);
 
   return { handle, bio, enlisted, avatar, orgId, orgRank, orgName };
 }

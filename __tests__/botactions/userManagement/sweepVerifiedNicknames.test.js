@@ -122,21 +122,6 @@ describe('sweepVerifiedNicknames', () => {
     mockConsoleWarn.mockRestore();
   });
 
-  it('logs the correct summary of checked and updated members', async () => {
-    VerifiedUser.findAll.mockResolvedValue([{ discordUserId: 'user1', rsiOrgId: 'PFCS' }]);
-    OrgTag.findByPk.mockResolvedValue({ tag: 'PFCS' });
-
-    formatVerifiedNickname.mockImplementation(() => '[PFCS] VerifiedUser');
-
-    const mockConsoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
-
-    await sweepVerifiedNicknames(mockClient);
-
-    expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Checked:'));
-    expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Updated:'));
-    mockConsoleLog.mockRestore();
-  });
-
   it('corrects wrong predefined tag for verified user', async () => {
     VerifiedUser.findAll.mockResolvedValue([
       { discordUserId: 'user1', rsiOrgId: 'PFCS' },

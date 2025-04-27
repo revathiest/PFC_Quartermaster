@@ -38,7 +38,6 @@ module.exports = {
 
     try {
       const existing = await VerifiedUser.findOne({ where: { rsiHandle } });
-      console.log(`[VERIFY EXECUTE] Checking existing verification for handle: ${rsiHandle}`);
 
       if (existing && existing.discordUserId !== user.id) {
         return interaction.editReply({
@@ -47,7 +46,6 @@ module.exports = {
       }
 
       await VerificationCode.upsert({ discordUserId, code, createdAt: now, expiresAt });
-      console.log(`[VERIFY EXECUTE] Verification code upserted: ${code}`);
 
       const verifyButton = new ButtonBuilder()
         .setCustomId(`verify_now::${rsiHandle}::${code}`)
@@ -82,17 +80,13 @@ module.exports = {
     const member = interaction.member;
 
     pendingVerifications.add(user.id);
-    console.log(`[VERIFY BUTTON] Added ${user.id} to pendingVerifications.`);
 
     await interaction.deferUpdate();
 
     try {
-      console.log(`[VERIFY BUTTON] Fetching RSI profile info for: ${rsiHandle}`);
       const { bio, orgId } = await fetchRsiProfileInfo(rsiHandle);
-      console.log(`[VERIFY BUTTON] Fetched bio: ${bio}, orgId: ${orgId}`);
 
       if (!bio || !bio.includes(code)) {
-        console.log(`[VERIFY BUTTON] Code not found in bio for handle: ${rsiHandle}`);
         pendingVerifications.delete(user.id);
         return interaction.editReply({
           content: `❌ Couldn't find the code in your RSI bio.\nMake sure you've saved this:\n\`\`\`${code}\`\`\`\nThen click the button again.`,
@@ -102,7 +96,6 @@ module.exports = {
       const tag = orgId
         ? (await OrgTag.findByPk(orgId.toUpperCase()))?.tag || null
         : null;
-      console.log(`[VERIFY BUTTON] Tag determined: ${tag}`);
 
       if (orgId === 'PFCS') {
         const recruitRole = interaction.guild.roles.cache.find(r => r.name === 'Recruit');
@@ -114,14 +107,12 @@ module.exports = {
             await member.roles.remove(recruitRole);
             await member.roles.add(ensignRole);
             await member.roles.add(pfcRole);
-            console.log(`[VERIFY BUTTON] Role updated: Recruit → Ensign`);
           } catch (err) {
             console.warn(`[VERIFY BUTTON] Couldn't update roles:`, err.message);
           }
         }
       }
 
-      console.log(`[VERIFY BUTTON] Upserting verified user record.`);
       await VerifiedUser.upsert({
         discordUserId: user.id,
         rsiHandle,
@@ -132,12 +123,10 @@ module.exports = {
       if (tag) {
         const currentNick = member.displayName;
         const newNick = formatVerifiedNickname(currentNick, true, tag);
-        console.log(`[VERIFY BUTTON] Setting nickname: ${newNick}`);
 
         try {
           await member.setNickname(newNick);
         } catch (err) {
-          console.warn(`[VERIFY BUTTON] Couldn't update nickname:`, err.message);
         }
       }
 
@@ -154,7 +143,6 @@ module.exports = {
       });
     } finally {
       pendingVerifications.delete(user.id);
-      console.log(`[VERIFY BUTTON] Removed ${user.id} from pendingVerifications.`);
     }
   }
 };

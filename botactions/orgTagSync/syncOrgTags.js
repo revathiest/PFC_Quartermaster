@@ -22,7 +22,6 @@ async function syncOrgTags(client) {
           { rsiOrgId: scrapedOrgId },
           { where: { discordUserId: user.discordUserId } }
         );
-        console.log(`[SYNC] Updated rsiOrgId for ${user.rsiHandle}: ${user.rsiOrgId} → ${scrapedOrgId}`);
       }
 
       // Get the enforced tag from the org_tags table
@@ -41,7 +40,6 @@ async function syncOrgTags(client) {
       const formattedNickname = formatVerifiedNickname(member.displayName, true, enforcedTag);
       if (member.displayName !== formattedNickname) {
         await member.setNickname(formattedNickname);
-        console.log(`[SYNC] Updated nickname for ${user.rsiHandle} to "${formattedNickname}"`);
       }
 
     } catch (error) {
@@ -65,7 +63,6 @@ async function syncOrgTags(client) {
         const formattedNickname = formatVerifiedNickname(member.displayName, false, null); // Unverified, no tag
         if (member.displayName !== formattedNickname) {
           await member.setNickname(formattedNickname);
-          console.log(`[SYNC] Updated nickname for ${user.rsiHandle} to "${formattedNickname}" (unverified)`);
         }
 
         continue; // Move to next user, do not rethrow

@@ -18,7 +18,6 @@ async function enforceNicknameFormat(oldMember, newMember) {
   const discordUserId = newMember.id;
 
   if (pendingVerifications.has(discordUserId)) {
-    console.log(`[NICK ENFORCE] Skipping enforcement for ${newMember.user.tag}, verification in progress.`);
     return;
   }
 
@@ -65,7 +64,6 @@ async function enforceNicknameFormat(oldMember, newMember) {
 
     if (currentNickname !== expectedNickname) {
       await newMember.setNickname(expectedNickname);
-      console.log(`[NICK ENFORCE] Updated ${newMember.user.tag} → ${expectedNickname}`);
     }
   } catch (err) {
     console.warn(`[NICK ENFORCE] Error processing nickname for ${newMember.user.tag}:`, err.message);

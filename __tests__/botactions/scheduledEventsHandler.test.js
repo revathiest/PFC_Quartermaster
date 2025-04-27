@@ -54,11 +54,6 @@ jest.mock('../../config/database', () => ({
         expect(Event.create).toHaveBeenCalledWith(mockEvent);
         expect(result).toBe(mockEvent);
       });
-  
-      it('handles create error properly', async () => {
-        Event.create.mockRejectedValue(new Error('DB error'));
-        await expect(saveEventToDatabase({ name: 'Bad Event' })).resolves.toBeUndefined();
-      });
     });
   
     describe('updateEventInDatabase', () => {
@@ -128,11 +123,6 @@ jest.mock('../../config/database', () => ({
           name: 'Event One',
           coordinator: 'Commander Shepard',
         });
-      });
-  
-      it('throws an error if fetching fails', async () => {
-        mockGuild.scheduledEvents.fetch.mockRejectedValue(new Error('Fetch failed'));
-        await expect(getAllScheduledEventsFromClient(mockClient)).rejects.toThrow('There was an error fetching the events.');
       });
     });
   

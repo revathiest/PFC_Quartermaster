@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const { VerifiedUser } = require('../config/database'); // Adjust if your path differs
-const scrapeOrgMembers = require('../utils/rsiScrapeOrgMembers'); // Assuming you’ve got this
-const getGuildMembersWithRoles = require('../utils/getGuildMembersWithRoles'); // You may need to make this
+const { VerifiedUser } = require('../config/database');
+const rsiScrapeOrgMembers = require('../utils/rsiScrapeOrgMembers');
+const getGuildMembersWithRoles = require('../utils/getGuildMembersWithRoles');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -21,7 +21,7 @@ module.exports = {
     await interaction.deferReply();
 
     // Step 1: Scrape RSI Org Members
-    const rsiMembers = await scrapeOrgMembers(orgId); 
+    const { members: rsiMembers, redactedCount } = await rsiScrapeOrgMembers(orgId);
     const rsiHandles = rsiMembers.map(m => m.handle.toLowerCase());
 
     // Step 2: Get Verified Users from DB
@@ -46,6 +46,7 @@ module.exports = {
       .setColor(0x3498db)
       .addFields(
         { name: 'RSI Org Total Members', value: `${rsiHandles.length}`, inline: true },
+        { name: 'Redacted RSI Members', value: `${redactedCount}`, inline: true },
         { name: 'Discord Members with Roles', value: `${roleMembers.length}`, inline: true },
         { name: 'Verified Matches', value: `${verifiedUsers.filter(v => roleMemberIds.includes(v.discordUserId)).length}`, inline: true },
         { name: 'Unverified in Discord (with role)', value: `${unverifiedRoleMembers.length}`, inline: true },

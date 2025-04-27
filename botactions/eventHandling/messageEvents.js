@@ -23,7 +23,7 @@ module.exports = {
         const serverId = message.guild.id;
 
         // 🔥 OpenAI Trigger — Bot Mentioned
-        if (message.mentions.has(client.user)) {
+        if (message.mentions.has(client.user) && !message.mentions.everyone && !message.mentions.here) {
             // 🧠 Load prompt data
             let prompts = {};
             try {

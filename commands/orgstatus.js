@@ -38,7 +38,6 @@ module.exports = {
 
     // Step 3: Get Discord Members with Target Roles
     const targetRoles = [
-        'Recruit',
         'Ensign',
         'Lieutenant',
         'Commander',

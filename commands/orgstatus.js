@@ -71,13 +71,13 @@ module.exports = {
       { name: 'Discord Server Total Members', value: `${guild.memberCount}`, inline: true },
       { name: 'Discord Members with PFC Roles', value: `${roleMembers.length}`, inline: true },
       { name: 'Verified PFC Members (with role)', value: `${verifiedMatchesWithRole.length}`, inline: true },
-      { name: 'Verified Members (no PFC role)', value: `${verifiedWithoutRole.length}`, inline: true },
-      { name: 'Verified Members (in other orgs)', value: `${verifiedOutsideOrg.length}`, inline: true }, // 🆕 Here!
-      { name: 'Unverified in Discord (with role)', value: `${unverifiedRoleMembers.length}`, inline: true },
+      { name: 'Unverified PFC Members (with role)', value: `${unverifiedRoleMembers.length}`, inline: true },
+      { name: 'Verified PFC Members (no PFC role)', value: `${verifiedWithoutRole.length}`, inline: true },
+      { name: 'Verified Non-PFC Members', value: `${verifiedOutsideOrg.length}`, inline: true }, // 🆕 Here!
       { name: 'In RSI Org but Not Verified', value: `${rsiOnlyHandles.length}`, inline: true },
     )
     .setTimestamp();
-    
+
     await interaction.editReply({ embeds: [reportEmbed] });
   }
 };

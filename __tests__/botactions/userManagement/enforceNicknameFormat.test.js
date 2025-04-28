@@ -112,4 +112,82 @@ describe('enforceNicknameFormat', () => {
 
     mockConsoleWarn.mockRestore();
   });
+
+  it('preserves unknown tag for verified user with no matching org tag', async () => {
+    VerifiedUser.findByPk.mockResolvedValue({ discordUserId: 'user1', rsiOrgId: null });
+    // This simulates the user being verified but with no org attached
+    formatVerifiedNickname.mockReturnValue('[UNKNOWN] VerifiedUser'); // Unknown tag preserved
+  
+    mockOldMember = createMockMember('user1', 'VerifiedUser', '[UNKNOWN] OldNick');
+    mockNewMember = createMockMember('user1', 'VerifiedUser', '[UNKNOWN] WrongNick');
+  
+    await enforceNicknameFormat(mockOldMember, mockNewMember);
+  
+    expect(mockNewMember.setNickname).toHaveBeenCalledWith('[UNKNOWN] VerifiedUser');
+  });
+
+  it('strips incorrect known tag from verified user', async () => {
+    VerifiedUser.findByPk.mockResolvedValue({ discordUserId: 'user1', rsiOrgId: 'PFCS' });
+    OrgTag.findByPk.mockResolvedValue({ tag: 'PFCS' });
+    formatVerifiedNickname.mockReturnValue('[PFCS] VerifiedUser');
+  
+    const oldMember = createMockMember('user1', 'VerifiedUser', '[DEFN] VerifiedUser');
+    const newMember = createMockMember('user1', 'VerifiedUser', '[DEFN] VerifiedUser updated'); // Must differ to bypass early return
+  
+    await enforceNicknameFormat(oldMember, newMember);
+  
+    expect(newMember.setNickname).toHaveBeenCalledTimes(1);
+    expect(newMember.setNickname).toHaveBeenCalledWith('[PFCS] VerifiedUser');
+  });
+    
+  it('adds missing tag for verified user with no tag present', async () => {
+    VerifiedUser.findByPk.mockResolvedValue({ discordUserId: 'user1', rsiOrgId: 'PFCS' });
+    OrgTag.findByPk.mockResolvedValue({ tag: 'PFCS' });
+    formatVerifiedNickname.mockReturnValue('[PFCS] VerifiedUser');
+  
+    mockOldMember = createMockMember('user1', 'VerifiedUser', 'OldNick');
+    mockNewMember = createMockMember('user1', 'VerifiedUser', 'VerifiedUser'); // No tag at all
+  
+    await enforceNicknameFormat(mockOldMember, mockNewMember);
+  
+    expect(mockNewMember.setNickname).toHaveBeenCalledWith('[PFCS] VerifiedUser');
+  });
+  
+  it('strips known tag and adds ⛔ for unverified user', async () => {
+    VerifiedUser.findByPk.mockResolvedValue(null); // Unverified
+    formatVerifiedNickname.mockReturnValue('UnverifiedUser ⛔');
+  
+    mockOldMember = createMockMember('user1', 'UnverifiedUser', '[PFCS] UnverifiedUser');
+    mockNewMember = createMockMember('user1', 'UnverifiedUser', '[PFCS] UnverifiedUser updated'); // Has known tag but unverified
+  
+    await enforceNicknameFormat(mockOldMember, mockNewMember);
+  
+    expect(mockNewMember.setNickname).toHaveBeenCalledWith('UnverifiedUser ⛔');
+  });
+  
+  it('preserves unknown tag and adds ⛔ for unverified user', async () => {
+    VerifiedUser.findByPk.mockResolvedValue(null); // Unverified
+    formatVerifiedNickname.mockReturnValue('[???] UnverifiedUser ⛔');
+  
+    mockOldMember = createMockMember('user1', 'UnverifiedUser', '[???] UnverifiedUser');
+    mockNewMember = createMockMember('user1', 'UnverifiedUser', '[???] WrongNick');
+  
+    await enforceNicknameFormat(mockOldMember, mockNewMember);
+  
+    expect(mockNewMember.setNickname).toHaveBeenCalledWith('[???] UnverifiedUser ⛔');
+  });
+
+  it('does not add tag if verified user has no org ID', async () => {
+    VerifiedUser.findByPk.mockResolvedValue({ discordUserId: 'user1', rsiOrgId: null }); // Verified but no org
+    OrgTag.findByPk.mockResolvedValue(null); // No matching org tag
+    formatVerifiedNickname.mockReturnValue('VerifiedUser'); // No tag applied
+  
+    mockOldMember = createMockMember('user1', 'VerifiedUser', 'OldNick');
+    mockNewMember = createMockMember('user1', 'VerifiedUser', 'WrongNick');
+  
+    await enforceNicknameFormat(mockOldMember, mockNewMember);
+  
+    expect(mockNewMember.setNickname).toHaveBeenCalledWith('VerifiedUser');
+  });
+  
 });

@@ -1,13 +1,24 @@
-let lastManualSyncTime = 0;
+let lastManualSyncTime = null; // 🟢 null means "never run"
 const cooldownMs = 60 * 60 * 1000; // 1 hour
 
-function canRunManualSync() {
-  const now = Date.now();
-  return now - lastManualSyncTime > cooldownMs;
+function canRunManualSync(now = Date.now()) {
+  if (lastManualSyncTime === null) {
+    return true; // First run allowed!
+  } else {
+    return now - lastManualSyncTime > cooldownMs;
+  }
 }
 
-function markManualSyncRun() {
-  lastManualSyncTime = Date.now();
+function markManualSyncRun(now = Date.now()) {
+  lastManualSyncTime = now;
 }
 
-module.exports = { canRunManualSync, markManualSyncRun };
+function resetManualSyncTracker() {
+  lastManualSyncTime = null;
+}
+
+module.exports = { 
+  canRunManualSync, 
+  markManualSyncRun, 
+  resetManualSyncTracker 
+};

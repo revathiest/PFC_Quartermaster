@@ -15,7 +15,7 @@ jest.mock('discord.js', () => ({
   },
 }));
 
-const command = require('../../commands/sync-org-tags');
+const command = require('../../commands/admin/sync-org-tags');
 const { syncOrgTags } = require('../../botactions/orgTagSync/syncOrgTags');
 const cooldownTracker = require('../../botactions/orgTagSync/syncCooldownTracker');
 const { MessageFlags } = require('discord.js'); // ✅ Pull it in to use below

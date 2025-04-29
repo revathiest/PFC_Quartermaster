@@ -18,6 +18,9 @@ const { handleMemberJoin } = require('./botactions/eventHandling/memberJoinEvent
 const { startOrgTagSyncScheduler } = require('./botactions/orgTagSync/syncScheduler');
 
 const botType = process.env.BOT_TYPE;
+let globalClient = null;
+let pendingLogs = [];
+let isFlushingLogs = false;
 
 // 🗂️ Setup Logging Directory
 const logDir = path.join(__dirname, 'logs');
@@ -25,7 +28,6 @@ if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir);
 }
 
-// ⏰ Timestamp for log file name
 const now = new Date();
 const pad = (n) => n.toString().padStart(2, '0');
 const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}`;
@@ -34,26 +36,97 @@ const logFileName = `bot-${timestamp}.log`;
 const logFilePath = path.join(logDir, logFileName);
 const logStream = fs.createWriteStream(logFilePath, { flags: 'a' });
 
-// 🔧 Intercept and log to file
 const origConsoleError = console.error;
 const origConsoleLog = console.log;
 
+const getTimeStampedLine = () => `[${new Date().toISOString()}]`;
+
 console.error = (...args) => {
-  logStream.write('[ERROR] ' + args.join(' ') + '\n');
+  const message = `${getTimeStampedLine()} [ERROR] ` + args.join(' ');
+  logStream.write(message + '\n');
+  sendToDiscordLogChannel(message);
+  origConsoleError(...args);
+};
+
+console.warn = (...args) => {
+  const message = `${getTimeStampedLine()} [WARN] ` + args.join(' ');
+  logStream.write(message + '\n');
+  sendToDiscordLogChannel(message);
   origConsoleError(...args);
 };
 
 console.log = (...args) => {
-  logStream.write('[LOG] ' + args.join(' ') + '\n');
+  const message = `${getTimeStampedLine()} [LOG] ` + args.join(' ');
+  logStream.write(message + '\n');
+  sendToDiscordLogChannel(message);
   origConsoleLog(...args);
 };
 
-deleteOldLogs(logDir, 7); // Run immediately on startup
+async function flushLogs() {
+  if (!globalClient || pendingLogs.length === 0) return;
+
+  if (isFlushingLogs) return;
+  isFlushingLogs = true;
+
+  try {
+    const channelId = globalClient?.chanBotLog;
+    if (!channelId) return;
+
+    const channel = globalClient.channels.cache.get(channelId);
+    if (!channel) return;
+
+    let batch = pendingLogs.splice(0, 15).join('\n');
+
+    if (batch.length > 1900) {
+      batch = batch.slice(0, 1900) + '...';
+    }
+
+    await channel.send({ content: `\	\	\	\	${batch}` });
+
+  } catch (err) {
+    origConsoleError('❌ Failed to flush logs to Discord:', err);
+  } finally {
+    isFlushingLogs = false;
+  }
+}
+
+setInterval(flushLogs, 2000);
+
+async function sendToDiscordLogChannel(content) {
+  pendingLogs.push(content);
+}
+
+// Clean up old logs immediately on startup
+deleteOldLogs(logDir, 7);
+
+process.on('exit', () => logStream.end());
+process.on('SIGINT', () => {
+  console.log('🛑 Caught SIGINT, shutting down cleanly...');
+  logStream.end(() => process.exit());
+});
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+async function safeLogin(client, token, retries = 5) {
+  try {
+    await client.login(token);
+  } catch (error) {
+    console.error('🚫 Failed to login:', error);
+    if (retries > 0) {
+      console.log(`🔁 Retrying login in 5 seconds... (${5 - retries + 1}/5)`);
+      setTimeout(() => safeLogin(client, token, retries - 1), 5000);
+    } else {
+      console.error('❌ Max login attempts reached. Exiting.');
+      process.exit(1);
+    }
+  }
+}
 
 // 🚀 Bot Initialization Flow
 const initializeBot = async () => {
   const config = await loadConfiguration(botType);
-  const token = config.token || fileToken;
+  const token = config.token;
   if (!token) {
     console.error('❌ No token found in configuration.');
     return;
@@ -61,59 +134,64 @@ const initializeBot = async () => {
 
   const client = initClient();
   client.config = config;
+  globalClient = client;
 
-  // 🎯 Event Listeners
   client.on('interactionCreate', async interaction => {
     await interactionHandler.handleInteraction(interaction, client);
   });
-
-  client.on("messageCreate", message => handleMessageCreate(message, client));
+  client.on('messageCreate', message => handleMessageCreate(message, client));
   client.on('messageReactionAdd', (reaction, user) => handleReactionAdd(reaction, user));
   client.on('messageReactionRemove', (reaction, user) => handleReactionRemove(reaction, user));
-  client.on("voiceStateUpdate", (oldState, newState) => handleVoiceStateUpdate(oldState, newState, client));
-  client.on('guildScheduledEventCreate', async (event) => handleCreateEvent(event, client));
+  client.on('voiceStateUpdate', (oldState, newState) => handleVoiceStateUpdate(oldState, newState, client));
+  client.on('guildScheduledEventCreate', async event => handleCreateEvent(event, client));
   client.on('guildScheduledEventUpdate', async (oldEvent, newEvent) => handleUpdateEvent(oldEvent, newEvent, client));
-  client.on('guildScheduledEventDelete', async (event) => handleDeleteEvent(event, client));
-  client.on('guildMemberAdd', async (member) => handleMemberJoin(member));
+  client.on('guildScheduledEventDelete', async event => handleDeleteEvent(event, client));
+  client.on('guildMemberAdd', async member => handleMemberJoin(member));
 
-  client.on('error', (error) => {
-    const logChannel = client.channels.cache.get(client.chanBotLog);
-    if (logChannel) logChannel.send('⚠️ Error: (client)' + error.stack);
+  client.on('error', error => {
     console.error('💥 Client error event:', error);
   });
 
-  client.on("userUpdate", (oldUser, newUser) => {
+  client.on('userUpdate', (oldUser, newUser) => {
     console.log(`🔄 A user's profile was updated.`);
   });
 
-  client.on("guildMemberUpdate", async (oldMember, newMember) => {
+  client.on('guildMemberUpdate', async (oldMember, newMember) => {
     await handleRoleAssignment(oldMember, newMember, client);
     await enforceNicknameFormat(oldMember, newMember);
   });
 
-  // ✅ Bot Ready
   client.once('ready', async () => {
     console.log('🟢 Discord client is ready!');
-
     try {
       await initializeDatabase();
+      console.log('✅ Database initialized.');
+
       await registerChannels(client);
+      console.log('✅ Channels registered.');
+
       await registerCommands(client);
+      console.log('✅ Commands registered.');
+
       await getInactiveUsersWithSingleRole(client);
+      console.log('✅ Inactive users fetched.');
+
       await syncEventsInDatabase(client);
+      console.log('✅ Scheduled events synced.');
+
       await sweepVerifiedNicknames(client);
+      console.log('✅ Verified nicknames swept.');
+
       startAmbientEngine(client);
+      console.log('✅ Ambient engine started.');
+
       startScheduledAnnouncementEngine(client);
+      console.log('✅ Scheduled announcement engine started.');
+
       startOrgTagSyncScheduler(client);
+      console.log('✅ Org tag sync scheduler started.');
 
       console.log('🚀 Bot setup complete and ready to go!');
-
-      const logChannel = client.channels.cache.get(client.chanBotLog);
-      if (logChannel) {
-        logChannel.send('✅ Startup Complete!');
-      } else {
-        console.error('⚠️ Log channel not found.');
-      }
 
       try {
         setInterval(() => checkEvents(client), 60000);
@@ -125,19 +203,16 @@ const initializeBot = async () => {
       } catch (error) {
         console.error(`❌ Error setting up interval: ${error}`);
       }
-
     } catch (error) {
       console.error('❗ Error during bot setup:', error);
     }
   });
 
-  // 🔐 Login
   try {
-    await client.login(token);
+    await safeLogin(client, token);
   } catch (error) {
     console.error('🚫 Failed to login:', error);
   }
 };
 
-// 🟢 Start the bot
 initializeBot();

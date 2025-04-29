@@ -1,4 +1,4 @@
-const { execute, button } = require('../commands/tools/verify');
+const { execute, button } = require('../commands/user/verify');
 const { VerifiedUser, VerificationCode, OrgTag } = require('../config/database');
 const { fetchRsiProfileInfo } = require('../utils/rsiProfileScraper');
 const { MessageFlags } = require('discord.js');

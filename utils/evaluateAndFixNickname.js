@@ -1,6 +1,6 @@
 const { VerifiedUser, OrgTag } = require('../config/database');
 const { formatVerifiedNickname } = require('./formatVerifiedNickname');
-const { pendingVerifications } = require('../commands/tools/verify');
+const { pendingVerifications } = require('../commands/user/verify');
 
 /**
  * Evaluates and (if needed) fixes a member's nickname.

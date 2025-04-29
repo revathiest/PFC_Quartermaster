@@ -1,11 +1,11 @@
 const { enforceNicknameFormat } = require('../../../botactions/userManagement/enforceNicknameFormat');
 const { VerifiedUser, OrgTag } = require('../../../config/database');
 const { formatVerifiedNickname } = require('../../../utils/formatVerifiedNickname');
-const { pendingVerifications } = require('../../../commands/tools/verify');
+const { pendingVerifications } = require('../../../commands/user/verify');
 
 jest.mock('../../../config/database');
 jest.mock('../../../utils/formatVerifiedNickname');
-jest.mock('../../../commands/tools/verify', () => ({
+jest.mock('../../../commands/user/verify', () => ({
   pendingVerifications: new Set(),
 }));
 

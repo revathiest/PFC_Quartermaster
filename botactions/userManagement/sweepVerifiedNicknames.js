@@ -35,8 +35,6 @@ async function sweepVerifiedNicknames(client) {
 
     if (updatedNickname) updated++;
   }
-
-  console.log(`[SWEEP] Checked ${checked} members, updated ${updated} nicknames.`);
 }
 
 module.exports = {

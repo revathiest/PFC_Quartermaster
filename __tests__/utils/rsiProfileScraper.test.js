@@ -88,8 +88,18 @@ describe('rsiProfileScraper - fetchRsiProfileInfo edge cases', () => {
   });
 
   it('handles unaffiliated user (no org info)', async () => {
-    const noOrgHtml = validProfileHtml
-      .replace(/<div class="main-org">[\s\S]*?<\/div>/, '');
+    const noOrgHtml = validProfileHtml.replace(
+      /<div class="main-org">[\s\S]*?<\/div>/,
+      `<div class="main-org right-col visibility-">
+        <span class="title">Main organization </span>
+        <div class="inner clearfix">
+          <div class="empty">NO MAIN ORG FOUND IN PUBLIC RECORDS</div>
+        </div>
+        <span class="deco-separator top"></span>
+        <span class="deco-separator bottom"></span>
+      </div>`
+    );
+
     fetch.mockResolvedValue(new Response(noOrgHtml, { status: 200 }));
 
     const result = await fetchRsiProfileInfo('UnaffiliatedUser');
@@ -97,6 +107,7 @@ describe('rsiProfileScraper - fetchRsiProfileInfo edge cases', () => {
     expect(result.orgId).toBeNull();
     expect(result.orgRank).toBeNull();
   });
+
 
   it('handles missing multiple fields gracefully', async () => {
     const halfBakedHtml = `

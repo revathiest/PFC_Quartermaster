@@ -1,5 +1,5 @@
-const { sequelize, VoiceLog } = require('../../../config/database');
-const { formatTime } = require('../../../botactions/utilityFunctions');
+const { sequelize, VoiceLog } = require('../config/database');
+const { formatTime } = require('../botactions/utilityFunctions');
 const { Op } = require('sequelize');
 
 async function generateVoiceActivityReport(serverId) {

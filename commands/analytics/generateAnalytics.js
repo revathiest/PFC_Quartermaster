@@ -1,6 +1,6 @@
-const { generateUsageReport } = require('./reports/usageReport');
-const { generateVoiceActivityReport } = require('./reports/voiceActivityReport');
-const { generateReportByChannel } = require('./reports/reportByChannel');
+const { generateUsageReport } = require('../../utils/usageReport');
+const { generateVoiceActivityReport } = require('../../utils/voiceActivityReport');
+const { generateReportByChannel } = require('../../utils/reportByChannel');
 
 module.exports = {
     generateUsageReport,

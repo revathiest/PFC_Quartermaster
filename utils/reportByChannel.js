@@ -1,4 +1,4 @@
-const { sequelize, UsageLog } = require('../../../config/database');
+const { sequelize, UsageLog } = require('../config/database');
 const { Op } = require('sequelize');
 
 async function generateReportByChannel(serverId, channelId) {

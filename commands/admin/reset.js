@@ -7,7 +7,7 @@ module.exports = {
     .setDescription('Restarts the Quartermaster (Admin only)')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
     help: 'Resets the bot and removes all registered commands. (Admin Only)',
-    category: 'Admin',
+    category: 'System',
 
   async execute(interaction) {
     if (!interaction.member.permissions.has('ADMINISTRATOR')) {

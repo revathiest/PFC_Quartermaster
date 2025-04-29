@@ -78,7 +78,7 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   help: 'Manage the pool of ambient messages the bot can use to enhance active channels.',
-  category: 'Tools',
+  category: 'Discord',
 
   async execute(interaction) {
     const sub = interaction.options.getSubcommand();

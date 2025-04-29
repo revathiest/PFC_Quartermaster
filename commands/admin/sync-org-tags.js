@@ -1,12 +1,14 @@
 const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
-const { syncOrgTags } = require('../botactions/orgTagSync/syncOrgTags');
-const { canRunManualSync, markManualSyncRun } = require('../botactions/orgTagSync/syncCooldownTracker');
+const { syncOrgTags } = require('../../botactions/orgTagSync/syncOrgTags');
+const { canRunManualSync, markManualSyncRun } = require('../../botactions/orgTagSync/syncCooldownTracker');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('sync-org-tags')
-    .setDescription('Manually trigger the org tag synchronization (admins only).')
+    .setDescription('Manually trigger the org tag synchronization (Admin only).')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+  help: 'Manually trigger the org tag synchronization (Admin only).',
+  category: 'Admin',
   async execute(interaction) {
     if (!canRunManualSync()) {
       await interaction.reply({ content: 'Sync was run recently. Please wait before running again.', flags: MessageFlags.Ephemeral });

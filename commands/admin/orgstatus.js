@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const { VerifiedUser } = require('../config/database');
-const rsiScrapeOrgMembers = require('../utils/rsiScrapeOrgMembers');
-const getGuildMembersWithRoles = require('../utils/getGuildMembersWithRoles');
+const { VerifiedUser } = require('../../config/database');
+const rsiScrapeOrgMembers = require('../../utils/rsiScrapeOrgMembers');
+const getGuildMembersWithRoles = require('../../utils/getGuildMembersWithRoles');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -10,9 +10,11 @@ module.exports = {
     .addSubcommand(subcommand =>
       subcommand
         .setName('report')
-        .setDescription('Generate the org membership discrepancy report')
+        .setDescription('Generate the org membership discrepancy report. (Admin only)')
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+  help: 'Generate a membership report with info about RSI and Discord membership',
+  category: 'Admin',
   botPermsReq: ['SendMessages', 'EmbedLinks'],
   async execute(interaction) {
     const guild = interaction.guild;

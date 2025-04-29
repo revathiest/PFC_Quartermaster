@@ -35,7 +35,14 @@ async function fetchRsiProfileInfo(rsiHandle) {
     .trim() || '';
 
   const avatarRel = $('.account-profile .thumb img').attr('src');
-  const avatar = avatarRel ? `https://robertsspaceindustries.com${avatarRel}` : null;
+  let avatar = null;
+  if (avatarRel) {
+    if (avatarRel.startsWith('http://') || avatarRel.startsWith('https://')) {
+      avatar = avatarRel;
+    } else if (avatarRel.startsWith('/')) {
+      avatar = `https://robertsspaceindustries.com${avatarRel}`;
+    }
+  }
 
   let orgId = null, orgRank = null;
   $('p.entry').each((_, el) => {

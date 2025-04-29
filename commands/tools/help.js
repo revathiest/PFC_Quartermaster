@@ -82,11 +82,19 @@ module.exports = {
     });
 
     collector.on('end', async () => {
-      if (!reply.editable) return;
+      if (!reply || reply.deleted || !reply.editable) {
+        console.warn('⚠️ Help menu message no longer exists. Skipping disable.');
+        return;
+      }
+
       try {
         await reply.edit({ components: [] });
       } catch (err) {
-        console.error('❌ Failed to disable help menu:', err);
+        if (err.code === 10008) {
+          console.warn('⚠️ Tried to edit help menu but it was already deleted.');
+        } else {
+          console.error('❌ Failed to disable help menu:', err);
+        }
       }
     });
   },

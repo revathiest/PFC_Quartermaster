@@ -5,7 +5,7 @@ const { fetchRsiProfileInfo } = require('../../utils/rsiProfileScraper');
 function isValidHttpsUrl(url) {
   try {
     const parsed = new URL(url);
-    return parsed.protocol === 'https:' && !!parsed.hostname && !!parsed.pathname;
+    return parsed.protocol === 'https:' && parsed.hostname && parsed.pathname.length > 1;
   } catch {
     return false;
   }

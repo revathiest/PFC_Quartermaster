@@ -47,6 +47,46 @@ const ButtonBuilder = jest.fn().mockImplementation(() => ({
 const ButtonStyle = {
   Primary: 1,
 };
+const SlashCommandBuilder = jest.fn(() => {
+  const builder = {
+    name: undefined,
+    description: undefined,
+    options: [],
+    setName(name) {
+      this.name = name;
+      return this;
+    },
+    setDescription(description) {
+      this.description = description;
+      return this;
+    },
+    addStringOption(fn) {
+      const option = { type: 'string', name: undefined, description: undefined, required: false };
+      fn({
+        setName(name) { option.name = name; return this; },
+        setDescription(desc) { option.description = desc; return this; },
+        setRequired(req) { option.required = req; return this; },
+      });
+      this.options.push(option);
+      return this;
+    },
+    addUserOption(fn) {
+      const option = { type: 'user', name: undefined, description: undefined, required: false };
+      fn({
+        setName(name) { option.name = name; return this; },
+        setDescription(desc) { option.description = desc; return this; },
+        setRequired(req) { option.required = req; return this; },
+      });
+      this.options.push(option);
+      return this;
+    },
+    setDefaultMemberPermissions() {
+      return this;
+    },
+  };
+  return builder;
+});
+
 
 module.exports = {
   MockInteraction,
@@ -54,10 +94,5 @@ module.exports = {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  SlashCommandBuilder: jest.fn(() => ({
-    setName: jest.fn().mockReturnThis(),
-    setDescription: jest.fn().mockReturnThis(),
-    addStringOption: jest.fn().mockReturnThis(),
-    setDefaultMemberPermissions: jest.fn().mockReturnThis()
-  })),
+  SlashCommandBuilder  
 };

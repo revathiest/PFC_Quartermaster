@@ -1,76 +1,44 @@
 const { VerifiedUser, OrgTag } = require('../../config/database');
-const { formatVerifiedNickname } = require('../../utils/formatVerifiedNickname');
+const { evaluateAndFixNickname } = require('../../utils/evaluateAndFixNickname');
 
 /**
- * Sweeps all members of the guild and applies/removes the ⛔ unverified marker.
+ * Sweeps all guild members and enforces nickname formatting.
  *
  * @param {object} client - The Discord.js client instance.
  */
 async function sweepVerifiedNicknames(client) {
-  const guild = client.guilds.cache.first(); // Assuming single-server bot
+  const guild = client.guilds.cache.first();
   if (!guild) {
     console.warn('[SWEEP] No guild found in cache. Cannot run sweep.');
     return;
   }
 
-  const verifiedUsers = await VerifiedUser.findAll();
-  const verifiedUserIds = new Set(verifiedUsers.map(u => u.discordUserId));
+  const [verifiedUsers, orgTags] = await Promise.all([
+    VerifiedUser.findAll(),
+    OrgTag.findAll(),
+  ]);
 
-  const knownOrgTags = await OrgTag.findAll();
-  const knownTags = knownOrgTags
-    .filter(o => o.tag)
-    .map(o => o.tag.toUpperCase());
+  const verifiedUsersMap = new Map(verifiedUsers.map(u => [u.discordUserId, u]));
+  const knownTags = orgTags.filter(o => o.tag).map(o => o.tag.toUpperCase());
+
+  const members = await guild.members.fetch();
 
   let checked = 0, updated = 0;
 
-  const members = await guild.members.fetch(); // Get all members from the server
-
   for (const member of members.values()) {
     checked++;
-    if (member.user.bot) continue; // Skip bots
+    const updatedNickname = await evaluateAndFixNickname(member, {
+      verifiedUsersMap,
+      knownTags,
+      skipPending: false,
+    });
 
-    const isVerified = verifiedUserIds.has(member.id);
-    const verifiedRecord = verifiedUsers.find(u => u.discordUserId === member.id);
-    const tag = isVerified && verifiedRecord?.rsiOrgId
-      ? (await OrgTag.findByPk(verifiedRecord.rsiOrgId.toUpperCase()))?.tag || null
-      : null;
-
-    const currentDisplayName = member.displayName;
-    const tagMatch = currentDisplayName.match(/^\[([^\]]+)\]\s*/);
-    const currentTag = tagMatch ? tagMatch[1].toUpperCase() : null;
-
-    let baseDisplayName = currentDisplayName.replace(/^\[[^\]]+\]\s*/, '').trim();
-    let tagToUse = tag;
-
-    const isKnownTag = currentTag && knownTags.includes(currentTag);
-
-    if (currentTag) {
-      if (isKnownTag) {
-        if (!isVerified || (tag && currentTag !== tag.toUpperCase())) {
-          // Strip known tag if unverified OR wrong known tag
-          baseDisplayName = currentDisplayName.replace(/^\[[^\]]+\]\s*/, '').trim();
-        } else {
-          // Correct known tag → keep it
-          tagToUse = tag;
-        }
-      } else if (isVerified && !tag) {
-        // Unknown tag, verified, and no matching org tag → preserve the current tag
-        tagToUse = currentTag;
-      }
-    }
-
-    const expectedNickname = formatVerifiedNickname(baseDisplayName, isVerified, tagToUse);
-    const currentNickname = member.nickname || member.user.username;
-
-    if (currentNickname !== expectedNickname) {
-      try {
-        await member.setNickname(expectedNickname);
-        updated++;
-      } catch (err) {
-        console.warn(`[SWEEP] Could not update ${member.user.tag}:`, err.message);
-      }
-    }
+    if (updatedNickname) updated++;
   }
+
+  console.log(`[SWEEP] Checked ${checked} members, updated ${updated} nicknames.`);
 }
 
-module.exports = { sweepVerifiedNicknames };
+module.exports = {
+  sweepVerifiedNicknames,
+};

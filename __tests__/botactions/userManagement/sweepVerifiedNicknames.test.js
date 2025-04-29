@@ -118,7 +118,7 @@ describe('sweepVerifiedNicknames', () => {
 
     await sweepVerifiedNicknames(mockClient);
 
-    expect(mockConsoleWarn).toHaveBeenCalledWith('[SWEEP] Could not update VerifiedUser#1234:', 'Test error');
+    expect(mockConsoleWarn).toHaveBeenCalledWith('[NICKNAME] Failed to update VerifiedUser#1234:', 'Test error');
     mockConsoleWarn.mockRestore();
   });
 

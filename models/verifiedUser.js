@@ -16,6 +16,10 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true
     },
+    manualTagOverride: { 
+      type: DataTypes.STRING,
+      allowNull: true
+    },
     verifiedAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW

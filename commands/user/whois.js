@@ -1,4 +1,5 @@
-const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const { EmbedBuilder } = require('@discordjs/builders'); // ✅ FIXED: embed constructor issue
 const { VerifiedUser } = require('../../config/database');
 const { fetchRsiProfileInfo } = require('../../utils/rsiProfileScraper');
 
@@ -42,12 +43,11 @@ module.exports = {
       if (profile.avatar && profile.avatar.startsWith('/')) {
         profile.avatar = `https://robertsspaceindustries.com${profile.avatar}`;
       }
-      
-    
+
       if (!isValidHttpsUrl(profile.avatar)) {
         console.warn('[WHOIS WARNING] Invalid avatar URL after expansion:', profile.avatar);
       }
-    
+
       const embed = new EmbedBuilder()
         .setColor(0x00AE86)
         .setTitle(profile.handle)
@@ -55,7 +55,7 @@ module.exports = {
         .setDescription(profile.bio || 'No bio provided.')
         .setFooter({ text: `Requested by ${interaction.user.tag}`, iconURL: interaction.user.displayAvatarURL() })
         .setTimestamp();
-    
+
       if (isValidHttpsUrl(profile.avatar)) {
         embed.setThumbnail(profile.avatar);
       }
@@ -82,15 +82,11 @@ module.exports = {
           inline: true
         }
       ];
-         
-    
-      if (fields.length) {
-        embed.addFields(fields);
-      }
-    
+
+      embed.addFields(fields);
+
       await interaction.editReply({ embeds: [embed] });
-    }
-     catch (err) {
+    } catch (err) {
       console.error(`[WHOIS ERROR]`, err);
       await interaction.editReply({
         content: '❌ Failed to fetch RSI profile details. Please try again later.',

@@ -87,6 +87,17 @@ describe('rsiProfileScraper - fetchRsiProfileInfo edge cases', () => {
     expect(result.orgName).toBe('Pyro Freelancer Corps');
   });
 
+  it('handles bad avatar URL (non-https) gracefully', async () => {
+    const badAvatarHtml = validProfileHtml.replace(
+      `/media/avatar.png`,
+      `javascript:void(0)`
+    );
+    fetch.mockResolvedValue(new Response(badAvatarHtml, { status: 200 }));
+
+    const result = await fetchRsiProfileInfo('BadAvatarUser');
+    expect(result.avatar).toBeNull(); // Because "javascript:void(0)" is NOT a valid URL
+  });
+
   it('handles unaffiliated user (no org info)', async () => {
     const noOrgHtml = validProfileHtml.replace(
       /<div class="main-org">[\s\S]*?<\/div>/,
@@ -107,7 +118,6 @@ describe('rsiProfileScraper - fetchRsiProfileInfo edge cases', () => {
     expect(result.orgId).toBeNull();
     expect(result.orgRank).toBeNull();
   });
-
 
   it('handles missing multiple fields gracefully', async () => {
     const halfBakedHtml = `
@@ -157,15 +167,14 @@ describe('rsiProfileScraper - fetchRsiProfileInfo edge cases', () => {
         </div>
       </html>
     `;
-  
+
     fetch.mockResolvedValue(new Response(orgIdOnlyHtml, { status: 200 }));
-  
+
     const result = await fetchRsiProfileInfo('SIDOnlyUser');
     expect(result.handle).toBe('SIDOnlyUser');
     expect(result.orgId).toBe('SID123');
-    expect(result.orgRank).toBeNull();  // Explicitly confirms rank parsing line is hit
+    expect(result.orgRank).toBeNull();
   });
-  
 
   it('throws an error if handle is not found (HTTP 404)', async () => {
     fetch.mockResolvedValue(new Response('Not Found', { status: 404 }));

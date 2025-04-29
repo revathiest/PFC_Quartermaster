@@ -34,16 +34,24 @@ module.exports = {
         .setColor(0x00AE86)
         .setTitle(profile.handle)
         .setURL(`https://robertsspaceindustries.com/citizens/${verified.rsiHandle}`)
-        .setThumbnail(profile.avatar)
         .setDescription(profile.bio || 'No bio provided.')
-        .addFields(
-          { name: 'Enlisted', value: profile.enlisted || 'Unknown', inline: true },
-          ...(profile.orgName ? [{ name: 'Organization', value: profile.orgName, inline: true }] : []),
-          ...(profile.orgRank ? [{ name: 'Rank', value: profile.orgRank, inline: true }] : []),
-          ...(profile.orgId ? [{ name: 'SID', value: profile.orgId, inline: true }] : [])
-        )
         .setFooter({ text: `Requested by ${interaction.user.tag}`, iconURL: interaction.user.displayAvatarURL() })
         .setTimestamp();
+
+      // ✅ Only set thumbnail if it's a valid HTTPS URL
+      if (profile.avatar && profile.avatar.startsWith('https://')) {
+        embed.setThumbnail(profile.avatar);
+      }
+
+      const fields = [];
+      if (profile.enlisted) fields.push({ name: 'Enlisted', value: profile.enlisted, inline: true });
+      if (profile.orgName) fields.push({ name: 'Organization', value: profile.orgName, inline: true });
+      if (profile.orgRank) fields.push({ name: 'Rank', value: profile.orgRank, inline: true });
+      if (profile.orgId) fields.push({ name: 'SID', value: profile.orgId, inline: true });
+
+      if (fields.length) {
+        embed.addFields(fields);
+      }
 
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {

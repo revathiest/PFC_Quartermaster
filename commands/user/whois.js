@@ -2,6 +2,15 @@ const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js'
 const { VerifiedUser } = require('../../config/database');
 const { fetchRsiProfileInfo } = require('../../utils/rsiProfileScraper');
 
+function isValidHttpsUrl(url) {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'https:' && !!parsed.hostname && !!parsed.pathname;
+  } catch {
+    return false;
+  }
+}
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('whois')
@@ -29,7 +38,6 @@ module.exports = {
 
     try {
       const profile = await fetchRsiProfileInfo(verified.rsiHandle);
-
       const embed = new EmbedBuilder()
         .setColor(0x00AE86)
         .setTitle(profile.handle)
@@ -37,12 +45,11 @@ module.exports = {
         .setDescription(profile.bio || 'No bio provided.')
         .setFooter({ text: `Requested by ${interaction.user.tag}`, iconURL: interaction.user.displayAvatarURL() })
         .setTimestamp();
-
-      // ✅ Only set thumbnail if it's a valid HTTPS URL
-      if (profile.avatar && profile.avatar.startsWith('https://')) {
+      
+      if (isValidHttpsUrl(profile.avatar)) {
         embed.setThumbnail(profile.avatar);
       }
-
+      
       const fields = [];
       if (profile.enlisted) fields.push({ name: 'Enlisted', value: profile.enlisted, inline: true });
       if (profile.orgName) fields.push({ name: 'Organization', value: profile.orgName, inline: true });

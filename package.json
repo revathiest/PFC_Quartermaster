@@ -6,7 +6,7 @@
   "scripts": {
     "prestart": "node -e \"process.stdout.write('\\x1Bc')\" && npm install",
     "start": "node bot.js",
-    "test": "node -e \"process.stdout.write('\\x1Bc')\" && jest"
+    "test": "node --no-deprecation -e \"process.stdout.write('\\x1Bc')\" && jest"
   },
   "author": "Kenneth Hart",
   "license": "ISC",
@@ -33,6 +33,9 @@
     "verbose": true,
     "collectCoverage": true,
     "coverageDirectory": "./coverage",
-    "moduleDirectories": ["node_modules", "__mocks__"]
+    "moduleDirectories": ["node_modules", "__mocks__"],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/.trash/"
+    ]
   }
 }

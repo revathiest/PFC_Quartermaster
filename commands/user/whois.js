@@ -38,32 +38,14 @@ module.exports = {
 
     try {
       const profile = await fetchRsiProfileInfo(verified.rsiHandle);
-      
-      console.log('[WHOIS DEBUG] Fetched profile:', {
-        handle: profile.handle,
-        avatar: profile.avatar,
-        enlisted: profile.enlisted,
-        orgName: profile.orgName,
-        orgId: profile.orgId,
-        orgRank: profile.orgRank,
-        bio: profile.bio
-      });
-    
-      console.log('[WHOIS DEBUG] Original avatar before expansion logic:', profile.avatar);
 
       if (profile.avatar && profile.avatar.startsWith('/')) {
-        console.log('[WHOIS DEBUG] Expanding relative avatar URL:', profile.avatar);
         profile.avatar = `https://robertsspaceindustries.com${profile.avatar}`;
-        console.log('[WHOIS DEBUG] Expanded avatar URL:', profile.avatar);
-      } else {
-        console.log('[WHOIS DEBUG] Avatar already absolute, no expansion needed.');
       }
       
     
       if (!isValidHttpsUrl(profile.avatar)) {
         console.warn('[WHOIS WARNING] Invalid avatar URL after expansion:', profile.avatar);
-      } else {
-        console.log('[WHOIS DEBUG] Avatar URL passed validation:', profile.avatar);
       }
     
       const embed = new EmbedBuilder()
@@ -77,18 +59,34 @@ module.exports = {
       if (isValidHttpsUrl(profile.avatar)) {
         embed.setThumbnail(profile.avatar);
       }
-    
-      const fields = [];
-      if (profile.enlisted) fields.push({ name: 'Enlisted', value: profile.enlisted, inline: true });
-      if (profile.orgName) fields.push({ name: 'Organization', value: profile.orgName, inline: true });
-      if (profile.orgRank) fields.push({ name: 'Rank', value: profile.orgRank, inline: true });
-      if (profile.orgId) fields.push({ name: 'SID', value: profile.orgId, inline: true });
+
+      const fields = [
+        {
+          name: 'Organization',
+          value: profile.orgName || 'None listed',
+          inline: true
+        },
+        {
+          name: 'SID',
+          value: profile.orgId || 'Not listed',
+          inline: true
+        },
+        {
+          name: 'Rank',
+          value: profile.orgRank || 'Not listed',
+          inline: true
+        },
+        {
+          name: 'Enlisted',
+          value: profile.enlisted || 'Not listed',
+          inline: true
+        }
+      ];
+         
     
       if (fields.length) {
         embed.addFields(fields);
       }
-    
-      console.log('[WHOIS DEBUG] Final embed JSON:', JSON.stringify(embed.toJSON(), null, 2));
     
       await interaction.editReply({ embeds: [embed] });
     }

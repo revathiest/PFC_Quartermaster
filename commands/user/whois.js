@@ -45,6 +45,11 @@ module.exports = {
         .setDescription(profile.bio || 'No bio provided.')
         .setFooter({ text: `Requested by ${interaction.user.tag}`, iconURL: interaction.user.displayAvatarURL() })
         .setTimestamp();
+
+      // Expand relative avatars
+      if (profile.avatar && profile.avatar.startsWith('/')) {
+        profile.avatar = `https://robertsspaceindustries.com${profile.avatar}`;
+      }
       
       if (isValidHttpsUrl(profile.avatar)) {
         embed.setThumbnail(profile.avatar);

@@ -41,7 +41,7 @@ const {
         });
       }
   
-      await interaction.deferReply();
+      await interaction.deferReply({flags: MessageFlags.Ephemeral});
   
       const now = new Date();
       const daysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); // 30 days ago
@@ -132,7 +132,7 @@ const {
     }
 
   
-      await interaction.editReply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+      await interaction.editReply({ embeds: [embed]});
     }
   };
   

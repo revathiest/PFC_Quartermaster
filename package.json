@@ -6,7 +6,7 @@
   "scripts": {
     "prestart": "node -e \"process.stdout.write('\\x1Bc')\" && npm install",
     "start": "node bot.js",
-    "test": "cls && jest"
+    "test": "node -e \"process.stdout.write('\\x1Bc')\" && jest"
   },
   "author": "Kenneth Hart",
   "license": "ISC",

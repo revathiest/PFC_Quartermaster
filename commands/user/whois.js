@@ -49,11 +49,16 @@ module.exports = {
         bio: profile.bio
       });
     
+      console.log('[WHOIS DEBUG] Original avatar before expansion logic:', profile.avatar);
+
       if (profile.avatar && profile.avatar.startsWith('/')) {
         console.log('[WHOIS DEBUG] Expanding relative avatar URL:', profile.avatar);
         profile.avatar = `https://robertsspaceindustries.com${profile.avatar}`;
         console.log('[WHOIS DEBUG] Expanded avatar URL:', profile.avatar);
+      } else {
+        console.log('[WHOIS DEBUG] Avatar already absolute, no expansion needed.');
       }
+      
     
       if (!isValidHttpsUrl(profile.avatar)) {
         console.warn('[WHOIS WARNING] Invalid avatar URL after expansion:', profile.avatar);

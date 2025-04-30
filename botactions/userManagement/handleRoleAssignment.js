@@ -12,25 +12,26 @@ async function handleRoleAssignment(oldMember, newMember, client) {
     try {
       const fetchedLogs = await newMember.guild.fetchAuditLogs({ limit: 1, type: 25 });
       const roleChangeLog = fetchedLogs.entries.first();
-
+  
       if (!roleChangeLog) {
-        client.channels.cache.get(client.chanBotLog)?.send("No audit log found for role update.");
+        console.log('⚠️ No audit log found for role update.');
         return;
       }
-
+  
       const { executor, target } = roleChangeLog;
-
+  
       if (target.id === newMember.id && executor.id === newMember.id) {
-        await client.channels.cache.get(client.chanBotLog)?.send(`User ${newMember.user.username} has assigned themselves a watermelon role.`);
+        console.log(`🚨 ${newMember.user.tag} self-assigned a watermelon role. Banning...`);
         await newMember.ban({ reason: 'Automatically banned for self-assigning a watermelon role.' });
-        await client.channels.cache.get(client.chanBotLog)?.send(`Automatically banned ${newMember.user.tag}.`);
+        console.log(`✅ Banned ${newMember.user.tag} for self-assigning a watermelon role.`);
       } else {
-        client.channels.cache.get(client.chanBotLog)?.send(`${newMember.user.tag} was given a watermelon role by someone else.`);
+        console.log(`🍉 ${newMember.user.tag} received a watermelon role from someone else (${executor.tag}).`);
       }
     } catch (error) {
-      client.channels.cache.get(client.chanBotLog)?.send(`An error occurred during auto-ban: ${error}`);
+      console.log(`❌ Error during auto-ban for ${newMember.user.tag}:`, error);
     }
   }
+  
 
   // 🎖️ Accolade Embed Update
   try {

@@ -84,29 +84,31 @@ module.exports = {
     const sub = interaction.options.getSubcommand();
     const guildId = interaction.guild.id;
 
+    const reply = (content) => interaction.reply({ content, flags: MessageFlags.Ephemeral });
+
     if (sub === 'add') {
       const content = interaction.options.getString('content');
       const tag = interaction.options.getString('tag');
 
       try {
         const newMessage = await AmbientMessage.create({ content, tag });
-        await interaction.reply(`✅ Ambient message added with ID \`${newMessage.id}\``);
+        await reply(`✅ Ambient message added with ID \`${newMessage.id}\``);
       } catch (err) {
         console.error('❌ Error adding ambient message:', err);
-        await interaction.reply('❌ Failed to add ambient message.');
+        await reply('❌ Failed to add ambient message.');
       }
 
     } else if (sub === 'list') {
       try {
         const messages = await AmbientMessage.findAll();
-        if (!messages.length) return interaction.reply('⚠️ No ambient messages found.');
+        if (!messages.length) return reply('⚠️ No ambient messages found.');
 
         const list = messages.map(msg => `• [${msg.id}] ${msg.content}${msg.tag ? ` _(tag: ${msg.tag})_` : ''}`);
         const chunk = list.join('\n').slice(0, 2000);
-        await interaction.reply(`🗃️ Ambient Messages:\n\n${chunk}`);
+        await reply(`🗃️ Ambient Messages:\n\n${chunk}`);
       } catch (err) {
         console.error('❌ Error listing ambient messages:', err);
-        await interaction.reply('❌ Failed to list ambient messages.');
+        await reply('❌ Failed to list ambient messages.');
       }
 
     } else if (sub === 'edit') {
@@ -115,13 +117,13 @@ module.exports = {
 
       try {
         const message = await AmbientMessage.findByPk(id);
-        if (!message) return interaction.reply('⚠️ No message found with that ID.');
+        if (!message) return reply('⚠️ No message found with that ID.');
 
         await message.update({ content });
-        await interaction.reply(`✏️ Ambient message \`${id}\` updated.`);
+        await reply(`✏️ Ambient message \`${id}\` updated.`);
       } catch (err) {
         console.error('❌ Error editing ambient message:', err);
-        await interaction.reply('❌ Failed to edit ambient message.');
+        await reply('❌ Failed to edit ambient message.');
       }
 
     } else if (sub === 'delete') {
@@ -129,13 +131,13 @@ module.exports = {
 
       try {
         const message = await AmbientMessage.findByPk(id);
-        if (!message) return interaction.reply('⚠️ No message found with that ID.');
+        if (!message) return reply('⚠️ No message found with that ID.');
 
         await message.destroy();
-        await interaction.reply(`🗑️ Ambient message \`${id}\` deleted.`);
+        await reply(`🗑️ Ambient message \`${id}\` deleted.`);
       } catch (err) {
         console.error('❌ Error deleting ambient message:', err);
-        await interaction.reply('❌ Failed to delete ambient message.');
+        await reply('❌ Failed to delete ambient message.');
       }
 
     } else if (sub === 'allowchannel') {
@@ -147,13 +149,13 @@ module.exports = {
         });
 
         if (created) {
-          await interaction.reply(`✅ Ambient messages **enabled** in <#${channel.id}>.`);
+          await reply(`✅ Ambient messages **enabled** in <#${channel.id}>.`);
         } else {
-          await interaction.reply(`ℹ️ Ambient messages were already enabled in <#${channel.id}>.`);
+          await reply(`ℹ️ Ambient messages were already enabled in <#${channel.id}>.`);
         }
       } catch (err) {
         console.error('❌ Error allowing channel:', err);
-        await interaction.reply('❌ Failed to allow ambient messages in that channel.');
+        await reply('❌ Failed to allow ambient messages in that channel.');
       }
 
     } else if (sub === 'disallowchannel') {
@@ -165,42 +167,39 @@ module.exports = {
         });
 
         if (removed) {
-          await interaction.reply(`🚫 Ambient messages **disabled** in <#${channel.id}>.`);
+          await reply(`🚫 Ambient messages **disabled** in <#${channel.id}>.`);
         } else {
-          await interaction.reply(`ℹ️ Ambient messages weren’t active in <#${channel.id}>.`);
+          await reply(`ℹ️ Ambient messages weren’t active in <#${channel.id}>.`);
         }
       } catch (err) {
         console.error('❌ Error disallowing channel:', err);
-        await interaction.reply('❌ Failed to disallow ambient messages in that channel.');
+        await reply('❌ Failed to disallow ambient messages in that channel.');
       }
 
     } else if (sub === 'listchannels') {
       try {
         const entries = await AmbientChannel.findAll({ where: { guildId } });
         if (!entries.length) {
-          return interaction.reply('📭 No channels currently allow ambient messages.');
+          return reply('📭 No channels currently allow ambient messages.');
         }
 
         const list = entries.map(row => `<#${row.channelId}>`).join('\n');
-        await interaction.reply(`📢 Ambient messages are currently allowed in:\n${list}`);
+        await reply(`📢 Ambient messages are currently allowed in:\n${list}`);
       } catch (err) {
         console.error('❌ Error listing ambient channels:', err);
-        await interaction.reply('❌ Failed to list allowed channels.');
+        await reply('❌ Failed to list allowed channels.');
       }
     } else if (sub === 'config') {
       const guildId = interaction.guild.id;
       const minMessages = interaction.options.getInteger('minmessages');
-      const freshWindowMin = interaction.options.getInteger('freshwindow'); // ✅ properly declared
-    
+      const freshWindowMin = interaction.options.getInteger('freshwindow');
+
       if (minMessages === null && freshWindowMin === null) {
-        return interaction.reply({
-          content: '⚠️ You must provide at least one setting to update.',
-          flags: MessageFlags.Ephemeral
-        });
+        return reply('⚠️ You must provide at least one setting to update.');
       }
-    
+
       const freshWindowMs = freshWindowMin != null ? freshWindowMin * 60 * 1000 : null;
-    
+
       try {
         const [setting, created] = await AmbientSetting.findOrCreate({
           where: { guildId },
@@ -209,17 +208,17 @@ module.exports = {
             freshWindowMs: freshWindowMs ?? 3 * 60 * 1000
           }
         });
-    
+
         if (!created) {
           if (minMessages !== null) setting.minMessagesSinceLast = minMessages;
           if (freshWindowMs !== null) setting.freshWindowMs = freshWindowMs;
           await setting.save();
         }
-    
-        await interaction.reply(`🔧 Ambient config updated:\n• Minimum messages: \`${setting.minMessagesSinceLast}\`\n• Fresh window: \`${Math.floor(setting.freshWindowMs / 60000)} min\``);
+
+        await reply(`🔧 Ambient config updated:\n• Minimum messages: \`${setting.minMessagesSinceLast}\`\n• Fresh window: \`${Math.floor(setting.freshWindowMs / 60000)} min\``);
       } catch (err) {
         console.error('❌ Error updating ambient config:', err);
-        await interaction.reply('❌ Failed to update ambient settings.');
+        await reply('❌ Failed to update ambient settings.');
       }
     }
   }

@@ -16,8 +16,13 @@ const OrgTag = {
   findByPk: jest.fn()
 };
 
+const UsageLog = {
+  create: jest.fn()
+};
+
 module.exports = {
   VerificationCode,
   VerifiedUser,
-  OrgTag
+  OrgTag,
+  UsageLog
 };

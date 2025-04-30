@@ -20,7 +20,7 @@ async function handleInteraction(interaction, client) {
   const serverId = interaction.guild?.id ?? 'unknown';
 
   if (interaction.isCommand()) {
-    const optionsSummary = buildOptionsSummary(interaction);
+    const optionsSummary = await buildOptionsSummary(interaction);
     await logInteraction({
       interaction,
       type: 'command',

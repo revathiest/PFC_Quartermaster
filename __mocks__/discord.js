@@ -1,13 +1,21 @@
 // __mocks__/discord.js.js
 
 class MockInteraction {
-  constructor({ options = {}, user = {}, member = {}, guild = {} }) {
+  constructor({
+    options = {},
+    user = {},
+    member = {},
+    guild = {},
+    channel = null
+  }) {
     this.options = {
       getString: jest.fn().mockImplementation(key => options[key]),
+      getSubcommand: jest.fn(() => options.subcommand || null),
     };
     this.user = user;
     this.member = member;
     this.guild = guild;
+    this.channel = channel;
     this.deferred = false;
     this.replied = false;
   }
@@ -17,10 +25,11 @@ class MockInteraction {
     this.deferFlags = flags;
   }
 
-  async editReply({ content, components }) {
+  async editReply({ content, components, embeds }) {
     this.replied = true;
     this.replyContent = content;
     this.replyComponents = components;
+    this.replyEmbeds = embeds;
   }
 
   async reply({ content, flags }) {
@@ -31,7 +40,7 @@ class MockInteraction {
 }
 
 const MessageFlags = {
-  Ephemeral: 1 << 6
+  Ephemeral: 1 << 6,
 };
 
 const ActionRowBuilder = jest.fn().mockImplementation(() => ({
@@ -47,6 +56,7 @@ const ButtonBuilder = jest.fn().mockImplementation(() => ({
 const ButtonStyle = {
   Primary: 1,
 };
+
 const SlashCommandBuilder = jest.fn(() => {
   const builder = {
     name: undefined,
@@ -87,12 +97,11 @@ const SlashCommandBuilder = jest.fn(() => {
   return builder;
 });
 
-
 module.exports = {
   MockInteraction,
   MessageFlags,
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  SlashCommandBuilder  
+  SlashCommandBuilder,
 };

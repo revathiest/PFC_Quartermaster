@@ -13,8 +13,17 @@ const { buildOptionsSummary } = require('./buildOptionsSummary');
  * @param {string} params.serverId - Server (guild) ID
  * @param {string} [params.optionsSummary] - Optional string summary of options
  */
-async function logInteraction({ interaction, type, event, commandName, serverId, optionsSummary = '' }) {
+ async function logInteraction(params = {}) {
   try {
+    const {
+      interaction,
+      type,
+      event,
+      commandName,
+      serverId,
+      optionsSummary = '',
+    } = params;
+
     const resolvedType = typeof type === 'string' ? type.toLowerCase() : 'unknown';
     const resolvedEvent = typeof event === 'string' ? event.toLowerCase() : 'unknown_event';
     const resolvedCommand = typeof commandName === 'string' ? commandName : 'unknown';
@@ -24,20 +33,19 @@ async function logInteraction({ interaction, type, event, commandName, serverId,
 
     let channelId = 'unknown_channel';
     let channelName = 'unknown_channel';
-    
-    if (interaction.channel) {
+
+    if (interaction?.channel) {
       try {
         const canFetch = typeof interaction.channel.fetch === 'function';
         const channel = canFetch ? await interaction.channel.fetch().catch(() => interaction.channel) : interaction.channel;
-    
+
         channelId = channel?.id ?? 'unknown_channel';
         channelName = channel?.name ?? (channel?.recipient?.username ?? 'unknown_channel');
       } catch (fetchErr) {
         console.error('❌ Failed to fetch or resolve channel for logging:', fetchErr);
       }
-    }    
+    }
 
-    // Save to database
     await UsageLog.create({
       user_id: userId,
       interaction_type: resolvedType,
@@ -48,7 +56,6 @@ async function logInteraction({ interaction, type, event, commandName, serverId,
       event_time: new Date(),
     });
 
-    // Build console message
     let logLine = `✅ [${resolvedType.toUpperCase()} Logged] /${resolvedCommand}`;
 
     if (interaction?.options && typeof interaction.options.getSubcommand === 'function') {
@@ -64,10 +71,11 @@ async function logInteraction({ interaction, type, event, commandName, serverId,
 
     console.log(logLine);
   } catch (error) {
-    const safeType = type ? type.toUpperCase() : 'UNKNOWN';
+    const safeType = params?.type ? params.type.toUpperCase() : 'UNKNOWN';
     console.error(`❌ [${safeType} Log Error] Failed to log interaction:`, error);
   }
 }
+
 
 module.exports = {
   logInteraction,

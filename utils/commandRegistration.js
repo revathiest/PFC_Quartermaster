@@ -22,7 +22,7 @@ function loadCommandsRecursively(dir, commandList = [], commandMap = new Map()) 
 
                 commandMap.set(command.data.name, command);
                 commandList.push(command.data.toJSON());
-                console.log(`✅ Registered command: ${command.data.name}`);
+                console.log(`✅ Loaded command: ${command.data.name}`);
             } catch (err) {
                 console.warn(`⚠️ Skipping "${file.name}": ${err.message}`);
             }
@@ -41,12 +41,25 @@ async function registerCommands(client) {
     const rest = new REST({ version: '10' }).setToken(token);
 
     try {
+        console.log('🔍 Fetching currently registered guild commands...');
+        const existingCommands = await rest.get(Routes.applicationGuildCommands(clientId, guildId));
+        console.log(`✅ Discord reports ${existingCommands.length} registered command(s):`, existingCommands.map(c => c.name));
+
+        if (existingCommands.length === 0) {
+            console.log('📝 No commands currently registered. Proceeding with registration...');
+        } else if (existingCommands.length === commandList.length) {
+            console.log('ℹ️ Same number of commands already registered. Skipping re-registration to avoid unnecessary API calls.');
+            return;
+        } else {
+            console.log(`⚠️ Mismatch detected (registered: ${existingCommands.length}, local: ${commandList.length}). Proceeding with re-registration...`);
+        }
+
         console.log('🔁 Syncing commands with Discord...');
-        await rest.put(
+        const response = await rest.put(
             Routes.applicationGuildCommands(clientId, guildId),
             { body: commandList }
         );
-        console.log('✅ Successfully registered all commands.');
+        console.log(`✅ Successfully registered ${response.length} command(s).`);
     } catch (error) {
         console.error('❌ Discord registration failed:', error);
     }

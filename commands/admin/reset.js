@@ -3,10 +3,10 @@ const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('disc
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('reset')
-    .setDescription('Restarts the Quartermaster (Admin only)')
+    .setDescription('Removes all bot commands and exits. (Admin only)')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
-  help: 'Resets the bot and removes all registered commands. (Admin Only)',
+  help: 'Resets the bot by clearing all registered commands (global and guild). Admin only.',
   category: 'System',
 
   async execute(interaction) {
@@ -20,28 +20,25 @@ module.exports = {
     const username = interaction.member.user.tag;
 
     try {
-      console.log(`🛑 Server shut down initiated by: ${username}`);
+      console.log(`🛑 Command reset initiated by: ${username}`);
       await interaction.reply({ content: 'Resetting...', flags: MessageFlags.Ephemeral });
 
-      // Fetch and delete commands
-      const globalCommands = await interaction.client.application.commands.fetch();
-      const guildCommands = await interaction.guild.commands.fetch();
-
+      // Bulk overwrite global and guild commands with empty arrays
       await Promise.all([
-        ...[...globalCommands.values()].map(command => command.delete()),
-        ...[...guildCommands.values()].map(command => command.delete())
+        interaction.client.application.commands.set([]), // global commands
+        interaction.guild.commands.set([])              // guild-specific commands
       ]);
 
-      console.log('✅ All commands deleted successfully.');
-      console.log('🧨 Completing server shutdown...');
+      console.log('✅ All commands have been removed.');
+      console.log('🧨 Completing reset and shutting down...');
       process.exit(0);
 
     } catch (error) {
-      console.error(`❌ Error occurred during bot reset:`, error);
+      console.error('❌ Error occurred during bot reset:', error);
 
       try {
         await interaction.editReply({
-          content: '❌ An error occurred while trying to shut down the bot.',
+          content: '❌ An error occurred while resetting the commands.',
           flags: MessageFlags.Ephemeral
         });
       } catch (editError) {

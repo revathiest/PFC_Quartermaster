@@ -28,5 +28,9 @@ module.exports = (sequelize) => {
     });
   };
 
+  UexVehiclePurchasePrice.associate = (models) => {
+    UexVehiclePurchasePrice.belongsTo(models.UexTerminal, { foreignKey: 'id_terminal', as: 'terminal' });
+  };
+  
   return UexVehiclePurchasePrice
 };

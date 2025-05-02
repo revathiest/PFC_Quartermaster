@@ -64,5 +64,9 @@ module.exports = (sequelize) => {
     collate: 'utf8mb4_unicode_ci'
   });
 
+  UexTerminal.associate = (models) => {
+    UexTerminal.belongsTo(models.UexPoi, { foreignKey: 'id_poi', as: 'poi' });
+  };
+
   return UexTerminal;
 };

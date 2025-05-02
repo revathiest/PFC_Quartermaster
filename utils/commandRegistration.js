@@ -35,6 +35,11 @@ function loadCommandsRecursively(dir, commandList = [], commandMap = new Map()) 
 async function registerCommands(client) {
     const commandsPath = path.join(__dirname, '../commands');
     const { commandList, commandMap } = loadCommandsRecursively(commandsPath);
+    const existingNames = existingCommands.map(c => c.name).sort();
+    const localNames = commandList.map(c => c.name).sort();
+
+    const isSame = existingNames.length === localNames.length &&
+               existingNames.every((name, i) => name === localNames[i]);
 
     client.commands = commandMap;
 
@@ -47,11 +52,11 @@ async function registerCommands(client) {
 
         if (existingCommands.length === 0) {
             console.log('📝 No commands currently registered. Proceeding with registration...');
-        } else if (existingCommands.length === commandList.length) {
-            console.log('ℹ️ Same number of commands already registered. Skipping re-registration to avoid unnecessary API calls.');
+        } else if (isSame) {
+            console.log('ℹ️ Commands are in sync. Skipping registration.');
             return;
         } else {
-            console.log(`⚠️ Mismatch detected (registered: ${existingCommands.length}, local: ${commandList.length}). Proceeding with re-registration...`);
+            console.log(`⚠️ Command mismatch detected. Proceeding with re-registration...`);
         }
 
         console.log('🔁 Syncing commands with Discord...');

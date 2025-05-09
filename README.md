@@ -28,11 +28,34 @@ Install dependencies:
 npm install
 ```
 
-Create a `.env` file or equivalent config with your bot token:
+## 🛠️ Configuration
 
-```env
-DISCORD_TOKEN=your-bot-token
+Create a `config.json` file in the project root with the following structure:
+
+```json
+{
+  "token": "your-discord-bot-token",
+  "guildId": "your-discord-guild-id",
+  "clientId": "your-discord-client-id",
+  "SCAPIkey": "your-star-citizen-api-key",
+  "botPermsReq": "2147483648",
+  "bot_type": "Development",
+  "wallOfFameChannelId": "your-wall-of-fame-channel-id"
+}
 ```
+
+> ⚠️ **Important:** This file contains sensitive information.  
+> Be sure to **add `config.json` to `.gitignore`** to avoid committing it.
+
+Each field is required:
+
+- `token`: Your Discord bot token
+- `guildId`: ID of the Discord server where the bot operates
+- `clientId`: Your bot's Discord client ID
+- `SCAPIkey`: API key for external services (e.g. Star Citizen)
+- `botPermsReq`: Bot permissions integer (default `2147483648`)
+- `bot_type`: `"Development"` or `"Production"`
+- `wallOfFameChannelId`: Channel ID for special logging/events
 
 ## 🏃‍♂️ Usage
 

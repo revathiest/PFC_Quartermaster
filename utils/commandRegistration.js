@@ -44,12 +44,12 @@ function loadCommandsRecursively(dir, commandList = [], commandMap = new Map()) 
 async function registerCommands(client) {
     const commandsPath = path.join(__dirname, '../commands');
     const { commandList, commandMap } = loadCommandsRecursively(commandsPath);
+
     client.commands = commandMap;
 
     const rest = new REST({ version: '10' }).setToken(token);
 
     try {
-
         console.log('🔁 Syncing commands with Discord...');
         const response = await rest.put(
             Routes.applicationGuildCommands(clientId, guildId),

@@ -49,24 +49,6 @@ async function registerCommands(client) {
     const rest = new REST({ version: '10' }).setToken(token);
 
     try {
-        console.log('🔍 Fetching currently registered guild commands...');
-        const existingCommands = await rest.get(Routes.applicationGuildCommands(clientId, guildId));
-        console.log(`✅ Discord reports ${existingCommands.length} registered command(s):`, existingCommands.map(c => c.name));
-
-        const existingNames = existingCommands.map(c => c.name).sort();
-        const localNames = commandList.map(c => c.name).sort();
-
-        const isSame = existingNames.length === localNames.length &&
-                   existingNames.every((name, i) => name === localNames[i]);
-
-        if (existingCommands.length === 0) {
-            console.log('📝 No commands currently registered. Proceeding with registration...');
-        } else if (isSame) {
-            //console.log('ℹ️ Commands are in sync. Skipping registration.');
-            //return;
-        } else {
-            console.log(`⚠️ Command mismatch detected. Proceeding with re-registration...`);
-        }
 
         console.log('🔁 Syncing commands with Discord...');
         const response = await rest.put(

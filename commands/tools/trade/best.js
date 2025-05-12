@@ -90,10 +90,18 @@ module.exports = {
     //    so that `.options.getString()` still works
     const result = await handleTradeBestCore({
       fromLocation: state.fromLocation,
-      shipQuery: ship.name,
+      ship: ship,
       cash: state.cash,
       userId: interaction.user.id
     });
+    
+    if (result.components) {
+      return interaction.followUp({
+        content: result.error,
+        components: result.components,
+        ephemeral: true
+      });
+    }
     
     if (result.error) {
       return interaction.followUp({ content: result.error, ephemeral: true });

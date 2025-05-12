@@ -8,16 +8,21 @@ const { safeReply, TradeStateCache } = require('./shared');
 
 // =======================================
 // Core handler that returns embed/error/components
-async function handleTradeBestCore({ fromLocation, shipQuery, cash, userId }) {
+async function handleTradeBestCore({ fromLocation, shipQuery, ship, cash, userId }) {
   if (DEBUG_TRADE) {
     console.log(`[TRADE CORE] start`, { fromLocation, shipQuery, cash });
   }
 
   try {
     let vehicles = [];
-    if (shipQuery) {
+    if (ship) {
+      vehicles = [ship];
+    } else if (shipQuery) {
       vehicles = await getVehicleByName(shipQuery);
     }
+
+    const selectedShip = vehicles[0] || null;
+    const shipSCU = selectedShip?.scu ?? 0; 
 
     if (shipQuery && vehicles.length === 0) {
       return { error: `❌ No ships found matching **${shipQuery}**.` };
@@ -39,9 +44,6 @@ async function handleTradeBestCore({ fromLocation, shipQuery, cash, userId }) {
 
     // 🚿 Clean up cache if we have a definitive ship and a user
     if (userId) TradeStateCache.delete(userId);
-
-    const ship = vehicles[0] || null;
-    const shipSCU = ship?.scu ?? 0;
 
     const buyOptions = await getBuyOptionsAtLocation(fromLocation);
 

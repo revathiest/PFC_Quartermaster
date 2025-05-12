@@ -37,6 +37,9 @@ async function handleTradeBestCore({ fromLocation, shipQuery, cash, userId }) {
       };
     }
 
+    // 🚿 Clean up cache if we have a definitive ship and a user
+    if (userId) TradeStateCache.delete(userId);
+
     const ship = vehicles[0] || null;
     const shipSCU = ship?.scu ?? 0;
 

@@ -2,7 +2,7 @@ const DEBUG_BEST = true;  // 🔍 Flip on/off
 
 const { SlashCommandSubcommandBuilder } = require('discord.js');
 const { UexVehicle } = require('../../../config/database');
-const { handleTradeBest } = require('../../../utils/trade/tradeHandlers');
+const { handleTradeBest, handleTradeBestCore } = require('../../../utils/trade/tradeHandlers');
 const { TradeStateCache } = require('../../../utils/trade/handlers/shared');
 
 module.exports = {
@@ -88,12 +88,18 @@ module.exports = {
 
     // 4) re‑invoke the slash‐command handler *using the original slash interaction*
     //    so that `.options.getString()` still works
-    const original = interaction.message.interaction;
-    await handleTradeBest(original, client, {
+    const result = await handleTradeBestCore({
       fromLocation: state.fromLocation,
-      shipQuery:    ship.name,
-      cash:         state.cash
+      shipQuery: ship.name,
+      cash: state.cash,
+      userId: interaction.user.id
     });
+    
+    if (result.error) {
+      return interaction.followUp({ content: result.error, ephemeral: true });
+    }
+    
+    return interaction.followUp({ embeds: [result.embed], ephemeral: true });
 
     if (DEBUG_BEST) console.log(`[BEST][option] done`);
   }

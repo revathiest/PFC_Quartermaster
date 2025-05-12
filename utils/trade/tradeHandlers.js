@@ -21,5 +21,6 @@ module.exports = {
   handleTradeShip,
   handleTradeLocations,
   handleTradeCommodities,
+  handleTradeBestCore,
   pendingBest
 };

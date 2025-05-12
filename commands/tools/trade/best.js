@@ -2,7 +2,8 @@ const DEBUG_BEST = true;  // 🔍 Flip on/off
 
 const { SlashCommandSubcommandBuilder } = require('discord.js');
 const { UexVehicle } = require('../../../config/database');
-const { handleTradeBest, pendingBest } = require('../../../utils/trade/tradeHandlers');
+const { handleTradeBest } = require('../../../utils/trade/tradeHandlers');
+const { TradeStateCache } = require('../../../utils/trade/handlers/shared');
 
 module.exports = {
   data: () => new SlashCommandSubcommandBuilder()
@@ -35,6 +36,7 @@ module.exports = {
     }
 
     // delegate all of the “best” logic to the handler
+    TradeStateCache.set(interaction.user.id, { fromLocation, shipQuery, cash });
     await handleTradeBest(interaction, client, { fromLocation, shipQuery, cash });
 
     if (DEBUG_BEST) console.log(`[BEST][execute] done`);
@@ -56,8 +58,8 @@ module.exports = {
     }
 
     // 1) grab the cached state
-    const state = pendingBest.get(interaction.user.id);
-    pendingBest.delete(interaction.user.id);
+    const state = TradeStateCache.get(interaction.user.id);
+    TradeStateCache.delete(interaction.user.id);
 
     if (!state) {
       if (DEBUG_BEST) console.warn(

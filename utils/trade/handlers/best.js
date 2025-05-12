@@ -4,7 +4,7 @@ const { getBuyOptionsAtLocation, getVehicleByName, getSellPricesForCommodityElse
 const { calculateProfitOptions } = require('../tradeCalculations');
 const { buildBestTradesEmbed } = require('../tradeEmbeds');
 const { buildShipSelectMenu } = require('../tradeComponents');
-const { safeReply, pendingBest } = require('./shared');
+const { safeReply, TradeStateCache } = require('./shared');
 
 // =======================================
 // Core handler that returns embed/error/components
@@ -28,7 +28,7 @@ async function handleTradeBestCore({ fromLocation, shipQuery, cash, userId }) {
         return { error: '❌ Multiple ships matched, and no userId provided for caching.' };
       }
 
-      pendingBest.set(userId, { fromLocation, shipQuery, cash });
+      TradeStateCache.set(userId, { fromLocation, shipQuery, cash });
 
       const row = buildShipSelectMenu(vehicles, 'trade::best::select_ship');
       return {

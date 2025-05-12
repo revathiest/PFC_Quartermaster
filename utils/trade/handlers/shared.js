@@ -1,35 +1,5 @@
 const DEBUG_TRADE = false;
 
-const {
-  getSellOptionsAtLocation,
-  getBuyOptionsAtLocation,
-  getCommodityTradeOptions,
-  getVehicleByName,
-  getAllShipNames,
-  getReturnOptions,
-  getTerminalsAtLocation,
-  getSellPricesForCommodityElsewhere
-} = require('../tradeQueries');
-
-const {
-  calculateProfitOptions,
-  calculateCircuitTotalProfit
-} = require('../tradeCalculations');
-
-const {
-  buildBestTradesEmbed,
-  buildRouteEmbed,
-  buildCircuitEmbed,
-  buildPriceEmbed,
-  buildShipEmbed,
-  buildLocationsEmbed,
-  buildCommoditiesEmbed
-} = require('../tradeEmbeds');
-
-const {
-  buildShipSelectMenu
-} = require('../tradeComponents');
-
 const pendingBest = new Map();
 
 async function safeReply(interaction, payload) {
@@ -49,7 +19,15 @@ async function safeReply(interaction, payload) {
   }
 }
 
+const TradeStateCache = {
+  get: (userId) => pendingBest.get(userId),
+  set: (userId, data) => pendingBest.set(userId, data),
+  delete: (userId) => pendingBest.delete(userId),
+  clear: () => pendingBest.clear()
+};
+
 module.exports = {
   safeReply,
-  pendingBest
+  pendingBest,
+  TradeStateCache
 };

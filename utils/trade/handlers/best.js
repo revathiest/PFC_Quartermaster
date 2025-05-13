@@ -5,6 +5,7 @@ const { calculateProfitOptions } = require('../tradeCalculations');
 const { buildBestTradesEmbed } = require('../tradeEmbeds');
 const { buildShipSelectMenu } = require('../tradeComponents');
 const { safeReply, TradeStateCache } = require('./shared');
+const { MessageFlags } = require('discord.js');
 
 // =======================================
 // Core handler that returns embed/error/components
@@ -97,12 +98,12 @@ async function handleTradeBest(interaction, client, { fromLocation, shipQuery, c
     return safeReply(interaction, {
       content: error,
       components,
-      ephemeral: true
+      flags: MessageFlags.Ephemeral
     });
   }
 
   if (error) {
-    return safeReply(interaction, { content: error, ephemeral: true });
+    return safeReply(interaction, { content: error, flags: MessageFlags.Ephemeral });
   }
 
   return safeReply(interaction, { embeds: [embed] });

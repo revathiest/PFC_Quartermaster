@@ -1,6 +1,6 @@
 const DEBUG_BEST = true;  // 🔍 Flip on/off
 
-const { SlashCommandSubcommandBuilder } = require('discord.js');
+const { SlashCommandSubcommandBuilder, MessageFlags, Message } = require('discord.js');
 const { UexVehicle } = require('../../../config/database');
 const { handleTradeBest, handleTradeBestCore } = require('../../../utils/trade/tradeHandlers');
 const { TradeStateCache } = require('../../../utils/trade/handlers/shared');
@@ -81,7 +81,7 @@ module.exports = {
       if (DEBUG_BEST) console.error(`[BEST][option] invalid ship id=${selectedId}`);
       return interaction.followUp({
         content: '❌ Could not find the selected ship.',
-        flags: 1 << 6 // ephemeral
+        flags: MessageFlags.Ephemeral
       });
     }
     if (DEBUG_BEST) console.log(`[BEST][option] user picked: ${ship.name_full}`);
@@ -99,15 +99,15 @@ module.exports = {
       return interaction.followUp({
         content: result.error,
         components: result.components,
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
     
     if (result.error) {
-      return interaction.followUp({ content: result.error, ephemeral: true });
+      return interaction.followUp({ content: result.error, flags: MessageFlags.Ephemeral });
     }
     
-    return interaction.followUp({ embeds: [result.embed], ephemeral: true });
+    return interaction.followUp({ embeds: [result.embed], flags: MessageFlags.Ephemeral });
 
     if (DEBUG_BEST) console.log(`[BEST][option] done`);
   }

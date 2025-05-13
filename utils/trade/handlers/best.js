@@ -22,7 +22,7 @@ async function handleTradeBestCore({ fromLocation, shipQuery, ship, cash, userId
     }
 
     const selectedShip = vehicles[0] || null;
-    const shipSCU = selectedShip?.scu ?? 0; 
+    const shipSCU = selectedShip?.scu ?? Infinity; 
 
     if (shipQuery && vehicles.length === 0) {
       return { error: `❌ No ships found matching **${shipQuery}**.` };

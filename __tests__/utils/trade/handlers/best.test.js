@@ -1,15 +1,15 @@
-jest.mock('discord.js');
+// 💥 Import MockInteraction directly from the mock file
+const { MockInteraction, MessageFlags } = require('../../../../__mocks__/discord.js');
+
+// ✅ Standard Jest mocks for dependencies
+jest.mock('../../../../utils/trade/tradeQueries');
 jest.mock('../../../../utils/trade/tradeCalculations');
 jest.mock('../../../../utils/trade/tradeComponents');
 jest.mock('../../../../utils/trade/tradeEmbeds');
-jest.mock('../../../../utils/trade/tradeQueries', () => ({
-    getBuyOptionsAtLocation: jest.fn(),
-    getSellPricesForCommodityElsewhere: jest.fn(),
-    getVehicleByName: jest.fn()
-  }));
+jest.mock('../../../../utils/trade/handlers/shared');
 
+// 🔧 Import handler after mocks are active
 const { handleTradeBest } = require('../../../../utils/trade/handlers/best');
-const { MockInteraction, MessageFlags } = require('discord.js');
 
 const {
   getVehicleByName,
@@ -28,6 +28,7 @@ describe('handleTradeBest', () => {
   });
 
   test('responds with embed if profitable options exist', async () => {
+
     const interaction = new MockInteraction({
       options: { from: 'Port Olisar' },
       user: { id: 'mock-user-id' }
@@ -156,6 +157,8 @@ describe('handleTradeBest', () => {
   });
 
   test('responds with generic error if an exception is thrown', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    
     const interaction = new MockInteraction({
       options: { from: 'Port Olisar' },
       user: { id: 'mock-user-id' }

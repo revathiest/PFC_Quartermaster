@@ -1,8 +1,6 @@
-const { MessageFlags } = require('discord.js');
-
-const DEBUG_TRADE = false;
-
 const pendingBest = new Map();
+
+const { MessageFlags } = require('discord.js');
 
 async function safeReply(interaction, payload = {}) {
   if (!interaction || typeof interaction.reply !== 'function') {
@@ -10,27 +8,26 @@ async function safeReply(interaction, payload = {}) {
     return;
   }
 
-  const isDeferred = interaction.deferred;
-  const isReplied = interaction.replied;
-
-  // Force ephemeral if not already set
-  if (!('flags' in payload)) {
-    payload.flags = MessageFlags.Ephemeral;
-  }
+  // Always enforce ephemeral visibility
+  payload.flags = MessageFlags.Ephemeral;
 
   try {
-    if (DEBUG_TRADE) {
-      console.debug(`[safeReply] Using ${isDeferred || isReplied ? 'editReply' : 'reply'}`, payload);
+    if (interaction.replied || interaction.deferred) {
+      // 🧼 Clear out old embeds/components if not explicitly provided
+      const patch = {
+        ...payload,
+        embeds: payload.embeds ?? [],
+        components: payload.components ?? []
+      };
+      return await interaction.editReply(patch);
+    } else {
+      return await interaction.reply(payload);
     }
-
-    return isDeferred || isReplied
-      ? await interaction.editReply(payload)
-      : await interaction.reply(payload);
-
   } catch (err) {
-    console.error('[safeReply] Failed to respond to interaction:', err);
+    console.error('[safeReply] Failed to respond to interaction', err);
   }
 }
+
 
 const TradeStateCache = {
   get: (userId) => pendingBest.get(userId),

@@ -3,7 +3,7 @@ const DEBUG_BEST = true;  // 🔍 Flip on/off
 const { SlashCommandSubcommandBuilder, MessageFlags, Message } = require('discord.js');
 const { UexVehicle } = require('../../../config/database');
 const { handleTradeBest, handleTradeBestCore } = require('../../../utils/trade/tradeHandlers');
-const { TradeStateCache } = require('../../../utils/trade/handlers/shared');
+const { TradeStateCache, safeReply } = require('../../../utils/trade/handlers/shared');
 
 module.exports = {
   data: () => new SlashCommandSubcommandBuilder()
@@ -79,10 +79,10 @@ module.exports = {
     const ship = await UexVehicle.findByPk(selectedId, { raw: true });
     if (!ship) {
       if (DEBUG_BEST) console.error(`[BEST][option] invalid ship id=${selectedId}`);
-      return interaction.followUp({
+      return safeReply(interaction, {
         content: '❌ Could not find the selected ship.',
         flags: MessageFlags.Ephemeral
-      });
+      });      
     }
     if (DEBUG_BEST) console.log(`[BEST][option] user picked: ${ship.name_full}`);
 
@@ -95,19 +95,13 @@ module.exports = {
       userId: interaction.user.id
     });
     
-    if (result.components) {
-      return interaction.followUp({
-        content: result.error,
-        components: result.components,
-        flags: MessageFlags.Ephemeral
-      });
-    }
-    
-    if (result.error) {
-      return interaction.followUp({ content: result.error, flags: MessageFlags.Ephemeral });
-    }
-    
-    return interaction.followUp({ embeds: [result.embed], flags: MessageFlags.Ephemeral });
+    const payload = result.error
+    ? { content: result.error, flags: MessageFlags.Ephemeral }
+    : result.components
+      ? { content: result.content ?? '', components: result.components, flags: MessageFlags.Ephemeral }
+      : { embeds: [result.embed], flags: MessageFlags.Ephemeral };
+  
+    return safeReply(interaction, payload);  
 
     if (DEBUG_BEST) console.log(`[BEST][option] done`);
   }

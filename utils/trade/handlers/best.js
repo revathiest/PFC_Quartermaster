@@ -39,7 +39,8 @@ async function handleTradeBestCore({ fromLocation, shipQuery, ship, cash, userId
       const row = buildShipSelectMenu(vehicles, 'trade::best::select_ship');
       return {
         error: `Multiple ships matched **${shipQuery}**. Please select one:`,
-        components: [row]
+        components: [row],
+        flags: MessageFlags.Ephemeral
       };
     }
 

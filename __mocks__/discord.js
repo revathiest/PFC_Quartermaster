@@ -1,5 +1,7 @@
 // __mocks__/discord.js.js
 
+const { PermissionFlagsBits } = jest.requireActual("discord.js");
+
 class MockInteraction {
   constructor({
     options = {},
@@ -38,6 +40,34 @@ class MockInteraction {
     this.replyFlags = flags;
   }
 }
+
+const EmbedBuilder = jest.fn().mockImplementation(() => {
+  const data = {
+    title: '',
+    description: '',
+    color: null,
+    fields: [],
+    footer: {},
+    timestamp: null
+  };
+
+  const embed = {
+    setTitle: jest.fn().mockImplementation(title => { data.title = title; return embed; }),
+    setDescription: jest.fn().mockImplementation(desc => { data.description = desc; return embed; }),
+    setColor: jest.fn().mockImplementation(color => { data.color = color; return embed; }),
+    addFields: jest.fn().mockImplementation((...args) => {
+      const flatFields = args.flat();
+      data.fields.push(...flatFields);
+      return embed;
+    }),
+    setFooter: jest.fn().mockImplementation(footer => { data.footer = footer; return embed; }),
+    setTimestamp: jest.fn().mockImplementation(() => { data.timestamp = Date.now(); return embed; }),
+    toJSON: jest.fn(() => data),
+    data
+  };
+
+  return embed;
+});
 
 const MessageFlags = {
   Ephemeral: 1 << 6,
@@ -104,4 +134,6 @@ module.exports = {
   ButtonBuilder,
   ButtonStyle,
   SlashCommandBuilder,
+  EmbedBuilder,
+  PermissionFlagsBits
 };

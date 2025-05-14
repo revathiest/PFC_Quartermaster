@@ -1,7 +1,5 @@
 // __mocks__/discord.js.js
 
-const { PermissionFlagsBits } = jest.requireActual("discord.js");
-
 class MockInteraction {
   constructor({
     options = {},
@@ -68,6 +66,10 @@ const EmbedBuilder = jest.fn().mockImplementation(() => {
 
   return embed;
 });
+
+const PermissionFlagsBits = {
+  Administrator: 0x00000008
+};
 
 const MessageFlags = {
   Ephemeral: 1 << 6,

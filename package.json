@@ -27,15 +27,5 @@
   "nodeVersion": "22.13.1",
   "devDependencies": {
     "@tsconfig/node10": "^1.0.9"
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "verbose": true,
-    "collectCoverage": true,
-    "coverageDirectory": "./coverage",
-    "moduleDirectories": ["node_modules", "__mocks__"],
-    "modulePathIgnorePatterns": [
-      "<rootDir>/.trash/"
-    ]
   }
 }

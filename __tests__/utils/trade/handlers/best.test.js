@@ -1,8 +1,15 @@
 jest.mock('discord.js');
+jest.mock('../../../../utils/trade/tradeCalculations');
+jest.mock('../../../../utils/trade/tradeComponents');
+jest.mock('../../../../utils/trade/tradeEmbeds');
+jest.mock('../../../../utils/trade/tradeQueries', () => ({
+    getBuyOptionsAtLocation: jest.fn(),
+    getSellPricesForCommodityElsewhere: jest.fn(),
+    getVehicleByName: jest.fn()
+  }));
 
 const { handleTradeBest } = require('../../../../utils/trade/handlers/best');
-const { MessageFlags } = require('discord.js');
-const { MockInteraction } = require('discord.js');
+const { MockInteraction, MessageFlags } = require('discord.js');
 
 const {
   getVehicleByName,

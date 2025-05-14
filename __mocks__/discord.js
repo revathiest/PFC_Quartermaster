@@ -3,7 +3,7 @@
 class MockInteraction {
   constructor({
     options = {},
-    user = {},
+    user = { id: 'mock-user-id', username: 'TestUser', bot: false },
     member = {},
     guild = {},
     channel = null

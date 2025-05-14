@@ -85,7 +85,7 @@ async function handleTradeBestCore({ fromLocation, shipQuery, ship, cash, userId
 
 // =======================================
 // /trade best — slash command only
-async function handleTradeBest(interaction, client, { fromLocation, shipQuery, cash }) {
+async function handleTradeBest(interaction, client, { fromLocation, shipQuery, cash } = {}) {
   const { embed, error, components } = await handleTradeBestCore({
     fromLocation,
     shipQuery,

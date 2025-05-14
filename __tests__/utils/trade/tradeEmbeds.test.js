@@ -20,7 +20,7 @@ const {
   
     test('buildRouteEmbed returns an embed with sell options', () => {
       const result = buildRouteEmbed('Agricium', 'Port Olisar', [
-        { terminal: 'Terminal B', location: 'Lorville', sellPrice: 800, profitPerSCU: 300 }
+        { toTerminal: 'Terminal B', location: 'Lorville', sellPrice: 800, profitPerSCU: 300 }
       ]);
       expect(result.data.title).toContain('Agricium');
       expect(result.data.fields[0].name).toContain('Terminal B');

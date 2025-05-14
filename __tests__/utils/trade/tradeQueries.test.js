@@ -64,17 +64,29 @@ describe('tradeQueries integration tests', () => {
     }
   });
 
-  test('getVehicleByName returns vehicle by name/slug/full name', async () => {
-    const vehicle = await getVehicleByName('Freelancer');
-    expect(vehicle).toBeTruthy();
-    expect(vehicle).toHaveProperty('name');
-    expect(vehicle).toHaveProperty('scu');
+  test('getVehicleByName returns array of matches for partial name', async () => {
+    const vehicles = await getVehicleByName('Freelancer');
+    expect(Array.isArray(vehicles)).toBe(true);
+    expect(vehicles.length).toBeGreaterThan(0);
+    vehicles.forEach(vehicle => {
+      expect(vehicle).toHaveProperty('name');
+      expect(vehicle).toHaveProperty('scu');
+    });
+  });
+  
+  test('getVehicleByName returns array with one match for unique name', async () => {
+    const vehicles = await getVehicleByName('C8X Pisces Expedition');
+    expect(Array.isArray(vehicles)).toBe(true);
+    expect(vehicles.length).toBe(1);
+    expect(vehicles[0]).toHaveProperty('name', 'C8X Pisces Expedition');
   });
 
-  test('getVehicleByName returns null for unknown name', async () => {
-    const vehicle = await getVehicleByName('NonexistentShipName123');
-    expect(vehicle).toBeNull();
-  });  
+  test('getVehicleByName returns empty array for unknown name', async () => {
+    const vehicles = await getVehicleByName('NonexistentShipName123');
+    expect(Array.isArray(vehicles)).toBe(true);
+    expect(vehicles.length).toBe(0);
+  });
+   
 
   test('getAllShipNames returns array of ship names', async () => {
     const ships = await getAllShipNames();

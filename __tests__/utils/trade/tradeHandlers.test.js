@@ -37,6 +37,7 @@ const {
 } = require('../../../utils/trade/tradeHandlers');
 
 const mockInteraction = () => ({
+  user: {id: 'mock-user-id'},
   options: {
     getString: jest.fn(),
     getInteger: jest.fn()
@@ -52,35 +53,54 @@ describe('tradeHandlers', () => {
   test('handleTradeBest replies with embed if profit options found', async () => {
     const interaction = mockInteraction();
     interaction.options.getString.mockReturnValueOnce('Port Olisar'); // from
-    getSellOptionsAtLocation.mockResolvedValue([{ price_buy: 1, price_sell: 2, commodity_name: 'Test', terminal: { name: 'Terminal A' } }]);
-    calculateProfitOptions.mockReturnValue([{ commodity: 'Test', terminal: 'Terminal A', profitPerSCU: 1, cargoUsed: 10, totalProfit: 10 }]);
+  
+    getSellOptionsAtLocation.mockResolvedValue([
+      { price_buy: 1, price_sell: 2, commodity_name: 'Test', terminal: { name: 'Terminal A' } }
+    ]);
+    calculateProfitOptions.mockReturnValue([
+      { commodity: 'Test', terminal: 'Terminal A', profitPerSCU: 1, cargoUsed: 10, totalProfit: 10 }
+    ]);
     buildBestTradesEmbed.mockReturnValue({ embed: 'mockEmbed' });
-
-    await handleTradeBest(interaction);
-
+  
+    await handleTradeBest(interaction, {}, {
+      //fromLocation: 'Port Olisar',
+      shipQuery: 'Drake Cutlass Black',
+      cash: 50000
+    });
+  
     expect(getSellOptionsAtLocation).toHaveBeenCalledWith('Port Olisar');
     expect(calculateProfitOptions).toHaveBeenCalled();
     expect(buildBestTradesEmbed).toHaveBeenCalled();
     expect(interaction.reply).toHaveBeenCalledWith({ embeds: [{ embed: 'mockEmbed' }] });
   });
-
+  
   test('handleTradeBest replies with error if no sell options found', async () => {
     const interaction = mockInteraction();
     interaction.options.getString.mockReturnValueOnce('Port Olisar');
     getSellOptionsAtLocation.mockResolvedValue([]); // no results
   
-    await handleTradeBest(interaction);
+    await handleTradeBest(interaction, {}, {
+      fromLocation: 'Port Olisar',
+      shipQuery: 'Drake Cutlass Black',
+      cash: 50000
+    });
   
     expect(interaction.reply).toHaveBeenCalledWith(expect.stringContaining('❌ No sell options'));
-  });  
-
+  });
+  
   test('handleTradeBest replies with error if no profit options found', async () => {
     const interaction = mockInteraction();
     interaction.options.getString.mockReturnValueOnce('Port Olisar');
-    getSellOptionsAtLocation.mockResolvedValue([{ price_buy: 1, price_sell: 1, terminal: { name: 'Terminal A' } }]);
+    getSellOptionsAtLocation.mockResolvedValue([
+      { price_buy: 1, price_sell: 1, terminal: { name: 'Terminal A' } }
+    ]);
     calculateProfitOptions.mockReturnValue([]); // no profit options
   
-    await handleTradeBest(interaction);
+    await handleTradeBest(interaction, {}, {
+      fromLocation: 'Port Olisar',
+      shipQuery: 'Drake Cutlass Black',
+      cash: 50000
+    });
   
     expect(interaction.reply).toHaveBeenCalledWith(expect.stringContaining('❌ No profitable trades'));
   });  

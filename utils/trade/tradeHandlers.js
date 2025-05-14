@@ -10,7 +10,7 @@ const { handleTradePrice } = require('./handlers/price');
 const { handleTradeShip } = require('./handlers/ship');
 const { handleTradeLocations } = require('./handlers/locations');
 const { handleTradeCommodities } = require('./handlers/commodities');
-const { pendingBest } = require('./handlers/shared');
+const { pendingBest, safeReply } = require('./handlers/shared');
 
 module.exports = {
   handleTradeBest,
@@ -22,5 +22,6 @@ module.exports = {
   handleTradeLocations,
   handleTradeCommodities,
   handleTradeBestCore,
+  safeReply,
   pendingBest
 };

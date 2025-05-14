@@ -34,7 +34,7 @@ function calculateProfitOptions(records, shipSCU, availableCash) {
       return {
         commodity: record.commodity_name,
         fromTerminal: record.terminal?.name,
-        toTerminal: record.toTerminal ?? record.sellTerminal ?? record.terminal_name ?? "unknown",
+        toTerminal: record.sellTerminal?.name ?? "unknown",
         location: record.terminal?.poi?.name ?? record.terminal?.city_name ?? record.terminal?.planet_name,
         buyPrice,
         sellPrice,

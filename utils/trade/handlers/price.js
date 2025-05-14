@@ -31,6 +31,8 @@ const {
   buildShipSelectMenu
 } = require('../tradeComponents');
 
+const { safeReply } = require('./shared');
+
 // =======================================
 // /trade price
 async function handleTradePrice(interaction) {

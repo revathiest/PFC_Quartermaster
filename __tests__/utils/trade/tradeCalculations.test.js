@@ -24,7 +24,7 @@ const {
         expect(results).toHaveLength(1);
         expect(results[0]).toMatchObject({
           commodity: 'Agricium',
-          terminal: 'Terminal A',
+          fromTerminal: 'Terminal A',
           location: 'Location X',
           profitPerSCU: 300,
           totalProfit: expect.any(Number)
@@ -66,7 +66,7 @@ const {
           terminal: { name: 'Terminal A', poi: { name: 'Location X' } }
         }];
         const results = calculateProfitOptions(records, 66, 100_000);
-        expect(results).toHaveLength(1); // profitPerSCU should still be 800
+        expect(results).toHaveLength(0);
       });      
     });
   

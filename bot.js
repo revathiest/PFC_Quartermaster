@@ -17,6 +17,7 @@ const { deleteOldLogs } = require('./botactions/maintenance/logCleanup');
 const { handleMemberJoin } = require('./botactions/eventHandling/memberJoinEvent');
 const { startOrgTagSyncScheduler } = require('./botactions/orgTagSync/syncScheduler');
 const { startAllScheduledJobs } = require('./jobs');
+const { pendingLogs } = require('./jobs/logState')
 
 const botType = process.env.BOT_TYPE;
 

@@ -7,9 +7,10 @@ const { evaluateAndFixNickname } = require('../../utils/evaluateAndFixNickname')
  * @param {object} client - The Discord.js client instance.
  */
 async function sweepVerifiedNicknames(client) {
+  console.log('🧽 Sweeping verified nicknames...');
   const guild = client.guilds.cache.first();
   if (!guild) {
-    console.warn('[SWEEP] No guild found in cache. Cannot run sweep.');
+    console.warn('🚫 No guild found in cache. Cannot run sweep.');
     return;
   }
 
@@ -35,6 +36,7 @@ async function sweepVerifiedNicknames(client) {
 
     if (updatedNickname) updated++;
   }
+  console.log(`✅ Nickname sweep complete. Checked: ${checked}, Updated: ${updated}`);
 }
 
 module.exports = {

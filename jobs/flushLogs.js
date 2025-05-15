@@ -9,6 +9,7 @@ async function flushLogs({client}) {
   
     if (isFlushinglogs) return;
     isFlushingLogs = true;
+    console.log('🌀 Flushing logs...');
   
     try {
       const channelId = client?.chanBotLog;
@@ -29,6 +30,7 @@ async function flushLogs({client}) {
       origConsoleError('❌ Failed to flush logs to Discord:', err);
     } finally {
       isFlushingLogs = false;
+      console.log('✅ Log flush complete.');
     }
   }
 

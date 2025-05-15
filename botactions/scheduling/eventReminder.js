@@ -8,6 +8,7 @@ const intervals = {
 };
 
 async function checkEvents(client) {
+    console.log('📅 Checking events...');
     client.guilds.cache.forEach(async (guild) => {
         const events = Array.from(guild.scheduledEvents.cache.values());
         const logChannel = client.channels.cache.get(client.chanLobby);
@@ -27,6 +28,7 @@ async function checkEvents(client) {
             }
         }
     });
+    console.log('✅ Event check complete.');
 }
 
 

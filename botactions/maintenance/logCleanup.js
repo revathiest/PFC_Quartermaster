@@ -5,6 +5,8 @@ function deleteOldLogs(logDir, days = 7) {
     const now = Date.now();
     const cutoff = now - days * 24 * 60 * 60 * 1000;
 
+    console.log('🧹 Scanning for old log files...');
+
     fs.readdir(logDir, (err, files) => {
         if (err) {
             console.error('❌ Failed to read log directory:', err);
@@ -31,6 +33,7 @@ function deleteOldLogs(logDir, days = 7) {
             });
         });
     });
+  console.log('✅ Log cleanup complete.');
 }
 
 module.exports = { deleteOldLogs };

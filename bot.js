@@ -141,31 +141,22 @@ const initializeBot = async () => {
     console.log('🟢 Discord client is ready!');
     try {
       await initializeDatabase();
-      console.log('✅ Database initialized.');
 
       await registerChannels(client);
-      console.log('✅ Channels registered.');
 
       await registerCommands(client);
-      console.log('✅ Commands registered.');
 
       await getInactiveUsersWithSingleRole(client);
-      console.log('✅ Inactive users fetched.');
 
       await syncEventsInDatabase(client);
-      console.log('✅ Scheduled events synced.');
 
       await sweepVerifiedNicknames(client);
-      console.log('✅ Verified nicknames swept.');
 
       startAmbientEngine(client);
-      console.log('✅ Ambient engine started.');
 
       startScheduledAnnouncementEngine(client);
-      console.log('✅ Scheduled announcement engine started.');
 
       startOrgTagSyncScheduler(client);
-      console.log('✅ Org tag sync scheduler started.');
 
       console.log('🚀 Bot setup complete and ready to go!');
 

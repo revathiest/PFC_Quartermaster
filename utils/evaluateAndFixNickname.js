@@ -79,7 +79,7 @@ async function evaluateAndFixNickname(member, {
       await member.setNickname(expectedNickname);
       return true;
     } catch (err) {
-      console.warn(`[NICKNAME] Failed to update ${member.user.tag}:`, err.message);
+      console.warn(`⚠️ Failed to update ${member.user.tag}:`, err.message);
       return false;
     }
   }

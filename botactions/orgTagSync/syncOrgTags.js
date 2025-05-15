@@ -7,7 +7,7 @@ async function syncOrgTags(client) {
   const guild = client.guilds.cache.first();
 
   if (!guild) {
-    console.warn('[SYNC] No guild found. Skipping sync.');
+    console.warn('🚫 No guild found. Skipping org tag sync.');
     return;
   }
 
@@ -32,7 +32,7 @@ async function syncOrgTags(client) {
       if (!member) continue;
 
       if (!member.manageable) {
-        console.warn(`[SYNC] Skipping ${member.user.tag}: Cannot manage this member.`);
+        console.warn(`⚠️ Skipping ${member.user.tag}: Cannot manage this member.`);
         continue;
       }
 
@@ -45,7 +45,7 @@ async function syncOrgTags(client) {
     } catch (error) {
       // Handle profile not found case
       if (error.message && error.message.includes('Unable to fetch RSI profile')) {
-        console.warn(`[SYNC] RSI profile not found for ${user.rsiHandle}. Removing verification.`);
+        console.warn(`⚠️ RSI profile not found for ${user.rsiHandle}. Removing verification.`);
 
         // Remove from the database
         await VerifiedUser.destroy({ where: { discordUserId: user.discordUserId } });
@@ -55,21 +55,21 @@ async function syncOrgTags(client) {
         if (!member) continue;
 
         if (!member.manageable) {
-          console.warn(`[SYNC] Skipping nickname update for ${member.user.tag}: Cannot manage this member.`);
+          console.warn(`⚠️ Skipping nickname update for ${member.user.tag}: Cannot manage this member.`);
           continue;
         }
 
         // Update nickname to show unverified status
-        const formattedNickname = formatVerifiedNickname(member.displayName, false, null); // Unverified, no tag
+        const formattedNickname = formatVerifiedNickname(member.displayName, false, null);
         if (member.displayName !== formattedNickname) {
           await member.setNickname(formattedNickname);
         }
 
-        continue; // Move to next user, do not rethrow
+        continue;
       }
 
       // Other errors: log and continue
-      console.error(`[SYNC] Failed to process ${user.rsiHandle}:`, error);
+      console.error(`❌ Failed to process ${user.rsiHandle}:`, error);
     }
   }
 }

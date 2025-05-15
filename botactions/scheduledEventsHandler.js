@@ -76,6 +76,7 @@ async function getAllScheduledEventsFromClient(client) {
 };
 
 async function syncEventsInDatabase(client) {
+    console.log('🔄 Syncing events with database...');
     try {
         const serverId = client.guilds.cache.first().id;
 
@@ -124,6 +125,7 @@ async function syncEventsInDatabase(client) {
                 });
             }
         }
+        console.log('✅ Event sync complete.');
     } catch (error) {
         console.error('❌ Error synchronizing events:', error);
     }

@@ -1,20 +1,20 @@
 // jobs/flushLogs.js
 const fs = require('fs');
 const path = require('path');
+let pendingLogs = [];
+let isFlushinglogs = false;
 
-const logFilePath = path.join(__dirname, '../logs/bot.log');
-
-async function flushLogs() {
-    if (!globalClient || pendingLogs.length === 0) return;
+async function flushLogs({client}) {
+    if (!client || pendingLogs.length === 0) return;
   
-    if (isFlushingLogs) return;
+    if (isFlushinglogs) return;
     isFlushingLogs = true;
   
     try {
-      const channelId = globalClient?.chanBotLog;
+      const channelId = client?.chanBotLog;
       if (!channelId) return;
   
-      const channel = globalClient.channels.cache.get(channelId);
+      const channel = client.channels.cache.get(channelId);
       if (!channel) return;
   
       let batch = pendingLogs.splice(0, 15).join('\n');
@@ -33,4 +33,3 @@ async function flushLogs() {
   }
 
 module.exports = { flushLogs };
-d

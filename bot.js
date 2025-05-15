@@ -19,9 +19,10 @@ const { startOrgTagSyncScheduler } = require('./botactions/orgTagSync/syncSchedu
 const { startAllScheduledJobs } = require('./jobs');
 
 const botType = process.env.BOT_TYPE;
-let globalClient = null;
-let pendingLogs = [];
-let isFlushingLogs = false;
+const pendingLogs = [];
+const isFlushingLogs = { value: false };
+global.globalClient = null; // Optional — or just use the actual client object directly
+
 
 // 🗂️ Setup Logging Directory
 const logDir = path.join(__dirname, 'logs');

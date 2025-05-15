@@ -3,7 +3,7 @@
 const { scheduleDailyApiSync } = require('./scheduler');
 const { flushLogs } = require('./flushLogs');
 const { checkEvents } = require('../botactions/scheduled/checkEvents');
-const { deleteMessages } = require('../botactions/maintenance/logCleanup');
+const { deleteOldLogs } = require('../botactions/maintenance/logCleanup');
 
 /**
  * Kick off all scheduled and interval-based tasks.
@@ -16,7 +16,7 @@ function startAllScheduledJobs(client) {
   // Interval jobs
   setInterval(() => flushLogs(), 2000);               // Every 2 seconds
   setInterval(() => checkEvents(client), 60000);      // Every 1 minute
-  setInterval(() => deleteMessages(client), 86400000); // Every 24 hours
+  setInterval(() => deleteOldLogs(client), 86400000); // Every 24 hours
 }
 
 module.exports = { startAllScheduledJobs };

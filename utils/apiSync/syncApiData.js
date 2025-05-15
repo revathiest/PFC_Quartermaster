@@ -10,16 +10,10 @@ const {
     syncUexVehiclePurchasePrices,
     syncUexVehicleRentalPrices,
     syncUexPois,
-  } = require('../botactions/api/syncEndpoints');
+  } = require('../../botactions/api/syncEndpoints');
   
-  async function runFullApoSync(logger = console.log) {
+  async function runFullApiSync(logger = console.log) {
     const results = {};const { EmbedBuilder } = require('discord.js');
-    const {
-      syncManufacturers, syncVehicles, syncGalactapedia, syncUexVehicles,
-      syncUexItemPrices, syncUexCategories, syncUexCommodityPrices,
-      syncUexFuelPrices, syncUexVehiclePurchasePrices,
-      syncUexVehicleRentalPrices, syncUexPois, syncUexTerminals,
-    } = require('../botactions/api/syncEndpoints');
     
     function formatResultTable(results) {
       const pad = (s, len) => String(s).padEnd(len, ' ');
@@ -92,34 +86,5 @@ const {
     
       return results;
     }
-    
+}
     module.exports = { runFullApiSync };
-    
-  
-    const updateStep = async (label, fn) => {
-      try {
-        results[label] = await fn();
-      } catch (err) {
-        logger(`[SYNC ERROR] ${label}:`, err);
-        results[label] = { error: true, created: 0, updated: 0, skipped: 0, total: 0 };
-      }
-    };
-  
-    await updateStep('Shops', syncUexTerminals);
-    await updateStep('Manufacturers', syncManufacturers);
-    await updateStep('Galactapedia', syncGalactapedia);
-    await updateStep('Vehicles (wiki)', syncVehicles);
-    await updateStep('Vehicles (uex)', syncUexVehicles);
-    await updateStep('Items', syncUexItemPrices);
-    await updateStep('Categories', syncUexCategories);
-    await updateStep('Commodities', syncUexCommodityPrices);
-    await updateStep('Fuel', syncUexFuelPrices);
-    await updateStep('Vehicle Prices', syncUexVehiclePurchasePrices);
-    await updateStep('Vehicle Rentals', syncUexVehicleRentalPrices);
-    await updateStep('Points of Interest', syncUexPois);
-  
-    return results;
-  }
-  
-  module.exports = { runFullApoiSync };
-  

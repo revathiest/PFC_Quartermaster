@@ -1,4 +1,4 @@
-const { runFullApiSync } = require('../utils/syncApiData');
+const { runFullApiSync } = require('../utils/apiSync/syncApiData');
 
 function scheduleDailyApiSync(hour = 4, minute = 0) {
   const now = new Date();

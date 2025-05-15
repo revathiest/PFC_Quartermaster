@@ -5,17 +5,18 @@ const path = require('path');
 
 const { initClient } = require('./botactions/initClient');
 const { interactionHandler, handleMessageCreate, handleReactionAdd, handleReactionRemove, handleVoiceStateUpdate } = require('./botactions/eventHandling');
-const { registerChannels, deleteMessages } = require('./botactions/channelManagement');
+const { registerChannels } = require('./botactions/channelManagement');
 const registerCommands = require('./utils/commandRegistration');
 const { initializeDatabase } = require('./config/database');
 const { loadConfiguration } = require('./botactions/configLoader');
-const { checkEvents, startScheduledAnnouncementEngine } = require('./botactions/scheduling');
+const { startScheduledAnnouncementEngine } = require('./botactions/scheduling');
 const { getInactiveUsersWithSingleRole, handleRoleAssignment, enforceNicknameFormat, sweepVerifiedNicknames } = require('./botactions/userManagement');
 const { handleCreateEvent, handleUpdateEvent, handleDeleteEvent, syncEventsInDatabase } = require('./botactions/eventHandling/scheduledEvents');
 const { startAmbientEngine } = require('./botactions/ambient/ambientEngine');
 const { deleteOldLogs } = require('./botactions/maintenance/logCleanup');
 const { handleMemberJoin } = require('./botactions/eventHandling/memberJoinEvent');
 const { startOrgTagSyncScheduler } = require('./botactions/orgTagSync/syncScheduler');
+const { startAllScheduledJobs } = require('./jobs');
 
 const botType = process.env.BOT_TYPE;
 let globalClient = null;
@@ -62,35 +63,9 @@ console.log = (...args) => {
   origConsoleLog(...args);
 };
 
-async function flushLogs() {
-  if (!globalClient || pendingLogs.length === 0) return;
 
-  if (isFlushingLogs) return;
-  isFlushingLogs = true;
 
-  try {
-    const channelId = globalClient?.chanBotLog;
-    if (!channelId) return;
-
-    const channel = globalClient.channels.cache.get(channelId);
-    if (!channel) return;
-
-    let batch = pendingLogs.splice(0, 15).join('\n');
-
-    if (batch.length > 1900) {
-      batch = batch.slice(0, 1900) + '...';
-    }
-
-    await channel.send({ content: `\	\	\	\	${batch}` });
-
-  } catch (err) {
-    origConsoleError('❌ Failed to flush logs to Discord:', err);
-  } finally {
-    isFlushingLogs = false;
-  }
-}
-
-setInterval(flushLogs, 2000);
+// setInterval(flushLogs, 2000);
 
 async function sendToDiscordLogChannel(content) {
   pendingLogs.push(content);
@@ -193,16 +168,18 @@ const initializeBot = async () => {
 
       console.log('🚀 Bot setup complete and ready to go!');
 
-      try {
-        setInterval(() => checkEvents(client), 60000);
-        console.log('⏱️ Check Events interval successfully started');
+      startAllScheduledJobs(client);
 
-        await deleteMessages(client);
-        setInterval(() => deleteMessages(client), 86400000);
-        console.log('🧹 Delete Messages interval successfully started');
-      } catch (error) {
-        console.error(`❌ Error setting up interval: ${error}`);
-      }
+      // try {
+      //   setInterval(() => checkEvents(client), 60000);
+      //   console.log('⏱️ Check Events interval successfully started');
+
+      //   await deleteMessages(client);
+      //   setInterval(() => deleteMessages(client), 86400000);
+      //   console.log('🧹 Delete Messages interval successfully started');
+      // } catch (error) {
+      //   console.error(`❌ Error setting up interval: ${error}`);
+      // }
     } catch (error) {
       console.error('❗ Error during bot setup:', error);
     }

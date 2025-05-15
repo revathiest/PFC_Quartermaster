@@ -1,8 +1,8 @@
 // jobs/flushLogs.js
 const fs = require('fs');
 const path = require('path');
-let pendingLogs = [];
-let isFlushinglogs = false;
+const { pendingLogs, isFlushingLogs } = require('./logState');
+
 
 async function flushLogs({client}) {
     if (!client || pendingLogs.length === 0) return;

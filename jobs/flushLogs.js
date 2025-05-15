@@ -1,14 +1,13 @@
 // jobs/flushLogs.js
-const fs = require('fs');
-const path = require('path');
 const { pendingLogs, isFlushingLogs } = require('./logState');
 
+async function flushLogs(client) {
+    console.log(`🧪 flushLogs called. Queue length: ${pendingLogs.length}, client: ${!!client}`);
 
-async function flushLogs({client}) {
     if (!client || pendingLogs.length === 0) return;
   
-    if (isFlushinglogs) return;
-    isFlushingLogs = true;
+    if (isFlushingLogs.value) return;
+    isFlushingLogs.value = true;
     console.log('🌀 Flushing logs...');
   
     try {
@@ -29,7 +28,7 @@ async function flushLogs({client}) {
     } catch (err) {
       origConsoleError('❌ Failed to flush logs to Discord:', err);
     } finally {
-      isFlushingLogs = false;
+      isFlushingLogs.value = false;
       console.log('✅ Log flush complete.');
     }
   }

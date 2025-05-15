@@ -17,6 +17,8 @@ function startAllScheduledJobs(client) {
   setInterval(() => flushLogs(client), 2000);               // Every 2 seconds
   setInterval(() => checkEvents(client), 60000);      // Every 1 minute
   setInterval(() => deleteOldLogs(client), 86400000); // Every 24 hours
+  console.log('🧭 Scheduled jobs are now running.');
+
 }
 
 module.exports = { startAllScheduledJobs };

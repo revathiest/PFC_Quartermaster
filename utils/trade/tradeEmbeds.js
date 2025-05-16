@@ -20,6 +20,7 @@ function buildBestTradesEmbed(fromLocation, profitOptions, shipName) {
             name: `${opt.commodity}: ${opt.fromTerminal} → ${opt.toTerminal}`,
             value: [
               `Profit/SCU: **${opt.profitPerSCU}**`,
+              `ROI: **${opt.returnOnInvestment}**`,
               opt.cargoUsed !== null ? `Cargo: **${opt.cargoUsed} SCU**` : `Cargo: *No ship selected*`,
               opt.totalProfit !== null ? `Total: **${opt.totalProfit}**` : `Total: *N/A*`
             ].join('\n'),

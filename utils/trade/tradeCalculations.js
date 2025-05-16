@@ -29,6 +29,7 @@ function calculateProfitOptions(records, shipSCU, availableCash) {
       }
 
       const totalProfit = maxAffordableSCU * profitPerSCU;
+      const returnOnInvestment = `${((profitPerSCU/buyPrice)*100).toFixed(0)}%`;
       if (DEBUG_CALC) console.log(`[CALC] totalProfit=${totalProfit} (profitPerSCU=${profitPerSCU} * maxAffordableSCU=${maxAffordableSCU})`);
 
       return {
@@ -40,7 +41,8 @@ function calculateProfitOptions(records, shipSCU, availableCash) {
         sellPrice,
         profitPerSCU,
         cargoUsed: maxAffordableSCU,
-        totalProfit: totalProfit || 0
+        totalProfit: totalProfit || 0,
+        returnOnInvestment
       };
     }).filter(option => option.profitPerSCU > 0 && option.cargoUsed > 0);
   } catch (err) {

@@ -1,5 +1,6 @@
 const {
     syncManufacturers,
+    syncUexTerminals,
     syncVehicles,
     syncGalactapedia,
     syncUexVehicles,
@@ -11,16 +12,16 @@ const {
     syncUexVehicleRentalPrices,
     syncUexPois,
   } = require('../../botactions/api/syncEndpoints');
-  
-  async function runFullApiSync(logger = console.log) {
-    const results = {};const { EmbedBuilder } = require('discord.js');
+
+  const { EmbedBuilder } = require('discord.js');
+
     
     function formatResultTable(results) {
       const pad = (s, len) => String(s).padEnd(len, ' ');
       const colWidths = [18, 6, 8, 8, 6];
       const headers = ['Endpoint', 'New', 'Updated', 'Skipped', 'Total'];
-      const headerRow = headers.map((h, i) => pad(h, colWidths[i])).join(' | ');
-      const dividerRow = colWidths.map(w => '-'.repeat(w)).join(' | ');
+      const headerRow = headers.map((h, i) => pad(h, colWidths[i])).join('| ');
+      const dividerRow = colWidths.map(w => '-'.repeat(w)).join('| ');
     
       const rows = Object.entries(results).map(([label, res]) => {
         const { created = 0, updated = 0, skipped = 0, total = 0, error } = res;
@@ -30,7 +31,7 @@ const {
           error ? 'ERR' : updated,
           error ? 'ERR' : skipped,
           error ? 'ERR' : total
-        ].map((val, i) => pad(val, colWidths[i])).join(' | ');
+        ].map((val, i) => pad(val, colWidths[i])).join('| ');
       });
     
       return ['```', headerRow, dividerRow, ...rows, '```'].join('\n');
@@ -85,6 +86,6 @@ const {
       }
     
       return results;
-    }
+
 }
     module.exports = { runFullApiSync };

@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { isAdmin } = require('../../botactions/userManagement/permissions');
-const { runFullApiSync } = require('../../utils/syncApiData');
+const { runFullApiSync } = require('../../utils/apiSync/syncApiData');
 
 module.exports = {
   data: new SlashCommandBuilder()

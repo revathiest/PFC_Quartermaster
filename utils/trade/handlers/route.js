@@ -3,7 +3,7 @@ const DEBUG_ROUTE = true;
 
 const { getBuyOptionsAtLocation, getSellOptionsAtLocation } = require('../tradeQueries');
 const { calculateProfitOptions } = require('../tradeCalculations');
-const { resolveBestMatchingTerminals } = require('../resolveBestMatchingTerminals');
+const { resolveBestMatchingTerminal } = require('../resolveBestMatchingTerminal');
 const { buildBestTradesEmbed } = require('../tradeEmbeds');
 const { buildLocationSelectMenu } = require('../tradeComponents');
 const { safeReply, TradeStateCache } = require('./shared');

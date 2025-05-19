@@ -1,3 +1,5 @@
+const DEBUG_REGISTER = false;
+
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v10');
 const fs = require('fs');
@@ -7,12 +9,13 @@ const { clientId, guildId, token } = require('../config.json');
 function loadCommandsRecursively(dir, commandList = [], commandMap = new Map()) {
     const files = fs.readdirSync(dir, { withFileTypes: true });
 
-    // 👇 Check if this directory has a sibling file of the same name + ".js"
     const parentFileName = path.basename(dir) + '.js';
     const parentFilePath = path.join(path.dirname(dir), parentFileName);
 
     if (fs.existsSync(parentFilePath)) {
-        //console.log(`⚠️ Skipping directory "${dir}" because "${parentFileName}" exists → treating as subcommand folder.`);
+        if (DEBUG_REGISTER) {
+            console.log(`📁 Skipping subcommand folder "${dir}" — paired with "${parentFileName}"`);
+        }
         return { commandList, commandMap };
     }
 
@@ -23,6 +26,10 @@ function loadCommandsRecursively(dir, commandList = [], commandMap = new Map()) 
             loadCommandsRecursively(fullPath, commandList, commandMap);
         } else if (file.isFile() && file.name.endsWith('.js')) {
             try {
+                if (DEBUG_REGISTER) {
+                    console.log(`🔍 Attempting to load: ${fullPath}`);
+                }
+
                 const command = require(fullPath);
 
                 if (!command.data || typeof command.data.toJSON !== 'function') {
@@ -33,7 +40,10 @@ function loadCommandsRecursively(dir, commandList = [], commandMap = new Map()) 
                 commandList.push(command.data.toJSON());
                 console.log(`✅ Loaded command: ${command.data.name}`);
             } catch (err) {
-                //console.warn(`⚠️ Skipping "${file.name}": ${err.message}`);
+                if (DEBUG_REGISTER) {
+                    console.warn(`⚠️ Failed to load "${file.name}": ${err.message}`);
+                    console.warn(err);
+                }
             }
         }
     }

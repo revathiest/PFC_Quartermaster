@@ -1,12 +1,25 @@
-const DEBUG_CALC = false; // 🔥 toggle debug logs on/off
+const DEBUG_CALC = true; // 🔥 toggle debug logs on/off
 
 function calculateProfitOptions(records, shipSCU, availableCash) {
-  if(DEBUG_CALC) console.log('calculateProfitOptions called')
+  if (DEBUG_CALC) console.log('calculateProfitOptions called');
   try {
-    return records.map((record, index) => {
+    const options = [];
+
+    for (let index = 0; index < records.length; index++) {
+      const record = records[index];
       const buyPrice = record.buyPrice ?? record.price_buy ?? 0;
       const sellPrice = record.sellPrice ?? record.price_sell ?? 0;
+
+      if (buyPrice <= 0 || sellPrice <= 0) {
+        if (DEBUG_CALC) console.warn(`[CALC] 🚩 Skipping ${record.commodity_name}: invalid price(s) (buy=${buyPrice}, sell=${sellPrice})`);
+        continue;
+      }
+
       const profitPerSCU = sellPrice - buyPrice;
+      if (profitPerSCU <= 0) {
+        if (DEBUG_CALC) console.warn(`[CALC] ⛔ Skipping ${record.commodity_name}: no profit (buy=${buyPrice}, sell=${sellPrice})`);
+        continue;
+      }
 
       const stockAvailable = record.scu_buy ?? shipSCU;
       if (DEBUG_CALC) console.log(`[CALC] Record #${index}: commodity=${record.commodity_name}, buyPrice=${buyPrice}, sellPrice=${sellPrice}, stockAvailable=${stockAvailable}, shipSCU=${shipSCU}, availableCash=${availableCash}`);
@@ -15,24 +28,26 @@ function calculateProfitOptions(records, shipSCU, availableCash) {
 
       if (availableCash == null) {
         maxAffordableSCU = Math.min(shipSCU, stockAvailable);
-        if (DEBUG_CALC) console.log(`[CALC] availableCash is null → using max capacity: ${maxAffordableSCU}`);
-      } else if (buyPrice <= 0) {
-        if (DEBUG_CALC) console.warn(`[CALC] 🚩 Skipping ${record.commodity_name}: buy price invalid (${buyPrice})`);
-        maxAffordableSCU = 0;
+        if (DEBUG_CALC) console.log(`[CALC] Record #${index}: cargo check = min(${shipSCU}, ${stockAvailable}) → ${maxAffordableSCU}`);
       } else {
         maxAffordableSCU = Math.min(
           shipSCU,
           stockAvailable,
           Math.floor(availableCash / buyPrice)
         );
-        if (DEBUG_CALC) console.log(`[CALC] Calculated maxAffordableSCU=${maxAffordableSCU}`);
+        if (DEBUG_CALC) console.log(`[CALC] Record #${index}: affordable check = min(${shipSCU}, ${stockAvailable}, ${Math.floor(availableCash / buyPrice)}) → ${maxAffordableSCU}`);
+      }
+
+      if (maxAffordableSCU <= 0) {
+        if (DEBUG_CALC) console.warn(`[CALC] ❌ Skipping ${record.commodity_name}: zero usable cargo`);
+        continue;
       }
 
       const totalProfit = maxAffordableSCU * profitPerSCU;
       const returnOnInvestment = `${((profitPerSCU/buyPrice)*100).toFixed(0)}%`;
       if (DEBUG_CALC) console.log(`[CALC] totalProfit=${totalProfit} (profitPerSCU=${profitPerSCU} * maxAffordableSCU=${maxAffordableSCU})`);
 
-      return {
+      options.push({
         commodity: record.commodity_name,
         fromTerminal: record.terminal?.name,
         toTerminal: record.sellTerminal?.name ?? "unknown",
@@ -41,10 +56,14 @@ function calculateProfitOptions(records, shipSCU, availableCash) {
         sellPrice,
         profitPerSCU,
         cargoUsed: maxAffordableSCU,
-        totalProfit: totalProfit || 0,
+        totalProfit,
         returnOnInvestment
-      };
-    }).filter(option => option.profitPerSCU > 0 && option.cargoUsed > 0);
+      });
+    }
+
+    // ✅ FINAL SORT
+    return options.sort((a, b) => b.profitPerSCU - a.profitPerSCU);
+
   } catch (err) {
     console.error(`[TRADE CALCULATIONS] calculateProfitOptions encountered an error:`, err);
     return [];

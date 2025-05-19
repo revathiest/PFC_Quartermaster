@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+const { safeReply } = require('../../utils/trade/tradeHandlers');
 
 const data = new SlashCommandBuilder()
   .setName('trade')
@@ -40,14 +41,14 @@ module.exports = {
         await subcommandModule.execute(interaction, client);
       } else {
         console.warn(`[TRADE] Subcommand module "${subcommand}" missing execute function.`);
-        await interaction.reply({
+        await safeReply(interaction, {
           content: `❌ Subcommand "${subcommand}" not implemented.`,
           flags: MessageFlags.Ephemeral
         });
       }
     } catch (err) {
       console.error(`❌ Failed to execute subcommand ${subcommand}:`, err);
-      await interaction.reply({
+      await safeReply(interaction, {
         content: `❌ Failed to load subcommand "${subcommand}".`,
         flags: MessageFlags.Ephemeral
       });
@@ -65,14 +66,14 @@ module.exports = {
         await subcommandModule.option(interaction, client);
       } else {
         console.warn(`[TRADE] No option handler function found in "${subcommand}".`);
-        await interaction.reply({
+        await safeReply(interaction, {
           content: `❌ No handler for option in "${subcommand}".`,
           flags: MessageFlags.Ephemeral
         });
       }
     } catch (err) {
       console.error(`❌ Failed to handle option for subcommand "${subcommand}":`, err);
-      await interaction.reply({
+      await safeReply(interaction, {
         content: `❌ Error loading handler for option "${subcommand}".`,
         flags: MessageFlags.Ephemeral
       });

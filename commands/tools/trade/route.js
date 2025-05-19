@@ -5,7 +5,7 @@ const { SlashCommandSubcommandBuilder } = require('discord.js');
 const { handleTradeRoute } = require('../../../utils/trade/handlers/route');
 
 module.exports = {
-  data: new SlashCommandSubcommandBuilder()
+  data: () => new SlashCommandSubcommandBuilder()
     .setName('route')
     .setDescription('Show profitable trades between two specific locations')
     .addStringOption(opt =>

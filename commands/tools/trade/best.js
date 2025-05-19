@@ -1,6 +1,6 @@
 const DEBUG_BEST = true;  // 🔍 Flip on/off
 
-const { SlashCommandSubcommandBuilder, MessageFlags, Message } = require('discord.js');
+const { SlashCommandSubcommandBuilder, MessageFlags } = require('discord.js');
 const { UexVehicle } = require('../../../config/database');
 const { handleTradeBest, handleTradeBestCore } = require('../../../utils/trade/tradeHandlers');
 const { TradeStateCache, safeReply } = require('../../../utils/trade/handlers/shared');
@@ -100,9 +100,10 @@ module.exports = {
     : result.components
       ? { content: result.content ?? '', components: result.components, flags: MessageFlags.Ephemeral }
       : { embeds: [result.embed], flags: MessageFlags.Ephemeral };
+      
+      if (DEBUG_BEST) console.log(`[BEST][option] done`);
   
     return safeReply(interaction, payload);  
 
-    if (DEBUG_BEST) console.log(`[BEST][option] done`);
   }
 };

@@ -14,6 +14,7 @@ const { pendingBest, safeReply } = require('./handlers/shared');
 
 module.exports = {
   handleTradeBest,
+  handleTradeBestCore,
   handleTradeRoute,
   handleTradeBestCircuit,
   handleTradeFind,
@@ -21,7 +22,6 @@ module.exports = {
   handleTradeShip,
   handleTradeLocations,
   handleTradeCommodities,
-  handleTradeBestCore,
   safeReply,
   pendingBest
 };

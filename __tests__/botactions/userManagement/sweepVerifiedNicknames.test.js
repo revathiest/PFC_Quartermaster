@@ -92,7 +92,7 @@ describe('sweepVerifiedNicknames', () => {
 
     await sweepVerifiedNicknames(emptyClient);
 
-    expect(mockConsoleWarn).toHaveBeenCalledWith('[SWEEP] No guild found in cache. Cannot run sweep.');
+    expect(mockConsoleWarn).toHaveBeenCalledWith('🚫 No guild found in cache. Cannot run sweep.');
     mockConsoleWarn.mockRestore();
   });
 
@@ -118,7 +118,7 @@ describe('sweepVerifiedNicknames', () => {
 
     await sweepVerifiedNicknames(mockClient);
 
-    expect(mockConsoleWarn).toHaveBeenCalledWith('[NICKNAME] Failed to update VerifiedUser#1234:', 'Test error');
+    expect(mockConsoleWarn).toHaveBeenCalledWith('⚠️ Failed to update VerifiedUser#1234:', 'Test error');
     mockConsoleWarn.mockRestore();
   });
 

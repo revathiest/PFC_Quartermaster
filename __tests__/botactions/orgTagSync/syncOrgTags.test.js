@@ -93,7 +93,7 @@ describe('syncOrgTags', () => {
 
     await syncOrgTags(clientWithNoGuild);
 
-    expect(consoleSpy).toHaveBeenCalledWith('[SYNC] No guild found. Skipping sync.');
+    expect(consoleSpy).toHaveBeenCalledWith('🚫 No guild found. Skipping org tag sync.');
     consoleSpy.mockRestore();
   });
 
@@ -122,7 +122,7 @@ describe('syncOrgTags', () => {
     await syncOrgTags(mockClient);
 
     expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('[SYNC] Failed to process VerifiedUser'),
+      expect.stringContaining('❌ Failed to process VerifiedUser:'),
       expect.any(Error)
     );
     consoleSpy.mockRestore();

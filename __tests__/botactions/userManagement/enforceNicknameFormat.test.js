@@ -106,7 +106,7 @@ describe('enforceNicknameFormat', () => {
 
     await enforceNicknameFormat(mockOldMember, mockNewMember);
     expect(mockConsoleWarn).toHaveBeenCalledWith(
-      '[NICKNAME] Failed to update VerifiedUser#1234:',
+      '⚠️ Failed to update VerifiedUser#1234:',
       'Test error'
     );
 

@@ -1,6 +1,12 @@
 const { VerifiedUser, OrgTag } = require('../../config/database');
-const { fetchRsiProfileInfo } = require('../../utils/rsiProfileScraper');
+const {
+  fetchRsiProfileInfo,
+  ProfileNotFoundError,
+  FetchFailedError
+} = require('../../utils/rsiProfileScraper');
 const { formatVerifiedNickname } = require('../../utils/formatVerifiedNickname');
+
+const FAILURE_THRESHOLD = 3;
 
 async function syncOrgTags(client) {
   const verifiedUsers = await VerifiedUser.findAll();
@@ -16,13 +22,14 @@ async function syncOrgTags(client) {
       const profile = await fetchRsiProfileInfo(user.rsiHandle);
       const scrapedOrgId = profile.orgId || null;
 
-      // Update rsiOrgId in the DB if it changed
-      if (scrapedOrgId !== user.rsiOrgId) {
-        await VerifiedUser.update(
-          { rsiOrgId: scrapedOrgId },
-          { where: { discordUserId: user.discordUserId } }
-        );
-      }
+      await VerifiedUser.update(
+        {
+          rsiOrgId: scrapedOrgId,
+          lastProfileCheck: new Date(),
+          failedProfileChecks: 0
+        },
+        { where: { discordUserId: user.discordUserId } }
+      );
 
       // Get the enforced tag from the org_tags table
       const orgTagEntry = await OrgTag.findByPk(scrapedOrgId);
@@ -43,33 +50,34 @@ async function syncOrgTags(client) {
       }
 
     } catch (error) {
-      // Handle profile not found case
-      if (error.message && error.message.includes('Unable to fetch RSI profile')) {
-        console.warn(`⚠️ RSI profile not found for ${user.rsiHandle}. Removing verification.`);
+      let failures = (user.failedProfileChecks || 0) + 1;
+      if (error instanceof ProfileNotFoundError) {
+        if (failures >= FAILURE_THRESHOLD) {
+          console.warn(`⚠️ RSI profile not found for ${user.rsiHandle}. Removing verification.`);
+          await VerifiedUser.destroy({ where: { discordUserId: user.discordUserId } });
 
-        // Remove from the database
-        await VerifiedUser.destroy({ where: { discordUserId: user.discordUserId } });
-
-        // Try to fetch the member to update their nickname
-        const member = await guild.members.fetch(user.discordUserId).catch(() => null);
-        if (!member) continue;
-
-        if (!member.manageable) {
-          console.warn(`⚠️ Skipping nickname update for ${member.user.tag}: Cannot manage this member.`);
+          const member = await guild.members.fetch(user.discordUserId).catch(() => null);
+          if (member && member.manageable) {
+            const formattedNickname = formatVerifiedNickname(member.displayName, false, null);
+            if (member.displayName !== formattedNickname) {
+              await member.setNickname(formattedNickname);
+            }
+          }
           continue;
+        } else {
+          console.warn(`⚠️ RSI profile check failed for ${user.rsiHandle}. (${failures}/${FAILURE_THRESHOLD})`);
         }
-
-        // Update nickname to show unverified status
-        const formattedNickname = formatVerifiedNickname(member.displayName, false, null);
-        if (member.displayName !== formattedNickname) {
-          await member.setNickname(formattedNickname);
-        }
-
+      } else if (error instanceof FetchFailedError) {
+        console.warn(`⚠️ Temporary failure fetching profile for ${user.rsiHandle}. (${failures}/${FAILURE_THRESHOLD})`);
+      } else {
+        console.error(`❌ Failed to process ${user.rsiHandle}:`, error);
         continue;
       }
 
-      // Other errors: log and continue
-      console.error(`❌ Failed to process ${user.rsiHandle}:`, error);
+      await VerifiedUser.update(
+        { failedProfileChecks: failures, lastProfileCheck: new Date() },
+        { where: { discordUserId: user.discordUserId } }
+      );
     }
   }
 }

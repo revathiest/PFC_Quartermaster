@@ -53,7 +53,7 @@ const {
           terminal: null // missing terminal
         }];
         const results = calculateProfitOptions(records, 66, 100_000);
-        expect(results[0].terminal).toBeUndefined();
+        expect(results[0].fromTerminal).toBeUndefined();
         expect(results[0].location).toBeUndefined();
       });
       

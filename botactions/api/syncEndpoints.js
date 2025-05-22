@@ -53,49 +53,49 @@ async function syncAllEndpoints() {
     const syncUexItemPriceResult = await syncUexItemPrices();
     results.push(syncUexItemPriceResult);
   }catch (error){
-    results.push({endpoint: 'items_prices_all', success: false, erro: error.message });
+    results.push({endpoint: 'items_prices_all', success: false, error: error.message });
   }
 
   try {
     const syncUexCategoryResult = await syncUexCategories();
     results.push(syncUexCategoryResult);
   }catch (error){
-    results.push({endpoint: 'categories', success: false, erro: error.message });
+    results.push({endpoint: 'categories', success: false, error: error.message });
   }
 
   try {
     const syncUexCommodityPriceResult = await syncUexCommodityPrices();
     results.push(syncUexCommodityPriceResult);
   }catch (error){
-    results.push({endpoint: 'commodities_prices_all', success: false, erro: error.message });
+    results.push({endpoint: 'commodities_prices_all', success: false, error: error.message });
   }
 
   try {
     const syncUexFuelPriceResult = await syncUexFuelPrices();
     results.push(syncUexFuelPriceResult);
   }catch (error){
-    results.push({endpoint: 'fuel_prices_all', success: false, erro: error.message });
+    results.push({endpoint: 'fuel_prices_all', success: false, error: error.message });
   }
 
   try {
     const syncUexVehiclePurchacePriceResult = await syncUexVehiclePurchasePrices();
     results.push(syncUexVehiclePurchacePriceResult);
   }catch (error){
-    results.push({endpoint: 'vehicle_purchase_prices_all', success: false, erro: error.message });
+    results.push({endpoint: 'vehicle_purchase_prices_all', success: false, error: error.message });
   }
 
   try {
     const syncUexVehicleRentalPriceResult = await syncUexVehicleRentalPrices();
     results.push(syncUexVehicleRentalPriceResult);
   }catch (error){
-    results.push({endpoint: 'vehicle_rental_prices_all', success: false, erro: error.message });
+    results.push({endpoint: 'vehicle_rental_prices_all', success: false, error: error.message });
   }
 
   try {
     const syncUexPoiResult = await syncUexPois();
     results.push(syncUexPoiResult);
   }catch (error){
-    results.push({endpoint: 'poi', success: false, erro: error.message });
+    results.push({endpoint: 'poi', success: false, error: error.message });
   }
 
   return results;

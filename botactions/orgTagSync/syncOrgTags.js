@@ -71,7 +71,6 @@ async function syncOrgTags(client) {
         console.warn(`⚠️ Temporary failure fetching profile for ${user.rsiHandle}. (${failures}/${FAILURE_THRESHOLD})`);
       } else {
         console.error(`❌ Failed to process ${user.rsiHandle}:`, error);
-        continue;
       }
 
       await VerifiedUser.update(

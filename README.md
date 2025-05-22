@@ -68,8 +68,11 @@ node bot.js
 For development with auto-reload:
 
 ```bash
-npm run dev
+node bot.js
 ```
+
+Restart the command after each change, or use a tool like `nodemon` to
+watch your files and automatically restart the bot during development.
 
 ## 📂 Project Structure
 

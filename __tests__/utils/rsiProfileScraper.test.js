@@ -2,7 +2,7 @@ const fetch = require('node-fetch');
 const { Response } = jest.requireActual('node-fetch');
 jest.mock('node-fetch');
 
-const { fetchRsiProfileInfo } = require('../../utils/rsiProfileScraper');
+const { fetchRsiProfileInfo, ProfileNotFoundError } = require('../../utils/rsiProfileScraper');
 
 describe('rsiProfileScraper - fetchRsiProfileInfo edge cases', () => {
   afterEach(() => {
@@ -176,12 +176,12 @@ describe('rsiProfileScraper - fetchRsiProfileInfo edge cases', () => {
     expect(result.orgRank).toBeNull();
   });
 
-  it('throws an error if handle is not found (HTTP 404)', async () => {
+  it('throws ProfileNotFoundError if handle is not found (HTTP 404)', async () => {
     fetch.mockResolvedValue(new Response('Not Found', { status: 404 }));
 
     await expect(fetchRsiProfileInfo('NonExistentHandle'))
       .rejects
-      .toThrow('Unable to fetch RSI profile for handle: NonExistentHandle');
+      .toBeInstanceOf(ProfileNotFoundError);
   });
 
   it('throws an error if profile page structure is invalid (no handle found)', async () => {

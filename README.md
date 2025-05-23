@@ -28,6 +28,12 @@ Install dependencies:
 npm install
 ```
 
+Run the full setup (install + tests):
+
+```bash
+npm run setup
+```
+
 ## 🛠️ Configuration
 
 Create a `config.json` file in the project root with the following structure:

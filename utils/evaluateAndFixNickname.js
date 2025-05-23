@@ -63,7 +63,7 @@ async function evaluateAndFixNickname(member, {
   if (currentTag) {
     if (isKnownTag) {
       if (!isVerified || (tag && currentTag !== tag.toUpperCase())) {
-        baseDisplayName = baseDisplayName; // Already stripped above
+        // nickname already formatted correctly
       } else {
         tagToUse = tag;
       }

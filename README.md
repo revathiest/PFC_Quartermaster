@@ -122,13 +122,18 @@ watch your files and automatically restart the bot during development.
 
 ## 📂 Project Structure
 
-```text
-bot.js                 # Main bot entrypoint
-/botactions/           # Event handlers & bot actions
-/config/                # Configuration & database setup
-/utils/                 # Command registration utilities
-/logs/                  # Auto-generated log files
-```
+| Path | Purpose |
+|------|---------|
+| bot.js | Main bot entrypoint |
+| /botactions/ | Event handlers and bot actions |
+| /commands/ | Slash command modules |
+| /components/ | UI components for Discord responses |
+| /jobs/ | Background job logic (no scheduling) |
+| /models/ | Sequelize models |
+| /config/ | Configuration and database setup |
+| /utils/ | Shared utility modules |
+| /__tests__/ | Jest test suites |
+| /__mocks__/ | Mock data for tests |
 
 ## 🧪 Testing
 

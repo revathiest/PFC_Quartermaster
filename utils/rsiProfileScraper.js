@@ -1,9 +1,6 @@
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 
-class ProfileNotFoundError extends Error {}
-class FetchFailedError extends Error {}
-
 /**
  * Fetches and parses an RSI user's profile page.
  * @param {string} rsiHandle - RSI citizen handle (case-sensitive)
@@ -12,19 +9,9 @@ class FetchFailedError extends Error {}
 async function fetchRsiProfileInfo(rsiHandle) {
   const url = `https://robertsspaceindustries.com/citizens/${rsiHandle}`;
 
-  let res;
-  try {
-    res = await fetch(url);
-  } catch (err) {
-    throw new FetchFailedError(`Unable to fetch RSI profile for handle: ${rsiHandle}`);
-  }
-
-  if (res.status === 404) {
-    throw new ProfileNotFoundError(`RSI profile not found for handle: ${rsiHandle}`);
-  }
-
+  const res = await fetch(url);
   if (!res.ok) {
-    throw new FetchFailedError(`Unable to fetch RSI profile for handle: ${rsiHandle}`);
+    throw new Error(`Unable to fetch RSI profile for handle: ${rsiHandle}`);
   }
 
   const html = await res.text();
@@ -73,8 +60,4 @@ async function fetchRsiProfileInfo(rsiHandle) {
   return { handle, bio, enlisted, avatar, orgId, orgRank, orgName };
 }
 
-module.exports = {
-  fetchRsiProfileInfo,
-  ProfileNotFoundError,
-  FetchFailedError
-};
+module.exports = { fetchRsiProfileInfo };

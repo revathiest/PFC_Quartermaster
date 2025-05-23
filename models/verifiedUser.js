@@ -16,18 +16,9 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true
     },
-    manualTagOverride: {
+    manualTagOverride: { 
       type: DataTypes.STRING,
       allowNull: true
-    },
-    lastProfileCheck: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    failedProfileChecks: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 0,
     },
     verifiedAt: {
       type: DataTypes.DATE,

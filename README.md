@@ -22,6 +22,9 @@ git clone https://github.com/revathiest/PFC_Quartermaster.git
 cd PFC_Quartermaster
 ```
 
+> **Note:** The bot requires **Node.js 22.13.1**, as specified in `package.json`.
+> Using other versions may lead to unexpected issues.
+
 Install dependencies:
 
 ```bash

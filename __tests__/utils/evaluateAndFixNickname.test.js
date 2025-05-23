@@ -60,4 +60,17 @@ describe('evaluateAndFixNickname', () => {
     expect(member.setNickname).toHaveBeenCalledWith('Foo ⛔');
     expect(updated).toBe(true);
   });
+
+  test('falls back to rsiOrgId when org tag record missing', async () => {
+    const member = createMember('5', 'Tester', 'Tester');
+    VerifiedUser.findByPk.mockResolvedValue({ discordUserId: '5', rsiOrgId: 'TST' });
+    OrgTag.findByPk.mockResolvedValue(null);
+    formatVerifiedNickname.mockReturnValue('[TST] Tester');
+
+    const updated = await evaluateAndFixNickname(member);
+
+    expect(formatVerifiedNickname).toHaveBeenCalledWith('Tester', true, 'TST');
+    expect(member.setNickname).toHaveBeenCalledWith('[TST] Tester');
+    expect(updated).toBe(true);
+  });
 });

@@ -176,12 +176,12 @@ describe('rsiProfileScraper - fetchRsiProfileInfo edge cases', () => {
     expect(result.orgRank).toBeNull();
   });
 
-  it('throws an error if handle is not found (HTTP 404)', async () => {
+  it('throws an error with code PROFILE_NOT_FOUND if handle is not found (HTTP 404)', async () => {
     fetch.mockResolvedValue(new Response('Not Found', { status: 404 }));
 
     await expect(fetchRsiProfileInfo('NonExistentHandle'))
       .rejects
-      .toThrow('Unable to fetch RSI profile for handle: NonExistentHandle');
+      .toMatchObject({ code: 'PROFILE_NOT_FOUND' });
   });
 
   it('throws an error if profile page structure is invalid (no handle found)', async () => {

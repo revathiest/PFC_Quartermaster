@@ -57,7 +57,9 @@ module.exports = {
 
     const profile = mockProfiles[rsiHandle];
     if (!profile) {
-      throw new Error(`Mock profile not found for handle: ${rsiHandle}`);
+      const error = new Error(`Mock profile not found for handle: ${rsiHandle}`);
+      error.code = 'PROFILE_NOT_FOUND';
+      throw error;
     }
     return Promise.resolve(profile);
   })

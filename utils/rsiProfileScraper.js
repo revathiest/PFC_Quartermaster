@@ -9,9 +9,25 @@ const cheerio = require('cheerio');
 async function fetchRsiProfileInfo(rsiHandle) {
   const url = `https://robertsspaceindustries.com/citizens/${rsiHandle}`;
 
-  const res = await fetch(url);
+  let res;
+  try {
+    res = await fetch(url);
+  } catch (err) {
+    const error = new Error(`Failed to fetch ${url}: ${err.message}`);
+    error.code = 'FETCH_FAILED';
+    throw error;
+  }
+
+  if (res.status === 404) {
+    const error = new Error(`RSI profile not found for handle: ${rsiHandle}`);
+    error.code = 'PROFILE_NOT_FOUND';
+    throw error;
+  }
+
   if (!res.ok) {
-    throw new Error(`Unable to fetch RSI profile for handle: ${rsiHandle}`);
+    const error = new Error(`Failed to fetch ${url}: ${res.status} ${res.statusText}`);
+    error.code = 'FETCH_FAILED';
+    throw error;
   }
 
   const html = await res.text();

@@ -136,7 +136,9 @@ describe('syncOrgTags', () => {
       { discordUserId: 'user1', rsiHandle: 'VerifiedUser', rsiOrgId: 'PFCS' }
     ]);
 
-    rsiProfileScraper.fetchRsiProfileInfo.mockRejectedValue(new Error('Unable to fetch RSI profile for handle: VerifiedUser'));
+    const err = new Error('Profile not found');
+    err.code = 'PROFILE_NOT_FOUND';
+    rsiProfileScraper.fetchRsiProfileInfo.mockRejectedValue(err);
 
     await syncOrgTags(mockClient);
 

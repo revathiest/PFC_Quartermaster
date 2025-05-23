@@ -44,7 +44,7 @@ async function syncOrgTags(client) {
 
     } catch (error) {
       // Handle profile not found case
-      if (error.message && error.message.includes('Unable to fetch RSI profile')) {
+      if (error.code === 'PROFILE_NOT_FOUND') {
         console.warn(`⚠️ RSI profile not found for ${user.rsiHandle}. Removing verification.`);
 
         // Remove from the database

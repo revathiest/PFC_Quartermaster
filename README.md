@@ -63,6 +63,18 @@ Each field is required:
 - `bot_type`: `"Development"` or `"Production"`
 - `wallOfFameChannelId`: Channel ID for special logging/events
 
+## 🌐 Environment Variables
+
+The bot also relies on several environment variables. The project uses
+[dotenv](https://github.com/motdotla/dotenv) to load a `.env` file in the
+project root, or you can export them in your shell before running the bot.
+
+- `BOT_TYPE` - Selects the runtime environment for the database and other
+  settings. Defaults to `development` if not provided.
+- `OPENAI_API_KEY` - API key used for OpenAI requests.
+- `OPENAI_MODEL` - Model name to use when calling the OpenAI API.
+- `UEX_API_TOKEN` - Authentication token for the UEX trading API.
+
 ## 🏃‍♂️ Usage
 
 Run the bot:

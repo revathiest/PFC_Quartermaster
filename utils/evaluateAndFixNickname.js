@@ -42,7 +42,7 @@ async function evaluateAndFixNickname(member, {
     } else if (verifiedRecord?.rsiOrgId) {
       const org = await OrgTag.findByPk(verifiedRecord.rsiOrgId.toUpperCase());
       // Fallback to the org ID itself if no tag entry exists
-      tag = org?.tag || verifiedRecord.rsiOrgId.toUpperCase() || null;
+      tag = org?.tag || verifiedRecord.rsiOrgId.toUpperCase();
     }
   }
   

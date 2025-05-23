@@ -41,7 +41,8 @@ async function evaluateAndFixNickname(member, {
       tag = verifiedRecord.manualTagOverride;
     } else if (verifiedRecord?.rsiOrgId) {
       const org = await OrgTag.findByPk(verifiedRecord.rsiOrgId.toUpperCase());
-      tag = org?.tag || null;
+      // Fallback to the org ID itself if no tag entry exists
+      tag = org?.tag || verifiedRecord.rsiOrgId.toUpperCase() || null;
     }
   }
   

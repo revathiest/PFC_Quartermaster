@@ -22,17 +22,14 @@ git clone https://github.com/revathiest/PFC_Quartermaster.git
 cd PFC_Quartermaster
 ```
 
-Install dependencies:
-
-```bash
-npm install
-```
-
-Run the full setup (install + tests):
+Install dependencies and run tests:
 
 ```bash
 npm run setup
 ```
+
+The `setup` script runs `npm ci` to ensure a clean install and executes the test
+suite. Running `npm install` separately is unnecessary.
 
 ## 🛠️ Configuration
 

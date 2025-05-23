@@ -63,6 +63,34 @@ Each field is required:
 - `bot_type`: `"Development"` or `"Production"`
 - `wallOfFameChannelId`: Channel ID for special logging/events
 
+Create a `databaseConfig.json` file in the project root for database settings.  
+`config/database.js` loads this file based on the `bot_type` value (`development` or `production`).  
+A minimal example is:
+
+```json
+{
+  "development": {
+    "host": "localhost",
+    "database": "pfc_db",
+    "username": "db_user",
+    "password": "db_pass",
+    "dialect": "postgres",
+    "logging": false
+  }
+}
+```
+
+> ⚠️ **Important:** This file contains sensitive information.  
+> Be sure to **add `databaseConfig.json` to `.gitignore`** to avoid committing it.
+
+Fields include:
+- `host`: Database host address
+- `database`: Database name
+- `username`: Database user
+- `password`: Password for the database user
+- `dialect`: Sequelize dialect (`postgres`, `mysql`, `sqlite`, etc.)
+- `logging`: `true` to log SQL queries, `false` to disable
+
 ## 🏃‍♂️ Usage
 
 Run the bot:

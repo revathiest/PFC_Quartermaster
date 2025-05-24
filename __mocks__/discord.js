@@ -79,6 +79,17 @@ const ActionRowBuilder = jest.fn().mockImplementation(() => ({
   addComponents: jest.fn().mockReturnThis(),
 }));
 
+const StringSelectMenuBuilder = jest.fn().mockImplementation(() => {
+  const data = { options: [], customId: undefined, placeholder: undefined };
+  const builder = {
+    setCustomId: jest.fn(id => { data.customId = id; return builder; }),
+    setPlaceholder: jest.fn(ph => { data.placeholder = ph; return builder; }),
+    addOptions: jest.fn(opts => { data.options.push(...opts); return builder; }),
+    data
+  };
+  return builder;
+});
+
 const ButtonBuilder = jest.fn().mockImplementation(() => ({
   setCustomId: jest.fn().mockReturnThis(),
   setLabel: jest.fn().mockReturnThis(),
@@ -134,6 +145,7 @@ module.exports = {
   MessageFlags,
   ActionRowBuilder,
   ButtonBuilder,
+  StringSelectMenuBuilder,
   ButtonStyle,
   SlashCommandBuilder,
   EmbedBuilder,

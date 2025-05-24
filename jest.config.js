@@ -1,7 +1,7 @@
 module.exports = {
     testEnvironment: 'node',
     roots: ['<rootDir>/__tests__'],
-    moduleFileExtensions: ['js', 'json'],
+    moduleFileExtensions: ['js', 'json', 'ts'],
     moduleDirectories: ['node_modules', '<rootDir>'],
     moduleNameMapper: {
       // Force any import of 'discord.js' to use your custom mock
@@ -10,7 +10,11 @@ module.exports = {
       '\\.(css|less|scss|sass)$': 'identity-obj-proxy'
     },
     collectCoverageFrom: [
-      'utils/**/*.js',
+      'utils/**/*.{js,ts}',
+      'commands/**/*.{js,ts}',
+      'botactions/**/*.{js,ts}',
+      'jobs/**/*.{js,ts}',
+      'models/**/*.{js,ts}',
       '!**/node_modules/**',
       '!**/__mocks__/**'
     ],

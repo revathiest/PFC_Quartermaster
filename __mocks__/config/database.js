@@ -9,11 +9,13 @@ const VerificationCode = {
 
 const VerifiedUser = {
   findOne: jest.fn(),
-  upsert: jest.fn()
+  upsert: jest.fn(),
+  findByPk: jest.fn()
 };
 
 const OrgTag = {
-  findByPk: jest.fn()
+  findByPk: jest.fn(),
+  findAll: jest.fn()
 };
 
 const UsageLog = {

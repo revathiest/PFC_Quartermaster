@@ -1,9 +1,9 @@
+jest.mock('../../../config/database', () => require('../../../__mocks__/config/database'));
+jest.mock('../../../utils/formatVerifiedNickname');
+
 const { sweepVerifiedNicknames } = require('../../../botactions/userManagement/sweepVerifiedNicknames');
 const { VerifiedUser, OrgTag } = require('../../../config/database');
 const { formatVerifiedNickname } = require('../../../utils/formatVerifiedNickname');
-
-jest.mock('../../../config/database');
-jest.mock('../../../utils/formatVerifiedNickname');
 
 describe('sweepVerifiedNicknames', () => {
   let mockClient, mockGuild, mockMembers;

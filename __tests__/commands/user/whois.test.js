@@ -1,11 +1,11 @@
 
+jest.mock('../../../utils/rsiProfileScraper');
+jest.mock('../../../config/database', () => require('../../../__mocks__/config/database'));
+
 const { fetchRsiProfileInfo } = require('../../../utils/rsiProfileScraper');
 const { VerifiedUser } = require('../../../config/database');
 const whois = require('../../../commands/user/whois');
 const { EmbedBuilder } = require('discord.js');
-
-jest.mock('../../../utils/rsiProfileScraper');
-jest.mock('../../../config/database');
 
 // Suppress expected console.error and console.warn during tests
 beforeAll(() => {

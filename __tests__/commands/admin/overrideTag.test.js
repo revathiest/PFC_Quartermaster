@@ -1,9 +1,9 @@
+jest.mock('../../../config/database', () => require('../../../__mocks__/config/database'));
+jest.mock('../../../utils/evaluateAndFixNickname');
+
 const { data, execute } = require('../../../commands/admin/overrideTag');
 const { VerifiedUser, OrgTag } = require('../../../config/database');
 const { evaluateAndFixNickname } = require('../../../utils/evaluateAndFixNickname');
-
-jest.mock('../../../config/database');
-jest.mock('../../../utils/evaluateAndFixNickname');
 
 describe('/override-tag command', () => {
   let mockInteraction;

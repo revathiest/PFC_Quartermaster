@@ -44,4 +44,15 @@ describe('deleteOldLogs', () => {
     expect(remaining).toContain('new.log');
     expect(remaining).not.toContain('old.log');
   });
+
+  it('logs an error if readdir fails', async () => {
+    const spy = jest.spyOn(fs, 'readdir').mockImplementation((_, cb) => cb(new Error('fail')));
+
+    deleteOldLogs(tempDir, 7);
+
+    await new Promise(r => setTimeout(r, 50));
+    expect(consoleErrorSpy).toHaveBeenCalledWith('❌ Failed to read log directory:', expect.any(Error));
+
+    spy.mockRestore();
+  });
 });

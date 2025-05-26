@@ -17,9 +17,26 @@ describe('flushLogs', () => {
     };
 
     await flushLogs(client);
-    expect(send).toHaveBeenCalled();
+    expect(send).toHaveBeenCalledWith({
+      content: expect.stringContaining('one\ntwo')
+    });
     expect(logState.pendingLogs.length).toBe(0);
     expect(logState.isFlushingLogs.value).toBe(false);
+  });
+
+  test('truncates very long batches', async () => {
+    const longLine = 'x'.repeat(2000);
+    logState.pendingLogs.push(longLine);
+    const send = jest.fn().mockResolvedValue();
+    const client = {
+      chanBotLog: '1',
+      channels: { cache: new Map([['1', { send }]]) }
+    };
+
+    await flushLogs(client);
+    const sent = send.mock.calls[0][0].content;
+    expect(sent.length).toBe(1907); // prefix of four tabs + truncated batch
+    expect(sent.endsWith('...')).toBe(true);
   });
 
   test('handles send errors', async () => {
@@ -33,5 +50,27 @@ describe('flushLogs', () => {
     await flushLogs(client);
     expect(global.origConsoleError).toHaveBeenCalled();
     expect(logState.isFlushingLogs.value).toBe(false);
+  });
+
+  test('does nothing when no logs pending', async () => {
+    const send = jest.fn();
+    const client = {
+      chanBotLog: '1',
+      channels: { cache: new Map([['1', { send }]]) }
+    };
+
+    await flushLogs(client);
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  test('does nothing when channel not found', async () => {
+    logState.pendingLogs.push('hi');
+    const client = {
+      chanBotLog: '99',
+      channels: { cache: new Map() }
+    };
+
+    await flushLogs(client);
+    expect(logState.pendingLogs.length).toBe(1);
   });
 });

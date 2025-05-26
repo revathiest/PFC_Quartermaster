@@ -37,6 +37,12 @@ describe('tradeQueries', () => {
     expect(res).toBe(mockResults);
   });
 
+  test('getCommodityTradeOptions returns empty array on error', async () => {
+    UexCommodityPrice.findAll.mockRejectedValue(new Error('db'));
+    const res = await getCommodityTradeOptions('Foo');
+    expect(res).toEqual([]);
+  });
+
   test('getSellOptionsAtLocation returns DB results', async () => {
     const mockResults = [{ commodity_name: 'Laranite', terminal: {} }];
     UexCommodityPrice.findAll.mockResolvedValue(mockResults);
@@ -59,6 +65,12 @@ describe('tradeQueries', () => {
     const res = await getVehicleByName('Cutlass');
     expect(UexVehicle.findAll).toHaveBeenCalled();
     expect(res).toBe(mockVehicles);
+  });
+
+  test('getVehicleByName returns empty array on error', async () => {
+    UexVehicle.findAll.mockRejectedValue(new Error('fail'));
+    const res = await getVehicleByName('Bad');
+    expect(res).toEqual([]);
   });
 
   test('getAllShipNames maps vehicle names', async () => {

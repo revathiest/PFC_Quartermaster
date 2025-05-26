@@ -181,4 +181,12 @@ const initializeBot = async () => {
   }
 };
 
-initializeBot();
+if (require.main === module) {
+  initializeBot();
+}
+
+module.exports = {
+  safeLogin,
+  sendToDiscordLogChannel,
+  initializeBot
+};

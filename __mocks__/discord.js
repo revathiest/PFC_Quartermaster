@@ -58,6 +58,10 @@ const EmbedBuilder = jest.fn().mockImplementation(() => {
       data.fields.push(...flatFields);
       return embed;
     }),
+    setThumbnail: jest.fn().mockImplementation(url => {
+      data.thumbnail = { url };
+      return embed;
+    }),
     setFooter: jest.fn().mockImplementation(footer => { data.footer = footer; return embed; }),
     setTimestamp: jest.fn().mockImplementation(() => { data.timestamp = Date.now(); return embed; }),
     toJSON: jest.fn(() => data),

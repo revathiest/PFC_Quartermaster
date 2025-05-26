@@ -1,123 +1,113 @@
 # AGENTS.md
 
-This file defines contributor and AI agent guidelines for working in the `PFC_Quartermaster` repository. All instructions must be followed when auditing, refactoring, or adding features.
+This file defines contributor and AI agent guidelines for working in the `PFC_Quartermaster` repository. These standards are mandatory for all code contributions, automation scripts, and test coverage tasks.
 
 ---
 
 ## ⚙️ Repo Standards
 
-### Language & Style
+### Language & Design
 
-* JavaScript (Node.js), using CommonJS or ESM as needed.
-* Modular design: one logical concern per file.
-* Sequelize ORM for all DB interaction — no raw SQL.
-* Discord bots use slash commands via the Interaction API.
+* Use JavaScript (Node.js) with CommonJS or ESM where appropriate.
+* Follow modular design — one logical responsibility per file.
+* Avoid raw SQL; use Sequelize ORM for all database operations.
+* Discord integrations must use the Slash Command Interaction API.
 
-### Testing Framework
+### Command Structure
 
-* Use `Jest` with high-fidelity mocks.
-* Avoid shallow tests (`jest.fn(() => true)`) unless they’re specifically validated.
-* Test both happy and failure paths for all business logic.
+* All commands reside in the `commands/` directory.
+* Categories (e.g. `admin`, `user`, `tools`) are organisational only.
+* Each `.js` file defines a full slash command.
+* For grouped subcommands (e.g. `/ambient set`, `/ambient stop`), place logic in `commands/<category>/ambient/*.js` and register the full command in `commands/<category>/ambient.js` using `.addSubcommand(...)`.
 
----
-
-## ✅ Pull Request Checklist
-
-* [ ] Unit tests included for all new logic.
-* [ ] Edge cases and failure branches covered.
-* [ ] `npm test` passes.
-* [ ] `CHANGELOG.md` updated if needed.
-* [ ] Branch naming: `feat/`, `fix/`, or `test/` prefixes.
-* [ ] Concise, informative commit messages.
-
----
-
-## 📁 Directory Guidelines
-
-### Commands
-
-* All Discord slash commands live in the `commands/` directory.
-* Subdirectories (e.g. `admin/`, `user/`, `tools/`) are for **organisational purposes only** — they do not define command namespaces.
-* The **actual slash command name** is defined by the `.setName()` call in each command file.
-* If you want a command like `/user verify`, you must implement it using `.addSubcommand(...)` inside a shared file (not separate files).
-* Subdirectories inside categories (e.g. `fun/ambient/`) can be used to group subcommand files **for maintainability**, but these files must still be composed into a single `SlashCommandBuilder` if the goal is a compound command.
-
-**Examples:**
+**Structure Example:**
 
 ```
 commands/
-├── admin/
-│   ├── addaccolade.js      => registers /addaccolade
-│   └── listtags.js         => registers /listtags
 ├── user/
-│   ├── verify.js           => registers /verify
-│   └── whois.js            => registers /whois
+│   ├── verify.js           => /verify
+│   └── whois.js            => /whois
 ├── fun/
-│   ├── ambient.js          => registers /ambient with subcommands
+│   ├── ambient.js          => /ambient (aggregates subcommands)
 │   └── ambient/
-│       ├── set.js          // defines subcommand logic for 'set'
-│       └── stop.js         // defines subcommand logic for 'stop'
+│       ├── set.js          => defines `set` subcommand logic
+│       └── stop.js         => defines `stop` subcommand logic
 ```
 
-In the above, if `fun/ambient/` contains files like `set.js` and `stop.js`, you must also define `ambient.js` in `fun/` to register `/ambient` and compose the subcommands using `.addSubcommand(...)`.
-
-### Command Definition Format
-
-Each file should export an object with:
-
-* `data`: a `SlashCommandBuilder` instance defining the command.
-* `execute(interaction)`: the function to run when the command is triggered.
+Each command file must export:
 
 ```js
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('verify')
-    .setDescription('Link your RSI account.'),
+    .setName('commandName')
+    .setDescription('Command description'),
   async execute(interaction) {
-    // Command logic here
-  }
+    // Command logic
+  },
 };
 ```
 
 ---
 
-## 🧪 Automated Test Coverage Improvement (Codex Agents)
+## ✅ Pull Request Checklist
 
-### 🎯 Task: Audit & Improve All Tests
-
-Codex agents must:
-
-1. Traverse all files in `__tests__/` and `*.test.js`.
-2. Identify shallow tests:
-
-   * `.toHaveBeenCalled()` with no `.toHaveBeenCalledWith(...)`.
-   * Mocks not verified via assertions.
-   * Lack of failure path testing.
-3. Refactor:
-
-   * Add full argument checks.
-   * Add error simulation (`mockRejectedValueOnce`).
-   * Add missing branch condition tests.
-   * Rename unclear test descriptions.
-   * Use `describe()` blocks to organise related cases.
+* [ ] The latest changes from `origin/development` or `origin/master` have been merged into this branch and all conflicts resolved prior to opening the pull request.
+* [ ] Unit tests cover all new logic.
+* [ ] Unit tests include negative paths and edge cases.
+* [ ] Argument validation is asserted in mocks.
+* [ ] All tests pass using `npm test`.
+* [ ] `CHANGELOG.md` updated unless change is trivial/internal-only.
+* [ ] Branch name uses appropriate prefix: `feat/`, `fix/`, `test/`, etc.
+* [ ] Commit messages are concise, descriptive, and reference issues.
+* [ ] Code is modular, documented, and free from console logging.
+* [ ] Mocks cleaned with `beforeEach`/`afterEach`.
 
 ---
 
-## 🚫 Anti-Patterns
+## 📁 Test Coverage Requirements
 
-* Empty or ambiguous test cases.
-* Overuse of `true` mocks without validation.
-* Copy/paste tests for similar commands with no variation in logic tested.
-* Tests that merely run code, not validate it.
+### Unit Testing
+
+* All modules must include tests that:
+
+  * Cover success and failure paths.
+  * Assert the shape and content of mocked DB interactions using `.toHaveBeenCalledWith(expect.objectContaining(...))`.
+  * Validate fallback behaviour when external services or data sources fail.
+
+### Codex Agent Tasking
+
+* Traverse all files in `__tests__/` and `*.test.js`.
+* Identify:
+
+  * Shallow tests (e.g. `toHaveBeenCalled()` without checking inputs).
+  * Untested error cases.
+  * Mocked operations that are never asserted.
+* Refactor by:
+
+  * Deepening all assertions.
+  * Adding error simulations using `mockRejectedValueOnce()`.
+  * Testing conditional branches, invalid input, and malformed data.
+  * Removing dead or duplicate test cases.
+
+---
+
+## 🚫 Prohibited Patterns
+
+* Tests that pass without verifying logical behaviour.
+* Mock functions that always return `true` without validation.
+* Duplicate tests for identical logic paths.
+* Any raw SQL.
+* Unscoped or excessive logging.
 
 ---
 
 ## 🪥 Code Hygiene
 
-* Format all files using a consistent style.
-* Do not log to console in tests — assert instead.
-* Clean up mocks in `beforeEach()` and `afterEach()` where needed.
+* Format consistently with project linting rules.
+* Avoid unnecessary complexity.
+* Use dependency injection for testability.
+* Ensure clear separation between Discord I/O, DB logic, and pure utilities.
 
 ---
 
-This file defines canonical behaviour for developers and AI contributors working on this project.
+This document defines canonical guidelines for all contributors and AI agents participating in the development of this project. No shortcuts. No exceptions.

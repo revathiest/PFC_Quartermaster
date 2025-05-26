@@ -67,7 +67,7 @@ describe('/addaccolade command', () => {
 
     expect(interaction.reply).toHaveBeenCalledWith(
       expect.objectContaining({
-        content: expect.stringContaining('permission'),
+        content: expect.stringContaining('administrators'),
         flags: MessageFlags.Ephemeral,
       }),
     );

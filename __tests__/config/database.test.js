@@ -1,3 +1,5 @@
+jest.mock('../../config/database', () => require('../../__mocks__/config/database'));
+
 const { initializeDatabase, sequelize } = require('../../config/database'); // Adjust this path!
 
 describe('initializeDatabase', () => {

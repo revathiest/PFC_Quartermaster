@@ -2,7 +2,11 @@
 const { MockInteraction, MessageFlags } = require('../../../../__mocks__/discord.js');
 
 // ✅ Standard Jest mocks for dependencies
-jest.mock('../../../../utils/trade/tradeQueries');
+jest.mock('../../../../utils/trade/tradeQueries', () => ({
+  getVehicleByName: jest.fn(),
+  getBuyOptionsAtLocation: jest.fn(),
+  getSellPricesForCommodityElsewhere: jest.fn(),
+}));
 jest.mock('../../../../utils/trade/tradeCalculations');
 jest.mock('../../../../utils/trade/tradeComponents');
 jest.mock('../../../../utils/trade/tradeEmbeds');

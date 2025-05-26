@@ -1,9 +1,9 @@
+jest.mock('../../../config/database', () => require('../../../__mocks__/config/database'));
+jest.mock('../../../utils/evaluateAndFixNickname');
+
 const { data, execute } = require('../../../commands/admin/clearTagOverride');
 const { VerifiedUser } = require('../../../config/database');
 const { evaluateAndFixNickname } = require('../../../utils/evaluateAndFixNickname');
-
-jest.mock('../../../config/database');
-jest.mock('../../../utils/evaluateAndFixNickname');
 
 describe('/clear-tag-override command', () => {
   let mockInteraction;

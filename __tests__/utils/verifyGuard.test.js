@@ -1,7 +1,7 @@
+jest.mock('../../config/database', () => require('../../__mocks__/config/database'));
+
 const { isUserVerified } = require('../../utils/verifyGuard');
 const { VerifiedUser } = require('../../config/database');
-
-jest.mock('../../config/database');
 
 describe('isUserVerified', () => {
   beforeEach(() => {

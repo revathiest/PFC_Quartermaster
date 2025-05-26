@@ -1,10 +1,10 @@
+jest.mock('../config/database', () => require('../__mocks__/config/database'));
+jest.mock('../utils/rsiProfileScraper');
+
 const { execute, button } = require('../commands/user/verify');
 const { VerifiedUser, VerificationCode, OrgTag } = require('../config/database');
 const { fetchRsiProfileInfo } = require('../utils/rsiProfileScraper');
 const { MessageFlags } = require('discord.js');
-
-jest.mock('../config/database');
-jest.mock('../utils/rsiProfileScraper');
 
 beforeAll(() => {
     jest.spyOn(console, 'warn').mockImplementation(() => {});

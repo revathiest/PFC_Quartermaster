@@ -1,3 +1,5 @@
+jest.mock('../../config.json', () => ({ clientId: '1', guildId: '2', token: '3' }), { virtual: true });
+
 const fs = require('fs');
 const path = require('path');
 const { loadCommandsRecursively } = require('../../utils/commandRegistration');

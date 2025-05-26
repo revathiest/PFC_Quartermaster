@@ -1,10 +1,10 @@
+jest.mock('../../config/database', () => require('../../__mocks__/config/database'));
+jest.mock('../../utils/formatVerifiedNickname');
+
 const { evaluateAndFixNickname } = require('../../utils/evaluateAndFixNickname');
 const { VerifiedUser, OrgTag } = require('../../config/database');
 const { pendingVerifications } = require('../../commands/user/verify');
 const { formatVerifiedNickname } = require('../../utils/formatVerifiedNickname');
-
-jest.mock('../../config/database');
-jest.mock('../../utils/formatVerifiedNickname');
 
 beforeEach(() => {
   jest.clearAllMocks();

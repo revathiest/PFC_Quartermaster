@@ -1,4 +1,4 @@
-jest.mock('../../../config/database');
+jest.mock('../../../config/database', () => require('../../../__mocks__/config/database'));
 jest.mock('../../../utils/rsiProfileScraper');  // Mock BEFORE requiring the module under test
 
 const { syncOrgTags } = require('../../../botactions/orgTagSync/syncOrgTags');

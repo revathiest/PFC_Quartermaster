@@ -79,15 +79,22 @@ const ActionRowBuilder = jest.fn().mockImplementation(() => ({
   addComponents: jest.fn().mockReturnThis(),
 }));
 
-const StringSelectMenuBuilder = jest.fn().mockImplementation(() => {
+const StringSelectMenuBuilder = jest.fn().mockImplementation(function () {
   const data = { options: [], customId: undefined, placeholder: undefined };
-  const builder = {
-    setCustomId: jest.fn(id => { data.customId = id; return builder; }),
-    setPlaceholder: jest.fn(ph => { data.placeholder = ph; return builder; }),
-    addOptions: jest.fn(opts => { data.options.push(...opts); return builder; }),
-    data
-  };
-  return builder;
+  this.setCustomId = jest.fn(id => {
+    data.customId = id;
+    return this;
+  });
+  this.setPlaceholder = jest.fn(ph => {
+    data.placeholder = ph;
+    return this;
+  });
+  this.addOptions = jest.fn(opts => {
+    data.options.push(...opts);
+    return this;
+  });
+  this.data = data;
+  return this;
 });
 
 const ButtonBuilder = jest.fn().mockImplementation(() => ({

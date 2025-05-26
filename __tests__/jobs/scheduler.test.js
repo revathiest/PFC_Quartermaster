@@ -17,6 +17,8 @@ describe('scheduleDailyApiSync', () => {
     const baseTime = new Date('2023-01-01T23:59:30.000Z');
     jest.useFakeTimers();
     jest.setSystemTime(baseTime);
+    jest.spyOn(global, 'setTimeout');
+    jest.spyOn(global, 'setInterval');
 
     scheduleDailyApiSync(0, 0);
 

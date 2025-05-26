@@ -22,7 +22,12 @@ const OrgTag = {
 };
 
 const UsageLog = {
-  create: jest.fn()
+  create: jest.fn(),
+  findAll: jest.fn()
+};
+
+const VoiceLog = {
+  findAll: jest.fn()
 };
 
 // Simple mock Sequelize-like instance
@@ -31,7 +36,10 @@ const sequelize = {
     MockModelA: { sync: jest.fn() },
     MockModelB: { sync: jest.fn() },
     MockModelC: { sync: jest.fn() },
-  }
+  },
+  fn: jest.fn((name, col) => `${name}(${col})`),
+  col: jest.fn(name => name),
+  literal: jest.fn(value => value)
 };
 
 /**
@@ -61,6 +69,7 @@ module.exports = {
   VerifiedUser,
   OrgTag,
   UsageLog,
+  VoiceLog,
   sequelize,
   initializeDatabase
 };

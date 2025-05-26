@@ -29,7 +29,7 @@ function createInteraction({ isAdmin = true, emoji = '<:medal:12345>' } = {}) {
   };
 
   const guild = {
-    channels: { fetch: jest.fn().mockResolvedValue(channel) },
+    channels: { fetch: jest.fn().mockReturnValue(channel) },
     members: {
       fetch: jest.fn().mockResolvedValue(),
       cache: { filter: jest.fn(() => membersCollection) },

@@ -22,6 +22,13 @@ module.exports = {
   help: 'Registers a role as an accolade and posts it to the Wall of Fame. Includes optional emoji and description. Only members with the role will be shown. This is typically used to spotlight achievements or honors.',
   category: 'Admin',
   async execute(interaction) {
+    if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
+      return interaction.reply({
+        content: '❌ Only administrators can use this command.',
+        flags: MessageFlags.Ephemeral
+      });
+    }
+
     const role = interaction.options.getRole('role');
     const rawEmoji = interaction.options.getString('emoji')?.trim() || '';
     const isValidEmoji = /^<a?:\w+:\d+>$|^\p{Extended_Pictographic}$/u.test(rawEmoji);

@@ -70,24 +70,29 @@ module.exports = {
 
 * All modules must include tests that:
 
-  * Cover success and failure paths.
+  * Cover success, failure, and edge case scenarios.
+  * Verify the correctness and validity of function parameters.
   * Assert the shape and content of mocked DB interactions using `.toHaveBeenCalledWith(expect.objectContaining(...))`.
   * Validate fallback behaviour when external services or data sources fail.
+  * Confirm expected side effects (e.g. role updates, messages sent, DB writes).
+  * Avoid redundant or trivial tests — test coverage must be meaningful.
 
 ### Codex Agent Tasking
 
-* Traverse all files in `__tests__/` and `*.test.js`.
+* Traverse all files in `__tests__/` and any `*.test.js`.
+* Continuously evaluate test coverage for completeness. Add tests when gaps are found but avoid writing pointless tests purely for coverage metrics.
 * Identify:
 
-  * Shallow tests (e.g. `toHaveBeenCalled()` without checking inputs).
-  * Untested error cases.
-  * Mocked operations that are never asserted.
+  * Shallow or weak assertions (`toHaveBeenCalled()` with no input/output check).
+  * Missing edge case and failure scenario testing.
+  * Mocks that are never validated with assertions.
 * Refactor by:
 
-  * Deepening all assertions.
-  * Adding error simulations using `mockRejectedValueOnce()`.
-  * Testing conditional branches, invalid input, and malformed data.
-  * Removing dead or duplicate test cases.
+  * Deepening assertions — check parameters, return values, and downstream effects.
+  * Simulating errors using `mockRejectedValueOnce()` and ensuring graceful degradation.
+  * Testing invalid, undefined, or unexpected arguments.
+  * Verifying logic branches that rely on conditional checks.
+  * Removing duplicate, ineffective, or dead test cases.
 
 ---
 

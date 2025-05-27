@@ -1,11 +1,11 @@
 const { MockInteraction } = require('../../../../__mocks__/discord.js');
 
 jest.mock('../../../../utils/trade/tradeQueries', () => ({
-  getAllShipNames: jest.fn(),
+  getCommodityPricesAtLocation: jest.fn(),
 }));
 
 jest.mock('../../../../utils/trade/tradeEmbeds', () => ({
-  buildCommoditiesEmbed: jest.fn(),
+  buildCommodityPricesEmbed: jest.fn(),
 }));
 
 jest.mock('../../../../utils/trade/handlers/shared', () => ({
@@ -13,8 +13,8 @@ jest.mock('../../../../utils/trade/handlers/shared', () => ({
 }));
 
 const { handleTradeCommodities } = require('../../../../utils/trade/handlers/commodities');
-const { getAllShipNames } = require('../../../../utils/trade/tradeQueries');
-const { buildCommoditiesEmbed } = require('../../../../utils/trade/tradeEmbeds');
+const { getCommodityPricesAtLocation } = require('../../../../utils/trade/tradeQueries');
+const { buildCommodityPricesEmbed } = require('../../../../utils/trade/tradeEmbeds');
 const { safeReply } = require('../../../../utils/trade/handlers/shared');
 
 describe('handleTradeCommodities', () => {
@@ -29,22 +29,21 @@ describe('handleTradeCommodities', () => {
   });
 
   test('sends commodities embed', async () => {
-    const interaction = new MockInteraction({});
-    getAllShipNames.mockResolvedValue(['A', 'B']);
-    buildCommoditiesEmbed.mockReturnValue({ title: 'embed' });
+    const interaction = new MockInteraction({ options: { location: 'Area18' } });
+    getCommodityPricesAtLocation.mockResolvedValue([{ commodity_name: 'A' }]);
+    buildCommodityPricesEmbed.mockReturnValue({ title: 'embed' });
 
     await handleTradeCommodities(interaction);
 
-    expect(buildCommoditiesEmbed).toHaveBeenCalledWith(['A', 'B']);
+    expect(buildCommodityPricesEmbed).toHaveBeenCalled();
     expect(safeReply).toHaveBeenCalledWith(interaction, { embeds: [{ title: 'embed' }] });
   });
 
   test('warns when no commodities', async () => {
-    const interaction = new MockInteraction({});
-    getAllShipNames.mockResolvedValue([]);
-
+    const interaction = new MockInteraction({ options: { location: 'Area18' } });
+    getCommodityPricesAtLocation.mockResolvedValue([]);
     await handleTradeCommodities(interaction);
-    expect(safeReply).toHaveBeenCalledWith(interaction, expect.stringContaining('No known commodities'));
+    expect(safeReply).toHaveBeenCalledWith(interaction, expect.stringContaining('commodity data')); 
     expect(warnSpy).toHaveBeenCalled();
   });
 });

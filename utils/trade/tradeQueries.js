@@ -175,6 +175,49 @@ async function getAllShipNames() {
   }
 }
 
+async function getAllCommodityNames() {
+  try {
+    if (DEBUG_QUERY) console.log(`[TRADE QUERIES] getAllCommodityNames → fetching unique commodity names`);
+    const records = await UexCommodityPrice.findAll({
+      attributes: [[UexCommodityPrice.sequelize.fn('DISTINCT', UexCommodityPrice.sequelize.col('commodity_name')), 'commodity_name']],
+      raw: true
+    });
+    const names = records.map(r => r.commodity_name).filter(Boolean);
+    if (DEBUG_QUERY) console.log(`[TRADE QUERIES] getAllCommodityNames → returning ${names.length} names`);
+    return names;
+  } catch (err) {
+    console.error(`[TRADE QUERIES] getAllCommodityNames encountered an error:`, err);
+    return [];
+  }
+}
+
+async function getCommodityPricesAtLocation(locationName) {
+  try {
+    if (DEBUG_QUERY) console.log(`[TRADE QUERIES] getCommodityPricesAtLocation → locationName="${locationName}"`);
+    const records = await UexCommodityPrice.findAll({
+      include: [{
+        model: UexTerminal,
+        as: 'terminal',
+        required: true,
+        where: {
+          [Op.or]: [
+            { name: locationName },
+            { nickname: locationName },
+            { city_name: locationName },
+            { planet_name: locationName }
+          ]
+        },
+        include: [{ model: UexPoi, as: 'poi' }]
+      }]
+    });
+    if (DEBUG_QUERY) console.log(`[TRADE QUERIES] getCommodityPricesAtLocation → found ${records.length} records`);
+    return records;
+  } catch (err) {
+    console.error(`[TRADE QUERIES] getCommodityPricesAtLocation encountered an error:`, err);
+    return [];
+  }
+}
+
 async function getSellPricesForCommodityElsewhere(commodityName, excludeLocation) {
   try {
     return await UexCommodityPrice.findAll({
@@ -211,8 +254,10 @@ module.exports = {
   getBuyOptionsAtLocation,
   getVehicleByName,
   getAllShipNames,
+  getAllCommodityNames,
   getReturnOptions,
   getTerminalsAtLocation,
   getDistanceBetween,
-  getSellPricesForCommodityElsewhere
+  getSellPricesForCommodityElsewhere,
+  getCommodityPricesAtLocation
 };

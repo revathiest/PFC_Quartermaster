@@ -2,34 +2,11 @@
 const DEBUG_TRADE = false;
 
 const {
-  getSellOptionsAtLocation,
-  getBuyOptionsAtLocation,
-  getCommodityTradeOptions,
-  getVehicleByName,
-  getAllShipNames,
-  getReturnOptions,
-  getTerminalsAtLocation,
-  getSellPricesForCommodityElsewhere
+  getCommodityPricesAtLocation
 } = require('../tradeQueries');
 
-const {
-  calculateProfitOptions,
-  calculateCircuitTotalProfit
-} = require('../tradeCalculations');
+const { buildCommodityPricesEmbed } = require('../tradeEmbeds');
 
-const {
-  buildBestTradesEmbed,
-  buildRouteEmbed,
-  buildCircuitEmbed,
-  buildPriceEmbed,
-  buildShipEmbed,
-  buildLocationsEmbed,
-  buildCommoditiesEmbed
-} = require('../tradeEmbeds');
-
-const {
-  buildShipSelectMenu
-} = require('../tradeComponents');
 
 const { safeReply } = require('./shared');
 
@@ -38,16 +15,17 @@ const { safeReply } = require('./shared');
 async function handleTradeCommodities(interaction) {
     try {
       if (DEBUG_TRADE) console.log(`[TRADE HANDLERS] handleTradeCommodities triggered`);
-      const commodities = await getAllShipNames();
-      if (DEBUG_TRADE) console.log(`[TRADE HANDLERS] Found ${commodities.length} commodities`);
-  
-      if (!commodities.length) {
-        console.warn(`[TRADE HANDLERS] No commodities found`);
-        await safeReply(interaction, `❌ No known commodities.`);
+      const location = interaction.options.getString('location');
+      const prices = await getCommodityPricesAtLocation(location);
+      if (DEBUG_TRADE) console.log(`[TRADE HANDLERS] Found ${prices.length} price records`);
+
+      if (!prices.length) {
+        console.warn(`[TRADE HANDLERS] No commodity prices found at ${location}`);
+        await safeReply(interaction, `❌ No commodity data found for **${location}**.`);
         return;
       }
-  
-      const embed = buildCommoditiesEmbed(commodities);
+
+      const embed = buildCommodityPricesEmbed(location, prices);
       if (DEBUG_TRADE) console.log(`[TRADE HANDLERS] Built embed for commodities`);
       await safeReply(interaction, { embeds: [embed] });
   

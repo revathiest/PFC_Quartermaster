@@ -179,6 +179,27 @@ function buildCommoditiesEmbed(commodities) {
   }
 }
 
+function buildCommodityPricesEmbed(location, records) {
+  try {
+    if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] buildCommodityPricesEmbed → location=${location}`);
+    const fields = records.slice(0, 10).map(rec => ({
+      name: rec.commodity_name ?? 'UNKNOWN_COMMODITY',
+      value: `Buy: **${rec.price_buy ?? 'N/A'}** | Sell: **${rec.price_sell ?? 'N/A'}**`,
+      inline: false
+    }));
+
+    const embed = new EmbedBuilder()
+      .setTitle(`📦 Commodity prices at ${location}`)
+      .addFields(fields)
+      .setFooter({ text: 'Prices from database.' });
+
+    return embed;
+  } catch (err) {
+    console.error(`[TRADE EMBEDS] buildCommodityPricesEmbed encountered an error:`, err);
+    return new EmbedBuilder().setTitle('❌ Failed to build commodity prices embed.');
+  }
+}
+
 module.exports = {
   buildBestTradesEmbed,
   buildRouteEmbed,
@@ -186,5 +207,6 @@ module.exports = {
   buildPriceEmbed,
   buildShipEmbed,
   buildLocationsEmbed,
-  buildCommoditiesEmbed
+  buildCommoditiesEmbed,
+  buildCommodityPricesEmbed
 };

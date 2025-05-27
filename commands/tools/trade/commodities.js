@@ -1,10 +1,12 @@
 const { SlashCommandSubcommandBuilder } = require('discord.js');
+const { handleTradeCommodities } = require('../../../utils/trade/tradeHandlers');
 
 module.exports = {
   data: () => new SlashCommandSubcommandBuilder()
     .setName('commodities')
-    .setDescription('Dummy /trade commodities subcommand.'),
+    .setDescription('List known commodities'),
+
   async execute(interaction) {
-    await interaction.reply({ content: '✅ Dummy response for /trade commodities.', ephemeral: true });
+    await handleTradeCommodities(interaction);
   }
 };

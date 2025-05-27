@@ -1,10 +1,22 @@
 const { SlashCommandSubcommandBuilder } = require('discord.js');
+const { handleTradeBestCircuit } = require('../../../utils/trade/tradeHandlers');
 
 module.exports = {
   data: () => new SlashCommandSubcommandBuilder()
     .setName('circuit')
-    .setDescription('Dummy /trade circuit subcommand.'),
+    .setDescription('Plan a basic trade circuit')
+    .addStringOption(opt =>
+      opt.setName('from')
+        .setDescription('Starting location')
+        .setRequired(true))
+    .addStringOption(opt =>
+      opt.setName('with')
+        .setDescription('Ship name'))
+    .addIntegerOption(opt =>
+      opt.setName('cash')
+        .setDescription('Available cash for trading')),
+
   async execute(interaction) {
-    await interaction.reply({ content: '✅ Dummy response for /trade circuit.', ephemeral: true });
+    await handleTradeBestCircuit(interaction);
   }
 };

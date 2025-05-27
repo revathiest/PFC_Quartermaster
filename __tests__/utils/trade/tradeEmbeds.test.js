@@ -62,11 +62,14 @@ const {
       expect(result.data.fields[0].name).toContain('Terminal A');
     });
   
-    test('buildCommoditiesEmbed returns embed listing commodities', () => {
-      const result = buildCommoditiesEmbed(['Agricium', 'Laranite']);
-      expect(result.data.title).toContain('commodities');
-      expect(result.data.description).toContain('Agricium');
-      expect(result.data.description).toContain('Laranite');
+    test('buildCommoditiesEmbed returns embed with price info', () => {
+      const data = [
+        { name: 'Agricium', buyPrice: 1, sellPrice: 2, averagePrice: 1.5, margin: 1 }
+      ];
+      const result = buildCommoditiesEmbed('Area18', data);
+      expect(result.data.title).toContain('Area18');
+      expect(result.data.fields[0].name).toBe('Agricium');
+      expect(result.data.fields[0].value).toContain('Buy:');
     });
     
     test('buildLocationsEmbed uses planet_name fallback', () => {

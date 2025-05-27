@@ -163,14 +163,25 @@ function buildLocationsEmbed(terminals) {
   }
 }
 
-function buildCommoditiesEmbed(commodities) {
+function buildCommoditiesEmbed(location, commodities) {
   try {
-    if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] buildCommoditiesEmbed → commodities:`, commodities);
+    if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] buildCommoditiesEmbed → location=${location}`, commodities);
+
+    const fields = commodities.slice(0, 25).map(c => ({
+      name: c.name,
+      value: [
+        `Buy: **${c.buyPrice ?? 'N/A'}**`,
+        `Sell: **${c.sellPrice ?? 'N/A'}**`,
+        `Avg: **${c.averagePrice ?? 'N/A'}**`,
+        c.margin != null ? `Profit: **${c.margin}**` : null
+      ].filter(Boolean).join(' | '),
+      inline: false
+    }));
 
     const embed = new EmbedBuilder()
-      .setTitle(`📦 Known commodities`)
-      .setDescription(commodities.join(', '))
-      .setFooter({ text: 'Commodity list from database.' });
+      .setTitle(`📦 Commodity prices at ${location}`)
+      .addFields(fields)
+      .setFooter({ text: 'Prices from latest available data.' });
 
     return embed;
   } catch (err) {

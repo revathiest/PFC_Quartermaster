@@ -168,7 +168,16 @@ function buildCommoditiesEmbed(location, terminals, page = 0, totalPages = 1) {
     if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] buildCommoditiesEmbed → location=${location}, page=${page}, total=${totalPages}`, terminals);
 
     const fields = terminals.slice(0, 25).map(t => {
-      const lines = t.commodities.map(c => `${c.name} - Buy: **${c.buyPrice ?? 'N/A'}** | Sell: **${c.sellPrice ?? 'N/A'}**`).join('\n');
+      let lines = t.commodities
+        .map(c => `${c.name} - Buy: **${c.buyPrice ?? 'N/A'}** | Sell: **${c.sellPrice ?? 'N/A'}**`)
+        .join('\n');
+
+      // Discord embed field values are limited to 1024 characters.
+      // Trim and add ellipsis when this limit would be exceeded.
+      if (lines.length > 1024) {
+        lines = `${lines.slice(0, 1021)}...`;
+      }
+
       return {
         name: t.terminal,
         value: lines || 'No commodities found',

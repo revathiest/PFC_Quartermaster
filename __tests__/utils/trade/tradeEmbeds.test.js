@@ -74,6 +74,19 @@ const {
       expect(result.data.fields[0].value).not.toContain('Avg');
       expect(result.data.footer.text).toContain('Page 1 of 1');
     });
+
+    test('buildCommoditiesEmbed truncates long field values', () => {
+      const longList = Array.from({ length: 300 }, (_, i) => ({
+        name: `Item${i}`,
+        buyPrice: i,
+        sellPrice: i + 1
+      }));
+      const data = [{ terminal: 'T1', commodities: longList }];
+      const result = buildCommoditiesEmbed('Area18', data, 0, 1);
+      const value = result.data.fields[0].value;
+      expect(value.length).toBeLessThanOrEqual(1024);
+      expect(value.endsWith('...')).toBe(true);
+    });
     
     test('buildLocationsEmbed uses planet_name fallback', () => {
       const result = buildLocationsEmbed([{ name: 'Terminal A', planet_name: 'MicroTech' }]);

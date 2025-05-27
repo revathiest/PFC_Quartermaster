@@ -8,7 +8,7 @@ const { MessageFlags } = require('discord.js');
 
 const createInteraction = (hasPerm = true) => {
   const memberObj = {
-    displayName: 'Tester',
+    displayName: 'Tester ⛔',
     setNickname: jest.fn(),
     roles: { cache: { has: jest.fn().mockReturnValue(true), remove: jest.fn(), add: jest.fn() } }
   };
@@ -70,6 +70,8 @@ describe('/manual-verify command', () => {
       rsiOrgId: 'PFCS'
     }));
     expect(interaction.guild.members.fetch).toHaveBeenCalledWith('u1');
+    const fetchedMember = interaction.guild.members.fetch.mock.results[0].value;
+    expect(fetchedMember.setNickname).toHaveBeenCalledWith('[PFC] Tester');
     expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({
       content: expect.stringContaining('manually verified'),
       flags: MessageFlags.Ephemeral
@@ -88,5 +90,18 @@ describe('/manual-verify command', () => {
       content: expect.stringContaining('Failed to manually verify'),
       flags: MessageFlags.Ephemeral
     }));
+  });
+
+  it('updates nickname even when org tag is unknown', async () => {
+    const interaction = createInteraction(true);
+    VerifiedUser.findOne.mockResolvedValue(null);
+    fetchRsiProfileInfo.mockResolvedValue({ orgId: 'UNKNOWN' });
+    OrgTag.findByPk.mockResolvedValue(null);
+    VerifiedUser.upsert.mockResolvedValue();
+
+    await execute(interaction);
+
+    const fetchedMember = interaction.guild.members.fetch.mock.results[0].value;
+    expect(fetchedMember.setNickname).toHaveBeenCalledWith('Tester');
   });
 });

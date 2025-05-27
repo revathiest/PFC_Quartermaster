@@ -65,12 +65,13 @@ module.exports = {
         }
       }
 
-      if (tag) {
-        const newNick = formatVerifiedNickname(member.displayName, true, tag);
+      // Always attempt to clean up the nickname using the formatter
+      const newNick = formatVerifiedNickname(member.displayName, true, tag);
+      if (newNick !== member.displayName) {
         try {
           await member.setNickname(newNick);
         } catch (err) {
-          // ignore failures
+          // Nickname updates may fail due to permissions; ignore silently
         }
       }
 

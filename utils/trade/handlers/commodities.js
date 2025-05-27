@@ -20,6 +20,7 @@ const { safeReply } = require('./shared');
 // =======================================
 // /trade commodities
 const PAGE_SIZE = 5;
+const COMMODITIES_PER_FIELD = 20;
 
 function chunkArray(arr, size) {
   const chunks = [];
@@ -53,7 +54,14 @@ async function handleTradeCommodities(interaction, { location, page = 0 } = {}) 
         sellPrice: r.price_sell
       });
     }
-    const terminals = Object.entries(terminalsMap).map(([terminal, commodities]) => ({ terminal, commodities }));
+    const terminals = [];
+    for (const [terminal, commodities] of Object.entries(terminalsMap)) {
+      const parts = chunkArray(commodities, COMMODITIES_PER_FIELD);
+      parts.forEach((list, idx) => {
+        const name = parts.length > 1 ? `${terminal} (${idx + 1}/${parts.length})` : terminal;
+        terminals.push({ terminal: name, commodities: list });
+      });
+    }
 
     const chunks = chunkArray(terminals, PAGE_SIZE);
     const pageData = chunks[page] || [];

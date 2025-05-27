@@ -170,7 +170,6 @@ function buildCommoditiesEmbed(location, terminals, page = 0, totalPages = 1) {
     if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] buildCommoditiesEmbed → location=${location}, page=${page}, total=${totalPages}`, terminals);
 
     const fields = terminals.slice(0, 25).map(t => {
-      const header = `${'Commodity'.padEnd(NAME_WIDTH, ' ')} |      Buy |     Sell`;
       const lines = t.commodities
         .map(c => {
           const buy = c.buyPrice ?? 'N/A';
@@ -184,7 +183,7 @@ function buildCommoditiesEmbed(location, terminals, page = 0, totalPages = 1) {
         })
         .join('\n');
 
-      let content = `${header}\n${lines}`.trim();
+      let content = lines.trim();
       const maxContentLength = 1017; // account for wrapping backticks
       if (content.length > maxContentLength) {
         content = `${content.slice(0, maxContentLength - 3)}...`;

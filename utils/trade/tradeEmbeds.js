@@ -168,19 +168,26 @@ function buildCommoditiesEmbed(location, terminals, page = 0, totalPages = 1) {
     if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] buildCommoditiesEmbed → location=${location}, page=${page}, total=${totalPages}`, terminals);
 
     const fields = terminals.slice(0, 25).map(t => {
-      let lines = t.commodities
-        .map(c => `${c.name} - Buy: **${c.buyPrice ?? 'N/A'}** | Sell: **${c.sellPrice ?? 'N/A'}**`)
+      const header = 'Commodity           |      Buy |     Sell';
+      const lines = t.commodities
+        .map(c => {
+          const buy = c.buyPrice ?? 'N/A';
+          const sell = c.sellPrice ?? 'N/A';
+          const name = String(c.name).padEnd(18, ' ');
+          return `${name} | ${String(buy).padStart(7, ' ')} | ${String(sell).padStart(7, ' ')}`;
+        })
         .join('\n');
 
-      // Discord embed field values are limited to 1024 characters.
-      // Trim and add ellipsis when this limit would be exceeded.
-      if (lines.length > 1024) {
-        lines = `${lines.slice(0, 1021)}...`;
+      let content = `${header}\n${lines}`.trim();
+      const maxContentLength = 1017; // account for wrapping backticks
+      if (content.length > maxContentLength) {
+        content = `${content.slice(0, maxContentLength - 3)}...`;
       }
+      const value = `\`\`\`\n${content}\`\`\``;
 
       return {
         name: t.terminal,
-        value: lines || 'No commodities found',
+        value: value || 'No commodities found',
         inline: false
       };
     });

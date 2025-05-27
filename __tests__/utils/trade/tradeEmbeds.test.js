@@ -69,9 +69,10 @@ const {
       const result = buildCommoditiesEmbed('Area18', data, 0, 1);
       expect(result.data.title).toContain('Area18');
       expect(result.data.fields[0].name).toBe('T1');
-      expect(result.data.fields[0].value).toContain('Agricium');
-      expect(result.data.fields[0].value).toContain('Buy:');
-      expect(result.data.fields[0].value).not.toContain('Avg');
+      const value = result.data.fields[0].value;
+      expect(value.startsWith('```')).toBe(true);
+      expect(value).toContain('Commodity');
+      expect(value).toContain('Agricium');
       expect(result.data.footer.text).toContain('Page 1 of 1');
     });
 
@@ -85,7 +86,7 @@ const {
       const result = buildCommoditiesEmbed('Area18', data, 0, 1);
       const value = result.data.fields[0].value;
       expect(value.length).toBeLessThanOrEqual(1024);
-      expect(value.endsWith('...')).toBe(true);
+      expect(value.endsWith('...```')).toBe(true);
     });
     
     test('buildLocationsEmbed uses planet_name fallback', () => {

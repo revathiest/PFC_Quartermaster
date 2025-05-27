@@ -20,6 +20,8 @@ module.exports = {
     const [, location, pageStr] = interaction.customId.split('::');
     const page = parseInt(pageStr, 10) || 0;
 
+    await interaction.deferUpdate();
+
     await handleTradeCommodities(interaction, { location, page });
   }
 };

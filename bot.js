@@ -6,7 +6,7 @@ const path = require('path');
 const { initClient } = require('./botactions/initClient');
 const { interactionHandler, handleMessageCreate, handleReactionAdd, handleReactionRemove, handleVoiceStateUpdate } = require('./botactions/eventHandling');
 const { registerChannels } = require('./botactions/channelManagement');
-const registerCommands = require('./utils/commandRegistration');
+const { registerCommands } = require('./utils/commandRegistration');
 const { initializeDatabase } = require('./config/database');
 const { loadConfiguration } = require('./botactions/configLoader');
 const { startScheduledAnnouncementEngine } = require('./botactions/scheduling');
@@ -181,4 +181,12 @@ const initializeBot = async () => {
   }
 };
 
-initializeBot();
+if (require.main === module) {
+  initializeBot();
+}
+
+module.exports = {
+  safeLogin,
+  sendToDiscordLogChannel,
+  initializeBot
+};

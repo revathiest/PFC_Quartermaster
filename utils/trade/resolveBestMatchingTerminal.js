@@ -7,7 +7,7 @@
  function resolveBestMatchingTerminal(input, terminals) {
     const normInput = input.trim().toLowerCase();
     let bestMatch = null;
-    let bestScore = -1;
+    let bestScore = 0;
   
     for (const terminal of terminals) {
       const candidates = [
@@ -43,7 +43,7 @@
       }
     }
   
-    return bestMatch;
+    return bestScore > 0 ? bestMatch : null;
   }
   
   module.exports = {

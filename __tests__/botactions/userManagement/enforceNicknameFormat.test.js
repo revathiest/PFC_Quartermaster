@@ -1,13 +1,13 @@
-const { enforceNicknameFormat } = require('../../../botactions/userManagement/enforceNicknameFormat');
-const { VerifiedUser, OrgTag } = require('../../../config/database');
-const { formatVerifiedNickname } = require('../../../utils/formatVerifiedNickname');
-const { pendingVerifications } = require('../../../commands/user/verify');
-
-jest.mock('../../../config/database');
+jest.mock('../../../config/database', () => require('../../../__mocks__/config/database'));
 jest.mock('../../../utils/formatVerifiedNickname');
 jest.mock('../../../commands/user/verify', () => ({
   pendingVerifications: new Set(),
 }));
+
+const { enforceNicknameFormat } = require('../../../botactions/userManagement/enforceNicknameFormat');
+const { VerifiedUser, OrgTag } = require('../../../config/database');
+const { formatVerifiedNickname } = require('../../../utils/formatVerifiedNickname');
+const { pendingVerifications } = require('../../../commands/user/verify');
 
 describe('enforceNicknameFormat', () => {
   let mockOldMember, mockNewMember;

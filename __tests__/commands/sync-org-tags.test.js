@@ -1,5 +1,10 @@
-jest.mock('../../botactions/orgTagSync/syncOrgTags');
-jest.mock('../../botactions/orgTagSync/syncCooldownTracker');
+jest.mock('../../botactions/orgTagSync/syncOrgTags', () => ({
+  syncOrgTags: jest.fn(),
+}));
+jest.mock('../../botactions/orgTagSync/syncCooldownTracker', () => ({
+  canRunManualSync: jest.fn(),
+  markManualSyncRun: jest.fn(),
+}));
 
 jest.mock('discord.js', () => ({
   SlashCommandBuilder: jest.fn(() => ({

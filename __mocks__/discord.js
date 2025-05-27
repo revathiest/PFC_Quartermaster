@@ -58,6 +58,10 @@ const EmbedBuilder = jest.fn().mockImplementation(() => {
       data.fields.push(...flatFields);
       return embed;
     }),
+    setThumbnail: jest.fn().mockImplementation(url => {
+      data.thumbnail = { url };
+      return embed;
+    }),
     setFooter: jest.fn().mockImplementation(footer => { data.footer = footer; return embed; }),
     setTimestamp: jest.fn().mockImplementation(() => { data.timestamp = Date.now(); return embed; }),
     toJSON: jest.fn(() => data),
@@ -68,7 +72,9 @@ const EmbedBuilder = jest.fn().mockImplementation(() => {
 });
 
 const PermissionFlagsBits = {
-  Administrator: 0x00000008
+  Administrator: 0x00000008,
+  ManageGuild: 0x00000020,
+  ManageRoles: 0x00010000
 };
 
 const MessageFlags = {
@@ -78,6 +84,24 @@ const MessageFlags = {
 const ActionRowBuilder = jest.fn().mockImplementation(() => ({
   addComponents: jest.fn().mockReturnThis(),
 }));
+
+const StringSelectMenuBuilder = jest.fn().mockImplementation(function () {
+  const data = { options: [], customId: undefined, placeholder: undefined };
+  this.setCustomId = jest.fn(id => {
+    data.customId = id;
+    return this;
+  });
+  this.setPlaceholder = jest.fn(ph => {
+    data.placeholder = ph;
+    return this;
+  });
+  this.addOptions = jest.fn(opts => {
+    data.options.push(...opts);
+    return this;
+  });
+  this.data = data;
+  return this;
+});
 
 const ButtonBuilder = jest.fn().mockImplementation(() => ({
   setCustomId: jest.fn().mockReturnThis(),
@@ -144,6 +168,7 @@ module.exports = {
   MessageFlags,
   ActionRowBuilder,
   ButtonBuilder,
+  StringSelectMenuBuilder,
   ButtonStyle,
   SlashCommandBuilder,
   EmbedBuilder,

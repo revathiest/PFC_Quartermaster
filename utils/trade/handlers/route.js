@@ -9,16 +9,6 @@ const { buildLocationSelectMenu } = require('../tradeComponents');
 const { safeReply, TradeStateCache } = require('./shared');
 const { MessageFlags } = require('discord.js');
 
-function extractLocationName(terminal) {
-  return (
-    terminal?.location_name ||
-    terminal?.city_name ||
-    terminal?.planet_name ||
-    terminal?.nickname ||
-    terminal?.name
-  );
-}
-
 async function handleTradeRouteCore({ fromLocation, toLocation }) {
   if (DEBUG_ROUTE) console.log(`[ROUTE][core] Resolving: from=${fromLocation}, to=${toLocation}`);
 

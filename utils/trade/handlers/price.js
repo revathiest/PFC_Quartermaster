@@ -2,34 +2,12 @@
 const DEBUG_TRADE = false;
 
 const {
-  getSellOptionsAtLocation,
-  getBuyOptionsAtLocation,
   getCommodityTradeOptions,
-  getVehicleByName,
-  getAllShipNames,
-  getReturnOptions,
-  getTerminalsAtLocation,
-  getSellPricesForCommodityElsewhere
 } = require('../tradeQueries');
 
 const {
-  calculateProfitOptions,
-  calculateCircuitTotalProfit
-} = require('../tradeCalculations');
-
-const {
-  buildBestTradesEmbed,
-  buildRouteEmbed,
-  buildCircuitEmbed,
   buildPriceEmbed,
-  buildShipEmbed,
-  buildLocationsEmbed,
-  buildCommoditiesEmbed
 } = require('../tradeEmbeds');
-
-const {
-  buildShipSelectMenu
-} = require('../tradeComponents');
 
 const { safeReply } = require('./shared');
 

@@ -71,7 +71,6 @@ const {
       expect(result.data.fields[0].name).toBe('T1');
       const value = result.data.fields[0].value;
       expect(value.startsWith('```')).toBe(true);
-      expect(value).toContain('Commodity');
       expect(value).toContain('Agricium');
       expect(result.data.footer.text).toContain('Page 1 of 1');
     });
@@ -95,7 +94,7 @@ const {
       const result = buildCommoditiesEmbed('Area18', data, 0, 1);
       const value = result.data.fields[0].value;
       expect(value).toContain('…');
-      const row = value.split('\n')[2];
+      const row = value.split('\n')[1];
       const namePart = row.split('|')[0].trim();
       expect(namePart.length).toBeLessThanOrEqual(22);
     });

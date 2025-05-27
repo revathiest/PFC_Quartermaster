@@ -11,7 +11,7 @@ describe('/trade commodities subcommand', () => {
   beforeEach(() => jest.clearAllMocks());
 
   test('delegates to handleTradeCommodities', async () => {
-    const interaction = new MockInteraction({});
+    const interaction = new MockInteraction({ options: { location: 'Area18' } });
     await command.execute(interaction);
     expect(handleTradeCommodities).toHaveBeenCalledWith(interaction);
   });

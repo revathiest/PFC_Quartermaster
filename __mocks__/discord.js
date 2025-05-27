@@ -103,14 +103,19 @@ const StringSelectMenuBuilder = jest.fn().mockImplementation(function () {
   return this;
 });
 
-const ButtonBuilder = jest.fn().mockImplementation(() => ({
-  setCustomId: jest.fn().mockReturnThis(),
-  setLabel: jest.fn().mockReturnThis(),
-  setStyle: jest.fn().mockReturnThis(),
-}));
+const ButtonBuilder = jest.fn().mockImplementation(function () {
+  const data = { customId: undefined, label: undefined, style: undefined, disabled: false };
+  this.setCustomId = jest.fn(id => { data.customId = id; return this; });
+  this.setLabel = jest.fn(label => { data.label = label; return this; });
+  this.setStyle = jest.fn(style => { data.style = style; return this; });
+  this.setDisabled = jest.fn(disabled => { data.disabled = disabled; return this; });
+  this.data = data;
+  return this;
+});
 
 const ButtonStyle = {
   Primary: 1,
+  Secondary: 2,
 };
 
 const SlashCommandBuilder = jest.fn(() => {

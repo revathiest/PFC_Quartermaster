@@ -1,4 +1,4 @@
-const { MockInteraction } = require('../../../../__mocks__/discord.js');
+const { MockInteraction, ButtonBuilder } = require('../../../../__mocks__/discord.js');
 
 jest.mock('../../../../utils/trade/tradeQueries', () => ({
   getSellOptionsAtLocation: jest.fn(),
@@ -48,5 +48,31 @@ describe('handleTradeCommodities', () => {
     await handleTradeCommodities(interaction);
     expect(safeReply).toHaveBeenCalledWith(interaction, expect.stringContaining('No commodity data'));
     expect(warnSpy).toHaveBeenCalled();
+  });
+
+  test('paginates long result with navigation buttons', async () => {
+    const interaction = new MockInteraction({ options: { location: 'Lorville' } });
+    const records = Array.from({ length: 20 }, (_, i) => ({
+      commodity_name: `C${i}`,
+      price_buy: i,
+      price_sell: i + 1,
+      terminal: { nickname: `T${i}` }
+    }));
+    getSellOptionsAtLocation.mockResolvedValue(records);
+    buildCommoditiesEmbed.mockReturnValue({ title: 'embed' });
+
+    await handleTradeCommodities(interaction);
+
+    expect(buildCommoditiesEmbed).toHaveBeenCalledWith('Lorville', expect.any(Array), 0, 4);
+
+    const prev = ButtonBuilder.mock.instances[0];
+    const next = ButtonBuilder.mock.instances[1];
+
+    expect(prev.setCustomId).toHaveBeenCalledWith('trade_commodities_page::Lorville::-1');
+    expect(next.setCustomId).toHaveBeenCalledWith('trade_commodities_page::Lorville::1');
+    expect(prev.setDisabled).toHaveBeenCalledWith(true);
+    expect(next.setDisabled).toHaveBeenCalledWith(false);
+    const components = safeReply.mock.calls[0][1].components;
+    expect(components).toHaveLength(1);
   });
 });

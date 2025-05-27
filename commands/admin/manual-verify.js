@@ -7,7 +7,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('manual-verify')
     .setDescription('Manually verify a user by RSI handle (mods & admins).')
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageNicknames)
     .addUserOption(option =>
       option.setName('user')
         .setDescription('Discord user to verify')
@@ -20,7 +20,7 @@ module.exports = {
   category: 'Admin',
 
   async execute(interaction) {
-    if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
+    if (!interaction.member.permissions.has(PermissionFlagsBits.ManageNicknames)) {
       return interaction.reply({
         content: '❌ Only moderators or administrators can use this command.',
         flags: MessageFlags.Ephemeral

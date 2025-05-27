@@ -15,4 +15,16 @@ describe('/trade commodities subcommand', () => {
     await command.execute(interaction);
     expect(handleTradeCommodities).toHaveBeenCalledWith(interaction);
   });
+
+  test('button interaction defers update and calls handler with page', async () => {
+    const btn = {
+      customId: 'trade_commodities_page::Area18::2',
+      deferUpdate: jest.fn().mockResolvedValue(),
+    };
+
+    await command.button(btn);
+
+    expect(btn.deferUpdate).toHaveBeenCalled();
+    expect(handleTradeCommodities).toHaveBeenCalledWith(btn, { location: 'Area18', page: 2 });
+  });
 });

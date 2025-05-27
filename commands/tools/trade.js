@@ -78,5 +78,34 @@ module.exports = {
         flags: MessageFlags.Ephemeral
       });
     }
+  },
+
+  async button(interaction, client) {
+    const customId = interaction.customId;
+    const [prefix] = customId.split('::');
+
+    if (!prefix.startsWith('trade_')) return;
+
+    const subcommand = prefix.slice('trade_'.length).split('_')[0];
+
+    try {
+      const subcommandModule = require(`./trade/${subcommand}`);
+
+      if (subcommandModule && typeof subcommandModule.button === 'function') {
+        await subcommandModule.button(interaction, client);
+      } else {
+        console.warn(`[TRADE] No button handler function found in "${subcommand}".`);
+        await safeReply(interaction, {
+          content: `❌ No handler for button in "${subcommand}".`,
+          flags: MessageFlags.Ephemeral
+        });
+      }
+    } catch (err) {
+      console.error(`❌ Failed to handle button for subcommand "${subcommand}":`, err);
+      await safeReply(interaction, {
+        content: `❌ Error loading button handler for "${subcommand}".`,
+        flags: MessageFlags.Ephemeral
+      });
+    }
   }
 };

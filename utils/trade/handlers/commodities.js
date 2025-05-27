@@ -19,7 +19,7 @@ const { safeReply } = require('./shared');
 
 // =======================================
 // /trade commodities
-const PAGE_SIZE = 3;
+const PAGE_SIZE = 1;
 const COMMODITIES_PER_FIELD = 20;
 
 function chunkArray(arr, size) {

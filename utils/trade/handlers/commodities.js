@@ -5,33 +5,34 @@ const {
   getSellOptionsAtLocation
 } = require('../tradeQueries');
 
-const {
-  calculateProfitOptions,
-  calculateCircuitTotalProfit
-} = require('../tradeCalculations');
+const { buildCommoditiesEmbed } = require('../tradeEmbeds');
 
 const {
-  buildBestTradesEmbed,
-  buildRouteEmbed,
-  buildCircuitEmbed,
-  buildPriceEmbed,
-  buildShipEmbed,
-  buildLocationsEmbed,
-  buildCommoditiesEmbed
-} = require('../tradeEmbeds');
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle
+} = require('discord.js');
 
-const {
-  buildShipSelectMenu
-} = require('../tradeComponents');
+
 
 const { safeReply } = require('./shared');
 
 // =======================================
 // /trade commodities
-async function handleTradeCommodities(interaction) {
+const PAGE_SIZE = 5;
+
+function chunkArray(arr, size) {
+  const chunks = [];
+  for (let i = 0; i < arr.length; i += size) {
+    chunks.push(arr.slice(i, i + size));
+  }
+  return chunks;
+}
+
+async function handleTradeCommodities(interaction, { location, page = 0 } = {}) {
   try {
-    const location = interaction.options.getString('location');
-    if (DEBUG_TRADE) console.log(`[TRADE HANDLERS] handleTradeCommodities → location=${location}`);
+    location = location || interaction.options.getString('location');
+    if (DEBUG_TRADE) console.log(`[TRADE HANDLERS] handleTradeCommodities → location=${location}, page=${page}`);
 
     const records = await getSellOptionsAtLocation(location);
     if (DEBUG_TRADE) console.log(`[TRADE HANDLERS] Found ${records.length} price records`);
@@ -42,17 +43,41 @@ async function handleTradeCommodities(interaction) {
       return;
     }
 
-    const commodities = records.map(r => ({
-      name: r.commodity_name,
-      buyPrice: r.price_buy,
-      sellPrice: r.price_sell,
-      averagePrice: Math.round(((r.price_buy ?? 0) + (r.price_sell ?? 0)) / 2) || null,
-      margin: r.price_sell != null && r.price_buy != null ? r.price_sell - r.price_buy : null
-    }));
+    const terminalsMap = {};
+    for (const r of records) {
+      const terminalName = r.terminal?.nickname || r.terminal?.name || 'UNKNOWN_TERMINAL';
+      if (!terminalsMap[terminalName]) terminalsMap[terminalName] = [];
+      terminalsMap[terminalName].push({
+        name: r.commodity_name,
+        buyPrice: r.price_buy,
+        sellPrice: r.price_sell
+      });
+    }
+    const terminals = Object.entries(terminalsMap).map(([terminal, commodities]) => ({ terminal, commodities }));
 
-    const embed = buildCommoditiesEmbed(location, commodities);
+    const chunks = chunkArray(terminals, PAGE_SIZE);
+    const pageData = chunks[page] || [];
+
+    const embed = buildCommoditiesEmbed(location, pageData, page, chunks.length);
+
+    const components = [];
+    if (chunks.length > 1) {
+      components.push(new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId(`trade_commodities_page::${location}::${page - 1}`)
+          .setLabel('◀️ Prev')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(page === 0),
+        new ButtonBuilder()
+          .setCustomId(`trade_commodities_page::${location}::${page + 1}`)
+          .setLabel('▶️ Next')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(page >= chunks.length - 1)
+      ));
+    }
+
     if (DEBUG_TRADE) console.log(`[TRADE HANDLERS] Built embed for commodities`);
-    await safeReply(interaction, { embeds: [embed] });
+    await safeReply(interaction, { embeds: [embed], components });
 
   } catch (err) {
     console.error(`[TRADE HANDLERS] handleTradeCommodities error:`, err);

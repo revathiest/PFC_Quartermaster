@@ -42,15 +42,19 @@ async function handleTradeCommodities(interaction) {
       return;
     }
 
-    const commodities = records.map(r => ({
-      name: r.commodity_name,
-      buyPrice: r.price_buy,
-      sellPrice: r.price_sell,
-      averagePrice: Math.round(((r.price_buy ?? 0) + (r.price_sell ?? 0)) / 2) || null,
-      margin: r.price_sell != null && r.price_buy != null ? r.price_sell - r.price_buy : null
-    }));
+    const terminalsMap = {};
+    for (const r of records) {
+      const terminalName = r.terminal?.nickname || r.terminal?.name || 'UNKNOWN_TERMINAL';
+      if (!terminalsMap[terminalName]) terminalsMap[terminalName] = [];
+      terminalsMap[terminalName].push({
+        name: r.commodity_name,
+        buyPrice: r.price_buy,
+        sellPrice: r.price_sell
+      });
+    }
+    const terminals = Object.entries(terminalsMap).map(([terminal, commodities]) => ({ terminal, commodities }));
 
-    const embed = buildCommoditiesEmbed(location, commodities);
+    const embed = buildCommoditiesEmbed(location, terminals);
     if (DEBUG_TRADE) console.log(`[TRADE HANDLERS] Built embed for commodities`);
     await safeReply(interaction, { embeds: [embed] });
 

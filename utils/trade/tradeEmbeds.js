@@ -163,20 +163,18 @@ function buildLocationsEmbed(terminals) {
   }
 }
 
-function buildCommoditiesEmbed(location, commodities) {
+function buildCommoditiesEmbed(location, terminals) {
   try {
-    if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] buildCommoditiesEmbed → location=${location}`, commodities);
+    if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] buildCommoditiesEmbed → location=${location}`, terminals);
 
-    const fields = commodities.slice(0, 25).map(c => ({
-      name: c.name,
-      value: [
-        `Buy: **${c.buyPrice ?? 'N/A'}**`,
-        `Sell: **${c.sellPrice ?? 'N/A'}**`,
-        `Avg: **${c.averagePrice ?? 'N/A'}**`,
-        c.margin != null ? `Profit: **${c.margin}**` : null
-      ].filter(Boolean).join(' | '),
-      inline: false
-    }));
+    const fields = terminals.slice(0, 25).map(t => {
+      const lines = t.commodities.map(c => `${c.name} - Buy: **${c.buyPrice ?? 'N/A'}** | Sell: **${c.sellPrice ?? 'N/A'}**`).join('\n');
+      return {
+        name: t.terminal,
+        value: lines || 'No commodities found',
+        inline: false
+      };
+    });
 
     const embed = new EmbedBuilder()
       .setTitle(`📦 Commodity prices at ${location}`)

@@ -163,17 +163,23 @@ function buildLocationsEmbed(terminals) {
   }
 }
 
+const NAME_WIDTH = 22; // width of the commodity column
+
 function buildCommoditiesEmbed(location, terminals, page = 0, totalPages = 1) {
   try {
     if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] buildCommoditiesEmbed → location=${location}, page=${page}, total=${totalPages}`, terminals);
 
     const fields = terminals.slice(0, 25).map(t => {
-      const header = 'Commodity           |      Buy |     Sell';
+      const header = `${'Commodity'.padEnd(NAME_WIDTH, ' ')} |      Buy |     Sell`;
       const lines = t.commodities
         .map(c => {
           const buy = c.buyPrice ?? 'N/A';
           const sell = c.sellPrice ?? 'N/A';
-          const name = String(c.name).padEnd(18, ' ');
+          let name = String(c.name);
+          if (name.length > NAME_WIDTH) {
+            name = name.slice(0, NAME_WIDTH - 1) + '…';
+          }
+          name = name.padEnd(NAME_WIDTH, ' ');
           return `${name} | ${String(buy).padStart(7, ' ')} | ${String(sell).padStart(7, ' ')}`;
         })
         .join('\n');

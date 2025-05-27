@@ -88,6 +88,17 @@ const {
       expect(value.length).toBeLessThanOrEqual(1024);
       expect(value.endsWith('...```')).toBe(true);
     });
+
+    test('buildCommoditiesEmbed truncates long commodity names', () => {
+      const longName = 'Supercalifragilisticexpialidocious Commodity';
+      const data = [{ terminal: 'T1', commodities: [{ name: longName, buyPrice: 1, sellPrice: 2 }] }];
+      const result = buildCommoditiesEmbed('Area18', data, 0, 1);
+      const value = result.data.fields[0].value;
+      expect(value).toContain('…');
+      const row = value.split('\n')[2];
+      const namePart = row.split('|')[0].trim();
+      expect(namePart.length).toBeLessThanOrEqual(22);
+    });
     
     test('buildLocationsEmbed uses planet_name fallback', () => {
       const result = buildLocationsEmbed([{ name: 'Terminal A', planet_name: 'MicroTech' }]);

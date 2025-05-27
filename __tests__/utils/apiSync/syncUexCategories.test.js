@@ -6,7 +6,18 @@ const { UexCategory } = require('../../../config/database');
 const { syncUexCategories } = require('../../../utils/apiSync/syncUexCategories');
 
 describe('syncUexCategories', () => {
-  beforeEach(() => jest.clearAllMocks());
+  let errorSpy, warnSpy;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    errorSpy.mockRestore();
+    warnSpy.mockRestore();
+  });
 
   test('upserts categories', async () => {
     fetchUexData.mockResolvedValue({ data: [{ id: 1, name: 'C' }] });
@@ -21,5 +32,6 @@ describe('syncUexCategories', () => {
   test('throws on invalid data', async () => {
     fetchUexData.mockResolvedValue({});
     await expect(syncUexCategories()).rejects.toThrow('Expected an array of categories');
+    expect(errorSpy).toHaveBeenCalled();
   });
 });

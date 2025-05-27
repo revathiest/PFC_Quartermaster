@@ -6,7 +6,18 @@ const { UexPoi } = require('../../../config/database');
 const { syncUexPois } = require('../../../utils/apiSync/syncUexPoi');
 
 describe('syncUexPois', () => {
-  beforeEach(() => jest.clearAllMocks());
+  let errorSpy, warnSpy;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    errorSpy.mockRestore();
+    warnSpy.mockRestore();
+  });
 
   test('upserts pois', async () => {
     fetchUexData.mockResolvedValue({ data: [{ id: 1, name: 'poi' }] });
@@ -21,5 +32,6 @@ describe('syncUexPois', () => {
   test('throws on invalid data', async () => {
     fetchUexData.mockResolvedValue({});
     await expect(syncUexPois()).rejects.toThrow('Expected an array of POIs');
+    expect(errorSpy).toHaveBeenCalled();
   });
 });

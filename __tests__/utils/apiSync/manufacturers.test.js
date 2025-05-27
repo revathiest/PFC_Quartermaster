@@ -6,7 +6,18 @@ const { Manufacturer } = require('../../../config/database');
 const { syncManufacturers } = require('../../../utils/apiSync/manufacturers');
 
 describe('syncManufacturers', () => {
-  beforeEach(() => jest.clearAllMocks());
+  let errorSpy, warnSpy;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    errorSpy.mockRestore();
+    warnSpy.mockRestore();
+  });
 
   test('upserts manufacturers', async () => {
     fetchSCData.mockResolvedValue([{ code: 'MISC', name: 'misc', link: 'x' }]);
@@ -21,5 +32,6 @@ describe('syncManufacturers', () => {
   test('throws on invalid data', async () => {
     fetchSCData.mockResolvedValue(null);
     await expect(syncManufacturers()).rejects.toThrow('Expected an array of manufacturers');
+    expect(errorSpy).toHaveBeenCalled();
   });
 });

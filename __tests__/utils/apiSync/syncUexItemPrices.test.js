@@ -9,7 +9,18 @@ const db = require('../../../config/database');
 const { syncUexItemPrices } = require('../../../utils/apiSync/syncUexItemPrices');
 
 describe('syncUexItemPrices', () => {
-  beforeEach(() => jest.clearAllMocks());
+  let errorSpy, warnSpy;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    errorSpy.mockRestore();
+    warnSpy.mockRestore();
+  });
 
   test('upserts item prices', async () => {
     fetchUexData.mockResolvedValue({ data: [{ id: 1, item_name: 'Foo', id_terminal: 3 }] });
@@ -24,5 +35,6 @@ describe('syncUexItemPrices', () => {
   test('throws on invalid data', async () => {
     fetchUexData.mockResolvedValue({});
     await expect(syncUexItemPrices()).rejects.toThrow('Expected an array of item prices');
+    expect(errorSpy).toHaveBeenCalled();
   });
 });

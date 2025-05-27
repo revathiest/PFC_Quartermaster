@@ -18,7 +18,15 @@ const { buildCommoditiesEmbed } = require('../../../../utils/trade/tradeEmbeds')
 const { safeReply } = require('../../../../utils/trade/handlers/shared');
 
 describe('handleTradeCommodities', () => {
-  beforeEach(() => jest.clearAllMocks());
+  let warnSpy;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
+  });
 
   test('sends commodities embed', async () => {
     const interaction = new MockInteraction({});
@@ -37,5 +45,6 @@ describe('handleTradeCommodities', () => {
 
     await handleTradeCommodities(interaction);
     expect(safeReply).toHaveBeenCalledWith(interaction, expect.stringContaining('No known commodities'));
+    expect(warnSpy).toHaveBeenCalled();
   });
 });

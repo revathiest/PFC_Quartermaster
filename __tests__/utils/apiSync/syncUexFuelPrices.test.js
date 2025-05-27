@@ -6,7 +6,18 @@ const { UexFuelPrice } = require('../../../config/database');
 const { syncUexFuelPrices } = require('../../../utils/apiSync/syncUexFuelPrices');
 
 describe('syncUexFuelPrices', () => {
-  beforeEach(() => jest.clearAllMocks());
+  let errorSpy, warnSpy;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    errorSpy.mockRestore();
+    warnSpy.mockRestore();
+  });
 
   test('upserts fuel prices', async () => {
     fetchUexData.mockResolvedValue({ data: [{ id: 1, commodity_name: 'Fuel' }] });
@@ -21,5 +32,6 @@ describe('syncUexFuelPrices', () => {
   test('throws on invalid data', async () => {
     fetchUexData.mockResolvedValue({});
     await expect(syncUexFuelPrices()).rejects.toThrow('Expected an array of fuel price entries');
+    expect(errorSpy).toHaveBeenCalled();
   });
 });

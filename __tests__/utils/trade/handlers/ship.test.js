@@ -18,7 +18,15 @@ const { buildShipEmbed } = require('../../../../utils/trade/tradeEmbeds');
 const { safeReply } = require('../../../../utils/trade/handlers/shared');
 
 describe('handleTradeShip', () => {
-  beforeEach(() => jest.clearAllMocks());
+  let warnSpy;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
+  });
 
   test('sends ship embed', async () => {
     const interaction = new MockInteraction({ options: { name: 'Cutlass' } });
@@ -37,5 +45,6 @@ describe('handleTradeShip', () => {
 
     await handleTradeShip(interaction);
     expect(safeReply).toHaveBeenCalledWith(interaction, expect.stringContaining('not found'));
+    expect(warnSpy).toHaveBeenCalled();
   });
 });

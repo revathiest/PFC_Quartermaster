@@ -18,7 +18,15 @@ const { buildLocationsEmbed } = require('../../../../utils/trade/tradeEmbeds');
 const { safeReply } = require('../../../../utils/trade/handlers/shared');
 
 describe('handleTradeLocations', () => {
-  beforeEach(() => jest.clearAllMocks());
+  let warnSpy;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
+  });
 
   test('sends locations embed', async () => {
     const interaction = new MockInteraction({});
@@ -37,5 +45,6 @@ describe('handleTradeLocations', () => {
 
     await handleTradeLocations(interaction);
     expect(safeReply).toHaveBeenCalledWith(interaction, expect.stringContaining('No known terminals'));
+    expect(warnSpy).toHaveBeenCalled();
   });
 });

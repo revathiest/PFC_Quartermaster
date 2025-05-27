@@ -37,8 +37,8 @@ describe('handleTradeCommodities', () => {
 
     await handleTradeCommodities(interaction);
 
-    expect(buildCommoditiesEmbed).toHaveBeenCalledWith('Area18', expect.any(Array));
-    expect(safeReply).toHaveBeenCalledWith(interaction, { embeds: [{ title: 'embed' }] });
+    expect(buildCommoditiesEmbed).toHaveBeenCalledWith('Area18', expect.any(Array), 0, 1);
+    expect(safeReply).toHaveBeenCalledWith(interaction, { embeds: [{ title: 'embed' }], components: expect.any(Array) });
   });
 
   test('warns when no commodities', async () => {

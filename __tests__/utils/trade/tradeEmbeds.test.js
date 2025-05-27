@@ -66,12 +66,13 @@ const {
       const data = [
         { terminal: 'T1', commodities: [{ name: 'Agricium', buyPrice: 1, sellPrice: 2 }] }
       ];
-      const result = buildCommoditiesEmbed('Area18', data);
+      const result = buildCommoditiesEmbed('Area18', data, 0, 1);
       expect(result.data.title).toContain('Area18');
       expect(result.data.fields[0].name).toBe('T1');
       expect(result.data.fields[0].value).toContain('Agricium');
       expect(result.data.fields[0].value).toContain('Buy:');
       expect(result.data.fields[0].value).not.toContain('Avg');
+      expect(result.data.footer.text).toContain('Page 1 of 1');
     });
     
     test('buildLocationsEmbed uses planet_name fallback', () => {

@@ -163,9 +163,9 @@ function buildLocationsEmbed(terminals) {
   }
 }
 
-function buildCommoditiesEmbed(location, terminals) {
+function buildCommoditiesEmbed(location, terminals, page = 0, totalPages = 1) {
   try {
-    if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] buildCommoditiesEmbed → location=${location}`, terminals);
+    if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] buildCommoditiesEmbed → location=${location}, page=${page}, total=${totalPages}`, terminals);
 
     const fields = terminals.slice(0, 25).map(t => {
       const lines = t.commodities.map(c => `${c.name} - Buy: **${c.buyPrice ?? 'N/A'}** | Sell: **${c.sellPrice ?? 'N/A'}**`).join('\n');
@@ -179,7 +179,7 @@ function buildCommoditiesEmbed(location, terminals) {
     const embed = new EmbedBuilder()
       .setTitle(`📦 Commodity prices at ${location}`)
       .addFields(fields)
-      .setFooter({ text: 'Prices from latest available data.' });
+      .setFooter({ text: `Page ${page + 1} of ${totalPages} • Prices from latest available data.` });
 
     return embed;
   } catch (err) {

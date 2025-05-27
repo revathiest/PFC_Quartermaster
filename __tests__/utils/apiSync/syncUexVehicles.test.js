@@ -6,7 +6,18 @@ const { UexVehicle } = require('../../../config/database');
 const { syncUexVehicles } = require('../../../utils/apiSync/syncUexVehicles');
 
 describe('syncUexVehicles', () => {
-  beforeEach(() => jest.clearAllMocks());
+  let errorSpy, warnSpy;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    errorSpy.mockRestore();
+    warnSpy.mockRestore();
+  });
 
   test('upserts vehicles', async () => {
     fetchUexData.mockResolvedValue({ data: [{ id: 1, name: 'ship' }] });
@@ -21,5 +32,6 @@ describe('syncUexVehicles', () => {
   test('throws on invalid data', async () => {
     fetchUexData.mockResolvedValue({});
     await expect(syncUexVehicles()).rejects.toThrow('Expected an array of vehicles');
+    expect(errorSpy).toHaveBeenCalled();
   });
 });

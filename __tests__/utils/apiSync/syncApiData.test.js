@@ -17,7 +17,16 @@ jest.mock('../../../botactions/api/syncEndpoints', () => ({
 }));
 
 describe('runFullApiSync', () => {
-  beforeEach(() => jest.clearAllMocks());
+  let errorSpy;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    errorSpy.mockRestore();
+  });
 
   test('calls all sync endpoints', async () => {
     const results = await runFullApiSync();
@@ -31,5 +40,6 @@ describe('runFullApiSync', () => {
     syncEndpoints.syncVehicles.mockRejectedValueOnce(new Error('fail'));
     const results = await runFullApiSync();
     expect(results['Vehicles (wiki)']).toEqual({ error: true });
+    expect(errorSpy).toHaveBeenCalled();
   });
 });

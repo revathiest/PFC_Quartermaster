@@ -6,7 +6,18 @@ const { UexTerminal } = require('../../../config/database');
 const { syncUexTerminals } = require('../../../utils/apiSync/syncUexTerminals');
 
 describe('syncUexTerminals', () => {
-  beforeEach(() => jest.clearAllMocks());
+  let errorSpy, warnSpy;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    errorSpy.mockRestore();
+    warnSpy.mockRestore();
+  });
 
   test('upserts terminals', async () => {
     fetchUexData.mockResolvedValue({ data: [{ id: 1, name: 'T' }] });
@@ -21,5 +32,6 @@ describe('syncUexTerminals', () => {
   test('throws on invalid data', async () => {
     fetchUexData.mockResolvedValue({});
     await expect(syncUexTerminals()).rejects.toThrow('Expected an array of terminals');
+    expect(errorSpy).toHaveBeenCalled();
   });
 });

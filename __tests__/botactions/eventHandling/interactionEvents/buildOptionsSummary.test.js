@@ -16,6 +16,15 @@ const mockGuild = {
 };
 
 describe('buildOptionsSummary', () => {
+  let warnSpy;
+
+  beforeEach(() => {
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
+  });
   it('returns "no options" when no options provided', async () => {
     const interaction = { options: { data: [] } };
     const result = await buildOptionsSummary(interaction);
@@ -102,6 +111,7 @@ describe('buildOptionsSummary', () => {
 
     const result = await buildOptionsSummary(interaction);
     expect(result).toBe('chanOpt: <UnknownChannel>');
+    expect(warnSpy).toHaveBeenCalled();
   });
 
   it('resolves MENTIONABLE as user first, then role, or unknown', async () => {

@@ -6,7 +6,18 @@ const { UexVehicleRentalPrice } = require('../../../config/database');
 const { syncUexVehicleRentalPrices } = require('../../../utils/apiSync/syncUexVehicleRentalPrices');
 
 describe('syncUexVehicleRentalPrices', () => {
-  beforeEach(() => jest.clearAllMocks());
+  let errorSpy, warnSpy;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    errorSpy.mockRestore();
+    warnSpy.mockRestore();
+  });
 
   test('upserts vehicle rental prices', async () => {
     fetchUexData.mockResolvedValue({ data: [{ id: 1, vehicle_name: 'ship', id_vehicle: 1, id_terminal: 1 }] });
@@ -21,5 +32,6 @@ describe('syncUexVehicleRentalPrices', () => {
   test('throws on invalid data', async () => {
     fetchUexData.mockResolvedValue({});
     await expect(syncUexVehicleRentalPrices()).rejects.toThrow('Expected an array of vehicle rental price entries');
+    expect(errorSpy).toHaveBeenCalled();
   });
 });

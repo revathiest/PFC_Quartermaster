@@ -18,7 +18,15 @@ const { buildPriceEmbed } = require('../../../../utils/trade/tradeEmbeds');
 const { safeReply } = require('../../../../utils/trade/handlers/shared');
 
 describe('handleTradePrice', () => {
-  beforeEach(() => jest.clearAllMocks());
+  let warnSpy;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
+  });
 
   test('sends price embed', async () => {
     const interaction = new MockInteraction({ options: { commodity: 'Laranite', location: 'Area18' } });
@@ -37,5 +45,6 @@ describe('handleTradePrice', () => {
 
     await handleTradePrice(interaction);
     expect(safeReply).toHaveBeenCalledWith(interaction, expect.stringContaining('No price data'));
+    expect(warnSpy).toHaveBeenCalled();
   });
 });

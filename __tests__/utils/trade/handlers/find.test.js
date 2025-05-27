@@ -23,7 +23,15 @@ const { buildBestTradesEmbed } = require('../../../../utils/trade/tradeEmbeds');
 const { safeReply } = require('../../../../utils/trade/handlers/shared');
 
 describe('handleTradeFind', () => {
-  beforeEach(() => jest.clearAllMocks());
+  let warnSpy;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
+  });
 
   test('returns trades embed when results found', async () => {
     const interaction = new MockInteraction({ options: { from: 'A', to: 'B' } });
@@ -44,5 +52,6 @@ describe('handleTradeFind', () => {
 
     await handleTradeFind(interaction);
     expect(safeReply).toHaveBeenCalledWith(interaction, expect.stringContaining('No trades found'));
+    expect(warnSpy).toHaveBeenCalled();
   });
 });

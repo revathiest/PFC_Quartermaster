@@ -63,7 +63,7 @@ describe('handleTradeCommodities', () => {
 
     await handleTradeCommodities(interaction);
 
-    expect(buildCommoditiesEmbed).toHaveBeenCalledWith('Lorville', expect.any(Array), 0, 7);
+    expect(buildCommoditiesEmbed).toHaveBeenCalledWith('Lorville', expect.any(Array), 0, 20);
 
     const prev = ButtonBuilder.mock.instances[0];
     const next = ButtonBuilder.mock.instances[1];

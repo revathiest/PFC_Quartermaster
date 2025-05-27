@@ -24,5 +24,5 @@ The following utilities previously lacked tests. Dedicated Jest suites now cover
 - utils/trade/handlers/price.js
 - utils/trade/handlers/route.js
 - utils/trade/handlers/ship.js
-
+- 
 All other utilities already have test coverage.

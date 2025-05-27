@@ -11,7 +11,7 @@ jest.mock('../botactions/eventHandling', () => ({
   handleVoiceStateUpdate: jest.fn()
 }));
 jest.mock('../botactions/channelManagement', () => ({ registerChannels: jest.fn() }));
-jest.mock('../utils/commandRegistration', () => jest.fn());
+jest.mock('../utils/commandRegistration', () => ({ registerCommands: jest.fn() }));
 jest.mock('../botactions/configLoader', () => ({ loadConfiguration: jest.fn(() => ({ token: 'TEST_TOKEN' })) }));
 jest.mock('../botactions/scheduling', () => ({ startScheduledAnnouncementEngine: jest.fn() }));
 jest.mock('../botactions/userManagement', () => ({

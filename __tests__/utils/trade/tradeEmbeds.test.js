@@ -62,14 +62,16 @@ const {
       expect(result.data.fields[0].name).toContain('Terminal A');
     });
   
-    test('buildCommoditiesEmbed returns embed with price info', () => {
+    test('buildCommoditiesEmbed returns embed grouped by terminal', () => {
       const data = [
-        { name: 'Agricium', buyPrice: 1, sellPrice: 2, averagePrice: 1.5, margin: 1 }
+        { terminal: 'T1', commodities: [{ name: 'Agricium', buyPrice: 1, sellPrice: 2 }] }
       ];
       const result = buildCommoditiesEmbed('Area18', data);
       expect(result.data.title).toContain('Area18');
-      expect(result.data.fields[0].name).toBe('Agricium');
+      expect(result.data.fields[0].name).toBe('T1');
+      expect(result.data.fields[0].value).toContain('Agricium');
       expect(result.data.fields[0].value).toContain('Buy:');
+      expect(result.data.fields[0].value).not.toContain('Avg');
     });
     
     test('buildLocationsEmbed uses planet_name fallback', () => {

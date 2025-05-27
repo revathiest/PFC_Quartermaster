@@ -30,12 +30,14 @@ describe('handleTradeCommodities', () => {
 
   test('sends commodities embed', async () => {
     const interaction = new MockInteraction({ options: { location: 'Area18' } });
-    getSellOptionsAtLocation.mockResolvedValue([{ commodity_name: 'A', price_buy: 1, price_sell: 2 }]);
+    getSellOptionsAtLocation.mockResolvedValue([
+      { commodity_name: 'A', price_buy: 1, price_sell: 2, terminal: { name: 'T1' } }
+    ]);
     buildCommoditiesEmbed.mockReturnValue({ title: 'embed' });
 
     await handleTradeCommodities(interaction);
 
-    expect(buildCommoditiesEmbed).toHaveBeenCalled();
+    expect(buildCommoditiesEmbed).toHaveBeenCalledWith('Area18', expect.any(Array));
     expect(safeReply).toHaveBeenCalledWith(interaction, { embeds: [{ title: 'embed' }] });
   });
 

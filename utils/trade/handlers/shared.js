@@ -8,6 +8,10 @@ async function safeReply(interaction, payload = {}) {
     return;
   }
 
+  if (typeof payload === 'string') {
+    payload = { content: payload };
+  }
+
   // Always enforce ephemeral visibility
   payload.flags = MessageFlags.Ephemeral;
 

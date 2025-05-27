@@ -46,6 +46,13 @@ describe('safeReply', () => {
     expect(interaction.reply).not.toHaveBeenCalled();
   });
 
+  test('accepts string payloads and wraps with content', async () => {
+    const interaction = createInteraction();
+    await safeReply(interaction, 'hello');
+
+    expect(interaction.reply).toHaveBeenCalledWith({ content: 'hello', flags: MessageFlags.Ephemeral });
+  });
+
   test('errors are caught and logged without throwing', async () => {
     const interaction = createInteraction();
     interaction.reply.mockImplementation(() => { throw new Error('boom'); });

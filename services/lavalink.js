@@ -1,6 +1,14 @@
-const host = process.env.LAVALINK_HOST;
-const port = process.env.LAVALINK_PORT;
-const password = process.env.LAVALINK_PASSWORD;
+const path = require('path');
+let config = {};
+try {
+  config = require(path.join(__dirname, '..', 'config', 'lavalink.json'));
+} catch {
+  // ignore if config file missing; env vars may still be set
+}
+
+const host = process.env.LAVALINK_HOST || config.host;
+const port = process.env.LAVALINK_PORT || config.port;
+const password = process.env.LAVALINK_PASSWORD || config.password;
 
 function buildUrl(path) {
   return `http://${host}:${port}${path}`;

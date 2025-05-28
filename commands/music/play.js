@@ -15,7 +15,11 @@ module.exports = {
   async execute(interaction) {
     const query = interaction.options.getString('query');
     await interaction.deferReply({});
-    await audioManager.enqueue(interaction.guild.id, query);
-    await interaction.editReply({ content: `Queued: ${query}` });
+    try {
+      await audioManager.enqueue(interaction.guild.id, query);
+      await interaction.editReply({ content: `Queued: ${query}` });
+    } catch (err) {
+      await interaction.editReply(`❌ Failed to play track: ${err.message}`);
+    }
   }
 };

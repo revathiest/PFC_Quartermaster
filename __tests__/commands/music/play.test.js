@@ -18,4 +18,16 @@ describe('play command', () => {
     expect(audioManager.enqueue).toHaveBeenCalledWith('g1', 'test');
     expect(interaction.editReply).toHaveBeenCalledWith(expect.objectContaining({ content: expect.stringContaining('Queued') }));
   });
+
+  test('handles enqueue failure', async () => {
+    const interaction = new MockInteraction({ options: { query: 'fail' }, guild: { id: 'g1' } });
+    jest.spyOn(interaction, 'deferReply');
+    jest.spyOn(interaction, 'editReply');
+    audioManager.enqueue.mockRejectedValue(new Error('bad'));
+
+    await play.execute(interaction);
+
+    expect(interaction.deferReply).toHaveBeenCalled();
+    expect(interaction.editReply).toHaveBeenCalledWith(expect.stringContaining('❌'));
+  });
 });

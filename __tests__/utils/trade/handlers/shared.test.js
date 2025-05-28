@@ -63,4 +63,51 @@ describe('safeReply', () => {
 
     spy.mockRestore();
   });
+
+  test('returns silently when given invalid interaction', async () => {
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    await expect(safeReply(null, 'nope')).resolves.toBeUndefined();
+
+    expect(spy).toHaveBeenCalledWith(
+      '[safeReply] Invalid interaction object:',
+      null
+    );
+
+    spy.mockRestore();
+  });
+
+  test('editReply used when interaction was deferred', async () => {
+    const interaction = createInteraction({ deferred: true });
+
+    await safeReply(interaction, { content: 'later' });
+
+    expect(interaction.editReply).toHaveBeenCalledWith({
+      content: 'later',
+      flags: MessageFlags.Ephemeral,
+      embeds: [],
+      components: []
+    });
+    expect(interaction.reply).not.toHaveBeenCalled();
+  });
+});
+
+describe('TradeStateCache helpers', () => {
+  const { TradeStateCache } = require('../../../../utils/trade/handlers/shared');
+
+  afterEach(() => {
+    TradeStateCache.clear();
+  });
+
+  test('get/set/delete/clear manage pendingBest map', () => {
+    TradeStateCache.set('123', { val: 1 });
+    expect(TradeStateCache.get('123')).toEqual({ val: 1 });
+
+    TradeStateCache.delete('123');
+    expect(TradeStateCache.get('123')).toBeUndefined();
+
+    TradeStateCache.set('abc', { val: 2 });
+    TradeStateCache.clear();
+    expect(TradeStateCache.get('abc')).toBeUndefined();
+  });
 });

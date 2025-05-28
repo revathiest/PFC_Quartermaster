@@ -5,7 +5,7 @@ This document summarises tasks required to raise Jest coverage to **100%** acros
 ## 1. Create Test Modules for Untested Files
 - Add a Jest test file for every JavaScript module currently lacking tests. Examples include:
   - `botactions/ambient/ambientEngine.js`
-  - `botactions/utilityFunctions.js` (helpers like `formatTime` and async fetch utilities)
+  - `botactions/utilityFunctions.js` ✅ (helpers like `formatTime` and async fetch utilities)
   - Admin commands such as `addsnapchannel.js`, `lookupuser.js`, and `syncapidata.js`
   - Fun commands like `coinflip.js`, `highcard.js`, and `roll.js`
   - Tool commands (`help.js`, `shipdetails.js`, `uexvehicle.js`)

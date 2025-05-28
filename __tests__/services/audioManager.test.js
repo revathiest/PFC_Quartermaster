@@ -1,6 +1,10 @@
 jest.mock('../../services/lavalink');
+jest.mock('../../services/spotify');
+jest.mock('../../services/youtube');
 
 const lavalink = require('../../services/lavalink');
+const spotify = require('../../services/spotify');
+const youtube = require('../../services/youtube');
 const audio = require('../../services/audioManager');
 
 describe('audioManager', () => {
@@ -8,6 +12,9 @@ describe('audioManager', () => {
     jest.clearAllMocks();
     audio._clear();
     lavalink.loadTrack.mockResolvedValue({ tracks: [{ track: 't1', info: { title: 'Song' } }] });
+    spotify.getPlaylistTracks.mockResolvedValue({ items: [] });
+    spotify.getTrack.mockResolvedValue({ name: 'Track', artists: [{ name: 'Artist' }] });
+    youtube.search.mockResolvedValue('yturl');
   });
 
   test('enqueue loads and plays when queue empty', async () => {
@@ -40,5 +47,33 @@ describe('audioManager', () => {
     expect(lavalink.play).not.toHaveBeenCalled();
     expect(errSpy).toHaveBeenCalledWith('❌ Failed to load track:', 'fail');
     errSpy.mockRestore();
+  });
+
+  test('loads spotify playlist via youtube', async () => {
+    spotify.getPlaylistTracks.mockResolvedValue({
+      items: [
+        { track: { name: 'Song1', artists: [{ name: 'A1' }] } },
+        { track: { name: 'Song2', artists: [{ name: 'A2' }] } }
+      ]
+    });
+    youtube.search
+      .mockResolvedValueOnce('u1')
+      .mockResolvedValueOnce('u2');
+    await audio.enqueue('g', 'https://open.spotify.com/playlist/x');
+    expect(youtube.search).toHaveBeenCalledTimes(2);
+    expect(lavalink.loadTrack).toHaveBeenCalledWith('u1');
+    expect(lavalink.loadTrack).toHaveBeenCalledWith('u2');
+    expect(audio.getQueue('g')).toHaveLength(2);
+    expect(lavalink.play).toHaveBeenCalledWith('g', 't1');
+  });
+
+  test('loads spotify track link', async () => {
+    spotify.getTrack.mockResolvedValue({ name: 'Solo', artists: [{ name: 'Artist' }] });
+    youtube.search.mockResolvedValue('yt');
+    await audio.enqueue('id', 'https://open.spotify.com/track/abc');
+    expect(spotify.getTrack).toHaveBeenCalledWith('abc');
+    expect(youtube.search).toHaveBeenCalledWith('Solo Artist');
+    expect(lavalink.loadTrack).toHaveBeenCalledWith('yt');
+    expect(lavalink.play).toHaveBeenCalledWith('id', 't1');
   });
 });

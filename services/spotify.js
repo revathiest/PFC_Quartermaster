@@ -34,4 +34,20 @@ async function getPlaylistTracks(id) {
   return res.json();
 }
 
-module.exports = { searchTrack, getPlaylistTracks, _resetAuth: () => { token = null; } };
+async function getTrack(id) {
+  const tk = await auth();
+  const res = await fetch(`https://api.spotify.com/v1/tracks/${id}`, {
+    headers: { Authorization: `Bearer ${tk}` }
+  });
+  if (!res.ok) throw new Error('Spotify track fetch failed');
+  return res.json();
+}
+
+module.exports = {
+  searchTrack,
+  getPlaylistTracks,
+  getTrack,
+  _resetAuth: () => {
+    token = null;
+  }
+};

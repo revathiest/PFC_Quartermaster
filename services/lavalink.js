@@ -15,8 +15,13 @@ const password = process.env.LAVALINK_PASSWORD || config.password;
 
 let lavalinkProcess;
 
+function delay(ms) {
+  return new Promise(res => setTimeout(res, ms));
+}
+
 function spawnLavalink() {
   if (lavalinkProcess) return lavalinkProcess;
+  console.log('🧭 Starting local Lavalink...');
   const lavalinkJar = path.join(__dirname, '..', 'lavalink', 'Lavalink.jar');
   lavalinkProcess = spawn('java', ['-Xmx512M', '-jar', lavalinkJar], {
     cwd: path.join(__dirname, '..', 'lavalink'),
@@ -29,8 +34,29 @@ function spawnLavalink() {
   return lavalinkProcess;
 }
 
+async function waitForLavalink(retries = 5, delayMs = 1000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await fetchFn(buildUrl('/version'), {
+        headers: { Authorization: password }
+      });
+      if (res.ok) {
+        console.log('🚀 Lavalink ready.');
+        return;
+      }
+    } catch {
+      // ignore and retry
+    }
+    await delay(delayMs);
+  }
+  console.error('❌ Lavalink failed to start or is unreachable.');
+  throw new Error('Lavalink not reachable');
+}
+
 if (process.env.SPAWN_LOCAL_LAVALINK === 'true') {
   spawnLavalink();
+  // Fire and forget to avoid blocking startup
+  waitForLavalink().catch(() => {});
 }
 
 function buildUrl(path) {
@@ -65,4 +91,4 @@ async function stop(guildId) {
   });
 }
 
-module.exports = { loadTrack, play, stop, spawnLavalink };
+module.exports = { loadTrack, play, stop, spawnLavalink, waitForLavalink };

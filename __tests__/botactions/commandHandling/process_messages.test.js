@@ -3,7 +3,10 @@ jest.mock('../../../messages.json', () => ({
     hello: { action: 'respond', response: 'hi there' },
     bad: { action: 'delete', response: 'nope' }
   },
-  regex: {}
+  regex: {
+    '/abc/': { action: 'respond', response: 'regex hi' },
+    '/bad\\d+/': { action: 'delete', response: 'regex bad' }
+  }
 }), { virtual: true });
 
 const { process_messages } = require('../../../botactions/commandHandling/process_messages');
@@ -39,5 +42,24 @@ describe('process_messages', () => {
     const result = process_messages(message, true, '1');
     expect(result).toBe(false);
     expect(message.channel.send).not.toHaveBeenCalled();
+  });
+
+  test('does nothing when allowmessage is false', () => {
+    process_messages(message, false, '1');
+    expect(message.channel.send).not.toHaveBeenCalled();
+    expect(message.delete).not.toHaveBeenCalled();
+  });
+
+  test('handles regex respond action', () => {
+    message.content = 'abc';
+    process_messages(message, true, '1');
+    expect(message.channel.send).toHaveBeenCalledWith('regex hi');
+  });
+
+  test('handles regex delete with missing response channel', () => {
+    message.content = 'bad123';
+    message.client.channels.cache.clear();
+    process_messages(message, true, 'missing');
+    expect(message.delete).toHaveBeenCalled();
   });
 });

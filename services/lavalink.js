@@ -15,9 +15,14 @@ function buildUrl(path) {
 }
 
 async function loadTrack(query) {
-  const res = await fetch(buildUrl(`/loadtracks?identifier=${encodeURIComponent(query)}`), {
-    headers: { Authorization: password }
-  });
+  let res;
+  try {
+    res = await fetch(buildUrl(`/loadtracks?identifier=${encodeURIComponent(query)}`), {
+      headers: { Authorization: password }
+    });
+  } catch (err) {
+    throw new Error('Lavalink connection failed');
+  }
   if (!res.ok) throw new Error('Failed to load track');
   return res.json();
 }

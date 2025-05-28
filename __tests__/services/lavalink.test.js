@@ -42,4 +42,10 @@ describe('lavalink service config fallback', () => {
       expect.objectContaining({ headers: { Authorization: 'secret' } })
     );
   });
+
+  test('throws error when fetch fails', async () => {
+    global.fetch.mockRejectedValue(new Error('connect error'));
+    lavalink = require('../../services/lavalink');
+    await expect(lavalink.loadTrack('bad')).rejects.toThrow('Lavalink connection failed');
+  });
 });

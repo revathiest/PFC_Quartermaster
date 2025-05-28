@@ -31,4 +31,11 @@ describe('audioManager', () => {
     expect(lavalink.stop).toHaveBeenCalledWith('guild');
     expect(audio.getQueue('guild')).toHaveLength(0);
   });
+
+  test('enqueue propagates errors', async () => {
+    lavalink.loadTrack.mockRejectedValue(new Error('fail'));
+    await expect(audio.enqueue('guild', 'bad')).rejects.toThrow('Failed to load track');
+    expect(audio.getQueue('guild')).toHaveLength(0);
+    expect(lavalink.play).not.toHaveBeenCalled();
+  });
 });

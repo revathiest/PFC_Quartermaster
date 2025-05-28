@@ -11,7 +11,13 @@ function getQueue(guildId) {
 }
 
 async function enqueue(guildId, query) {
-  const data = await lavalink.loadTrack(query);
+  let data;
+  try {
+    data = await lavalink.loadTrack(query);
+  } catch (err) {
+    console.error('❌ Failed to load track:', err);
+    throw new Error('Failed to load track');
+  }
   const track = data.tracks ? data.tracks[0] : data;
   const queue = queues.get(guildId) || [];
   queue.push(track);

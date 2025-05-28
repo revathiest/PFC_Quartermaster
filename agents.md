@@ -95,6 +95,7 @@ include them.
   * Validate fallback behaviour when external services or data sources fail.
   * Confirm expected side effects (e.g. role updates, messages sent, DB writes).
   * Avoid redundant or trivial tests — test coverage must be meaningful.
+  * Where debugging statements cause a reduction in branch coverage, remove the debugging statements.
 
 ### Codex Agent Tasking
 

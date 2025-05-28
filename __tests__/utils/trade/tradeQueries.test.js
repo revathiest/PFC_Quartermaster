@@ -198,6 +198,68 @@ describe('tradeQueries', () => {
     }));
   });
 
+  test('getSellOptionsAtLocation queries across location fields', async () => {
+    UexCommodityPrice.findAll.mockResolvedValue([]);
+    await getSellOptionsAtLocation('Area18');
+    expect(UexCommodityPrice.findAll).toHaveBeenCalledWith(expect.objectContaining({
+      include: expect.arrayContaining([
+        expect.objectContaining({
+          where: {
+            [Op.or]: [
+              { name: 'Area18' },
+              { nickname: 'Area18' },
+              { city_name: 'Area18' },
+              { planet_name: 'Area18' }
+            ]
+          }
+        })
+      ])
+    }));
+  });
+
+  test('getVehicleByName searches all fields with wildcard', async () => {
+    UexVehicle.findAll.mockResolvedValue([]);
+    await getVehicleByName('Cut');
+    expect(UexVehicle.findAll).toHaveBeenCalledWith(expect.objectContaining({
+      where: {
+        [Op.or]: [
+          { name: { [Op.like]: '%Cut%' } },
+          { name_full: { [Op.like]: '%Cut%' } },
+          { slug: { [Op.like]: '%Cut%' } }
+        ]
+      }
+    }));
+  });
+
+  test('getTerminalsAtLocation queries across location fields', async () => {
+    UexTerminal.findAll.mockResolvedValue([]);
+    await getTerminalsAtLocation('Area18');
+    expect(UexTerminal.findAll).toHaveBeenCalledWith(expect.objectContaining({
+      where: {
+        [Op.or]: [
+          { name: 'Area18' },
+          { nickname: 'Area18' },
+          { city_name: 'Area18' },
+          { planet_name: 'Area18' }
+        ]
+      }
+    }));
+  });
+
+  test('getAllShipNames aggregates all name fields', async () => {
+    const vehicles = [{ name: 'A', name_full: 'A Full', slug: 'a' }];
+    UexVehicle.findAll.mockResolvedValue(vehicles);
+    const res = await getAllShipNames();
+    expect(res).toEqual(['A', 'A Full', 'a']);
+  });
+
+  test('getReturnOptions returns empty array if no matching terminals', async () => {
+    UexTerminal.findAll.mockResolvedValue([]);
+    UexCommodityPrice.findAll.mockResolvedValue([{ terminal_name: 'T1' }]);
+    const res = await getReturnOptions('LocA', 'LocB');
+    expect(res).toEqual([]);
+  });
+
   test('getReturnOptions logs error on DB failure', async () => {
     const error = new Error('db fail');
     jest.spyOn(console, 'error').mockImplementation(() => {});

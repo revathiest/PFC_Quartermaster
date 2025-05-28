@@ -88,7 +88,11 @@ describe('lavalink local spawning', () => {
     require('../../services/lavalink');
     expect(spawnMock).toHaveBeenCalledWith(
       'java',
-      ['-Xmx512M', '-jar', expect.stringContaining('lavalink/Lavalink.jar')],
+      [
+        '-Xmx512M',
+        '-jar',
+        expect.stringContaining(path.join('lavalink', 'Lavalink.jar')),
+      ],
       expect.objectContaining({ cwd: expect.stringContaining('lavalink'), detached: true })
     );
   });

@@ -10,7 +10,7 @@ async function sweepVerifiedNicknames(client) {
   console.log('🧽 Sweeping verified nicknames...');
   const guild = client.guilds.cache.first();
   if (!guild) {
-    console.warn('🚫 No guild found in cache. Cannot run sweep.');
+    console.warn('⚠️ No guild found in cache. Cannot run sweep.');
     return;
   }
 

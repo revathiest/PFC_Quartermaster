@@ -104,7 +104,7 @@ async function sendAmbientMessages(client) {
 }
 
 async function startAmbientEngine(client) {
-    console.log('🌀 Ambient engine starting...');
+    console.log('🧭 Ambient engine starting...');
     await refreshAllowedChannels();
     await refreshAmbientSettings();
 

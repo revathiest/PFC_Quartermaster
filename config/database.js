@@ -64,7 +64,7 @@ const initializeDatabase = async () => {
 
         console.log('✅ All models synchronized');
     } catch (error) {
-        console.error('🚫 Unable to synchronize the database:', error);
+        console.error('❌ Unable to synchronize the database:', error);
     }
 };
 

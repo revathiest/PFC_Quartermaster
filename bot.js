@@ -86,7 +86,7 @@ async function safeLogin(client, token, retries = 5) {
   try {
     await client.login(token);
   } catch (error) {
-    console.error('🚫 Failed to login:', error);
+    console.error('❌ Failed to login:', error);
     if (retries > 0) {
       console.log(`🔁 Retrying login in 5 seconds... (${5 - retries + 1}/5)`);
       setTimeout(() => safeLogin(client, token, retries - 1), 5000);
@@ -177,7 +177,7 @@ const initializeBot = async () => {
   try {
     await safeLogin(client, token);
   } catch (error) {
-    console.error('🚫 Failed to login:', error);
+    console.error('❌ Failed to login:', error);
   }
 };
 

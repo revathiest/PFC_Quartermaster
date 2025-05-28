@@ -14,6 +14,7 @@ try {
 const host = process.env.LAVALINK_HOST || config.host;
 const port = process.env.LAVALINK_PORT || config.port;
 const password = process.env.LAVALINK_PASSWORD || config.password;
+const apiPrefix = process.env.LAVALINK_API_PREFIX || '/v4';
 
 let lavalinkProcess;
 
@@ -78,7 +79,7 @@ if (process.env.SPAWN_LOCAL_LAVALINK === 'true') {
 }
 
 function buildUrl(path) {
-  return `http://${host}:${port}${path}`;
+  return `http://${host}:${port}${apiPrefix}${path}`;
 }
 
 async function loadTrack(query) {

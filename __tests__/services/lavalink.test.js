@@ -25,7 +25,7 @@ describe('lavalink service config fallback', () => {
     await lavalink.loadTrack('song');
 
     expect(global.fetch).toHaveBeenCalledWith(
-      `http://${config.host}:${config.port}/loadtracks?identifier=song`,
+      `http://${config.host}:${config.port}/v4/loadtracks?identifier=song`,
       expect.objectContaining({ headers: { Authorization: config.password } })
     );
   });
@@ -39,7 +39,7 @@ describe('lavalink service config fallback', () => {
     await lavalink.loadTrack('track');
 
     expect(global.fetch).toHaveBeenCalledWith(
-      'http://envhost:9999/loadtracks?identifier=track',
+      'http://envhost:9999/v4/loadtracks?identifier=track',
       expect.objectContaining({ headers: { Authorization: 'secret' } })
     );
   });
@@ -78,7 +78,7 @@ describe('lavalink service config fallback', () => {
     await lavalink.loadTrack('song');
 
     expect(nodeFetch).toHaveBeenCalledWith(
-      `http://${config.host}:${config.port}/loadtracks?identifier=song`,
+      `http://${config.host}:${config.port}/v4/loadtracks?identifier=song`,
       expect.objectContaining({ headers: { Authorization: config.password } })
     );
 
@@ -116,7 +116,7 @@ describe('lavalink local spawning', () => {
       expect.objectContaining({ cwd: expect.stringContaining('lavalink'), detached: true })
     );
     expect(global.fetch).toHaveBeenCalledWith(
-      `http://${config.host}:${config.port}/version`,
+      `http://${config.host}:${config.port}/v4/version`,
       expect.objectContaining({ headers: { Authorization: config.password } })
     );
   });
@@ -136,7 +136,7 @@ describe('waitForLavalink', () => {
     const { waitForLavalink } = require('../../services/lavalink');
     await expect(waitForLavalink(1, 0)).resolves.toBeUndefined();
     expect(global.fetch).toHaveBeenCalledWith(
-      `http://${config.host}:${config.port}/version`,
+      `http://${config.host}:${config.port}/v4/version`,
       expect.objectContaining({ headers: { Authorization: config.password } })
     );
   });

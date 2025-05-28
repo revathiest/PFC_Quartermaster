@@ -12,6 +12,7 @@ const {
   UexVehicle,
   sequelize
 } = require('../../../config/database');
+const { Op } = require('sequelize');
 
 const tradeQueries = require('../../../utils/trade/tradeQueries');
 const {
@@ -161,5 +162,52 @@ describe('tradeQueries', () => {
     UexCommodityPrice.findAll.mockRejectedValue(new Error('fail'));
     const res = await getSellPricesForCommodityElsewhere('A', 'Loc');
     expect(res).toEqual([]);
+  });
+
+  test('getCommodityTradeOptions queries by commodity name', async () => {
+    UexCommodityPrice.findAll.mockResolvedValue([]);
+    await getCommodityTradeOptions('Agricium');
+    expect(UexCommodityPrice.findAll).toHaveBeenCalledWith(expect.objectContaining({
+      where: { commodity_name: 'Agricium' }
+    }));
+  });
+
+  test('getBuyOptionsAtLocation filters by buy price and location', async () => {
+    UexCommodityPrice.findAll.mockResolvedValue([]);
+    await getBuyOptionsAtLocation('Area18');
+    expect(UexCommodityPrice.findAll).toHaveBeenCalledWith(expect.objectContaining({
+      where: { price_buy: { [Op.not]: 0 } },
+      include: expect.any(Array)
+    }));
+  });
+
+  test('getSellPricesForCommodityElsewhere excludes given location', async () => {
+    UexCommodityPrice.findAll.mockResolvedValue([]);
+    await getSellPricesForCommodityElsewhere('Laranite', 'Area18');
+    expect(UexCommodityPrice.findAll).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ commodity_name: 'Laranite' }),
+      include: expect.arrayContaining([
+        expect.objectContaining({
+          where: expect.objectContaining({
+            [Op.or]: expect.arrayContaining([
+              expect.objectContaining({ name: { [Op.not]: 'Area18' } })
+            ])
+          })
+        })
+      ])
+    }));
+  });
+
+  test('getReturnOptions logs error on DB failure', async () => {
+    const error = new Error('db fail');
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    UexCommodityPrice.findAll.mockRejectedValue(error);
+    const res = await getReturnOptions('LocA', 'LocB');
+    expect(res).toEqual([]);
+    expect(console.error).toHaveBeenCalledWith(
+      '[TRADE QUERIES] getReturnOptions encountered an error:',
+      error
+    );
+    console.error.mockRestore();
   });
 });

@@ -1,5 +1,6 @@
 const syncEndpoints = require('../../../botactions/api/syncEndpoints');
 const { runFullApiSync } = require('../../../utils/apiSync/syncApiData');
+const { MockInteraction } = require('../../../__mocks__/discord.js');
 
 jest.mock('../../../botactions/api/syncEndpoints', () => ({
   syncManufacturers: jest.fn().mockResolvedValue({}),
@@ -40,6 +41,29 @@ describe('runFullApiSync', () => {
     syncEndpoints.syncVehicles.mockRejectedValueOnce(new Error('fail'));
     const results = await runFullApiSync();
     expect(results['Vehicles (wiki)']).toEqual({ error: true });
+    expect(errorSpy).toHaveBeenCalled();
+  });
+
+  test('updates interaction embed as it runs', async () => {
+    const interaction = new MockInteraction({});
+    const editSpy = jest.spyOn(interaction, 'editReply');
+    const results = await runFullApiSync(interaction);
+    expect(editSpy).toHaveBeenCalledTimes(14);
+    const lastCall = editSpy.mock.calls.at(-1)[0];
+    const embedData = lastCall.embeds[0].toJSON();
+    expect(embedData.title).toBe('✅ API Sync Complete');
+    expect(embedData.description).toContain('Shops');
+    expect(results).toHaveProperty('Points of Interest');
+  });
+
+  test('marks failed endpoint as ERR in table', async () => {
+    syncEndpoints.syncUexFuelPrices.mockRejectedValueOnce(new Error('fail'));
+    const interaction = new MockInteraction({});
+    const editSpy = jest.spyOn(interaction, 'editReply');
+    const results = await runFullApiSync(interaction);
+    const finalDesc = editSpy.mock.calls.at(-1)[0].embeds[0].toJSON().description;
+    expect(finalDesc).toContain('ERR');
+    expect(results['Fuel']).toEqual({ error: true });
     expect(errorSpy).toHaveBeenCalled();
   });
 });

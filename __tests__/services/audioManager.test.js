@@ -34,8 +34,11 @@ describe('audioManager', () => {
 
   test('enqueue propagates errors', async () => {
     lavalink.loadTrack.mockRejectedValue(new Error('fail'));
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     await expect(audio.enqueue('guild', 'bad')).rejects.toThrow('Failed to load track');
     expect(audio.getQueue('guild')).toHaveLength(0);
     expect(lavalink.play).not.toHaveBeenCalled();
+    expect(errSpy).toHaveBeenCalledWith('❌ Failed to load track:', 'fail');
+    errSpy.mockRestore();
   });
 });

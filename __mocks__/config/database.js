@@ -60,7 +60,7 @@ async function initializeDatabase() {
 
     console.log('✅ All models synchronized');
   } catch (error) {
-    console.error('🚫 Unable to synchronize the database:', error);
+    console.error('❌ Unable to synchronize the database:', error);
   }
 }
 

@@ -7,7 +7,7 @@ async function syncOrgTags(client) {
   const guild = client.guilds.cache.first();
 
   if (!guild) {
-    console.warn('🚫 No guild found. Skipping org tag sync.');
+    console.warn('⚠️ No guild found. Skipping org tag sync.');
     return;
   }
 

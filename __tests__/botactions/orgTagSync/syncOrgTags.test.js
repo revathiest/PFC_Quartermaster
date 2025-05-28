@@ -93,7 +93,7 @@ describe('syncOrgTags', () => {
 
     await syncOrgTags(clientWithNoGuild);
 
-    expect(consoleSpy).toHaveBeenCalledWith('🚫 No guild found. Skipping org tag sync.');
+    expect(consoleSpy).toHaveBeenCalledWith('⚠️ No guild found. Skipping org tag sync.');
     consoleSpy.mockRestore();
   });
 

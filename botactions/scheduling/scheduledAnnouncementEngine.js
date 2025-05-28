@@ -58,7 +58,7 @@ async function checkScheduledAnnouncements(client) {
 
 function startScheduledAnnouncementEngine(client) {
     setInterval(() => checkScheduledAnnouncements(client), 60 * 1000);
-    console.log('🌀 Scheduled Announcement engine started');
+    console.log('🧭 Scheduled Announcement engine started');
 }
 
 module.exports = {

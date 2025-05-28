@@ -44,8 +44,14 @@ module.exports = {
   async execute(interaction) {
     // Command logic
   },
-};
+}; 
 ```
+
+### Logging Emojis
+
+Please use the standard set of emojis listed in `LOGGING_EMOJIS.md` for all log
+messages. Avoid introducing new emojis unless the guideline file is updated to
+include them.
 
 ---
 

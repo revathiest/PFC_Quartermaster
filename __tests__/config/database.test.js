@@ -57,7 +57,7 @@ describe('initializeDatabase', () => {
 
     await initializeDatabase();
 
-    expect(mockConsoleError).toHaveBeenCalledWith('🚫 Unable to synchronize the database:', breakingError);
+    expect(mockConsoleError).toHaveBeenCalledWith('❌ Unable to synchronize the database:', breakingError);
 
     // Restore Object.entries afterward to avoid breaking other tests
     Object.entries = originalEntries;

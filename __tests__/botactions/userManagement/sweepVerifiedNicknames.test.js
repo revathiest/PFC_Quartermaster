@@ -92,7 +92,7 @@ describe('sweepVerifiedNicknames', () => {
 
     await sweepVerifiedNicknames(emptyClient);
 
-    expect(mockConsoleWarn).toHaveBeenCalledWith('🚫 No guild found in cache. Cannot run sweep.');
+    expect(mockConsoleWarn).toHaveBeenCalledWith('⚠️ No guild found in cache. Cannot run sweep.');
     mockConsoleWarn.mockRestore();
   });
 

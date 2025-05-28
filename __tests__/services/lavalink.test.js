@@ -45,8 +45,20 @@ describe('lavalink service config fallback', () => {
 
   test('throws error when fetch fails', async () => {
     global.fetch.mockRejectedValue(new Error('connect error'));
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     lavalink = require('../../services/lavalink');
     await expect(lavalink.loadTrack('bad')).rejects.toThrow('Lavalink connection failed');
+    expect(errSpy).toHaveBeenCalledWith('❌ Lavalink connection failed:', 'connect error');
+    errSpy.mockRestore();
+  });
+
+  test('logs status when response not ok', async () => {
+    global.fetch.mockResolvedValue({ ok: false, status: 500 });
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    lavalink = require('../../services/lavalink');
+    await expect(lavalink.loadTrack('bad')).rejects.toThrow('Failed to load track');
+    expect(errSpy).toHaveBeenCalledWith('⚠️ Lavalink responded with status', 500);
+    errSpy.mockRestore();
   });
 
   test('falls back to node-fetch when global fetch missing', async () => {
@@ -72,7 +84,7 @@ describe('lavalink local spawning', () => {
   let spawnMock;
   beforeEach(() => {
     jest.resetModules();
-    spawnMock = jest.fn(() => ({ stdout: { on: jest.fn() }, stderr: { on: jest.fn() }, kill: jest.fn() }));
+    spawnMock = jest.fn(() => ({ stdout: { on: jest.fn() }, stderr: { on: jest.fn() }, on: jest.fn(), kill: jest.fn() }));
     jest.doMock('child_process', () => ({ spawn: spawnMock }));
     process.env.SPAWN_LOCAL_LAVALINK = 'true';
     global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({}) });

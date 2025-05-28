@@ -5,12 +5,10 @@ const { UexCommodityPrice, UexTerminal, UexPoi, UexVehicle } = require('../../co
 
 async function getCommodityTradeOptions(commodityName) {
   try {
-    if (DEBUG_QUERY) console.log(`[TRADE QUERIES] getCommodityTradeOptions → commodityName="${commodityName}"`);
     const results = await UexCommodityPrice.findAll({
       where: { commodity_name: commodityName },
       include: [{ model: UexTerminal, as: 'terminal', required: true, include: [{ model: UexPoi, as: 'poi' }] }]
     });
-    if (DEBUG_QUERY) console.log(`[TRADE QUERIES] getCommodityTradeOptions → found ${results.length} records`);
     return results;
   } catch (err) {
     console.error(`[TRADE QUERIES] getCommodityTradeOptions encountered an error:`, err);
@@ -20,7 +18,6 @@ async function getCommodityTradeOptions(commodityName) {
 
 async function getSellOptionsAtLocation(locationName) {
   try {
-    if (DEBUG_QUERY) console.log(`[TRADE QUERIES] getSellOptionsAtLocation → locationName="${locationName}"`);
     const results = await UexCommodityPrice.findAll({
       include: [{
         model: UexTerminal,
@@ -37,7 +34,6 @@ async function getSellOptionsAtLocation(locationName) {
         include: [{ model: UexPoi, as: 'poi' }]
       }]
     });
-    if (DEBUG_QUERY) console.log(`[TRADE QUERIES] getSellOptionsAtLocation → found ${results.length} records`);
     return results;
   } catch (err) {
     console.error(`[TRADE QUERIES] getSellOptionsAtLocation encountered an error:`, err);
@@ -47,7 +43,6 @@ async function getSellOptionsAtLocation(locationName) {
 
 async function getVehicleByName(shipName) {
   try {
-    if (DEBUG_QUERY) console.log(`[TRADE QUERIES] getVehicleByName → shipName="${shipName}"`);
 
     const vehicles = await UexVehicle.findAll({
       where: {
@@ -60,7 +55,6 @@ async function getVehicleByName(shipName) {
     });
 
     if (vehicles.length) {
-      if (DEBUG_QUERY) console.log(`[TRADE QUERIES] getVehicleByName → found ${vehicles.length} vehicle(s):`, vehicles.map(v => v.name_full ?? v.name));
     } else {
       console.warn(`[TRADE QUERIES] getVehicleByName → no match found for "${shipName}"`);
     }
@@ -75,7 +69,6 @@ async function getVehicleByName(shipName) {
 
 async function getBuyOptionsAtLocation(locationName) {
   try {
-    if (DEBUG_QUERY) console.log(`[TRADE QUERIES] getBuyOptionsAtLocation → locationName="${locationName}"`);
     const results = await UexCommodityPrice.findAll({
       where: { price_buy: { [Op.not]: 0 } },
       include: [{
@@ -93,7 +86,6 @@ async function getBuyOptionsAtLocation(locationName) {
         include: [{ model: UexPoi, as: 'poi' }]
       }]
     });
-    if (DEBUG_QUERY) console.log(`[TRADE QUERIES] getBuyOptionsAtLocation → found ${results.length} records`);
     return results;
   } catch (err) {
     console.error(`[TRADE QUERIES] getBuyOptionsAtLocation encountered an error:`, err);
@@ -103,9 +95,7 @@ async function getBuyOptionsAtLocation(locationName) {
 
 async function getReturnOptions(fromLocation, toLocation) {
   try {
-    if (DEBUG_QUERY) console.log(`[TRADE QUERIES] getReturnOptions → fromLocation="${fromLocation}", toLocation="${toLocation}"`);
     const fromTerminals = await getTerminalsAtLocation(fromLocation);
-    if (DEBUG_QUERY) console.log(`[TRADE QUERIES] getReturnOptions → found ${fromTerminals.length} fromTerminals`);
     const fromTerminalNames = fromTerminals.map(t => t.name);
 
     const records = await UexCommodityPrice.findAll({
@@ -125,10 +115,8 @@ async function getReturnOptions(fromLocation, toLocation) {
         include: [{ model: UexPoi, as: 'poi' }]
       }]
     });
-    if (DEBUG_QUERY) console.log(`[TRADE QUERIES] getReturnOptions → initial records fetched: ${records.length}`);
 
     const filtered = records.filter(record => fromTerminalNames.includes(record.terminal_name));
-    if (DEBUG_QUERY) console.log(`[TRADE QUERIES] getReturnOptions → filtered to ${filtered.length} records matching fromTerminalNames`);
     return filtered;
   } catch (err) {
     console.error(`[TRADE QUERIES] getReturnOptions encountered an error:`, err);
@@ -138,7 +126,6 @@ async function getReturnOptions(fromLocation, toLocation) {
 
 async function getTerminalsAtLocation(locationName) {
   try {
-    if (DEBUG_QUERY) console.log(`[TRADE QUERIES] getTerminalsAtLocation → locationName="${locationName}"`);
     const results = await UexTerminal.findAll({
       where: {
         [Op.or]: [
@@ -149,7 +136,6 @@ async function getTerminalsAtLocation(locationName) {
         ]
       }
     });
-    if (DEBUG_QUERY) console.log(`[TRADE QUERIES] getTerminalsAtLocation → found ${results.length} terminals`);
     return results;
   } catch (err) {
     console.error(`[TRADE QUERIES] getTerminalsAtLocation encountered an error:`, err);
@@ -158,16 +144,13 @@ async function getTerminalsAtLocation(locationName) {
 }
 
 async function getDistanceBetween(locationA, locationB) {
-  if (DEBUG_QUERY) console.log(`[TRADE QUERIES] getDistanceBetween → locationA="${locationA}", locationB="${locationB}" → returning placeholder null`);
   return null;
 }
 
 async function getAllShipNames() {
   try {
-    if (DEBUG_QUERY) console.log(`[TRADE QUERIES] getAllShipNames → fetching ships`);
     const ships = await UexVehicle.findAll({ attributes: ['name', 'name_full', 'slug'] });
     const names = ships.flatMap(ship => [ship.name, ship.name_full, ship.slug].filter(Boolean));
-    if (DEBUG_QUERY) console.log(`[TRADE QUERIES] getAllShipNames → returning ${names.length} names`);
     return names;
   } catch (err) {
     console.error(`[TRADE QUERIES] getAllShipNames encountered an error:`, err);

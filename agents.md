@@ -44,7 +44,7 @@ module.exports = {
   async execute(interaction) {
     // Command logic
   },
-}; 
+};
 ```
 
 ### Logging Emojis
@@ -71,6 +71,19 @@ include them.
 ---
 
 ## 📁 Test Coverage Requirements
+
+### Realistic Coverage Goals
+
+* Aim for **70–80% overall line coverage** as a practical baseline.
+* Ensure **80–90% coverage in critical modules** (e.g., payments, auth, data sanitization) to protect core functionality.
+* Allow **60–70% coverage in low-risk or legacy code** where exhaustive testing yields limited ROI.
+
+### Guiding Principles
+
+1. **Prioritise risk**: Focus on testing business-critical and security-sensitive code first.
+2. **Measure what matters**: Use branch and condition coverage for core logic; line coverage is sufficient for utility and glue code.
+3. **Leverage code reviews** to spot missing or weak tests rather than enforcing rigid percentage gates.
+4. **Automate reports**, but avoid gating PRs solely on coverage thresholds to discourage superficial tests.
 
 ### Unit Testing
 

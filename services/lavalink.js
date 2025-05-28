@@ -45,7 +45,7 @@ function spawnLavalink() {
   return lavalinkProcess;
 }
 
-async function waitForLavalink(retries = 5, delayMs = 1000) {
+async function waitForLavalink(retries = 15, delayMs = 2000) {
   let lastError;
   for (let i = 0; i < retries; i++) {
     const url = buildUrl('/version');

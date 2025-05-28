@@ -1,5 +1,3 @@
-const DEBUG_QUERY = false;
-
 const { Op } = require('sequelize');
 const { UexCommodityPrice, UexTerminal, UexPoi, UexVehicle } = require('../../config/database');
 

@@ -1,6 +1,4 @@
 
-const DEBUG_TRADE = false;
-
 const {
   getSellOptionsAtLocation
 } = require('../tradeQueries');
@@ -33,10 +31,8 @@ function chunkArray(arr, size) {
 async function handleTradeCommodities(interaction, { location, page = 0 } = {}) {
   try {
     location = location || interaction.options.getString('location');
-    if (DEBUG_TRADE) console.log(`[TRADE HANDLERS] handleTradeCommodities → location=${location}, page=${page}`);
 
     const records = await getSellOptionsAtLocation(location);
-    if (DEBUG_TRADE) console.log(`[TRADE HANDLERS] Found ${records.length} price records`);
 
     if (!records.length) {
       console.warn(`[TRADE HANDLERS] No commodity prices found at ${location}`);
@@ -84,7 +80,6 @@ async function handleTradeCommodities(interaction, { location, page = 0 } = {}) 
       ));
     }
 
-    if (DEBUG_TRADE) console.log(`[TRADE HANDLERS] Built embed for commodities`);
     await safeReply(interaction, { embeds: [embed], components });
 
   } catch (err) {

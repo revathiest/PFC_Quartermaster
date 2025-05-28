@@ -1,5 +1,3 @@
-const DEBUG_ROUTE = false;
-
 // commands/tools/trade/route.js
 const { SlashCommandSubcommandBuilder } = require('discord.js');
 const { handleTradeRoute } = require('../../../utils/trade/handlers/route');

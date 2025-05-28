@@ -1,6 +1,4 @@
 
-const DEBUG_TRADE = false;
-
 const {
   getTerminalsAtLocation,
 } = require('../tradeQueries');
@@ -18,9 +16,7 @@ const { safeReply } = require('./shared');
 // /trade locations
 async function handleTradeLocations(interaction) {
     try {
-      if (DEBUG_TRADE) console.log(`[TRADE HANDLERS] handleTradeLocations triggered`);
       const terminals = await getTerminalsAtLocation('%');
-      if (DEBUG_TRADE) console.log(`[TRADE HANDLERS] Found ${terminals.length} terminals`);
   
       if (!terminals.length) {
         console.warn(`[TRADE HANDLERS] No terminals found`);
@@ -29,7 +25,6 @@ async function handleTradeLocations(interaction) {
       }
   
       const embed = buildLocationsEmbed(terminals);
-      if (DEBUG_TRADE) console.log(`[TRADE HANDLERS] Built embed for locations`);
       await safeReply(interaction, { embeds: [embed] });
   
     } catch (err) {

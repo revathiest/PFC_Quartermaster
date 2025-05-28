@@ -1,5 +1,3 @@
-const DEBUG_REGISTER = false;
-
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v10');
 const fs = require('fs');
@@ -13,9 +11,7 @@ function loadCommandsRecursively(dir, commandList = [], commandMap = new Map()) 
     const parentFilePath = path.join(path.dirname(dir), parentFileName);
 
     if (fs.existsSync(parentFilePath)) {
-        if (DEBUG_REGISTER) {
-            console.log(`📁 Skipping subcommand folder "${dir}" — paired with "${parentFileName}"`);
-        }
+        console.log(`📁 Skipping subcommand folder "${dir}" — paired with "${parentFileName}"`);
         return { commandList, commandMap };
     }
 
@@ -26,9 +22,7 @@ function loadCommandsRecursively(dir, commandList = [], commandMap = new Map()) 
             loadCommandsRecursively(fullPath, commandList, commandMap);
         } else if (file.isFile() && file.name.endsWith('.js')) {
             try {
-                if (DEBUG_REGISTER) {
-                    console.log(`🔍 Attempting to load: ${fullPath}`);
-                }
+                console.log(`🔍 Attempting to load: ${fullPath}`);
 
                 const command = require(fullPath);
 
@@ -40,10 +34,8 @@ function loadCommandsRecursively(dir, commandList = [], commandMap = new Map()) 
                 commandList.push(command.data.toJSON());
                 console.log(`✅ Loaded command: ${command.data.name}`);
             } catch (err) {
-                if (DEBUG_REGISTER) {
-                    console.warn(`⚠️ Failed to load "${file.name}": ${err.message}`);
-                    console.warn(err);
-                }
+                console.warn(`⚠️ Failed to load "${file.name}": ${err.message}`);
+                console.warn(err);
             }
         }
     }

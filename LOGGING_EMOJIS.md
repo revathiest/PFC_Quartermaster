@@ -13,6 +13,7 @@ This project uses emojis in log messages to make console output easy to scan. Us
 | ⏰ | Scheduling or date-based info |
 | 🛠️ | Setup or configuration step |
 | 🧩 | Database synchronization |
+| 📦 | Model synchronization |
 | 📌 | Channel or event registration |
 | 🧭 | Engine or scheduled job startup |
 | 🚀 | Engine fully ready |

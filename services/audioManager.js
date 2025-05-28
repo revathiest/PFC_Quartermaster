@@ -15,7 +15,7 @@ async function enqueue(guildId, query) {
   try {
     data = await lavalink.loadTrack(query);
   } catch (err) {
-    console.error('❌ Failed to load track:', err);
+    console.error('❌ Failed to load track:', err.message);
     throw new Error('Failed to load track');
   }
   const track = data.tracks ? data.tracks[0] : data;

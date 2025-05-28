@@ -24,13 +24,12 @@ module.exports = {
     const shipQuery    = interaction.options.getString('with');
     const cash         = interaction.options.getInteger('cash') ?? null;
 
-      console.log(`[BEST][execute] start`, {
-        user: interaction.user.tag,
-        fromLocation,
-        shipQuery,
-        cash
-      });
-    }
+    console.log(`[BEST][execute] start`, {
+      user: interaction.user.tag,
+      fromLocation,
+      shipQuery,
+      cash
+    });
 
     // delegate all of the “best” logic to the handler
     TradeStateCache.set(interaction.user.id, { fromLocation, shipQuery, cash });
@@ -40,11 +39,10 @@ module.exports = {
 
   // Select‐menu handler for when we had multiple variants
   async option(interaction, client) {
-      console.log(
-        `[BEST][option] start`,
-        { customId: interaction.customId, values: interaction.values }
-      );
-    }
+    console.log(
+      `[BEST][option] start`,
+      { customId: interaction.customId, values: interaction.values }
+    );
 
     // only handle our “best” ship menu
     if (!interaction.customId.startsWith('trade::best::select_ship')) {
@@ -56,6 +54,7 @@ module.exports = {
     TradeStateCache.delete(interaction.user.id);
 
     if (!state) {
+      console.log(
         `[BEST][option] no pending request for user=${interaction.user.tag}`
       );
       return interaction.deferUpdate();

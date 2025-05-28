@@ -30,11 +30,18 @@ function spawnLavalink() {
 
   lavalinkProcess.stdout.on('data', data => console.log(`[Lavalink]: ${data}`));
   lavalinkProcess.stderr.on('data', data => console.error(`[Lavalink Error]: ${data}`));
+  lavalinkProcess.on('error', err =>
+    console.error('❌ Lavalink process error:', err.message)
+  );
+  lavalinkProcess.on('close', code => {
+    if (code !== 0) console.error(`⚠️ Lavalink exited with code ${code}`);
+  });
   process.on('exit', () => lavalinkProcess.kill());
   return lavalinkProcess;
 }
 
 async function waitForLavalink(retries = 5, delayMs = 1000) {
+  let lastError;
   for (let i = 0; i < retries; i++) {
     try {
       const res = await fetchFn(buildUrl('/version'), {
@@ -44,12 +51,16 @@ async function waitForLavalink(retries = 5, delayMs = 1000) {
         console.log('🚀 Lavalink ready.');
         return;
       }
-    } catch {
-      // ignore and retry
+      lastError = new Error(`HTTP ${res.status}`);
+      console.error('⚠️ Lavalink connection attempt failed:', `status ${res.status}`);
+    } catch (err) {
+      lastError = err;
+      console.error('⚠️ Lavalink connection attempt failed:', err.message);
     }
     await delay(delayMs);
   }
   console.error('❌ Lavalink failed to start or is unreachable.');
+  if (lastError) console.error('⚠️ Last error:', lastError.message);
   throw new Error('Lavalink not reachable');
 }
 
@@ -70,9 +81,13 @@ async function loadTrack(query) {
       headers: { Authorization: password }
     });
   } catch (err) {
+    console.error('❌ Lavalink connection failed:', err.message);
     throw new Error('Lavalink connection failed');
   }
-  if (!res.ok) throw new Error('Failed to load track');
+  if (!res.ok) {
+    console.error('⚠️ Lavalink responded with status', res.status);
+    throw new Error('Failed to load track');
+  }
   return res.json();
 }
 

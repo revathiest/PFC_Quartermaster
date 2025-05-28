@@ -95,5 +95,35 @@ describe('lavalink local spawning', () => {
       ],
       expect.objectContaining({ cwd: expect.stringContaining('lavalink'), detached: true })
     );
+    expect(global.fetch).toHaveBeenCalledWith(
+      `http://${config.host}:${config.port}/version`,
+      expect.objectContaining({ headers: { Authorization: config.password } })
+    );
+  });
+});
+
+describe('waitForLavalink', () => {
+  beforeEach(() => {
+    jest.resetModules();
+    global.fetch = jest.fn().mockResolvedValue({ ok: true });
+  });
+
+  afterEach(() => {
+    delete global.fetch;
+  });
+
+  test('resolves when server responds', async () => {
+    const { waitForLavalink } = require('../../services/lavalink');
+    await expect(waitForLavalink(1, 0)).resolves.toBeUndefined();
+    expect(global.fetch).toHaveBeenCalledWith(
+      `http://${config.host}:${config.port}/version`,
+      expect.objectContaining({ headers: { Authorization: config.password } })
+    );
+  });
+
+  test('rejects after retries', async () => {
+    global.fetch.mockRejectedValue(new Error('down'));
+    const { waitForLavalink } = require('../../services/lavalink');
+    await expect(waitForLavalink(2, 1)).rejects.toThrow('Lavalink not reachable');
   });
 });

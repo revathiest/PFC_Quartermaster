@@ -65,7 +65,7 @@ include them.
 * [ ] `CHANGELOG.md` updated unless change is trivial/internal-only.
 * [ ] Branch name uses appropriate prefix: `feat/`, `fix/`, `test/`, etc.
 * [ ] Commit messages are concise, descriptive, and reference issues.
-* [ ] Code is modular, documented, and free from console logging.
+* [ ] Code is modular, documented, and minimal console logging.
 * [ ] Mocks cleaned with `beforeEach`/`afterEach`.
 
 ---
@@ -122,7 +122,6 @@ include them.
 * Mock functions that always return `true` without validation.
 * Duplicate tests for identical logic paths.
 * Any raw SQL.
-* Unscoped or excessive logging.
 
 ---
 

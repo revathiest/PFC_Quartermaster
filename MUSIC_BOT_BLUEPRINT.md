@@ -1,10 +1,10 @@
-# 🎧 Discord Music Bot Blueprint (Free & Robust)
+# 🎵 Discord Music Bot Blueprint (Free & Robust)
 
 This document outlines a complete implementation plan for a free, high-quality Discord music bot that integrates Spotify for metadata and plays music via YouTube. This plan avoids legal grey zones as much as possible, and is designed for robustness and scalability.
 
 ---
 
-## 🧱 Architecture Overview
+## 🛡️ Architecture Overview
 
 **Technologies Used:**
 
@@ -14,22 +14,26 @@ This document outlines a complete implementation plan for a free, high-quality D
 * `Spotify Web API`: Metadata only (playlists, track info)
 * `yt-dlp`: Extracts audio from YouTube and other platforms
 
+**Project Language:**
+
+* This project will be built using **JavaScript**.
+
 ---
 
 ## 🗂️ File Structure & Responsibilities
 
-### `commands/music/play.ts`
+### `commands/music/play.js`
 
 * Slash command handler for `/play`
 * Parses user input (Spotify URL, YouTube URL, or search query)
 * Delegates track resolution and queueing to `audioManager`
 
-### `commands/music/queue.ts`
+### `commands/music/queue.js`
 
 * Slash command handler for `/queue`
 * Displays current and upcoming tracks in the queue
 
-### `services/lavalink.ts`
+### `services/lavalink.js`
 
 * Establishes and manages connection to Lavalink server
 * Exposes API to:
@@ -38,21 +42,21 @@ This document outlines a complete implementation plan for a free, high-quality D
   * Start, pause, skip, and stop playback
   * Monitor player state
 
-### `services/spotify.ts`
+### `services/spotify.js`
 
 * Handles Spotify Web API authentication (client credentials grant)
 * Functions:
 
-  * `searchTrack(query: string): SpotifyTrack`
-  * `getPlaylistTracks(playlistId): SpotifyTrack[]`
+  * `searchTrack(query)`: Fetch track metadata from Spotify
+  * `getPlaylistTracks(playlistId)`: Get tracklist from a Spotify playlist
 
-### `services/youtube.ts`
+### `services/youtube.js`
 
 * Uses yt-dlp or YouTube search API to find a playable URL for a given query
 * Matches Spotify metadata to a YouTube video
 * Returns direct streamable URL or Lavalink-compatible ID
 
-### `services/audioManager.ts`
+### `services/audioManager.js`
 
 * Central orchestration for:
 
@@ -61,7 +65,7 @@ This document outlines a complete implementation plan for a free, high-quality D
   * Interfacing with Lavalink
 * Handles retry logic, cleanup, timeouts
 
-### `utils/cache.ts`
+### `utils/cache.js`
 
 * Optional caching layer to store mappings:
 
@@ -84,6 +88,7 @@ This document outlines a complete implementation plan for a free, high-quality D
 * **yt-dlp:**
 
   * CLI tool to extract direct audio stream URLs
+  * Ensure `yt-dlp` is installed and available in your runtime environment
 
 * **Spotify Developer Account:**
 
@@ -112,6 +117,7 @@ This document outlines a complete implementation plan for a free, high-quality D
 
 * Use track name + artist to find corresponding YouTube video
 * Can use search APIs or yt-dlp directly
+* Ensure yt-dlp usage complies with YouTube’s Terms of Service
 
 ### 5. **Voice Channel Playback**
 
@@ -122,6 +128,7 @@ This document outlines a complete implementation plan for a free, high-quality D
 ### 6. **Queue Management**
 
 * Track state per guild (in-memory or with Sequelize)
+* Consider using Sequelize with a DB like MySQL for persistence
 * Commands: `add`, `skip`, `pause`, `resume`, `show`
 
 ### 7. **Slash Command Setup**
@@ -137,7 +144,7 @@ This document outlines a complete implementation plan for a free, high-quality D
 
 ---
 
-## 🧠 Optional Enhancements
+## 🧫 Optional Enhancements
 
 * **Spotify-YouTube Mapping Cache**
 * **Audio Filters via Lavalink**
@@ -159,6 +166,7 @@ This document outlines a complete implementation plan for a free, high-quality D
   * Queue logic
   * Command resolution
   * API fallback behaviour
+* Expand integration tests to simulate Discord interactions
 
 ---
 
@@ -172,3 +180,7 @@ LAVALINK_PORT=...
 LAVALINK_PASSWORD=...
 YTDLP_PATH=/usr/bin/yt-dlp
 ```
+
+> **Security Note:** Store these securely using `.env` files or secrets management tools like Docker secrets, GitHub Actions secrets, or AWS Secrets Manager.
+
+---

@@ -115,18 +115,65 @@ const {
       });      
     });
   
-    describe('calculateProfitPerJump', () => {
-      test('returns total profit if jumpCount = 0', () => {
-        expect(calculateProfitPerJump(5000, 0)).toBe(5000);
-      });
+  describe('calculateProfitPerJump', () => {
+    test('returns total profit if jumpCount = 0', () => {
+      expect(calculateProfitPerJump(5000, 0)).toBe(5000);
+    });
   
       test('returns profit per jump', () => {
         expect(calculateProfitPerJump(5000, 5)).toBe(1000);
       });
 
       test('handles negative jumpCount by returning totalProfit', () => {
-        expect(calculateProfitPerJump(5000, -2)).toBe(5000);
-      });      
+      expect(calculateProfitPerJump(5000, -2)).toBe(5000);
     });
   });
+
+  describe('additional edge cases', () => {
+    test('uses ship capacity when cash is null and includes sellTerminal', () => {
+      const records = [{
+        commodity_name: 'Titanium',
+        price_buy: 10,
+        price_sell: 20,
+        scu_buy: 5,
+        terminal: { name: 'T1', poi: { name: 'Loc' } },
+        sellTerminal: { name: 'SellT' }
+      }];
+      const res = calculateProfitOptions(records, 10, null);
+      expect(res[0].cargoUsed).toBe(5);
+      expect(res[0].toTerminal).toBe('SellT');
+    });
+
+    test('skips option when cash insufficient', () => {
+      const records = [{
+        commodity_name: 'Laranite',
+        price_buy: 200,
+        price_sell: 300,
+        scu_buy: 5,
+        terminal: { name: 'T1', poi: { name: 'Loc' } }
+      }];
+      const res = calculateProfitOptions(records, 10, 100);
+      expect(res).toEqual([]);
+    });
+
+    test('results sorted by profit per SCU', () => {
+      const records = [
+        { commodity_name: 'A', price_buy: 10, price_sell: 20, scu_buy: 10, terminal: { name: 'T1', poi: { name: 'L' } } },
+        { commodity_name: 'B', price_buy: 5, price_sell: 30, scu_buy: 10, terminal: { name: 'T1', poi: { name: 'L' } } }
+      ];
+      const res = calculateProfitOptions(records, 10, 1000);
+      expect(res[0].commodity).toBe('B');
+      expect(res[0].returnOnInvestment).toBe('500%');
+      expect(res[1].commodity).toBe('A');
+    });
+
+    test('returns empty array on invalid input', () => {
+      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const res = calculateProfitOptions(null);
+      expect(res).toEqual([]);
+      expect(spy).toHaveBeenCalled();
+      spy.mockRestore();
+    });
+  });
+});
   

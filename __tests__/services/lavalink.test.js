@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const config = require('../../config/lavalink.json');
 
 describe('lavalink service config fallback', () => {
@@ -48,7 +49,10 @@ describe('lavalink service config fallback', () => {
     const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     lavalink = require('../../services/lavalink');
     await expect(lavalink.loadTrack('bad')).rejects.toThrow('Lavalink connection failed');
-    expect(errSpy).toHaveBeenCalledWith('❌ Lavalink connection failed:', 'connect error');
+    expect(errSpy).toHaveBeenCalledWith(
+      expect.stringContaining('❌ Lavalink connection failed ('),
+      expect.stringContaining('connect error')
+    );
     errSpy.mockRestore();
   });
 
@@ -57,7 +61,9 @@ describe('lavalink service config fallback', () => {
     const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     lavalink = require('../../services/lavalink');
     await expect(lavalink.loadTrack('bad')).rejects.toThrow('Failed to load track');
-    expect(errSpy).toHaveBeenCalledWith('⚠️ Lavalink responded with status', 500);
+    expect(errSpy).toHaveBeenCalledWith(
+      expect.stringContaining('⚠️ Lavalink responded with status 500')
+    );
     errSpy.mockRestore();
   });
 
@@ -86,12 +92,14 @@ describe('lavalink local spawning', () => {
     jest.resetModules();
     spawnMock = jest.fn(() => ({ stdout: { on: jest.fn() }, stderr: { on: jest.fn() }, on: jest.fn(), kill: jest.fn() }));
     jest.doMock('child_process', () => ({ spawn: spawnMock }));
+    jest.spyOn(fs, 'existsSync').mockReturnValue(true);
     process.env.SPAWN_LOCAL_LAVALINK = 'true';
     global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
   });
 
   afterEach(() => {
     jest.dontMock('child_process');
+    fs.existsSync.mockRestore();
     delete process.env.SPAWN_LOCAL_LAVALINK;
     delete global.fetch;
   });

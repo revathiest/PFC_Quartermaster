@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const { spawn } = require('child_process');
 // Use builtin fetch when available, otherwise fall back to node-fetch
 const fetchFn = global.fetch || require('node-fetch');
@@ -21,8 +22,12 @@ function delay(ms) {
 
 function spawnLavalink() {
   if (lavalinkProcess) return lavalinkProcess;
-  console.log('🧭 Starting local Lavalink...');
   const lavalinkJar = path.join(__dirname, '..', 'lavalink', 'Lavalink.jar');
+  if (!fs.existsSync(lavalinkJar)) {
+    console.error(`❌ Lavalink jar not found at ${lavalinkJar}`);
+    return undefined;
+  }
+  console.log('🧭 Starting local Lavalink...');
   lavalinkProcess = spawn('java', ['-Xmx512M', '-jar', lavalinkJar], {
     cwd: path.join(__dirname, '..', 'lavalink'),
     detached: true
@@ -43,8 +48,9 @@ function spawnLavalink() {
 async function waitForLavalink(retries = 5, delayMs = 1000) {
   let lastError;
   for (let i = 0; i < retries; i++) {
+    const url = buildUrl('/version');
     try {
-      const res = await fetchFn(buildUrl('/version'), {
+      const res = await fetchFn(url, {
         headers: { Authorization: password }
       });
       if (res.ok) {
@@ -52,15 +58,15 @@ async function waitForLavalink(retries = 5, delayMs = 1000) {
         return;
       }
       lastError = new Error(`HTTP ${res.status}`);
-      console.error('⚠️ Lavalink connection attempt failed:', `status ${res.status}`);
+      console.error(`⚠️ Lavalink connection attempt to ${url} failed with status ${res.status}`);
     } catch (err) {
       lastError = err;
-      console.error('⚠️ Lavalink connection attempt failed:', err.message);
+      console.error(`⚠️ Lavalink connection attempt to ${url} failed:`, err.stack || err.message);
     }
     await delay(delayMs);
   }
   console.error('❌ Lavalink failed to start or is unreachable.');
-  if (lastError) console.error('⚠️ Last error:', lastError.message);
+  if (lastError) console.error('⚠️ Last error:', lastError.stack || lastError.message);
   throw new Error('Lavalink not reachable');
 }
 
@@ -76,16 +82,17 @@ function buildUrl(path) {
 
 async function loadTrack(query) {
   let res;
+  const url = buildUrl(`/loadtracks?identifier=${encodeURIComponent(query)}`);
   try {
-    res = await fetchFn(buildUrl(`/loadtracks?identifier=${encodeURIComponent(query)}`), {
+    res = await fetchFn(url, {
       headers: { Authorization: password }
     });
   } catch (err) {
-    console.error('❌ Lavalink connection failed:', err.message);
+    console.error(`❌ Lavalink connection failed (${url}):`, err.stack || err.message);
     throw new Error('Lavalink connection failed');
   }
   if (!res.ok) {
-    console.error('⚠️ Lavalink responded with status', res.status);
+    console.error(`⚠️ Lavalink responded with status ${res.status} for ${url}`);
     throw new Error('Failed to load track');
   }
   return res.json();

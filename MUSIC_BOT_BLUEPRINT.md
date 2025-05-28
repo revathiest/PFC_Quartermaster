@@ -41,6 +41,7 @@ This document outlines a complete implementation plan for a free, high-quality D
   * Load tracks
   * Start, pause, skip, and stop playback
   * Monitor player state
+* bootstraps Lavalink as a child process
 
 ### `services/spotify.js`
 
@@ -75,6 +76,7 @@ This document outlines a complete implementation plan for a free, high-quality D
 ### `config/lavalink.json`
 
 * Lavalink server configuration (host, port, password, etc.)
+* Supports toggle for local Lavalink spawning
 
 ---
 
@@ -83,7 +85,7 @@ This document outlines a complete implementation plan for a free, high-quality D
 * **Lavalink Server:**
 
   * Java-based audio node
-  * Deployed on local server or free VPS
+  * Can be deployed on local server, free VPS, or **bootstrapped directly by the bot** using Node’s `child_process` module
 
 * **yt-dlp:**
 
@@ -98,10 +100,29 @@ This document outlines a complete implementation plan for a free, high-quality D
 
 ## 🛠️ Core Implementation Steps
 
-### 1. **Deploy Lavalink**
+### 1. **Bootstrap Lavalink (Optional Local Mode)**
 
-* Host Lavalink with ports open for REST and WebSocket
-* Secure with password
+* Include Lavalink `.jar` and `application.yml` in a `lavalink/` directory
+* In `services/lavalink.js`, use `child_process.spawn` to start Lavalink:
+
+```js
+const { spawn } = require('child_process');
+const path = require('path');
+
+const lavalinkJar = path.join(__dirname, '../lavalink/Lavalink.jar');
+
+const lavalinkProcess = spawn('java', ['-Xmx512M', '-jar', lavalinkJar], {
+  cwd: path.join(__dirname, '../lavalink'),
+  detached: true,
+});
+
+lavalinkProcess.stdout.on('data', data => console.log(`[Lavalink]: ${data}`));
+lavalinkProcess.stderr.on('data', data => console.error(`[Lavalink Error]: ${data}`));
+
+process.on('exit', () => lavalinkProcess.kill());
+```
+
+* Adjust config to point to `localhost:2333` as the Lavalink host
 
 ### 2. **Lavalink Client in Bot**
 
@@ -175,9 +196,9 @@ This document outlines a complete implementation plan for a free, high-quality D
 ```env
 SPOTIFY_CLIENT_ID=...
 SPOTIFY_CLIENT_SECRET=...
-LAVALINK_HOST=...
-LAVALINK_PORT=...
-LAVALINK_PASSWORD=...
+LAVALINK_HOST=localhost
+LAVALINK_PORT=2333
+LAVALINK_PASSWORD=youshallnotpass
 YTDLP_PATH=/usr/bin/yt-dlp
 ```
 

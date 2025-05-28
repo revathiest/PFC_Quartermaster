@@ -13,6 +13,7 @@ const {
   sequelize
 } = require('../../../config/database');
 
+const tradeQueries = require('../../../utils/trade/tradeQueries');
 const {
   getCommodityTradeOptions,
   getSellOptionsAtLocation,
@@ -21,8 +22,9 @@ const {
   getAllShipNames,
   getReturnOptions,
   getTerminalsAtLocation,
-  getDistanceBetween
-} = require('../../../utils/trade/tradeQueries');
+  getDistanceBetween,
+  getSellPricesForCommodityElsewhere
+} = tradeQueries;
 
 describe('tradeQueries', () => {
   beforeEach(() => {
@@ -98,5 +100,66 @@ describe('tradeQueries', () => {
   test('getDistanceBetween returns null placeholder', async () => {
     const res = await getDistanceBetween('A', 'B');
     expect(res).toBeNull();
+  });
+
+  test('getSellOptionsAtLocation returns empty array on error', async () => {
+    UexCommodityPrice.findAll.mockRejectedValue(new Error('db'));
+    const res = await getSellOptionsAtLocation('Area18');
+    expect(res).toEqual([]);
+  });
+
+  test('getBuyOptionsAtLocation returns empty array on error', async () => {
+    UexCommodityPrice.findAll.mockRejectedValue(new Error('db'));
+    const res = await getBuyOptionsAtLocation('Area18');
+    expect(res).toEqual([]);
+  });
+
+  test('getVehicleByName warns when no match found', async () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    UexVehicle.findAll.mockResolvedValue([]);
+    const res = await getVehicleByName('Unknown');
+    expect(res).toEqual([]);
+    expect(warnSpy).toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
+
+  test('getAllShipNames returns empty array on error', async () => {
+    UexVehicle.findAll.mockRejectedValue(new Error('oops'));
+    const res = await getAllShipNames();
+    expect(res).toEqual([]);
+  });
+
+  test('getTerminalsAtLocation returns empty array on error', async () => {
+    UexTerminal.findAll.mockRejectedValue(new Error('bad'));
+    const res = await getTerminalsAtLocation('Area18');
+    expect(res).toEqual([]);
+  });
+
+  test('getReturnOptions filters by terminal names', async () => {
+    UexTerminal.findAll.mockResolvedValue([{ name: 'T1' }]);
+    const records = [{ terminal_name: 'T1' }, { terminal_name: 'T2' }];
+    UexCommodityPrice.findAll.mockResolvedValue(records);
+    const res = await getReturnOptions('LocA', 'LocB');
+    expect(res).toEqual([{ terminal_name: 'T1' }]);
+  });
+
+  test('getReturnOptions returns empty array on error', async () => {
+    UexTerminal.findAll.mockRejectedValue(new Error('fail'));
+    const res = await getReturnOptions('LocA', 'LocB');
+    expect(res).toEqual([]);
+  });
+
+  test('getSellPricesForCommodityElsewhere returns DB results', async () => {
+    const rows = [{ id: 1 }];
+    UexCommodityPrice.findAll.mockResolvedValue(rows);
+    const res = await getSellPricesForCommodityElsewhere('A', 'Loc');
+    expect(UexCommodityPrice.findAll).toHaveBeenCalled();
+    expect(res).toBe(rows);
+  });
+
+  test('getSellPricesForCommodityElsewhere returns empty array on error', async () => {
+    UexCommodityPrice.findAll.mockRejectedValue(new Error('fail'));
+    const res = await getSellPricesForCommodityElsewhere('A', 'Loc');
+    expect(res).toEqual([]);
   });
 });

@@ -170,6 +170,50 @@ const {
       const result = buildLocationsEmbed(input);
       expect(result.data.fields).toHaveLength(10);
     });
-    
+
+    describe('error handling', () => {
+      beforeEach(() => {
+        jest.spyOn(console, 'error').mockImplementation(() => {});
+      });
+      afterEach(() => {
+        console.error.mockRestore();
+      });
+
+      test('buildBestTradesEmbed failure path', () => {
+        const res = buildBestTradesEmbed('Port', null);
+        expect(res.data.title).toContain('Failed to build trade embed');
+      });
+
+      test('buildRouteEmbed failure path', () => {
+        const res = buildRouteEmbed('A', 'B', null);
+        expect(res.data.title).toContain('Failed to build route embed');
+      });
+
+      test('buildCircuitEmbed failure path', () => {
+        const res = buildCircuitEmbed(null, null, 'Loc');
+        expect(res.data.title).toContain('Failed to build circuit embed');
+      });
+
+      test('buildPriceEmbed failure path', () => {
+        const res = buildPriceEmbed('A', 'Loc', null);
+        expect(res.data.title).toContain('Failed to build price embed');
+      });
+
+      test('buildShipEmbed failure path', () => {
+        const res = buildShipEmbed(null);
+        expect(res.data.title).toContain('Failed to build ship embed');
+      });
+
+      test('buildLocationsEmbed failure path', () => {
+        const res = buildLocationsEmbed(null);
+        expect(res.data.title).toContain('Failed to build locations embed');
+      });
+
+      test('buildCommoditiesEmbed failure path', () => {
+        const res = buildCommoditiesEmbed('L', null);
+        expect(res.data.title).toContain('Failed to build commodities embed');
+      });
+    });
+
   });
   

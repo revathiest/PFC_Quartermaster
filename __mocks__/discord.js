@@ -164,6 +164,9 @@ const SlashCommandBuilder = jest.fn(() => {
     setDefaultMemberPermissions() {
       return this;
     },
+    setDMPermission() {
+      return this;
+    },
   };
   return builder;
 });

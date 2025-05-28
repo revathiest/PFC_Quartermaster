@@ -132,6 +132,7 @@ include them.
 * Avoid unnecessary complexity.
 * Use dependency injection for testability.
 * Ensure clear separation between Discord I/O, DB logic, and pure utilities.
+* Ensure that all tests have proper teardown.  use --detectOpenHandles to find leaks.  Ensure that .unref() is called on any active timers.
 
 ---
 

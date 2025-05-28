@@ -1,4 +1,6 @@
 const path = require('path');
+// Use builtin fetch when available, otherwise fall back to node-fetch
+const fetchFn = global.fetch || require('node-fetch');
 let config = {};
 try {
   config = require(path.join(__dirname, '..', 'config', 'lavalink.json'));
@@ -17,7 +19,7 @@ function buildUrl(path) {
 async function loadTrack(query) {
   let res;
   try {
-    res = await fetch(buildUrl(`/loadtracks?identifier=${encodeURIComponent(query)}`), {
+    res = await fetchFn(buildUrl(`/loadtracks?identifier=${encodeURIComponent(query)}`), {
       headers: { Authorization: password }
     });
   } catch (err) {
@@ -28,7 +30,7 @@ async function loadTrack(query) {
 }
 
 async function play(guildId, track) {
-  return fetch(buildUrl(`/sessions/${guildId}/players/${guildId}`), {
+  return fetchFn(buildUrl(`/sessions/${guildId}/players/${guildId}`), {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', Authorization: password },
     body: JSON.stringify({ encodedTrack: track })
@@ -36,7 +38,7 @@ async function play(guildId, track) {
 }
 
 async function stop(guildId) {
-  return fetch(buildUrl(`/sessions/${guildId}/players/${guildId}`), {
+  return fetchFn(buildUrl(`/sessions/${guildId}/players/${guildId}`), {
     method: 'DELETE',
     headers: { Authorization: password }
   });

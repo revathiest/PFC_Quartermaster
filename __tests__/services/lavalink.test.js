@@ -48,4 +48,22 @@ describe('lavalink service config fallback', () => {
     lavalink = require('../../services/lavalink');
     await expect(lavalink.loadTrack('bad')).rejects.toThrow('Lavalink connection failed');
   });
+
+  test('falls back to node-fetch when global fetch missing', async () => {
+    jest.resetModules();
+    jest.doMock('node-fetch', () => jest.fn().mockResolvedValue({ ok: true, json: async () => ({}) }));
+    delete global.fetch;
+
+    lavalink = require('../../services/lavalink');
+    const nodeFetch = require('node-fetch');
+
+    await lavalink.loadTrack('song');
+
+    expect(nodeFetch).toHaveBeenCalledWith(
+      `http://${config.host}:${config.port}/loadtracks?identifier=song`,
+      expect.objectContaining({ headers: { Authorization: config.password } })
+    );
+
+    jest.dontMock('node-fetch');
+  });
 });

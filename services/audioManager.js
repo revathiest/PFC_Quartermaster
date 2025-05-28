@@ -32,6 +32,15 @@ async function enqueue(guildId, query) {
   queues.set(guildId, queue);
 }
 
+function isUrl(str) {
+  try {
+    new URL(str);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function resolveQuery(query) {
   if (query.includes('open.spotify.com/')) {
     try {
@@ -54,6 +63,14 @@ async function resolveQuery(query) {
       }
     } catch (err) {
       console.error('❌ Failed to process Spotify query:', err.message);
+      throw new Error('Failed to load track');
+    }
+  }
+  if (!isUrl(query)) {
+    try {
+      return [await youtube.search(query)];
+    } catch (err) {
+      console.error('❌ Failed to search YouTube:', err.message);
       throw new Error('Failed to load track');
     }
   }

@@ -16,29 +16,31 @@ async function auth() {
   return token;
 }
 
+async function fetchSpotify(url) {
+  let tk = await auth();
+  let res = await fetch(url, { headers: { Authorization: `Bearer ${tk}` } });
+  if (!res.ok && res.status === 401) {
+    token = null;
+    tk = await auth();
+    res = await fetch(url, { headers: { Authorization: `Bearer ${tk}` } });
+  }
+  return res;
+}
+
 async function searchTrack(query) {
-  const tk = await auth();
-  const res = await fetch(`https://api.spotify.com/v1/search?type=track&limit=1&q=${encodeURIComponent(query)}`, {
-    headers: { Authorization: `Bearer ${tk}` }
-  });
+  const res = await fetchSpotify(`https://api.spotify.com/v1/search?type=track&limit=1&q=${encodeURIComponent(query)}`);
   if (!res.ok) throw new Error('Spotify search failed');
   return res.json();
 }
 
 async function getPlaylistTracks(id) {
-  const tk = await auth();
-  const res = await fetch(`https://api.spotify.com/v1/playlists/${id}/tracks`, {
-    headers: { Authorization: `Bearer ${tk}` }
-  });
+  const res = await fetchSpotify(`https://api.spotify.com/v1/playlists/${id}/tracks`);
   if (!res.ok) throw new Error('Spotify playlist fetch failed');
   return res.json();
 }
 
 async function getTrack(id) {
-  const tk = await auth();
-  const res = await fetch(`https://api.spotify.com/v1/tracks/${id}`, {
-    headers: { Authorization: `Bearer ${tk}` }
-  });
+  const res = await fetchSpotify(`https://api.spotify.com/v1/tracks/${id}`);
   if (!res.ok) throw new Error('Spotify track fetch failed');
   return res.json();
 }

@@ -3,6 +3,7 @@ const fs = require('fs');
 const { spawn } = require('child_process');
 // Use builtin fetch when available, otherwise fall back to node-fetch
 const fetchFn = global.fetch || require('node-fetch');
+const debugLog = require('../utils/debugLogger');
 let config = {};
 try {
   config = require(path.join(__dirname, '..', 'config', 'lavalink.json'));
@@ -83,6 +84,7 @@ function buildUrl(path) {
 async function loadTrack(query) {
   let res;
   const url = buildUrl(`/loadtracks?identifier=${encodeURIComponent(query)}`);
+  debugLog('Loading track via Lavalink:', url);
   try {
     res = await fetchFn(url, {
       headers: { Authorization: password }
@@ -95,6 +97,7 @@ async function loadTrack(query) {
     console.error(`⚠️ Lavalink responded with status ${res.status} for ${url}`);
     throw new Error('Failed to load track');
   }
+  debugLog('Lavalink loadTrack status:', res.status);
   return res.json();
 }
 

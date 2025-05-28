@@ -1,6 +1,7 @@
 const lavalink = require('./lavalink');
 const spotify = require('./spotify');
 const youtube = require('./youtube');
+const debugLog = require('../utils/debugLogger');
 
 const queues = new Map();
 
@@ -13,6 +14,7 @@ function getQueue(guildId) {
 }
 
 async function enqueue(guildId, query) {
+  debugLog('Enqueue request', guildId, query);
   const queue = queues.get(guildId) || [];
   const targets = await resolveQuery(query);
   for (const target of targets) {
@@ -24,6 +26,7 @@ async function enqueue(guildId, query) {
       throw new Error('Failed to load track');
     }
     const track = data.tracks ? data.tracks[0] : data;
+    debugLog('Resolved track', track.info?.title || track.track);
     queue.push(track);
     if (queue.length === 1) {
       await lavalink.play(guildId, track.track || track.encoded);
@@ -42,23 +45,28 @@ function isUrl(str) {
 }
 
 async function resolveQuery(query) {
+  debugLog('Resolving query', query);
   if (query.includes('open.spotify.com/')) {
     try {
       if (query.includes('/playlist/')) {
         const id = query.match(/playlist\/([^/?]+)/)[1];
+        debugLog('Spotify playlist id', id);
         const data = await spotify.getPlaylistTracks(id);
         const tracks = [];
         for (const item of data.items) {
           const t = item.track;
           const name = `${t.name} ${t.artists[0]?.name || ''}`.trim();
+          debugLog('Searching YouTube for', name);
           tracks.push(await youtube.search(name));
         }
         return tracks;
       }
       if (query.includes('/track/')) {
         const id = query.match(/track\/([^/?]+)/)[1];
+        debugLog('Spotify track id', id);
         const t = await spotify.getTrack(id);
         const name = `${t.name} ${t.artists[0]?.name || ''}`.trim();
+        debugLog('Searching YouTube for', name);
         return [await youtube.search(name)];
       }
     } catch (err) {
@@ -68,6 +76,7 @@ async function resolveQuery(query) {
   }
   if (!isUrl(query)) {
     try {
+      debugLog('YouTube search for query', query);
       return [await youtube.search(query)];
     } catch (err) {
       console.error('❌ Failed to search YouTube:', err.message);

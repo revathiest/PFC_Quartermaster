@@ -37,4 +37,49 @@ describe('syncUexCommodityPrices', () => {
     await expect(syncUexCommodityPrices()).rejects.toThrow('Expected an array of commodity price entries');
     expect(errorSpy).toHaveBeenCalled();
   });
+
+  test('skips entry missing fields', async () => {
+    fetchUexData.mockResolvedValue({ data: [{ commodity_name: 'MissingId', id_terminal: 1 }] });
+
+    const res = await syncUexCommodityPrices();
+    expect(db.UexCommodityPrice.upsert).not.toHaveBeenCalled();
+    expect(res).toEqual({ created: 0, updated: 0, skipped: 1, total: 1 });
+    expect(warnSpy).toHaveBeenCalled();
+  });
+
+  test('skips entry when terminal not found', async () => {
+    fetchUexData.mockResolvedValue({ data: [{ id: 2, commodity_name: 'X', id_terminal: 99 }] });
+    db.UexTerminal.findByPk.mockResolvedValueOnce(null);
+
+    const res = await syncUexCommodityPrices();
+    expect(db.UexCommodityPrice.upsert).not.toHaveBeenCalled();
+    expect(res).toEqual({ created: 0, updated: 0, skipped: 1, total: 1 });
+    expect(warnSpy).toHaveBeenCalled();
+  });
+
+  test('skips entry on FK error', async () => {
+    fetchUexData.mockResolvedValue({ data: [{ id: 3, commodity_name: 'X', id_terminal: 2 }] });
+    const err = new Error('fk');
+    err.name = 'SequelizeForeignKeyConstraintError';
+    err.fields = ['id_terminal'];
+    db.UexCommodityPrice.upsert.mockRejectedValueOnce(err);
+
+    const res = await syncUexCommodityPrices();
+    expect(res).toEqual({ created: 0, updated: 0, skipped: 1, total: 1 });
+    expect(warnSpy).toHaveBeenCalled();
+  });
+
+  test('throws on unexpected upsert error', async () => {
+    fetchUexData.mockResolvedValue({ data: [{ id: 4, commodity_name: 'X', id_terminal: 2 }] });
+    db.UexCommodityPrice.upsert.mockRejectedValueOnce(new Error('db'));
+
+    await expect(syncUexCommodityPrices()).rejects.toThrow('db');
+    expect(errorSpy).toHaveBeenCalled();
+  });
+
+  test('propagates fetch errors', async () => {
+    fetchUexData.mockRejectedValueOnce(new Error('network'));
+    await expect(syncUexCommodityPrices()).rejects.toThrow('network');
+    expect(errorSpy).toHaveBeenCalled();
+  });
 });

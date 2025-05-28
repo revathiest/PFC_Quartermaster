@@ -67,3 +67,29 @@ describe('lavalink service config fallback', () => {
     jest.dontMock('node-fetch');
   });
 });
+
+describe('lavalink local spawning', () => {
+  let spawnMock;
+  beforeEach(() => {
+    jest.resetModules();
+    spawnMock = jest.fn(() => ({ stdout: { on: jest.fn() }, stderr: { on: jest.fn() }, kill: jest.fn() }));
+    jest.doMock('child_process', () => ({ spawn: spawnMock }));
+    process.env.SPAWN_LOCAL_LAVALINK = 'true';
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
+  });
+
+  afterEach(() => {
+    jest.dontMock('child_process');
+    delete process.env.SPAWN_LOCAL_LAVALINK;
+    delete global.fetch;
+  });
+
+  test('spawns lavalink when env var set', () => {
+    require('../../services/lavalink');
+    expect(spawnMock).toHaveBeenCalledWith(
+      'java',
+      ['-Xmx512M', '-jar', expect.stringContaining('lavalink/Lavalink.jar')],
+      expect.objectContaining({ cwd: expect.stringContaining('lavalink'), detached: true })
+    );
+  });
+});

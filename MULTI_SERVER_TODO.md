@@ -55,4 +55,22 @@ This document outlines the work required to make the bot operate across multiple
 - Several modules call `client.guilds.cache.first()` or otherwise assume only one guild is active, e.g. org tag syncing, nickname sweeps, inactive user cleanup, and event synchronization.
 - Refactor these utilities to operate on the guild associated with the current event or iterate over all guilds.
 
+## 10. Configurable Admin Roles
+- **Current**: Admin commands check for hard-coded roles like `Admiral` and `Fleet Admiral`, e.g. `deleteannouncements.js`【F:commands/admin/deleteannouncements.js†L4-L20】 and `schedule.js`【F:commands/admin/schedule.js†L11-L12】.
+- **Needed**:
+  - Load required admin roles from the per-guild configuration.
+  - Allow each server to define its own administrator role names.
+
+## 11. Guild-Aware Ambient Engine
+- **Current**: `ambientEngine.js` loads allowed channels and settings without scoping to a guild, using `findAll()` and `findOne()` regardless of `guildId`【F:botactions/ambient/ambientEngine.js†L11-L26】.
+- **Needed**:
+  - Query `AmbientChannel` and `AmbientSetting` by guild.
+  - Store per-guild activity state so ambient messages remain isolated to each server.
+
+## 12. Server-Specific Rules Tables
+- **Current**: `updaterules.js` reads from tables `PFC_RULES` and `PFC_BOT_RULES_EMBED` and embeds PFC-branded text in the rules message【F:botactions/updaterules.js†L28-L66】.
+- **Needed**:
+  - Use generic table names or include the guild ID as part of the schema.
+  - Replace hard-coded PFC text with values from configuration.
+
 By addressing these areas, the bot will be able to function fully when invited to any server, instead of being restricted to a single guild.

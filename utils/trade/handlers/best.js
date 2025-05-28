@@ -1,5 +1,3 @@
-const DEBUG_TRADE = false;
-
 const { getBuyOptionsAtLocation, getVehicleByName, getSellPricesForCommodityElsewhere } = require('../tradeQueries');
 const { calculateProfitOptions } = require('../tradeCalculations');
 const { buildBestTradesEmbed } = require('../tradeEmbeds');
@@ -10,9 +8,6 @@ const { MessageFlags } = require('discord.js');
 // =======================================
 // Core handler that returns embed/error/components
 async function handleTradeBestCore({ fromLocation, shipQuery, ship, cash, userId }) {
-  if (DEBUG_TRADE) {
-    console.log(`[TRADE CORE] start`, { fromLocation, shipQuery, cash });
-  }
 
   try {
     let vehicles = [];

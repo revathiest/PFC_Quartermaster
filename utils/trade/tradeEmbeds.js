@@ -1,10 +1,7 @@
-const DEBUG_EMBED = false; // 🔥 toggle debug logs on/off
 const { EmbedBuilder } = require('discord.js');
 
 function buildBestTradesEmbed(fromLocation, profitOptions, shipName) {
   try {
-    if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] buildBestTradesEmbed → fromLocation=${fromLocation}, shipName=${shipName}`);
-    if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] profitOptions input:`, profitOptions);
 
     const title = shipName
       ? `🚀 Best trades from ${fromLocation} using ${shipName}`
@@ -15,7 +12,6 @@ function buildBestTradesEmbed(fromLocation, profitOptions, shipName) {
       .setDescription(`Top ${profitOptions.length} profitable commodities:`)
       .addFields(
         profitOptions.slice(0, 5).map((opt, index) => {
-          if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] [Best] mapping option #${index}:`, opt);
           return {
             name: `${opt.commodity}: ${opt.fromTerminal} → ${opt.toTerminal}`,
             value: [
@@ -39,11 +35,8 @@ function buildBestTradesEmbed(fromLocation, profitOptions, shipName) {
 
 function buildRouteEmbed(commodity, fromLocation, sellOptions) {
   try {
-    if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] buildRouteEmbed → commodity=${commodity}, fromLocation=${fromLocation}`);
-    if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] sellOptions input:`, sellOptions);
 
     const fields = sellOptions.slice(0, 5).map((opt, index) => {
-      if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] [Route] mapping option #${index}:`, opt);
       return {
         name: `${opt.toTerminal ?? 'UNKNOWN_TERMINAL'} (${opt.location ?? 'UNKNOWN_LOCATION'})`,
         value: `Sell Price: **${opt.sellPrice ?? 'N/A'}**\nProfit/SCU: **${opt.profitPerSCU ?? 'N/A'}**`,
@@ -65,9 +58,6 @@ function buildRouteEmbed(commodity, fromLocation, sellOptions) {
 
 function buildCircuitEmbed(outbound, returnTrip, fromLocation) {
   try {
-    if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] buildCircuitEmbed → fromLocation=${fromLocation}`);
-    if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] outbound:`, outbound);
-    if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] returnTrip:`, returnTrip);
 
     const outboundField = {
       name: `Outbound: Buy ${outbound.commodity ?? 'UNKNOWN_COMMODITY'} → Sell at ${outbound.terminal ?? 'UNKNOWN_TERMINAL'}`,
@@ -99,11 +89,8 @@ function buildCircuitEmbed(outbound, returnTrip, fromLocation) {
 
 function buildPriceEmbed(commodity, location, priceOptions) {
   try {
-    if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] buildPriceEmbed → commodity=${commodity}, location=${location}`);
-    if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] priceOptions input:`, priceOptions);
 
     const fields = priceOptions.slice(0, 5).map((opt, index) => {
-      if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] [Price] mapping option #${index}:`, opt);
       return {
         name: `${opt.toTerminal ?? 'UNKNOWN_TERMINAL'}`,
         value: `Buy: **${opt.buyPrice ?? 'N/A'}** | Sell: **${opt.sellPrice ?? 'N/A'}**`,
@@ -125,7 +112,6 @@ function buildPriceEmbed(commodity, location, priceOptions) {
 
 function buildShipEmbed(ship) {
   try {
-    if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] buildShipEmbed → ship:`, ship);
 
     const embed = new EmbedBuilder()
       .setTitle(`🚢 Ship info: ${ship.name ?? 'UNKNOWN_NAME'}`)
@@ -141,10 +127,8 @@ function buildShipEmbed(ship) {
 
 function buildLocationsEmbed(terminals) {
   try {
-    if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] buildLocationsEmbed → terminals:`, terminals);
 
     const fields = terminals.slice(0, 10).map((t, index) => {
-      if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] [Locations] mapping terminal #${index}:`, t);
       return {
         name: `${t.name ?? 'UNKNOWN_TERMINAL'}`,
         value: `${t.city_name ?? t.planet_name ?? 'Unknown'}`,
@@ -167,7 +151,6 @@ const NAME_WIDTH = 22; // width of the commodity column
 
 function buildCommoditiesEmbed(location, terminals, page = 0, totalPages = 1) {
   try {
-    if (DEBUG_EMBED) console.log(`[TRADE EMBEDS] buildCommoditiesEmbed → location=${location}, page=${page}, total=${totalPages}`, terminals);
 
     const fields = terminals.slice(0, 25).map(t => {
       const lines = t.commodities

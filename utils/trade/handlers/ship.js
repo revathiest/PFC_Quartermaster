@@ -1,6 +1,3 @@
-
-const DEBUG_TRADE = false;
-
 const {
   getVehicleByName,
 } = require('../tradeQueries');
@@ -16,10 +13,8 @@ const { safeReply } = require('./shared');
 async function handleTradeShip(interaction) {
     try {
       const shipName = interaction.options.getString('name');
-      if (DEBUG_TRADE) console.log(`[TRADE HANDLERS] handleTradeShip → shipName=${shipName}`);
   
       const ship = await getVehicleByName(shipName);
-      if (DEBUG_TRADE) console.log(`[TRADE HANDLERS] Fetched ship:`, ship);
   
       if (!ship) {
         console.warn(`[TRADE HANDLERS] Ship not found: ${shipName}`);
@@ -28,7 +23,6 @@ async function handleTradeShip(interaction) {
       }
   
       const embed = buildShipEmbed(ship);
-      if (DEBUG_TRADE) console.log(`[TRADE HANDLERS] Built embed for ship`);
       await safeReply(interaction, { embeds: [embed] });
   
     } catch (err) {

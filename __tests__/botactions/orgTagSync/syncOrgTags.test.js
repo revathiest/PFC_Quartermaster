@@ -151,4 +151,50 @@ describe('syncOrgTags', () => {
     );
     consoleSpy.mockRestore();
   });
+
+  it('warns and skips if member is not manageable', async () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+    mockMember.manageable = false;
+
+    VerifiedUser.findAll.mockResolvedValue([
+      { discordUserId: 'user1', rsiHandle: 'VerifiedUser', rsiOrgId: 'OLDORG' }
+    ]);
+
+    rsiProfileScraper.fetchRsiProfileInfo.mockResolvedValue({ orgId: 'PFCS' });
+    OrgTag.findByPk.mockResolvedValue({ tag: 'PFC' });
+
+    await syncOrgTags(mockClient);
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      '⚠️ Skipping VerifiedUser#1234: Cannot manage this member.'
+    );
+    expect(mockMember.setNickname).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
+
+  it('skips nickname update for unmanageable member when profile not found', async () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+    mockMember.manageable = false;
+
+    VerifiedUser.findAll.mockResolvedValue([
+      { discordUserId: 'user1', rsiHandle: 'VerifiedUser', rsiOrgId: 'PFCS' }
+    ]);
+
+    const err = new Error('Profile gone');
+    err.code = 'PROFILE_NOT_FOUND';
+    rsiProfileScraper.fetchRsiProfileInfo.mockRejectedValue(err);
+
+    await syncOrgTags(mockClient);
+
+    expect(VerifiedUser.destroy).toHaveBeenCalledWith({
+      where: { discordUserId: 'user1' }
+    });
+    expect(warnSpy).toHaveBeenCalledWith(
+      '⚠️ Skipping nickname update for VerifiedUser#1234: Cannot manage this member.'
+    );
+    expect(mockMember.setNickname).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
 });

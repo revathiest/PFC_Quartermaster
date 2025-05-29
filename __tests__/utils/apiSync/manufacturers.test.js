@@ -34,4 +34,31 @@ describe('syncManufacturers', () => {
     await expect(syncManufacturers()).rejects.toThrow('Expected an array of manufacturers');
     expect(errorSpy).toHaveBeenCalled();
   });
+
+  test('skips entries missing code', async () => {
+    fetchSCData.mockResolvedValue([
+      { name: 'Unknown', link: 'y' },
+      { code: 'MISC', name: 'misc', link: 'x' }
+    ]);
+    Manufacturer.upsert.mockResolvedValue([{}, true]);
+
+    const res = await syncManufacturers();
+    expect(warnSpy).toHaveBeenCalled();
+    expect(Manufacturer.upsert).toHaveBeenCalledTimes(1);
+    expect(res).toEqual({ created: 1, updated: 0, skipped: 1, total: 2 });
+  });
+
+  test('counts updates when upsert not creating', async () => {
+    fetchSCData.mockResolvedValue([{ code: 'MISC', name: 'misc', link: 'x' }]);
+    Manufacturer.upsert.mockResolvedValue([{}, false]);
+
+    const res = await syncManufacturers();
+    expect(res).toEqual({ created: 0, updated: 1, skipped: 0, total: 1 });
+  });
+
+  test('propagates fetch errors', async () => {
+    fetchSCData.mockRejectedValue(new Error('fail'));
+    await expect(syncManufacturers()).rejects.toThrow('fail');
+    expect(errorSpy).toHaveBeenCalled();
+  });
 });

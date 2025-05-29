@@ -19,13 +19,16 @@ const { safeReply } = require('../../../../utils/trade/handlers/shared');
 
 describe('handleTradeShip', () => {
   let warnSpy;
+  let errorSpy;
   beforeEach(() => {
     jest.clearAllMocks();
     warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
     warnSpy.mockRestore();
+    errorSpy.mockRestore();
   });
 
   test('sends ship embed', async () => {
@@ -53,5 +56,6 @@ describe('handleTradeShip', () => {
     getVehicleByName.mockRejectedValue(new Error('db'));
     await handleTradeShip(interaction);
     expect(safeReply).toHaveBeenCalledWith(interaction, expect.stringContaining('error'));
+    expect(errorSpy).toHaveBeenCalled();
   });
 });

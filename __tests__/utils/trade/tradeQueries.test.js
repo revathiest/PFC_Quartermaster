@@ -28,8 +28,18 @@ const {
 } = tradeQueries;
 
 describe('tradeQueries', () => {
+  let errorSpy;
+  let warnSpy;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    errorSpy.mockRestore();
+    warnSpy.mockRestore();
   });
 
   test('getCommodityTradeOptions returns DB results', async () => {
@@ -116,12 +126,10 @@ describe('tradeQueries', () => {
   });
 
   test('getVehicleByName warns when no match found', async () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     UexVehicle.findAll.mockResolvedValue([]);
     const res = await getVehicleByName('Unknown');
     expect(res).toEqual([]);
     expect(warnSpy).toHaveBeenCalled();
-    warnSpy.mockRestore();
   });
 
   test('getAllShipNames returns empty array on error', async () => {
@@ -262,14 +270,12 @@ describe('tradeQueries', () => {
 
   test('getReturnOptions logs error on DB failure', async () => {
     const error = new Error('db fail');
-    jest.spyOn(console, 'error').mockImplementation(() => {});
     UexCommodityPrice.findAll.mockRejectedValue(error);
     const res = await getReturnOptions('LocA', 'LocB');
     expect(res).toEqual([]);
-    expect(console.error).toHaveBeenCalledWith(
+    expect(errorSpy).toHaveBeenCalledWith(
       '[TRADE QUERIES] getReturnOptions encountered an error:',
       error
     );
-    console.error.mockRestore();
   });
 });

@@ -12,8 +12,9 @@ function search(query) {
       }
       try {
         const info = JSON.parse(stdout.trim());
-        debugLog('yt-dlp returned url:', info.url);
-        resolve(info.url); // direct URL
+        const pageUrl = info.webpage_url || info.url;
+        debugLog('yt-dlp returned url:', pageUrl);
+        resolve(pageUrl); // use stable webpage URL
       } catch (e) {
         debugLog('Failed to parse yt-dlp output');
         reject(e);

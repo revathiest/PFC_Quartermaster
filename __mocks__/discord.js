@@ -141,6 +141,16 @@ const SlashCommandBuilder = jest.fn(() => {
       this.options.push(option);
       return this;
     },
+    addIntegerOption(fn) {
+      const option = { type: 'integer', name: undefined, description: undefined, required: false };
+      fn({
+        setName(name) { option.name = name; return this; },
+        setDescription(desc) { option.description = desc; return this; },
+        setRequired(req) { option.required = req; return this; },
+      });
+      this.options.push(option);
+      return this;
+    },
     addUserOption(fn) {
       const option = { type: 'user', name: undefined, description: undefined, required: false };
       fn({
@@ -179,6 +189,7 @@ module.exports = {
   StringSelectMenuBuilder,
   ButtonStyle,
   SlashCommandBuilder,
+  SlashCommandSubcommandBuilder: SlashCommandBuilder,
   EmbedBuilder,
   PermissionFlagsBits
 };

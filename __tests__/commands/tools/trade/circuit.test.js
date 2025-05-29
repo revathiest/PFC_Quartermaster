@@ -15,4 +15,14 @@ describe('/trade circuit subcommand', () => {
     await command.execute(interaction);
     expect(handleTradeBestCircuit).toHaveBeenCalledWith(interaction);
   });
+
+  test('defines command data with options', () => {
+    const data = command.data();
+    const optionNames = data.options.map(o => o.name);
+    expect(data.name).toBe('circuit');
+    expect(optionNames).toEqual(['from', 'with', 'cash']);
+    const cashOpt = data.options.find(o => o.name === 'cash');
+    expect(cashOpt.type).toBe('integer');
+    expect(data.options.find(o => o.name === 'from').required).toBe(true);
+  });
 });

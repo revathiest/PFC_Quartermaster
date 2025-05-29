@@ -197,4 +197,23 @@ describe('syncOrgTags', () => {
     expect(mockMember.setNickname).not.toHaveBeenCalled();
     warnSpy.mockRestore();
   });
+
+  it('continues when profile not found and member fetch fails', async () => {
+    mockGuild.members.fetch = jest.fn().mockRejectedValue(new Error('fetch failed'));
+
+    VerifiedUser.findAll.mockResolvedValue([
+      { discordUserId: 'user1', rsiHandle: 'VerifiedUser', rsiOrgId: 'PFCS' }
+    ]);
+
+    const err = new Error('Profile gone');
+    err.code = 'PROFILE_NOT_FOUND';
+    rsiProfileScraper.fetchRsiProfileInfo.mockRejectedValue(err);
+
+    await syncOrgTags(mockClient);
+
+    expect(VerifiedUser.destroy).toHaveBeenCalledWith({
+      where: { discordUserId: 'user1' }
+    });
+    expect(mockMember.setNickname).not.toHaveBeenCalled();
+  });
 });

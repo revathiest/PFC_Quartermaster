@@ -28,7 +28,7 @@ const testCases = [
   
 
 describe('formatVerifiedNickname', () => {
-    testCases.forEach(({ displayName, verified, tag, expected }) => {
+  testCases.forEach(({ displayName, verified, tag, expected }) => {
       test(
         `formats nickname correctly: verified=${verified}, tag=${tag}, displayName="${displayName}", expected="${expected}"`,
         () => {
@@ -38,4 +38,18 @@ describe('formatVerifiedNickname', () => {
         }
       );
     });
-  });  
+
+    test('returns empty string when displayName is missing', () => {
+      expect(formatVerifiedNickname()).toBe('');
+      expect(formatVerifiedNickname('', true, 'PFCS')).toBe('');
+    });
+
+    test('uses default parameters when only displayName provided', () => {
+      expect(formatVerifiedNickname('User')).toBe('User ⛔');
+    });
+
+    test('truncates long nicknames with tag applied', () => {
+      const result = formatVerifiedNickname('SuperLongNameThatExceedsThirtyTwoChars', false, 'PFCS');
+      expect(result).toBe('[PFCS] SuperLongNameThatExceed ⛔');
+    });
+  });

@@ -54,6 +54,14 @@ jest.mock('../../config/database', () => ({
         expect(Event.create).toHaveBeenCalledWith(mockEvent);
         expect(result).toBe(mockEvent);
       });
+
+      it('logs error on failure', async () => {
+        Event.create.mockRejectedValue(new Error('fail'));
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        await saveEventToDatabase({});
+        expect(consoleSpy).toHaveBeenCalled();
+        consoleSpy.mockRestore();
+      });
     });
   
     describe('updateEventInDatabase', () => {
@@ -69,6 +77,14 @@ jest.mock('../../config/database', () => ({
         Event.findByPk.mockResolvedValue(null);
         const result = await updateEventInDatabase(999, { name: 'Nonexistent' });
         expect(result).toBeNull();
+      });
+
+      it('logs error on db failure', async () => {
+        Event.findByPk.mockRejectedValue(new Error('fail'));
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        await updateEventInDatabase(1, { name: 'fail' });
+        expect(consoleSpy).toHaveBeenCalled();
+        consoleSpy.mockRestore();
       });
     });
   
@@ -87,6 +103,14 @@ jest.mock('../../config/database', () => ({
         const result = await deleteEventFromDatabase(999);
         expect(result).toBeNull();
       });
+
+      it('logs error when fetch fails', async () => {
+        Event.findByPk.mockRejectedValue(new Error('fail'));
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        await deleteEventFromDatabase(1);
+        expect(consoleSpy).toHaveBeenCalled();
+        consoleSpy.mockRestore();
+      });
     });
   
     describe('getAllEventsFromDatabase', () => {
@@ -96,6 +120,14 @@ jest.mock('../../config/database', () => ({
         const result = await getAllEventsFromDatabase();
         expect(Event.findAll).toHaveBeenCalled();
         expect(result).toBe(mockEvents);
+      });
+
+      it('logs error when query fails', async () => {
+        Event.findAll.mockRejectedValue(new Error('fail'));
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        await getAllEventsFromDatabase();
+        expect(consoleSpy).toHaveBeenCalled();
+        consoleSpy.mockRestore();
       });
     });
   
@@ -124,8 +156,31 @@ jest.mock('../../config/database', () => ({
           coordinator: 'Commander Shepard',
         });
       });
+
+      it('uses defaults when location or creator missing', async () => {
+        const mockEvent = {
+          id: '2',
+          name: 'Event Two',
+          description: 'desc',
+          scheduledStartTimestamp: Date.now(),
+          scheduledEndTimestamp: Date.now() + 1000,
+        };
+
+        mockGuild.scheduledEvents.fetch.mockResolvedValue(
+          new Collection([[mockEvent.id, mockEvent]])
+        );
+
+        const result = await getAllScheduledEventsFromClient(mockClient);
+        expect(result[0].location).toBe('No location');
+        expect(result[0].coordinator).toBe('Unknown');
+      });
+
+      it('throws when fetch fails', async () => {
+        mockGuild.scheduledEvents.fetch.mockRejectedValue(new Error('fail'));
+        await expect(getAllScheduledEventsFromClient(mockClient)).rejects.toThrow('There was an error fetching the events.');
+      });
     });
-  
+
     describe('syncEventsInDatabase', () => {
         let mockGetAllScheduledEventsFromClient;
       
@@ -178,7 +233,29 @@ jest.mock('../../config/database', () => ({
           expect(Event.create).not.toHaveBeenCalled();
         });
       });
-      
-       
+
+      describe('edge cases and error paths', () => {
+        it('removes db events not present on the server', async () => {
+          const dbEvents = [{ event_id: '2', name: 'Old Name', server_id: 'server1' }];
+          mockGuild.scheduledEvents.fetch.mockResolvedValue(new Collection());
+          Event.findAll.mockResolvedValue(dbEvents);
+
+          await syncEventsInDatabase(mockClient);
+
+          expect(Event.destroy).toHaveBeenCalledWith({
+            where: { event_id: '2', server_id: 'server1' },
+          });
+        });
+
+        it('logs error when sync fails to query db', async () => {
+          Event.findAll.mockRejectedValue(new Error('fail'));
+          const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+          await syncEventsInDatabase(mockClient);
+          expect(consoleSpy).toHaveBeenCalled();
+          consoleSpy.mockRestore();
+        });
+      });
+
+
   });
   

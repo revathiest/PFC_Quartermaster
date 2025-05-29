@@ -4,9 +4,14 @@ const youtube = require('./youtube');
 const debugLog = require('../utils/debugLogger');
 
 const queues = new Map();
+const voiceConnections = new Map();
 
 function _clear() {
   queues.clear();
+  for (const conn of voiceConnections.values()) {
+    if (conn && !conn.destroyed) conn.destroy();
+  }
+  voiceConnections.clear();
 }
 
 function getQueue(guildId) {
@@ -97,4 +102,36 @@ async function skip(guildId) {
   queues.set(guildId, queue);
 }
 
-module.exports = { enqueue, getQueue, skip, _clear };
+function join(guildId, channelId, adapterCreator) {
+  let connection = voiceConnections.get(guildId);
+  if (connection) {
+    if (connection.joinConfig.channelId === channelId && !connection.destroyed) {
+      return connection;
+    }
+    connection.destroy();
+  }
+  let joinVoiceChannel;
+  try {
+    ({ joinVoiceChannel } = require('@discordjs/voice'));
+  } catch (err) {
+    console.error('❌ @discordjs/voice not installed:', err.message);
+    throw new Error('Voice support missing');
+  }
+  connection = joinVoiceChannel({
+    channelId,
+    guildId,
+    adapterCreator,
+  });
+  voiceConnections.set(guildId, connection);
+  return connection;
+}
+
+function disconnect(guildId) {
+  const connection = voiceConnections.get(guildId);
+  if (connection) {
+    connection.destroy();
+    voiceConnections.delete(guildId);
+  }
+}
+
+module.exports = { enqueue, getQueue, skip, join, disconnect, _clear };

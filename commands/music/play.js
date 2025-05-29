@@ -15,7 +15,12 @@ module.exports = {
   async execute(interaction) {
     const query = interaction.options.getString('query');
     await interaction.deferReply({});
+    const channelId = interaction.member.voice?.channelId;
+    if (!channelId) {
+      return interaction.editReply('❌ You must join a voice channel first.');
+    }
     try {
+      audioManager.join(interaction.guild.id, channelId, interaction.guild.voiceAdapterCreator);
       await audioManager.enqueue(interaction.guild.id, query);
       await interaction.editReply({ content: `Queued: ${query}` });
     } catch (err) {

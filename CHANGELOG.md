@@ -10,3 +10,5 @@
 - Startup now verifies Lavalink becomes reachable and logs readiness.
 - Fallback YouTube search for text queries in `/play`.
 - Spotify service now refreshes tokens on 401 responses.
+### Fixed
+- Music bot now joins the user's voice channel before queuing tracks.

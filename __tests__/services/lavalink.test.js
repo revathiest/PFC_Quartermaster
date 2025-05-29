@@ -116,7 +116,7 @@ describe('lavalink local spawning', () => {
       expect.objectContaining({ cwd: expect.stringContaining('lavalink'), detached: true })
     );
     expect(global.fetch).toHaveBeenCalledWith(
-      `http://${config.host}:${config.port}/v4/version`,
+      `http://${config.host}:${config.port}/version`,
       expect.objectContaining({ headers: { Authorization: config.password } })
     );
   });
@@ -136,7 +136,7 @@ describe('waitForLavalink', () => {
     const { waitForLavalink } = require('../../services/lavalink');
     await expect(waitForLavalink(1, 0)).resolves.toBeUndefined();
     expect(global.fetch).toHaveBeenCalledWith(
-      `http://${config.host}:${config.port}/v4/version`,
+      `http://${config.host}:${config.port}/version`,
       expect.objectContaining({ headers: { Authorization: config.password } })
     );
   });

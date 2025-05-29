@@ -50,7 +50,7 @@ function spawnLavalink() {
 async function waitForLavalink(retries = 15, delayMs = 2000) {
   let lastError;
   for (let i = 0; i < retries; i++) {
-    const url = buildUrl('/version');
+    const url = buildUrl('/version', true);
     try {
       const res = await fetchFn(url, {
         headers: { Authorization: password }
@@ -78,8 +78,8 @@ if (process.env.SPAWN_LOCAL_LAVALINK === 'true') {
   waitForLavalink().catch(() => {});
 }
 
-function buildUrl(path) {
-  return `http://${host}:${port}${apiPrefix}${path}`;
+function buildUrl(path, noPrefix = false) {
+  return `http://${host}:${port}${noPrefix ? '' : apiPrefix}${path}`;
 }
 
 async function loadTrack(query) {

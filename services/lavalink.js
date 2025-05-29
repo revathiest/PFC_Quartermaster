@@ -99,7 +99,12 @@ async function loadTrack(query) {
     throw new Error('Failed to load track');
   }
   debugLog('Lavalink loadTrack status:', res.status);
-  return res.json();
+  const data = await res.json();
+  if (data.loadType === 'LOAD_FAILED' || data.loadType === 'NO_MATCHES') {
+    console.error('⚠️ Lavalink returned loadType', data.loadType);
+    throw new Error('Failed to load track');
+  }
+  return data;
 }
 
 async function play(guildId, track) {

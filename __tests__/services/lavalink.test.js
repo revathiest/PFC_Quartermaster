@@ -84,6 +84,20 @@ describe('lavalink service config fallback', () => {
 
     jest.dontMock('node-fetch');
   });
+
+  test('throws when loadType is LOAD_FAILED', async () => {
+    global.fetch.mockResolvedValue({ ok: true, status: 200, json: async () => ({ loadType: 'LOAD_FAILED' }) });
+    lavalink = require('../../services/lavalink');
+    await expect(lavalink.loadTrack('bad'))
+      .rejects.toThrow('Failed to load track');
+  });
+
+  test('throws when loadType is NO_MATCHES', async () => {
+    global.fetch.mockResolvedValue({ ok: true, status: 200, json: async () => ({ loadType: 'NO_MATCHES' }) });
+    lavalink = require('../../services/lavalink');
+    await expect(lavalink.loadTrack('bad'))
+      .rejects.toThrow('Failed to load track');
+  });
 });
 
 describe('lavalink local spawning', () => {

@@ -29,6 +29,23 @@ describe('syncVehicles', () => {
     expect(res).toEqual({ created: 1, updated: 0, skipped: 0, total: 1 });
   });
 
+  test('skips entries without uuid', async () => {
+    fetchSCData.mockResolvedValue([{ uuid: '', name: 'x' }, { uuid: 'u2', name: 'y' }]);
+    Vehicle.upsert.mockResolvedValue([{}, false]);
+
+    const res = await syncVehicles();
+    expect(warnSpy).toHaveBeenCalled();
+    expect(res).toEqual({ created: 0, updated: 1, skipped: 1, total: 2 });
+  });
+
+  test('logs and rethrows when upsert fails', async () => {
+    fetchSCData.mockResolvedValue([{ uuid: 'u3', name: 'z' }]);
+    Vehicle.upsert.mockRejectedValue(new Error('fail'));
+
+    await expect(syncVehicles()).rejects.toThrow('fail');
+    expect(errorSpy).toHaveBeenCalled();
+  });
+
   test('throws on invalid data', async () => {
     fetchSCData.mockResolvedValue(null);
     await expect(syncVehicles()).rejects.toThrow('Expected an array of vehicles');

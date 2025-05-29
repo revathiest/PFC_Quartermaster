@@ -58,4 +58,12 @@ describe('handleTradeShip', () => {
     expect(safeReply).toHaveBeenCalledWith(interaction, expect.stringContaining('error'));
     expect(errorSpy).toHaveBeenCalled();
   });
+
+  test('does not reply again if already replied on error', async () => {
+    const interaction = new MockInteraction({ options: { name: 'Cutlass' } });
+    interaction.replied = true;
+    getVehicleByName.mockRejectedValue(new Error('x'));
+    await handleTradeShip(interaction);
+    expect(safeReply).not.toHaveBeenCalled();
+  });
 });

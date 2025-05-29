@@ -27,4 +27,23 @@ describe('youtube service', () => {
     const youtube = require(path);
     await expect(youtube.search('bad')).rejects.toThrow(err);
   });
+
+  test('getStreamUrl resolves with first line', async () => {
+    execFile.mockImplementation((cmd, args, cb) => cb(null, 'http://a\n'));
+    const youtube = require(path);
+    const url = await youtube.getStreamUrl('https://yt/watch?v=1');
+    expect(execFile).toHaveBeenCalledWith(
+      expect.any(String),
+      ['-f', 'bestaudio', '-g', 'https://yt/watch?v=1'],
+      expect.any(Function)
+    );
+    expect(url).toBe('http://a');
+  });
+
+  test('getStreamUrl rejects on error', async () => {
+    const err = new Error('bad');
+    execFile.mockImplementation((cmd, args, cb) => cb(err));
+    const youtube = require(path);
+    await expect(youtube.getStreamUrl('u')).rejects.toThrow(err);
+  });
 });

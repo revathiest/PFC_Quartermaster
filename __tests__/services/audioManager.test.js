@@ -94,6 +94,25 @@ describe('audioManager', () => {
     expect(lavalink.loadTrack).toHaveBeenCalledWith('https://youtube.com/watch?v=123');
   });
 
+  test('falls back to stream when lavalink fails for YouTube URL', async () => {
+    lavalink.loadTrack
+      .mockRejectedValueOnce(new Error('sig'))
+      .mockResolvedValueOnce({ tracks: [{ track: 't1', info: { title: 'Song' } }] });
+    youtube.getStreamUrl = jest.fn().mockResolvedValue('http://stream');
+    await audio.enqueue('g', 'https://youtube.com/watch?v=1');
+    expect(youtube.getStreamUrl).toHaveBeenCalledWith('https://youtube.com/watch?v=1');
+    expect(lavalink.loadTrack).toHaveBeenLastCalledWith('http://stream');
+  });
+
+  test('propagates when fallback fails', async () => {
+    lavalink.loadTrack.mockRejectedValue(new Error('sig'));
+    youtube.getStreamUrl = jest.fn().mockRejectedValue(new Error('bad'));
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    await expect(audio.enqueue('g', 'https://youtu.be/x')).rejects.toThrow('Failed to load track');
+    expect(youtube.getStreamUrl).toHaveBeenCalledWith('https://youtu.be/x');
+    errSpy.mockRestore();
+  });
+
   test('join reuses existing connection', () => {
     jest.doMock('@discordjs/voice', () => ({
       joinVoiceChannel: jest.fn(() => ({ joinConfig: { channelId: 'c1' }, destroyed: false, destroy: jest.fn() }))

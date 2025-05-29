@@ -63,4 +63,15 @@ describe('handleTradeRoute', () => {
       flags: MessageFlags.Ephemeral,
     });
   });
+
+  test('returns error when route not profitable', async () => {
+    const interaction = new MockInteraction({ options: { from: 'A', to: 'B' } });
+    getBuyOptionsAtLocation.mockResolvedValue([{ terminal: { name: 'A' }, commodity_name: 'X', price_buy: 1, scu_buy: 1 }]);
+    getSellOptionsAtLocation.mockResolvedValue([{ terminal: { name: 'B' }, commodity_name: 'X', price_sell: 0 }]);
+    resolveBestMatchingTerminal.mockReturnValueOnce({ name: 'A' }).mockReturnValueOnce({ name: 'B' });
+    calculateProfitOptions.mockReturnValue([]);
+
+    await handleTradeRoute(interaction, {}, { from: 'A', to: 'B' });
+    expect(safeReply).toHaveBeenCalledWith(interaction, { content: expect.stringContaining('No profitable trades'), flags: MessageFlags.Ephemeral });
+  });
 });

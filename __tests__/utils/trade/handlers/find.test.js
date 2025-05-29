@@ -58,6 +58,15 @@ describe('handleTradeFind', () => {
     expect(warnSpy).toHaveBeenCalled();
   });
 
+  test('warns when no terminal matches to location', async () => {
+    const interaction = new MockInteraction({ options: { from: 'A', to: 'B' } });
+    getSellOptionsAtLocation.mockResolvedValue([{ terminal: { name: 'C' }, price_buy: 10, scu_buy: 1 }]);
+    calculateProfitOptions.mockReturnValue([]);
+
+    await handleTradeFind(interaction);
+    expect(warnSpy).toHaveBeenCalled();
+  });
+
   test('handles query errors gracefully', async () => {
     const interaction = new MockInteraction({ options: { from: 'A', to: 'B' } });
     getSellOptionsAtLocation.mockRejectedValue(new Error('fail'));

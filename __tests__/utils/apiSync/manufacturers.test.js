@@ -29,6 +29,23 @@ describe('syncManufacturers', () => {
     expect(res).toEqual({ created: 1, updated: 0, skipped: 0, total: 1 });
   });
 
+  test('skips entries missing code and counts update', async () => {
+    fetchSCData.mockResolvedValue([{ code: '', name: 'x' }, { code: 'GOOD', name: 'n' }]);
+    Manufacturer.upsert.mockResolvedValue([{}, false]);
+
+    const res = await syncManufacturers();
+    expect(warnSpy).toHaveBeenCalled();
+    expect(res).toEqual({ created: 0, updated: 1, skipped: 1, total: 2 });
+  });
+
+  test('logs and rethrows on upsert failure', async () => {
+    fetchSCData.mockResolvedValue([{ code: 'BOOM', name: 'b' }]);
+    Manufacturer.upsert.mockRejectedValue(new Error('fail'));
+
+    await expect(syncManufacturers()).rejects.toThrow('fail');
+    expect(errorSpy).toHaveBeenCalled();
+  });
+
   test('throws on invalid data', async () => {
     fetchSCData.mockResolvedValue(null);
     await expect(syncManufacturers()).rejects.toThrow('Expected an array of manufacturers');

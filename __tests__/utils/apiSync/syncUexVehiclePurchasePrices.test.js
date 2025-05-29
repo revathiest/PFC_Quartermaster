@@ -29,6 +29,23 @@ describe('syncUexVehiclePurchasePrices', () => {
     expect(res).toEqual({ created: 1, updated: 0, skipped: 0, total: 1 });
   });
 
+  test('skips invalid entries', async () => {
+    fetchUexData.mockResolvedValue({ data: [{}, { id: 2, vehicle_name: 'ok', id_vehicle: 2, id_terminal: 1 }] });
+    UexVehiclePurchasePrice.upsert.mockResolvedValue([{}, false]);
+
+    const res = await syncUexVehiclePurchasePrices();
+    expect(warnSpy).toHaveBeenCalled();
+    expect(res).toEqual({ created: 0, updated: 1, skipped: 1, total: 2 });
+  });
+
+  test('logs and rethrows on upsert error', async () => {
+    fetchUexData.mockResolvedValue({ data: [{ id: 3, vehicle_name: 'x', id_vehicle: 3, id_terminal: 1 }] });
+    UexVehiclePurchasePrice.upsert.mockRejectedValue(new Error('fail'));
+
+    await expect(syncUexVehiclePurchasePrices()).rejects.toThrow('fail');
+    expect(errorSpy).toHaveBeenCalled();
+  });
+
   test('throws on invalid data', async () => {
     fetchUexData.mockResolvedValue({});
     await expect(syncUexVehiclePurchasePrices()).rejects.toThrow('Expected an array of vehicle purchase price entries');

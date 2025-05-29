@@ -12,10 +12,12 @@ jest.mock('../../../config/database', () => ({
 describe('ambientEngine', () => {
   let client;
   let channel;
+  let logSpy;
 
   beforeEach(() => {
     jest.useFakeTimers();
     jest.clearAllMocks();
+    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     channel = { isTextBased: () => true, name: 'general', send: jest.fn() };
     client = { channels: { cache: new Map([['1', channel]]) } };
     AmbientChannel.findAll.mockResolvedValue([{ channelId: '1' }]);
@@ -25,6 +27,7 @@ describe('ambientEngine', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+    logSpy.mockRestore();
   });
 
   test('sends ambient message when channel active', async () => {

@@ -6,10 +6,11 @@ const { UexVehiclePurchasePrice } = require('../../../config/database');
 const { syncUexVehiclePurchasePrices } = require('../../../utils/apiSync/syncUexVehiclePurchasePrices');
 
 describe('syncUexVehiclePurchasePrices', () => {
-  let errorSpy, warnSpy;
+  let errorSpy, warnSpy, logSpy;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
@@ -17,6 +18,7 @@ describe('syncUexVehiclePurchasePrices', () => {
   afterEach(() => {
     errorSpy.mockRestore();
     warnSpy.mockRestore();
+    logSpy.mockRestore();
   });
 
   test('upserts vehicle purchase prices', async () => {

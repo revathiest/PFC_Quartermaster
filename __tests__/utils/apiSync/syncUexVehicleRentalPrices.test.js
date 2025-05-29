@@ -6,10 +6,11 @@ const { UexVehicleRentalPrice } = require('../../../config/database');
 const { syncUexVehicleRentalPrices } = require('../../../utils/apiSync/syncUexVehicleRentalPrices');
 
 describe('syncUexVehicleRentalPrices', () => {
-  let errorSpy, warnSpy;
+  let errorSpy, warnSpy, logSpy;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
@@ -17,6 +18,7 @@ describe('syncUexVehicleRentalPrices', () => {
   afterEach(() => {
     errorSpy.mockRestore();
     warnSpy.mockRestore();
+    logSpy.mockRestore();
   });
 
   test('upserts vehicle rental prices', async () => {

@@ -7,9 +7,11 @@ const { syncGalactapedia } = require('../../../utils/apiSync/galactapedia');
 
 describe('syncGalactapedia', () => {
   let errorSpy, warnSpy;
+  let logSpy;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
@@ -17,6 +19,7 @@ describe('syncGalactapedia', () => {
   afterEach(() => {
     errorSpy.mockRestore();
     warnSpy.mockRestore();
+    logSpy.mockRestore();
   });
 
   test('upserts entries', async () => {

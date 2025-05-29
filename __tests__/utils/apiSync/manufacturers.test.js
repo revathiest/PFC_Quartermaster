@@ -6,10 +6,11 @@ const { Manufacturer } = require('../../../config/database');
 const { syncManufacturers } = require('../../../utils/apiSync/manufacturers');
 
 describe('syncManufacturers', () => {
-  let errorSpy, warnSpy;
+  let errorSpy, warnSpy, logSpy;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
@@ -17,6 +18,7 @@ describe('syncManufacturers', () => {
   afterEach(() => {
     errorSpy.mockRestore();
     warnSpy.mockRestore();
+    logSpy.mockRestore();
   });
 
   test('upserts manufacturers', async () => {

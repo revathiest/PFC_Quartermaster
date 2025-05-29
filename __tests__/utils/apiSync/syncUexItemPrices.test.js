@@ -9,10 +9,11 @@ const db = require('../../../config/database');
 const { syncUexItemPrices } = require('../../../utils/apiSync/syncUexItemPrices');
 
 describe('syncUexItemPrices', () => {
-  let errorSpy, warnSpy;
+  let errorSpy, warnSpy, logSpy;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
@@ -20,6 +21,7 @@ describe('syncUexItemPrices', () => {
   afterEach(() => {
     errorSpy.mockRestore();
     warnSpy.mockRestore();
+    logSpy.mockRestore();
   });
 
   test('upserts item prices', async () => {

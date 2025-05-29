@@ -13,11 +13,17 @@ jest.mock('../../../botactions/utilityFunctions');
 
 describe('handleVoiceStateUpdate', () => {
   const client = {};
+  let logSpy;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     getChannelNameById.mockResolvedValue('Channel');
     getUserNameById.mockResolvedValue('User');
+  });
+
+  afterEach(() => {
+    logSpy.mockRestore();
   });
 
   function state(channelId) {
@@ -91,6 +97,38 @@ describe('handleVoiceStateUpdate', () => {
       expect.objectContaining({
         channel_id: 'chan1',
       })
+    );
+  });
+
+  it('uses null when user lookup fails', async () => {
+    getUserNameById.mockRejectedValueOnce(new Error('bad'));
+
+    await handleVoiceStateUpdate(state(null), state('chan1'), client);
+
+    expect(VoiceLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({ event_type: 'voice_join' })
+    );
+  });
+
+  it('handles old channel name fetch failure gracefully', async () => {
+    getChannelNameById.mockRejectedValueOnce(new Error('old fail'));
+    VoiceLog.findOne.mockResolvedValue({ timestamp: new Date(Date.now() - 1000) });
+
+    await handleVoiceStateUpdate(state('chan1'), state(null), client);
+
+    expect(VoiceLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({ event_type: 'voice_leave' })
+    );
+  });
+
+  it('logs join when switching without prior join log', async () => {
+    VoiceLog.findOne.mockResolvedValue(null);
+
+    await handleVoiceStateUpdate(state('chan1'), state('chan2'), client);
+
+    expect(VoiceLog.create).toHaveBeenCalledTimes(1);
+    expect(VoiceLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({ event_type: 'voice_join', channel_id: 'chan2' })
     );
   });
 });

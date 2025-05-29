@@ -50,6 +50,37 @@ describe('loadCommandsRecursively', () => {
     expect(commandList).toEqual([]);
     expect(commandMap.size).toBe(0);
   });
+
+  test('skips folder when paired parent command file exists', () => {
+    const subDir = path.join(tempDir, 'ambient');
+    fs.mkdirSync(subDir);
+    fs.writeFileSync(path.join(tempDir, 'ambient.js'), '');
+
+    const result = loadCommandsRecursively(subDir);
+    expect(result.commandList).toEqual([]);
+    expect(result.commandMap.size).toBe(0);
+  });
+
+  test('loads commands from nested directories', () => {
+    const nested = path.join(tempDir, 'group');
+    const inner = path.join(nested, 'inner');
+    fs.mkdirSync(inner, { recursive: true });
+    const content = `module.exports = { data: { name: 'pong', toJSON(){ return { name: 'pong' }; } } };`;
+    fs.writeFileSync(path.join(inner, 'pong.js'), content);
+
+    const { commandList, commandMap } = loadCommandsRecursively(nested);
+    expect(commandList).toEqual([{ name: 'pong' }]);
+    expect(commandMap.has('pong')).toBe(true);
+  });
+
+  test('skips command missing toJSON but with data property', () => {
+    const badContent = `module.exports = { data: { name: 'foo' } };`;
+    fs.writeFileSync(path.join(tempDir, 'foo.js'), badContent);
+
+    const { commandList, commandMap } = loadCommandsRecursively(tempDir);
+    expect(commandList).toEqual([]);
+    expect(commandMap.size).toBe(0);
+  });
 });
 
 describe('registerCommands', () => {

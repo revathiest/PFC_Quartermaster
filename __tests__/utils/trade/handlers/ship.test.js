@@ -19,13 +19,16 @@ const { safeReply } = require('../../../../utils/trade/handlers/shared');
 
 describe('handleTradeShip', () => {
   let warnSpy;
+  let errorSpy;
   beforeEach(() => {
     jest.clearAllMocks();
     warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
     warnSpy.mockRestore();
+    errorSpy.mockRestore();
   });
 
   test('sends ship embed', async () => {
@@ -46,5 +49,21 @@ describe('handleTradeShip', () => {
     await handleTradeShip(interaction);
     expect(safeReply).toHaveBeenCalledWith(interaction, expect.stringContaining('not found'));
     expect(warnSpy).toHaveBeenCalled();
+  });
+
+  test('handles lookup errors gracefully', async () => {
+    const interaction = new MockInteraction({ options: { name: 'Cutlass' } });
+    getVehicleByName.mockRejectedValue(new Error('db'));
+    await handleTradeShip(interaction);
+    expect(safeReply).toHaveBeenCalledWith(interaction, expect.stringContaining('error'));
+    expect(errorSpy).toHaveBeenCalled();
+  });
+
+  test('does not reply again if already replied on error', async () => {
+    const interaction = new MockInteraction({ options: { name: 'Cutlass' } });
+    interaction.replied = true;
+    getVehicleByName.mockRejectedValue(new Error('x'));
+    await handleTradeShip(interaction);
+    expect(safeReply).not.toHaveBeenCalled();
   });
 });

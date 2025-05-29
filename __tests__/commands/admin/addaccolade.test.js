@@ -116,4 +116,57 @@ describe('/addaccolade command', () => {
     );
     expect(Accolade.create).not.toHaveBeenCalled();
   });
+
+  it('rejects when role is already registered', async () => {
+    const interaction = createInteraction();
+    Accolade.findOne.mockResolvedValue({ id: 'existing' });
+
+    await execute(interaction);
+
+    expect(interaction.reply).toHaveBeenCalledWith(
+      expect.objectContaining({
+        content: expect.stringContaining('already registered'),
+        flags: MessageFlags.Ephemeral,
+      }),
+    );
+    expect(Accolade.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects when Wall of Fame channel is missing', async () => {
+    const interaction = createInteraction();
+    Accolade.findOne.mockResolvedValue(null);
+    interaction.guild.channels.fetch.mockReturnValue(null);
+
+    await execute(interaction);
+
+    expect(interaction.reply).toHaveBeenCalledWith(
+      expect.objectContaining({
+        content: expect.stringContaining('Wall of Fame channel'),
+        flags: MessageFlags.Ephemeral,
+      }),
+    );
+    expect(Accolade.create).not.toHaveBeenCalled();
+  });
+
+  it('handles empty emoji and description defaults', async () => {
+    const interaction = createInteraction({ emoji: null });
+    interaction.options.getString = jest.fn(name => null);
+    Accolade.findOne.mockResolvedValue(null);
+    buildAccoladeEmbed.mockReturnValue('embed');
+
+    await execute(interaction);
+
+    expect(Accolade.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        emoji: '',
+        description: 'No description provided.',
+      }),
+    );
+    expect(interaction.reply).toHaveBeenCalledWith(
+      expect.objectContaining({
+        content: expect.stringContaining('registered'),
+        flags: MessageFlags.Ephemeral,
+      }),
+    );
+  });
 });

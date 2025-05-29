@@ -113,6 +113,7 @@ include them.
   * Testing invalid, undefined, or unexpected arguments.
   * Verifying logic branches that rely on conditional checks.
   * Removing duplicate, ineffective, or dead test cases.
+  * using spyon statements to capture/supress all console log/warn/error messages.
 
 ---
 

@@ -17,6 +17,14 @@ const {
       expect(result.data.title).toContain('Port Olisar');
       expect(result.data.fields).toHaveLength(1);
     });
+
+    test('buildBestTradesEmbed supports shipName and null values', () => {
+      const opts = [{ commodity: 'Agricium', fromTerminal: 'T1', toTerminal: 'T2', profitPerSCU: 1, returnOnInvestment: 1, cargoUsed: null, totalProfit: null }];
+      const result = buildBestTradesEmbed('Area18', opts, 'Ship');
+      expect(result.data.title).toContain('using Ship');
+      expect(result.data.fields[0].value).toContain('No ship selected');
+      expect(result.data.fields[0].value).toContain('Total: *N/A*');
+    });
   
     test('buildRouteEmbed returns an embed with sell options', () => {
       const result = buildRouteEmbed('Agricium', 'Port Olisar', [
@@ -24,6 +32,12 @@ const {
       ]);
       expect(result.data.title).toContain('Agricium');
       expect(result.data.fields[0].name).toContain('Terminal B');
+    });
+
+    test('buildRouteEmbed handles missing fields', () => {
+      const res = buildRouteEmbed('C', 'Loc', [{ }]);
+      expect(res.data.fields[0].name).toContain('UNKNOWN_TERMINAL');
+      expect(res.data.fields[0].value).toContain('N/A');
     });
   
     test('buildCircuitEmbed returns embed with outbound + return fields', () => {
@@ -42,6 +56,12 @@ const {
       expect(result.data.fields).toHaveLength(2);
       expect(result.data.fields[1].value).toContain('No profitable return');
     });
+
+    test('buildCircuitEmbed falls back when fields missing', () => {
+      const outbound = {};
+      const res = buildCircuitEmbed(outbound, null, 'X');
+      expect(res.data.fields[0].name).toContain('UNKNOWN_COMMODITY');
+    });
   
     test('buildPriceEmbed returns embed with price data', () => {
       const result = buildPriceEmbed('Agricium', 'Port Olisar', [
@@ -50,16 +70,38 @@ const {
       expect(result.data.title).toContain('Agricium');
       expect(result.data.fields[0].value).toContain('Buy:');
     });
+
+    test('buildPriceEmbed handles null location and prices', () => {
+      const res = buildPriceEmbed('Commodity', null, [{ }]);
+      expect(res.data.title).toContain('Commodity');
+      expect(res.data.fields[0].value).toContain('N/A');
+    });
   
     test('buildShipEmbed returns embed with ship info', () => {
       const result = buildShipEmbed({ name: 'Freelancer', scu: 66, is_cargo: true });
       expect(result.data.title).toContain('Freelancer');
       expect(result.data.description).toContain('Cargo Capacity');
     });
+
+    test('buildShipEmbed handles non-cargo ship', () => {
+      const res = buildShipEmbed({ name: 'X', scu: 0, is_cargo: false });
+      expect(res.data.description).toContain('Non-cargo');
+    });
+
+    test('buildShipEmbed uses fallbacks for missing fields', () => {
+      const res = buildShipEmbed({});
+      expect(res.data.title).toContain('UNKNOWN_NAME');
+      expect(res.data.description).toContain('N/A');
+    });
   
     test('buildLocationsEmbed returns embed with location names', () => {
       const result = buildLocationsEmbed([{ name: 'Terminal A', city_name: 'Lorville' }]);
       expect(result.data.fields[0].name).toContain('Terminal A');
+    });
+
+    test('buildCommoditiesEmbed shows no commodities message', () => {
+      const res = buildCommoditiesEmbed('Loc', [{ terminal: 'T', commodities: [] }], 0, 1);
+      expect(res.data.fields[0].value).toBe('```\n```');
     });
   
     test('buildCommoditiesEmbed returns embed grouped by terminal', () => {
@@ -75,6 +117,12 @@ const {
       expect(result.data.footer.text).toContain('Page 1 of 1');
     });
 
+    test('buildCommoditiesEmbed uses default paging', () => {
+      const data = [{ terminal: 'T1', commodities: [] }];
+      const embed = buildCommoditiesEmbed('Area18', data);
+      expect(embed.data.footer.text).toContain('Page 1');
+    });
+
     test('buildCommoditiesEmbed truncates long field values', () => {
       const longList = Array.from({ length: 300 }, (_, i) => ({
         name: `Item${i}`,
@@ -86,6 +134,12 @@ const {
       const value = result.data.fields[0].value;
       expect(value.length).toBeLessThanOrEqual(1024);
       expect(value.endsWith('...```')).toBe(true);
+    });
+
+    test('buildCommoditiesEmbed handles missing prices', () => {
+      const data = [{ terminal: 'T1', commodities: [{ name: 'X' }] }];
+      const res = buildCommoditiesEmbed('L', data, 0, 1);
+      expect(res.data.fields[0].value).toContain('N/A');
     });
 
     test('buildCommoditiesEmbed truncates long commodity names', () => {

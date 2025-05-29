@@ -141,6 +141,16 @@ const SlashCommandBuilder = jest.fn(() => {
       this.options.push(option);
       return this;
     },
+    addIntegerOption(fn) {
+      const option = { type: 'integer', name: undefined, description: undefined, required: false };
+      fn({
+        setName(name) { option.name = name; return this; },
+        setDescription(desc) { option.description = desc; return this; },
+        setRequired(req) { option.required = req; return this; },
+      });
+      this.options.push(option);
+      return this;
+    },
     addUserOption(fn) {
       const option = { type: 'user', name: undefined, description: undefined, required: false };
       fn({
@@ -149,6 +159,38 @@ const SlashCommandBuilder = jest.fn(() => {
         setRequired(req) { option.required = req; return this; },
       });
       this.options.push(option);
+      return this;
+    },
+    addSubcommand(fn) {
+      const sub = { type: 'subcommand', name: undefined, description: undefined, options: [] };
+      const subBuilder = {
+        setName(name) { sub.name = name; return this; },
+        setDescription(desc) { sub.description = desc; return this; },
+        addUserOption(userFn) {
+          const opt = { type: 'user', name: undefined, description: undefined, required: false };
+          userFn({
+            setName(n) { opt.name = n; return this; },
+            setDescription(d) { opt.description = d; return this; },
+            setRequired(r) { opt.required = r; return this; },
+            addChoices: jest.fn()
+          });
+          sub.options.push(opt);
+          return this;
+        },
+        addStringOption(strFn) {
+          const opt = { type: 'string', name: undefined, description: undefined, required: false };
+          strFn({
+            setName(n) { opt.name = n; return this; },
+            setDescription(d) { opt.description = d; return this; },
+            setRequired(r) { opt.required = r; return this; },
+            addChoices: jest.fn()
+          });
+          sub.options.push(opt);
+          return this;
+        }
+      };
+      fn(subBuilder);
+      this.options.push(sub);
       return this;
     },
     addRoleOption(fn) {
@@ -179,6 +221,7 @@ module.exports = {
   StringSelectMenuBuilder,
   ButtonStyle,
   SlashCommandBuilder,
+  SlashCommandSubcommandBuilder: SlashCommandBuilder,
   EmbedBuilder,
   PermissionFlagsBits
 };

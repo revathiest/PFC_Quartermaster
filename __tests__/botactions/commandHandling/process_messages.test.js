@@ -10,6 +10,7 @@ jest.mock('../../../messages.json', () => ({
 }), { virtual: true });
 
 const { process_messages } = require('../../../botactions/commandHandling/process_messages');
+const filterMock = require('../../../messages.json');
 
 describe('process_messages', () => {
   let message;
@@ -60,6 +61,51 @@ describe('process_messages', () => {
     message.content = 'bad123';
     message.client.channels.cache.clear();
     process_messages(message, true, 'missing');
+    expect(message.delete).toHaveBeenCalled();
+  });
+
+  test('handles regex delete with response channel', () => {
+    message.content = 'bad123';
+    process_messages(message, true, '1');
+    const responseChannel = message.client.channels.cache.get('1');
+    const deletion = `The following message has been deleted from channel gen. Sender - u`;
+    expect(responseChannel.send).toHaveBeenNthCalledWith(1, deletion);
+    expect(responseChannel.send).toHaveBeenNthCalledWith(2, 'bad123');
+    expect(message.delete).toHaveBeenCalled();
+  });
+
+  test('returns undefined when no matches found', () => {
+    message.content = 'no filtered words here';
+    const result = process_messages(message, true, '1');
+    expect(result).toBeUndefined();
+    expect(message.channel.send).not.toHaveBeenCalled();
+    expect(message.delete).not.toHaveBeenCalled();
+  });
+
+  test('skips prototype properties in filter', () => {
+    const protoWords = { proto: { action: 'respond', response: 'ignored' } };
+    const protoRegex = { '/proto/': { action: 'delete', response: 'ignored' } };
+    const origWordsProto = Object.getPrototypeOf(filterMock.words);
+    const origRegexProto = Object.getPrototypeOf(filterMock.regex);
+    Object.setPrototypeOf(filterMock.words, protoWords);
+    Object.setPrototypeOf(filterMock.regex, protoRegex);
+
+    message.content = 'proto';
+    const result = process_messages(message, true, '1');
+
+    expect(result).toBeUndefined();
+    expect(message.channel.send).not.toHaveBeenCalled();
+
+    Object.setPrototypeOf(filterMock.words, origWordsProto);
+    Object.setPrototypeOf(filterMock.regex, origRegexProto);
+  });
+
+  test('handles word delete with non-text response channel', () => {
+    message.content = 'bad word';
+    message.client.channels.cache.set('1', { send: jest.fn(), isText: () => false, type: 1 });
+    process_messages(message, true, '1');
+    const responseChannel = message.client.channels.cache.get('1');
+    expect(responseChannel.send).not.toHaveBeenCalled();
     expect(message.delete).toHaveBeenCalled();
   });
 });

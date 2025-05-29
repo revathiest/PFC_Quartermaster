@@ -6,10 +6,11 @@ const { UexPoi } = require('../../../config/database');
 const { syncUexPois } = require('../../../utils/apiSync/syncUexPoi');
 
 describe('syncUexPois', () => {
-  let errorSpy, warnSpy;
+  let errorSpy, warnSpy, logSpy;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
@@ -17,6 +18,7 @@ describe('syncUexPois', () => {
   afterEach(() => {
     errorSpy.mockRestore();
     warnSpy.mockRestore();
+    logSpy.mockRestore();
   });
 
   test('upserts pois', async () => {
@@ -27,6 +29,23 @@ describe('syncUexPois', () => {
     expect(fetchUexData).toHaveBeenCalledWith('poi');
     expect(UexPoi.upsert).toHaveBeenCalled();
     expect(res).toEqual({ created: 1, updated: 0, skipped: 0, total: 1 });
+  });
+
+  test('skips invalid entries', async () => {
+    fetchUexData.mockResolvedValue({ data: [{}, { id: 2, name: 'ok' }] });
+    UexPoi.upsert.mockResolvedValue([{}, false]);
+
+    const res = await syncUexPois();
+    expect(warnSpy).toHaveBeenCalled();
+    expect(res).toEqual({ created: 0, updated: 1, skipped: 1, total: 2 });
+  });
+
+  test('logs and rethrows on upsert failure', async () => {
+    fetchUexData.mockResolvedValue({ data: [{ id: 3, name: 'b' }] });
+    UexPoi.upsert.mockRejectedValue(new Error('fail'));
+
+    await expect(syncUexPois()).rejects.toThrow('fail');
+    expect(errorSpy).toHaveBeenCalled();
   });
 
   test('throws on invalid data', async () => {

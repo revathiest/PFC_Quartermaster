@@ -24,13 +24,16 @@ const { safeReply } = require('../../../../utils/trade/handlers/shared');
 
 describe('handleTradeFind', () => {
   let warnSpy;
+  let errorSpy;
   beforeEach(() => {
     jest.clearAllMocks();
     warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
     warnSpy.mockRestore();
+    errorSpy.mockRestore();
   });
 
   test('returns trades embed when results found', async () => {
@@ -53,5 +56,22 @@ describe('handleTradeFind', () => {
     await handleTradeFind(interaction);
     expect(safeReply).toHaveBeenCalledWith(interaction, expect.stringContaining('No trades found'));
     expect(warnSpy).toHaveBeenCalled();
+  });
+
+  test('warns when no terminal matches to location', async () => {
+    const interaction = new MockInteraction({ options: { from: 'A', to: 'B' } });
+    getSellOptionsAtLocation.mockResolvedValue([{ terminal: { name: 'C' }, price_buy: 10, scu_buy: 1 }]);
+    calculateProfitOptions.mockReturnValue([]);
+
+    await handleTradeFind(interaction);
+    expect(warnSpy).toHaveBeenCalled();
+  });
+
+  test('handles query errors gracefully', async () => {
+    const interaction = new MockInteraction({ options: { from: 'A', to: 'B' } });
+    getSellOptionsAtLocation.mockRejectedValue(new Error('fail'));
+    await handleTradeFind(interaction);
+    expect(safeReply).toHaveBeenCalledWith(interaction, expect.stringContaining('error'));
+    expect(errorSpy).toHaveBeenCalled();
   });
 });

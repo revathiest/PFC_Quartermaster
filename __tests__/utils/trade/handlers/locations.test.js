@@ -19,13 +19,16 @@ const { safeReply } = require('../../../../utils/trade/handlers/shared');
 
 describe('handleTradeLocations', () => {
   let warnSpy;
+  let errorSpy;
   beforeEach(() => {
     jest.clearAllMocks();
     warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
     warnSpy.mockRestore();
+    errorSpy.mockRestore();
   });
 
   test('sends locations embed', async () => {
@@ -46,5 +49,22 @@ describe('handleTradeLocations', () => {
     await handleTradeLocations(interaction);
     expect(safeReply).toHaveBeenCalledWith(interaction, expect.stringContaining('No known terminals'));
     expect(warnSpy).toHaveBeenCalled();
+  });
+
+  test('handles lookup errors gracefully', async () => {
+    const interaction = new MockInteraction({});
+    getTerminalsAtLocation.mockRejectedValue(new Error('fail'));
+    await handleTradeLocations(interaction);
+    expect(safeReply).toHaveBeenCalledWith(interaction, expect.stringContaining('error'));
+    expect(errorSpy).toHaveBeenCalled();
+  });
+
+  test('does not reply twice on error if already replied', async () => {
+    const interaction = new MockInteraction({});
+    interaction.replied = true;
+    getTerminalsAtLocation.mockRejectedValue(new Error('boom'));
+    await handleTradeLocations(interaction);
+    expect(safeReply).not.toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalled();
   });
 });

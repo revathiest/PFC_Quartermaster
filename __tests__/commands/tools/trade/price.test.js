@@ -15,4 +15,13 @@ describe('/trade price subcommand', () => {
     await command.execute(interaction);
     expect(handleTradePrice).toHaveBeenCalledWith(interaction);
   });
+
+  test('defines command data with commodity/location options', () => {
+    const data = command.data();
+    expect(data.name).toBe('price');
+    const commodity = data.options.find(o => o.name === 'commodity');
+    const location = data.options.find(o => o.name === 'location');
+    expect(commodity.required).toBe(true);
+    expect(location.required).toBe(false);
+  });
 });

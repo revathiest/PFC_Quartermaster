@@ -13,7 +13,7 @@ jest.mock('../../../../utils/trade/tradeEmbeds');
 jest.mock('../../../../utils/trade/handlers/shared');
 
 // 🔧 Import handler after mocks are active
-const { handleTradeBest } = require('../../../../utils/trade/handlers/best');
+const { handleTradeBest, handleTradeBestCore } = require('../../../../utils/trade/handlers/best');
 
 const {
   getVehicleByName,
@@ -138,6 +138,14 @@ describe('handleTradeBest', () => {
       components: [{ type: 1, components: [] }],
       flags: MessageFlags.Ephemeral
     });
+  });
+
+  test('returns error when multiple ships but no userId', async () => {
+    getVehicleByName.mockResolvedValue([{ name: 'A' }, { name: 'B' }]);
+
+    const result = await handleTradeBestCore({ fromLocation: 'A', shipQuery: 'X', cash: 0 });
+
+    expect(result).toEqual({ error: '❌ Multiple ships matched, and no userId provided for caching.' });
   });
 
   test('clears TradeStateCache if a single ship is selected', async () => {

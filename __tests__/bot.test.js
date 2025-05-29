@@ -38,6 +38,7 @@ const originalConsoleWarn = console.warn;
 
 let bot;
 let pendingLogs;
+let errorSpy;
 
 describe('bot.js core utilities', () => {
   beforeEach(() => {
@@ -45,6 +46,7 @@ describe('bot.js core utilities', () => {
     console.log = originalConsoleLog;
     console.error = originalConsoleError;
     console.warn = originalConsoleWarn;
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     bot = require('../bot');
     pendingLogs = require('../jobs/logState').pendingLogs;
     pendingLogs.length = 0;
@@ -54,6 +56,7 @@ describe('bot.js core utilities', () => {
     console.log = originalConsoleLog;
     console.error = originalConsoleError;
     console.warn = originalConsoleWarn;
+    errorSpy.mockRestore();
   });
 
   test('console.log forwards to pending logs', () => {

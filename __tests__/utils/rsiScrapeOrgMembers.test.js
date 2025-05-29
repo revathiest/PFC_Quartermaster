@@ -5,7 +5,16 @@ jest.mock('node-fetch');
 const rsiScrapeOrgMembers = require('../../utils/rsiScrapeOrgMembers');
 
 describe('rsiScrapeOrgMembers', () => {
-  afterEach(() => jest.clearAllMocks());
+  let errorSpy;
+
+  beforeEach(() => {
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    errorSpy.mockRestore();
+  });
 
   test('collects members across pages', async () => {
     const page1 = `
@@ -31,5 +40,6 @@ describe('rsiScrapeOrgMembers', () => {
   test('throws on http error', async () => {
     fetch.mockResolvedValueOnce({ ok: false, status: 500, statusText: 'err' });
     await expect(rsiScrapeOrgMembers('PFC')).rejects.toThrow('Failed to fetch page 1');
+    expect(errorSpy).toHaveBeenCalled();
   });
 });

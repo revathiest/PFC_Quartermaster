@@ -46,4 +46,36 @@ describe('ambientEngine', () => {
 
     expect(channel.send).not.toHaveBeenCalled();
   });
+
+  test('does not record bot messages', async () => {
+    await startAmbientEngine(client);
+    trackChannelActivity({ author: { bot: true }, channel: { id: '1' } });
+
+    jest.advanceTimersByTime(60000);
+    await Promise.resolve();
+
+    expect(channel.send).not.toHaveBeenCalled();
+  });
+
+  test('requires minMessagesSinceLast', async () => {
+    AmbientSetting.findOne.mockResolvedValue({ minMessagesSinceLast: 2, freshWindowMs: 120000 });
+    await startAmbientEngine(client);
+    trackChannelActivity({ author: { bot: false }, channel: { id: '1' } });
+
+    jest.advanceTimersByTime(60000);
+    await Promise.resolve();
+
+    expect(channel.send).not.toHaveBeenCalled();
+  });
+
+  test('handles empty ambient message list', async () => {
+    AmbientMessage.findAll.mockResolvedValue([]);
+    await startAmbientEngine(client);
+    trackChannelActivity({ author: { bot: false }, channel: { id: '1' } });
+
+    jest.advanceTimersByTime(60000);
+    await Promise.resolve();
+
+    expect(channel.send).not.toHaveBeenCalled();
+  });
 });

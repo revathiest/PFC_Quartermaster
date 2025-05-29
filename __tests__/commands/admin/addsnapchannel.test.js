@@ -38,4 +38,25 @@ describe('/addsnapchannel command', () => {
       flags: MessageFlags.Ephemeral
     });
   });
+
+  test('uses default purge time when none provided', async () => {
+    const interaction = makeInteraction(['Fleet Admiral']);
+    interaction.options.getInteger = jest.fn(() => null);
+    await execute(interaction);
+    expect(addSnapChannel).toHaveBeenCalledWith('c1', 30, 'g1');
+    expect(interaction.reply).toHaveBeenCalledWith({
+      content: expect.stringContaining('Snap channel chan added'),
+      flags: MessageFlags.Ephemeral
+    });
+  });
+
+  test('replies with error message on failure', async () => {
+    const interaction = makeInteraction(['Admiral']);
+    addSnapChannel.mockRejectedValueOnce(new Error('oops'));
+    await execute(interaction);
+    expect(interaction.reply).toHaveBeenCalledWith({
+      content: expect.stringContaining('error'),
+      flags: MessageFlags.Ephemeral
+    });
+  });
 });

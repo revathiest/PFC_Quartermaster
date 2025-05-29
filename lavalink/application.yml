@@ -7,6 +7,8 @@ spring:
     banner-mode: "off"
 
 lavalink:
+  plugins:
+    # Add plugin paths here if needed later
   server:
     password: "youshallnotpass"
     sources:
@@ -17,3 +19,12 @@ lavalink:
       vimeo: true
       http: true
       local: false
+
+metrics:
+  prometheus:
+    enabled: true
+
+logging:
+  level:
+    root: INFO
+    lavalink: INFO

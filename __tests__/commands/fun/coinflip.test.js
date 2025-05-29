@@ -38,9 +38,9 @@ const makeChallengeInteraction = ({ self = false, hasTesterRole = false } = {}) 
   };
 };
 
-const makeCallInteraction = (choice) => {
+const makeCallInteraction = (choice, userId = 'opponent') => {
   return {
-    user: { id: 'opponent' },
+    user: { id: userId },
     options: {
       getSubcommand: jest.fn(() => 'call'),
       getString: jest.fn(() => choice),
@@ -78,7 +78,7 @@ describe('/coinflip command', () => {
     await coinflip.execute(challenge);
     expect(challenge.reply).toHaveBeenCalledWith(expect.stringContaining('has challenged'));
 
-    const call = makeCallInteraction('heads');
+      const call = makeCallInteraction('heads');
     await coinflip.execute(call);
     expect(call.reply.mock.calls[0][0].embeds[0].toJSON().description).toContain('wins the toss');
 
@@ -96,11 +96,58 @@ describe('/coinflip command', () => {
     await coinflip.execute(challenge);
     jest.advanceTimersByTime(2 * 60 * 1000);
 
-    const call = makeCallInteraction('heads');
+    const call = makeCallInteraction('heads', 'challenger');
     await coinflip.execute(call);
     expect(call.reply).toHaveBeenCalledWith({
       content: expect.stringContaining('no pending coin flip'),
       flags: MessageFlags.Ephemeral,
     });
+  });
+
+  test('allows self challenge for Fleet Admiral role', async () => {
+    const challenge = makeChallengeInteraction({ self: true, hasTesterRole: true });
+    await coinflip.execute(challenge);
+    expect(challenge.reply).toHaveBeenCalledWith(expect.stringContaining('has challenged'));
+
+    const call = makeCallInteraction('heads', 'challenger');
+    await coinflip.execute(call);
+    expect(call.reply.mock.calls[0][0].embeds[0].toJSON().description).toContain('wins the toss');
+  });
+
+  test('rejects challenge when opponent already challenged', async () => {
+    const first = makeChallengeInteraction();
+    await coinflip.execute(first);
+
+    const second = makeChallengeInteraction();
+    await coinflip.execute(second);
+    expect(second.reply).toHaveBeenCalledWith({
+      content: expect.stringContaining('already has a pending coin flip'),
+      flags: MessageFlags.Ephemeral,
+    });
+
+    const call = makeCallInteraction('heads');
+    await coinflip.execute(call);
+  });
+
+  test('handles incorrect call choice', async () => {
+    Math.random = jest.fn(() => 1); // always tails
+
+    const challenge = makeChallengeInteraction();
+    await coinflip.execute(challenge);
+
+    const call = makeCallInteraction('heads');
+    await coinflip.execute(call);
+    const result = call.reply.mock.calls[0][0].embeds[0].toJSON();
+    expect(result.description).toContain('Challenger');
+    expect(result.thumbnail.url).toContain('reverse-650x650.jpg');
+  });
+
+  test('ignores unknown subcommand', async () => {
+    const interaction = {
+      options: { getSubcommand: jest.fn(() => 'other') },
+      reply: jest.fn(),
+    };
+    await coinflip.execute(interaction);
+    expect(interaction.reply).not.toHaveBeenCalled();
   });
 });

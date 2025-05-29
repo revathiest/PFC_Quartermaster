@@ -14,6 +14,7 @@ describe('ambientEngine', () => {
   let channel;
 
   beforeEach(() => {
+    jest.useFakeTimers();
     jest.clearAllMocks();
     channel = { isTextBased: () => true, name: 'general', send: jest.fn() };
     client = { channels: { cache: new Map([['1', channel]]) } };
@@ -77,5 +78,68 @@ describe('ambientEngine', () => {
     await Promise.resolve();
 
     expect(channel.send).not.toHaveBeenCalled();
+  });
+
+  test('logs error when loading allowed channels fails', async () => {
+    AmbientChannel.findAll.mockRejectedValue(new Error('db fail'));
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    await startAmbientEngine(client);
+
+    expect(errorSpy).toHaveBeenCalledWith(
+      '❌ Failed to load allowed ambient channels:',
+      expect.any(Error)
+    );
+    errorSpy.mockRestore();
+  });
+
+  test('warns when ambient settings missing', async () => {
+    AmbientSetting.findOne.mockResolvedValue(null);
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+    await startAmbientEngine(client);
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      '⚠️ No ambient settings found in DB. Using defaults.'
+    );
+    warnSpy.mockRestore();
+  });
+
+  test('logs error when ambient settings load fails', async () => {
+    AmbientSetting.findOne.mockRejectedValue(new Error('db fail'));
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    await startAmbientEngine(client);
+
+    expect(errorSpy).toHaveBeenCalledWith(
+      '❌ Failed to load ambient settings:',
+      expect.any(Error)
+    );
+    errorSpy.mockRestore();
+  });
+
+  test('skips non-text based channels', async () => {
+    channel.isTextBased = () => false;
+    await startAmbientEngine(client);
+    trackChannelActivity({ author: { bot: false }, channel: { id: '1' } });
+
+    jest.advanceTimersByTime(60000);
+    await Promise.resolve();
+
+    expect(channel.send).not.toHaveBeenCalled();
+  });
+
+  test('logs error when message send fails', async () => {
+    channel.send.mockRejectedValue(new Error('net fail'));
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    await startAmbientEngine(client);
+    trackChannelActivity({ author: { bot: false }, channel: { id: '1' } });
+
+    jest.advanceTimersByTime(60000);
+    await jest.runOnlyPendingTimersAsync();
+    expect(channel.send).toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalled();
+    errorSpy.mockRestore();
   });
 });

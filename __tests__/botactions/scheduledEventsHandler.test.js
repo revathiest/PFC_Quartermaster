@@ -177,7 +177,10 @@ jest.mock('../../config/database', () => ({
 
       it('throws when fetch fails', async () => {
         mockGuild.scheduledEvents.fetch.mockRejectedValue(new Error('fail'));
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
         await expect(getAllScheduledEventsFromClient(mockClient)).rejects.toThrow('There was an error fetching the events.');
+        expect(consoleSpy).toHaveBeenCalled();
+        consoleSpy.mockRestore();
       });
     });
 

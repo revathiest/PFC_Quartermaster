@@ -9,14 +9,17 @@ const { deleteOldLogs } = require('../../botactions/maintenance/logCleanup');
 const { startAllScheduledJobs } = require('../../jobs');
 
 describe('startAllScheduledJobs', () => {
+  let logSpy;
   beforeEach(() => {
     jest.useFakeTimers();
     jest.spyOn(global, 'setInterval');
+    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
   });
 
   afterEach(() => {
     jest.useRealTimers();
     jest.clearAllMocks();
+    logSpy.mockRestore();
   });
 
   test('schedules jobs and intervals', () => {

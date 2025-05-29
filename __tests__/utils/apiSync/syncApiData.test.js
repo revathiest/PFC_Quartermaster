@@ -19,14 +19,17 @@ jest.mock('../../../botactions/api/syncEndpoints', () => ({
 
 describe('runFullApiSync', () => {
   let errorSpy;
+  let logSpy;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
     errorSpy.mockRestore();
+    logSpy.mockRestore();
   });
 
   test('calls all sync endpoints', async () => {

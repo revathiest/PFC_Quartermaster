@@ -13,11 +13,17 @@ jest.mock('../../../botactions/utilityFunctions');
 
 describe('handleVoiceStateUpdate', () => {
   const client = {};
+  let logSpy;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     getChannelNameById.mockResolvedValue('Channel');
     getUserNameById.mockResolvedValue('User');
+  });
+
+  afterEach(() => {
+    logSpy.mockRestore();
   });
 
   function state(channelId) {

@@ -8,9 +8,16 @@ const { scheduleDailyApiSync } = require('../../jobs/scheduler');
 const { runFullApiSync } = require('../../utils/apiSync/syncApiData');
 
 describe('scheduleDailyApiSync', () => {
+  let logSpy;
+
+  beforeEach(() => {
+    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+  });
+
   afterEach(() => {
     jest.useRealTimers();
     jest.clearAllMocks();
+    logSpy.mockRestore();
   });
 
   test('schedules API sync at next midnight UTC', async () => {

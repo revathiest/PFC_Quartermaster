@@ -23,4 +23,23 @@ function search(query) {
   });
 }
 
-module.exports = { search };
+function getStreamUrl(videoUrl) {
+  return new Promise((resolve, reject) => {
+    const cmd = process.env.YTDLP_PATH || 'yt-dlp';
+    debugLog('Fetching stream URL for', videoUrl);
+    execFile(cmd, ['-f', 'bestaudio', '-g', videoUrl], (err, stdout) => {
+      if (err) {
+        debugLog('yt-dlp stream error:', err.message);
+        return reject(err);
+      }
+      const url = stdout.trim().split('\n')[0];
+      if (url) {
+        debugLog('yt-dlp stream url:', url);
+        resolve(url);
+      } else {
+        reject(new Error('No stream URL found'));
+      }
+    });
+  });
+}
+module.exports = { search, getStreamUrl };

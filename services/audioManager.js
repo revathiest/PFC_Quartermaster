@@ -28,7 +28,17 @@ async function enqueue(guildId, query) {
       data = await lavalink.loadTrack(target);
     } catch (err) {
       console.error('❌ Failed to load track:', err.message);
-      throw new Error('Failed to load track');
+      if (target.includes('youtube.com') || target.includes('youtu.be')) {
+        try {
+          const url = await youtube.getStreamUrl(target);
+          data = await lavalink.loadTrack(url);
+        } catch (fallbackErr) {
+          console.error('❌ Fallback stream load failed:', fallbackErr.message);
+          throw new Error('Failed to load track');
+        }
+      } else {
+        throw new Error('Failed to load track');
+      }
     }
     const track = data.tracks ? data.tracks[0] : data;
     debugLog('Resolved track', track.info?.title || track.track);

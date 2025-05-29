@@ -15,4 +15,11 @@ describe('/trade route subcommand', () => {
     await command.execute(interaction, {});
     expect(handleTradeRoute).toHaveBeenCalledWith(interaction, {}, { from: 'A', to: 'B' });
   });
+
+  test('defines command data with required options', () => {
+    const data = command.data();
+    const names = data.options.map(o => o.name);
+    expect(names).toEqual(['from', 'to']);
+    data.options.forEach(opt => expect(opt.required).toBe(true));
+  });
 });

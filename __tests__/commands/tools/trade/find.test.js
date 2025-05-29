@@ -15,4 +15,12 @@ describe('/trade find subcommand', () => {
     await command.execute(interaction);
     expect(handleTradeFind).toHaveBeenCalledWith(interaction);
   });
+
+  test('defines command data with from/to options', () => {
+    const data = command.data();
+    const names = data.options.map(o => o.name);
+    expect(data.name).toBe('find');
+    expect(names).toEqual(['from', 'to']);
+    data.options.forEach(opt => expect(opt.required).toBe(true));
+  });
 });

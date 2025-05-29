@@ -102,4 +102,56 @@ describe('handleTradeCommodities', () => {
     expect(errorSpy).toHaveBeenCalled();
     expect(safeReply).not.toHaveBeenCalled();
   });
+
+  test('handles duplicate and unknown terminals', async () => {
+    const interaction = new MockInteraction({ options: { location: 'Area18' } });
+    const records = [
+      { commodity_name: 'A', price_buy: 1, price_sell: 2, terminal: { nickname: 'T1' } },
+      { commodity_name: 'B', price_buy: 3, price_sell: 4, terminal: { name: 'T1' } },
+      { commodity_name: 'C', price_buy: 5, price_sell: 6, terminal: {} },
+    ];
+    getSellOptionsAtLocation.mockResolvedValue(records);
+    buildCommoditiesEmbed.mockReturnValue({ title: 'embed' });
+
+    await handleTradeCommodities(interaction);
+
+    const pageData = buildCommoditiesEmbed.mock.calls[0][1];
+    expect(pageData[0].terminal).toBe('T1');
+    expect(pageData.length).toBe(1);
+    const components = safeReply.mock.calls[0][1].components;
+    expect(components).toHaveLength(1);
+  });
+
+  test('returns empty page data when page out of range', async () => {
+    const interaction = new MockInteraction({ options: { location: 'Area18' } });
+    getSellOptionsAtLocation.mockResolvedValue([
+      { commodity_name: 'A', price_buy: 1, price_sell: 2, terminal: { name: 'T1' } },
+    ]);
+    buildCommoditiesEmbed.mockReturnValue({ title: 'embed' });
+
+    await handleTradeCommodities(interaction, { location: 'Area18', page: 5 });
+
+    expect(buildCommoditiesEmbed).toHaveBeenCalledWith('Area18', [], 5, 1);
+    const components = safeReply.mock.calls[0][1].components;
+    expect(components).toHaveLength(0);
+  });
+
+  test('uses part numbering when terminal list is long', async () => {
+    const interaction = new MockInteraction({ options: { location: 'Area18' } });
+    const records = Array.from({ length: 40 }, (_, i) => ({
+      commodity_name: `C${i}`,
+      price_buy: i,
+      price_sell: i + 1,
+      terminal: { nickname: 'T1' },
+    }));
+    getSellOptionsAtLocation.mockResolvedValue(records);
+    buildCommoditiesEmbed.mockReturnValue({ title: 'embed' });
+
+    await handleTradeCommodities(interaction);
+
+    const firstCallData = buildCommoditiesEmbed.mock.calls[0][1][0];
+    expect(firstCallData.terminal).toBe('T1 (1/2)');
+    const components = safeReply.mock.calls[0][1].components;
+    expect(components).toHaveLength(1);
+  });
 });

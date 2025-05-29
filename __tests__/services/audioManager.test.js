@@ -2,14 +2,23 @@ jest.mock('../../services/lavalink');
 jest.mock('../../services/spotify');
 jest.mock('../../services/youtube');
 
-const lavalink = require('../../services/lavalink');
-const spotify = require('../../services/spotify');
-const youtube = require('../../services/youtube');
-const audio = require('../../services/audioManager');
+let lavalink = require('../../services/lavalink');
+let spotify = require('../../services/spotify');
+let youtube = require('../../services/youtube');
+let audio;
 
 describe('audioManager', () => {
   beforeEach(() => {
+    jest.resetModules();
     jest.clearAllMocks();
+    // re-require mocks after resetting modules
+    jest.mock('../../services/lavalink');
+    jest.mock('../../services/spotify');
+    jest.mock('../../services/youtube');
+    lavalink = require('../../services/lavalink');
+    spotify = require('../../services/spotify');
+    youtube = require('../../services/youtube');
+    audio = require('../../services/audioManager');
     audio._clear();
     lavalink.loadTrack.mockResolvedValue({ tracks: [{ track: 't1', info: { title: 'Song' } }] });
     spotify.getPlaylistTracks.mockResolvedValue({ items: [] });
@@ -83,5 +92,33 @@ describe('audioManager', () => {
     await audio.enqueue('id', 'https://youtube.com/watch?v=123');
     expect(youtube.search).not.toHaveBeenCalled();
     expect(lavalink.loadTrack).toHaveBeenCalledWith('https://youtube.com/watch?v=123');
+  });
+
+  test('join reuses existing connection', () => {
+    jest.doMock('@discordjs/voice', () => ({
+      joinVoiceChannel: jest.fn(() => ({ joinConfig: { channelId: 'c1' }, destroyed: false, destroy: jest.fn() }))
+    }), { virtual: true });
+    audio = require('../../services/audioManager');
+    const { joinVoiceChannel } = require('@discordjs/voice');
+    const conn1 = audio.join('g', 'c1', 'a');
+    const conn2 = audio.join('g', 'c1', 'a');
+    expect(joinVoiceChannel).toHaveBeenCalledTimes(1);
+    expect(conn1).toBe(conn2);
+    jest.dontMock('@discordjs/voice');
+  });
+
+  test('join switches channels', () => {
+    jest.doMock('@discordjs/voice', () => ({
+      joinVoiceChannel: jest.fn(() => ({ joinConfig: { channelId: 'c1' }, destroyed: false, destroy: jest.fn() }))
+    }), { virtual: true });
+    audio = require('../../services/audioManager');
+    const { joinVoiceChannel } = require('@discordjs/voice');
+    const conn1 = audio.join('g', 'c1', 'a');
+    joinVoiceChannel.mockReturnValueOnce({ joinConfig: { channelId: 'c2' }, destroyed: false, destroy: jest.fn() });
+    const conn2 = audio.join('g', 'c2', 'a');
+    expect(conn1.destroy).toHaveBeenCalled();
+    expect(joinVoiceChannel).toHaveBeenCalledTimes(2);
+    expect(conn2.joinConfig.channelId).toBe('c2');
+    jest.dontMock('@discordjs/voice');
   });
 });

@@ -26,10 +26,11 @@ jest.mock('../../config/database', () => ({
   const { Collection } = require('@discordjs/collection');
   
   describe('scheduledEventsHandler full module tests', () => {
-    let mockClient, mockGuild;
+    let mockClient, mockGuild, logSpy;
   
     beforeEach(() => {
       jest.clearAllMocks();
+      logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
   
       mockGuild = {
         id: 'server1',
@@ -44,6 +45,10 @@ jest.mock('../../config/database', () => ({
           cache: new Collection([['server1', mockGuild]]),
         },
       };
+    });
+
+    afterEach(() => {
+      logSpy.mockRestore();
     });
   
     describe('saveEventToDatabase', () => {

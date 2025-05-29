@@ -11,15 +11,17 @@ const db = require('../../../config/database');
 const { syncGalactapediaDetail } = require('../../../utils/apiSync/galactapediaDetail');
 
 describe('syncGalactapediaDetail', () => {
-  let errorSpy;
+  let errorSpy, logSpy;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
     errorSpy.mockRestore();
+    logSpy.mockRestore();
   });
 
   test('saves details and related data', async () => {

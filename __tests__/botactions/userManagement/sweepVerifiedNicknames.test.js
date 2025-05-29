@@ -6,10 +6,11 @@ const { VerifiedUser, OrgTag } = require('../../../config/database');
 const { formatVerifiedNickname } = require('../../../utils/formatVerifiedNickname');
 
 describe('sweepVerifiedNicknames', () => {
-  let mockClient, mockGuild, mockMembers;
+  let mockClient, mockGuild, mockMembers, logSpy;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
 
     OrgTag.findAll.mockResolvedValue([
       { tag: 'PFCS' },
@@ -47,6 +48,10 @@ describe('sweepVerifiedNicknames', () => {
         },
       },
     };
+  });
+
+  afterEach(() => {
+    logSpy.mockRestore();
   });
 
   it('updates nicknames correctly based on verification status', async () => {

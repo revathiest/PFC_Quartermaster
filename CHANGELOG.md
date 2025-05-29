@@ -12,3 +12,4 @@
 - Spotify service now refreshes tokens on 401 responses.
 ### Fixed
 - Music bot now joins the user's voice channel before queuing tracks.
+- YouTube search returns stable video URLs for Lavalink metadata.

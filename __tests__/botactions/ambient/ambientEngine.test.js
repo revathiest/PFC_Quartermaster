@@ -71,6 +71,7 @@ describe('ambientEngine', () => {
 
   test('handles empty ambient message list', async () => {
     AmbientMessage.findAll.mockResolvedValue([]);
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     await startAmbientEngine(client);
     trackChannelActivity({ author: { bot: false }, channel: { id: '1' } });
 
@@ -78,6 +79,8 @@ describe('ambientEngine', () => {
     await Promise.resolve();
 
     expect(channel.send).not.toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalledWith('⚠️ No ambient messages available in DB.');
+    warnSpy.mockRestore();
   });
 
   test('logs error when loading allowed channels fails', async () => {

@@ -49,8 +49,11 @@ describe('scheduleHandler', () => {
 
   test('getScheduledAnnouncements returns empty array on error', async () => {
     db.ScheduledAnnouncement.findAll.mockRejectedValue(new Error('fail'));
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     const res = await getScheduledAnnouncements();
     expect(res).toEqual([]);
+    expect(errorSpy).toHaveBeenCalled();
+    errorSpy.mockRestore();
   });
 
   test('deleteScheduledAnnouncement deletes record', async () => {

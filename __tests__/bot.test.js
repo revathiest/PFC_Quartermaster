@@ -32,20 +32,18 @@ jest.mock('../botactions/eventHandling/memberJoinEvent', () => ({ handleMemberJo
 jest.mock('../botactions/orgTagSync/syncScheduler', () => ({ startOrgTagSyncScheduler: jest.fn() }));
 jest.mock('../jobs', () => ({ startAllScheduledJobs: jest.fn() }));
 
-const originalConsoleLog = console.log;
-const originalConsoleError = console.error;
-const originalConsoleWarn = console.warn;
 
 let bot;
 let pendingLogs;
+let logSpy;
+let warnSpy;
 let errorSpy;
 
 describe('bot.js core utilities', () => {
   beforeEach(() => {
     jest.resetModules();
-    console.log = originalConsoleLog;
-    console.error = originalConsoleError;
-    console.warn = originalConsoleWarn;
+    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     bot = require('../bot');
     pendingLogs = require('../jobs/logState').pendingLogs;
@@ -53,9 +51,8 @@ describe('bot.js core utilities', () => {
   });
 
   afterEach(() => {
-    console.log = originalConsoleLog;
-    console.error = originalConsoleError;
-    console.warn = originalConsoleWarn;
+    logSpy.mockRestore();
+    warnSpy.mockRestore();
     errorSpy.mockRestore();
   });
 

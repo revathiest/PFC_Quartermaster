@@ -5,8 +5,14 @@ const fetch = require('node-fetch');
 jest.mock('node-fetch');
 
 describe('fetch helpers', () => {
+  let errorSpy;
   beforeEach(() => {
     jest.clearAllMocks();
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    errorSpy.mockRestore();
   });
 
   describe('fetchSCData', () => {

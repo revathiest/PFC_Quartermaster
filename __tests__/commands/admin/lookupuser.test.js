@@ -9,7 +9,18 @@ describe('/lookupuser command', () => {
     reply: jest.fn()
   });
 
-  beforeEach(() => jest.clearAllMocks());
+  let warnSpy;
+  let errorSpy;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
+    errorSpy.mockRestore();
+  });
 
   test('replies with member info if found in guild', async () => {
     const interaction = createInteraction(

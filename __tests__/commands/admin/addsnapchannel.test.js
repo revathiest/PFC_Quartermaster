@@ -52,11 +52,14 @@ describe('/addsnapchannel command', () => {
 
   test('replies with error message on failure', async () => {
     const interaction = makeInteraction(['Admiral']);
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     addSnapChannel.mockRejectedValueOnce(new Error('oops'));
     await execute(interaction);
     expect(interaction.reply).toHaveBeenCalledWith({
       content: expect.stringContaining('error'),
       flags: MessageFlags.Ephemeral
     });
+    expect(errorSpy).toHaveBeenCalled();
+    errorSpy.mockRestore();
   });
 });

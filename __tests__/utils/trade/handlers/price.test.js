@@ -19,13 +19,16 @@ const { safeReply } = require('../../../../utils/trade/handlers/shared');
 
 describe('handleTradePrice', () => {
   let warnSpy;
+  let errorSpy;
   beforeEach(() => {
     jest.clearAllMocks();
     warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
     warnSpy.mockRestore();
+    errorSpy.mockRestore();
   });
 
   test('sends price embed', async () => {
@@ -53,6 +56,7 @@ describe('handleTradePrice', () => {
     getCommodityTradeOptions.mockRejectedValue(new Error('fail'));
     await handleTradePrice(interaction);
     expect(safeReply).toHaveBeenCalledWith(interaction, expect.stringContaining('error'));
+    expect(errorSpy).toHaveBeenCalled();
   });
 
   test('handles missing location filter', async () => {
@@ -70,5 +74,6 @@ describe('handleTradePrice', () => {
     getCommodityTradeOptions.mockRejectedValue(new Error('x'));
     await handleTradePrice(interaction);
     expect(safeReply).not.toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalled();
   });
 });

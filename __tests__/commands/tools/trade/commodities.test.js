@@ -35,6 +35,18 @@ describe('/trade commodities subcommand', () => {
     expect(handleTradeCommodities).toHaveBeenCalledWith(btn, { location: 'Area18', page: 2 });
   });
 
+  test('defaults to page 0 when page is not a number', async () => {
+    const btn = {
+      customId: 'trade_commodities_page::Area18::abc',
+      deferUpdate: jest.fn().mockResolvedValue(),
+    };
+
+    await command.button(btn);
+
+    expect(btn.deferUpdate).toHaveBeenCalled();
+    expect(handleTradeCommodities).toHaveBeenCalledWith(btn, { location: 'Area18', page: 0 });
+  });
+
   test('ignores unrelated button customId', async () => {
     const btn = { customId: 'other', deferUpdate: jest.fn() };
     await command.button(btn);

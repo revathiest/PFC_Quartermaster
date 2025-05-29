@@ -19,13 +19,16 @@ const { safeReply } = require('../../../../utils/trade/handlers/shared');
 
 describe('handleTradeCommodities', () => {
   let warnSpy;
+  let errorSpy;
   beforeEach(() => {
     jest.clearAllMocks();
     warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
     warnSpy.mockRestore();
+    errorSpy.mockRestore();
   });
 
   test('sends commodities embed', async () => {
@@ -74,5 +77,29 @@ describe('handleTradeCommodities', () => {
     expect(next.setDisabled).toHaveBeenCalledWith(false);
     const components = safeReply.mock.calls[0][1].components;
     expect(components).toHaveLength(1);
+  });
+
+  test('replies with generic error when query fails', async () => {
+    const interaction = new MockInteraction({ options: { location: 'Area18' } });
+    getSellOptionsAtLocation.mockRejectedValue(new Error('fail'));
+
+    await handleTradeCommodities(interaction);
+
+    expect(errorSpy).toHaveBeenCalled();
+    expect(safeReply).toHaveBeenCalledWith(
+      interaction,
+      expect.stringContaining('An error occurred')
+    );
+  });
+
+  test('does not reply again if interaction already replied on error', async () => {
+    const interaction = new MockInteraction({ options: { location: 'Area18' } });
+    interaction.replied = true;
+    getSellOptionsAtLocation.mockRejectedValue(new Error('fail'));
+
+    await handleTradeCommodities(interaction);
+
+    expect(errorSpy).toHaveBeenCalled();
+    expect(safeReply).not.toHaveBeenCalled();
   });
 });

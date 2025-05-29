@@ -30,8 +30,19 @@ const createInteraction = (hasPerm = true) => {
   };
 };
 
+
+let errorSpy;
+let warnSpy;
+
 beforeEach(() => {
   jest.clearAllMocks();
+  errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+});
+
+afterEach(() => {
+  errorSpy.mockRestore();
+  warnSpy.mockRestore();
 });
 
 describe('/manual-verify command', () => {
@@ -90,6 +101,7 @@ describe('/manual-verify command', () => {
       content: expect.stringContaining('Failed to manually verify'),
       flags: MessageFlags.Ephemeral
     }));
+    expect(errorSpy).toHaveBeenCalled();
   });
 
   it('updates nickname even when org tag is unknown', async () => {

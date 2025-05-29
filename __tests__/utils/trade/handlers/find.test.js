@@ -24,13 +24,16 @@ const { safeReply } = require('../../../../utils/trade/handlers/shared');
 
 describe('handleTradeFind', () => {
   let warnSpy;
+  let errorSpy;
   beforeEach(() => {
     jest.clearAllMocks();
     warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
     warnSpy.mockRestore();
+    errorSpy.mockRestore();
   });
 
   test('returns trades embed when results found', async () => {
@@ -60,5 +63,6 @@ describe('handleTradeFind', () => {
     getSellOptionsAtLocation.mockRejectedValue(new Error('fail'));
     await handleTradeFind(interaction);
     expect(safeReply).toHaveBeenCalledWith(interaction, expect.stringContaining('error'));
+    expect(errorSpy).toHaveBeenCalled();
   });
 });

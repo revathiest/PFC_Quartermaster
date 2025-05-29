@@ -199,6 +199,7 @@ describe('syncOrgTags', () => {
   });
 
   it('continues when profile not found and member fetch fails', async () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     mockGuild.members.fetch = jest.fn().mockRejectedValue(new Error('fetch failed'));
 
     VerifiedUser.findAll.mockResolvedValue([
@@ -215,5 +216,9 @@ describe('syncOrgTags', () => {
       where: { discordUserId: 'user1' }
     });
     expect(mockMember.setNickname).not.toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('RSI profile not found for VerifiedUser')
+    );
+    warnSpy.mockRestore();
   });
 });

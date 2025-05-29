@@ -41,4 +41,48 @@ describe('generateVoiceActivityReport', () => {
       }
     ]);
   });
+
+  test('ignores leave events for users not present', async () => {
+    jest.setSystemTime(new Date('2021-01-01T01:00:00Z'));
+    VoiceLog.findAll
+      .mockResolvedValueOnce([
+        { get: () => ({ channel_id: 'c', user_id: 'u1', timestamp: new Date('2021-01-01T00:00:00Z') }) }
+      ])
+      .mockResolvedValueOnce([
+        { get: () => ({ channel_id: 'c', user_id: 'u2', timestamp: new Date('2021-01-01T00:30:00Z') }) }
+      ]);
+
+    const res = await generateVoiceActivityReport('guild');
+
+    expect(res).toEqual([
+      {
+        channel_id: 'c',
+        peak_users: 1,
+        average_users: 1,
+        total_duration: '01:00:00'
+      }
+    ]);
+  });
+
+  test('returns N/A average when activity duration is zero', async () => {
+    jest.setSystemTime(new Date('2021-01-01T00:10:00Z'));
+    VoiceLog.findAll
+      .mockResolvedValueOnce([
+        { get: () => ({ channel_id: 'c', user_id: 'u1', timestamp: new Date('2021-01-01T00:00:00Z') }) }
+      ])
+      .mockResolvedValueOnce([
+        { get: () => ({ channel_id: 'c', user_id: 'u1', timestamp: new Date('2021-01-01T00:00:00Z') }) }
+      ]);
+
+    const res = await generateVoiceActivityReport('guild');
+
+    expect(res).toEqual([
+      {
+        channel_id: 'c',
+        peak_users: 1,
+        average_users: 'N/A',
+        total_duration: '00:00:00'
+      }
+    ]);
+  });
 });

@@ -29,4 +29,10 @@ describe('Manual Sync Cooldown Logic', () => {
     markManualSyncRun(0);
     expect(canRunManualSync(30 * 60 * 1000)).toBe(false); // Not enough time
   });
+
+  test('uses default timestamps when args omitted', () => {
+    expect(canRunManualSync()).toBe(true);
+    markManualSyncRun();
+    expect(typeof canRunManualSync()).toBe('boolean');
+  });
 });

@@ -54,4 +54,11 @@ describe('handleTradeFind', () => {
     expect(safeReply).toHaveBeenCalledWith(interaction, expect.stringContaining('No trades found'));
     expect(warnSpy).toHaveBeenCalled();
   });
+
+  test('handles query errors gracefully', async () => {
+    const interaction = new MockInteraction({ options: { from: 'A', to: 'B' } });
+    getSellOptionsAtLocation.mockRejectedValue(new Error('fail'));
+    await handleTradeFind(interaction);
+    expect(safeReply).toHaveBeenCalledWith(interaction, expect.stringContaining('error'));
+  });
 });

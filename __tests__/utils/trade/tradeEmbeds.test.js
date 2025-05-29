@@ -75,6 +75,12 @@ const {
       expect(result.data.footer.text).toContain('Page 1 of 1');
     });
 
+    test('buildCommoditiesEmbed uses default paging', () => {
+      const data = [{ terminal: 'T1', commodities: [] }];
+      const embed = buildCommoditiesEmbed('Area18', data);
+      expect(embed.data.footer.text).toContain('Page 1');
+    });
+
     test('buildCommoditiesEmbed truncates long field values', () => {
       const longList = Array.from({ length: 300 }, (_, i) => ({
         name: `Item${i}`,

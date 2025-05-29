@@ -47,4 +47,11 @@ describe('handleTradeShip', () => {
     expect(safeReply).toHaveBeenCalledWith(interaction, expect.stringContaining('not found'));
     expect(warnSpy).toHaveBeenCalled();
   });
+
+  test('handles lookup errors gracefully', async () => {
+    const interaction = new MockInteraction({ options: { name: 'Cutlass' } });
+    getVehicleByName.mockRejectedValue(new Error('db'));
+    await handleTradeShip(interaction);
+    expect(safeReply).toHaveBeenCalledWith(interaction, expect.stringContaining('error'));
+  });
 });

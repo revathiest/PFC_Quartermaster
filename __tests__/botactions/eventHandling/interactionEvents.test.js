@@ -147,4 +147,116 @@ describe('handleInteraction', () => {
     await handleInteraction(interaction, client);
     expect(interaction.reply).toHaveBeenCalledWith({ content: '❌ There was an error while executing this command!', flags: MessageFlags.Ephemeral });
   });
+
+  test('replies when button handler missing', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const client = { commands: new Map([['foo', { data: { name: 'foo' } }]]) };
+    const interaction = {
+      isCommand: () => false,
+      isButton: () => true,
+      isStringSelectMenu: () => false,
+      isModalSubmit: () => false,
+      customId: 'foo::btn',
+      message: { interaction: { commandName: 'foo' } },
+      guild: { id: 'g1' },
+      replied: false,
+      deferred: false,
+      reply: jest.fn()
+    };
+
+    await handleInteraction(interaction, client);
+    expect(interaction.reply).toHaveBeenCalledWith({ content: '❌ Button handler not found.', flags: MessageFlags.Ephemeral });
+    warn.mockRestore();
+  });
+
+  test('handles button handler errors gracefully', async () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const button = jest.fn().mockRejectedValue(new Error('fail'));
+    const client = { commands: new Map([['foo', { data: { name: 'foo' }, button }]]) };
+    const interaction = {
+      isCommand: () => false,
+      isButton: () => true,
+      isStringSelectMenu: () => false,
+      isModalSubmit: () => false,
+      customId: 'foo::btn',
+      message: { interaction: { commandName: 'foo' } },
+      guild: { id: 'g1' },
+      replied: false,
+      deferred: false,
+      reply: jest.fn()
+    };
+
+    await handleInteraction(interaction, client);
+    expect(error).toHaveBeenCalled();
+    expect(interaction.reply).toHaveBeenCalledWith({ content: '❌ Something went wrong.', flags: MessageFlags.Ephemeral });
+    error.mockRestore();
+  });
+
+  test('replies when select menu handler missing', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const client = { commands: new Map([['foo', { data: { name: 'foo' } }]]) };
+    const interaction = {
+      isCommand: () => false,
+      isButton: () => false,
+      isStringSelectMenu: () => true,
+      isModalSubmit: () => false,
+      customId: 'foo::select',
+      values: ['A'],
+      guild: { id: 'g1' },
+      replied: false,
+      deferred: false,
+      reply: jest.fn()
+    };
+
+    await handleInteraction(interaction, client);
+    expect(interaction.reply).toHaveBeenCalledWith({ content: '❌ Select menu handler not found.', flags: MessageFlags.Ephemeral });
+    warn.mockRestore();
+  });
+
+  test('handles select menu handler errors gracefully', async () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const option = jest.fn().mockRejectedValue(new Error('fail'));
+    const client = { commands: new Map([['foo', { data: { name: 'foo' }, option }]]) };
+    const interaction = {
+      isCommand: () => false,
+      isButton: () => false,
+      isStringSelectMenu: () => true,
+      isModalSubmit: () => false,
+      customId: 'foo::select',
+      values: ['A'],
+      guild: { id: 'g1' },
+      replied: false,
+      deferred: false,
+      reply: jest.fn()
+    };
+
+    await handleInteraction(interaction, client);
+    expect(error).toHaveBeenCalled();
+    expect(interaction.reply).toHaveBeenCalledWith({ content: '❌ Something went wrong.', flags: MessageFlags.Ephemeral });
+    error.mockRestore();
+  });
+
+  test('modal submission rejects invalid time', async () => {
+    const interaction = {
+      isCommand: () => false,
+      isButton: () => false,
+      isStringSelectMenu: () => false,
+      isModalSubmit: () => true,
+      customId: 'scheduleModal',
+      user: { id: 'u2' },
+      guild: {},
+      fields: { getTextInputValue: jest.fn(() => 'not a time') },
+      replied: false,
+      deferred: false,
+      reply: jest.fn()
+    };
+
+    await handleInteraction(interaction, { commands: new Map() });
+    expect(createChannelSelectMenu).not.toHaveBeenCalled();
+    expect(pendingChannelSelection.u2).toBeUndefined();
+    expect(interaction.reply).toHaveBeenCalledWith({
+      content: '❌ Could not understand that time. Try something like "tomorrow at 5pm" or "in 15 minutes".',
+      flags: MessageFlags.Ephemeral
+    });
+  });
 });

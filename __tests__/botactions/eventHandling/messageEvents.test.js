@@ -50,4 +50,58 @@ describe('messageEvents handleMessageCreate', () => {
     expect(UsageLog.create).toHaveBeenCalled();
     expect(message.channel.send).toHaveBeenCalledWith('no');
   });
+
+  test('blocks openai in disallowed channel', async () => {
+    fs.readFileSync.mockReturnValue(JSON.stringify({ allowedChannelNames: ['other'], default: ['Prompt'] }));
+    message.guild.channels.cache.find.mockReturnValue({ isTextBased: () => true, toString: () => '#other' });
+
+    await messageEvents.handleMessageCreate(message, client);
+
+    expect(mockChatCreate).not.toHaveBeenCalled();
+    expect(message.reply).toHaveBeenCalledWith(expect.stringContaining('#other'));
+  });
+
+  test('warns when openai returns empty reply', async () => {
+    mockChatCreate.mockResolvedValueOnce({ choices: [{ message: { content: null } }] });
+    await messageEvents.handleMessageCreate(message, client);
+    expect(message.reply).toHaveBeenCalledWith("Hmm, I didn’t quite catch that. Try again?");
+  });
+
+  test('handles openai error gracefully', async () => {
+    mockChatCreate.mockRejectedValueOnce(new Error('fail'));
+    await messageEvents.handleMessageCreate(message, client);
+    expect(message.reply).toHaveBeenCalledWith("Sorry, I couldn't fetch a reply right now.");
+  });
+});
+
+describe('messageEvents performAction', () => {
+  let message, client, responseChannel;
+  beforeEach(() => {
+    responseChannel = { isTextBased: () => true, send: jest.fn() };
+    message = {
+      author: { id: 'u1', username: 'User' },
+      channel: { name: 'chan', send: jest.fn(), isTextBased: () => true },
+      content: 'content',
+      delete: jest.fn()
+    };
+    client = { channels: { cache: new Map([['alert', responseChannel]]) }, chanProfanityAlert: 'alert' };
+  });
+
+  test('personal action matches by username', () => {
+    const res = messageEvents.performAction({ ...message, author: { id: 'x', username: 'u1' } }, client, { action: 'personal', userId: 'u1', response: 'hi' });
+    expect(message.channel.send).toHaveBeenCalledWith('hi');
+    expect(res).toBe(true);
+  });
+
+  test('personal action ignored when user does not match', () => {
+    const res = messageEvents.performAction(message, client, { action: 'personal', userId: 'other', response: 'hi' });
+    expect(res).toBe(false);
+  });
+
+  test('delete action notifies channel and deletes', () => {
+    const res = messageEvents.performAction(message, client, { action: 'delete' });
+    expect(message.delete).toHaveBeenCalled();
+    expect(responseChannel.send).toHaveBeenCalledTimes(2);
+    expect(res).toBe(true);
+  });
 });

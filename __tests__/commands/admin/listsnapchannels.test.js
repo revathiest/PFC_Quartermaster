@@ -43,6 +43,20 @@ describe('/listsnapchannels command', () => {
     });
   });
 
+  test('falls back to channelId when channel not found', async () => {
+    const interaction = makeInteraction(['Admiral']);
+    // Remove the known channel to force fallback path
+    interaction.guild.channels.cache = new Map();
+    listSnapChannels.mockResolvedValue([{ channelId: 'c2', purgeTimeInDays: 4 }]);
+
+    await execute(interaction);
+
+    expect(interaction.reply).toHaveBeenCalledWith({
+      content: expect.stringContaining('c2'),
+      flags: MessageFlags.Ephemeral
+    });
+  });
+
   test('handles errors gracefully', async () => {
     const interaction = makeInteraction(['Fleet Admiral']);
     const err = new Error('fail');

@@ -8,7 +8,7 @@ discordMock.StringSelectMenuBuilder.mockImplementation(function(){
   this.data = data;
   return this;
 });
-const { createChannelSelectMenu } = require('../../botactions/channelSelector');
+const { createChannelSelectMenu } = require('../../botactions/commandHandling/channelSelector');
 
 const makeCollection = entries => {
   const col = new Map(entries);

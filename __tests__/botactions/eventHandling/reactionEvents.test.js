@@ -29,6 +29,19 @@ describe('reactionEvents', () => {
     log.mockRestore();
   });
 
+  test('handleReactionRemove ignores bot reactions', async () => {
+    await handleReactionRemove(reaction, { ...user, bot: true });
+    expect(UsageLog.create).not.toHaveBeenCalled();
+  });
+
+  test('handleReactionRemove logs error on failure', async () => {
+    UsageLog.create.mockRejectedValue(new Error('fail'));
+    const err = jest.spyOn(console, 'error').mockImplementation(() => {});
+    await handleReactionRemove(reaction, user);
+    expect(err).toHaveBeenCalled();
+    err.mockRestore();
+  });
+
   test('ignores bot reactions', async () => {
     await handleReactionAdd(reaction, { ...user, bot: true });
     expect(UsageLog.create).not.toHaveBeenCalled();

@@ -51,4 +51,38 @@ describe('scheduledEvents handlers', () => {
     await events.handleDeleteEvent(event);
     expect(handler.deleteEventFromDatabase).toHaveBeenCalledWith('e1');
   });
+
+  test('handleCreateEvent logs error when save fails', async () => {
+    handler.saveEventToDatabase.mockRejectedValue(new Error('fail'));
+    const error = jest.spyOn(console, 'error').mockImplementation(() => {});
+    await events.handleCreateEvent(event);
+    expect(error).toHaveBeenCalled();
+    error.mockRestore();
+  });
+
+  test('handleUpdateEvent logs error when update fails', async () => {
+    handler.updateEventInDatabase.mockRejectedValue(new Error('fail'));
+    const error = jest.spyOn(console, 'error').mockImplementation(() => {});
+    await events.handleUpdateEvent(event, { ...event, status: 2 }, {});
+    expect(error).toHaveBeenCalled();
+    error.mockRestore();
+  });
+
+  test('handleDeleteEvent logs error when delete fails', async () => {
+    handler.deleteEventFromDatabase.mockRejectedValue(new Error('fail'));
+    const error = jest.spyOn(console, 'error').mockImplementation(() => {});
+    await events.handleDeleteEvent(event);
+    expect(error).toHaveBeenCalled();
+    error.mockRestore();
+  });
+
+  test('handleUpdateEvent updates when upcoming', async () => {
+    await events.handleUpdateEvent(event, { ...event, status: 1 }, {});
+    expect(handler.updateEventInDatabase).toHaveBeenCalled();
+  });
+
+  test('handleUpdateEvent deletes when canceled', async () => {
+    await events.handleUpdateEvent(event, { ...event, status: 4 });
+    expect(handler.deleteEventFromDatabase).toHaveBeenCalled();
+  });
 });

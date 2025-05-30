@@ -125,6 +125,10 @@ const ButtonStyle = {
   Secondary: 2,
 };
 
+const AttachmentBuilder = jest.fn(function(path) {
+  this.path = path;
+});
+
 const SlashCommandBuilder = jest.fn(() => {
   const builder = {
     name: undefined,
@@ -230,6 +234,7 @@ module.exports = {
   SlashCommandBuilder,
   SlashCommandSubcommandBuilder: SlashCommandBuilder,
   EmbedBuilder,
+  AttachmentBuilder,
   PermissionFlagsBits,
   PermissionsBitField,
   ComponentType

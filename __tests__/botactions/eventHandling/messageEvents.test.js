@@ -129,6 +129,58 @@ describe('messageEvents handleMessageCreate', () => {
     expect(spy).toHaveBeenCalledWith(message, client, filter.regex['fo+']);
     spy.mockRestore();
   });
+
+  test('ignores bot authored messages', async () => {
+    await messageEvents.handleMessageCreate({ guild: {}, author: { bot: true } }, client);
+    expect(trackChannelActivity).not.toHaveBeenCalled();
+  });
+
+  test('early returns when prompt text empty', async () => {
+    message.content = '<@1>';
+    await messageEvents.handleMessageCreate(message, client);
+    expect(mockChatCreate).not.toHaveBeenCalled();
+  });
+
+  test('falls back when prompt file read fails', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    fs.readFileSync.mockImplementationOnce(() => { throw new Error('fail'); });
+    await messageEvents.handleMessageCreate(message, client);
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  test('reply failure when channel blocked is logged', async () => {
+    fs.readFileSync.mockReturnValueOnce(JSON.stringify({ allowedChannelNames: ['other'], default: ['Prompt'] }));
+    message.guild.channels.cache.find.mockReturnValue(undefined);
+    const err = jest.spyOn(console, 'error').mockImplementation(() => {});
+    message.reply.mockRejectedValueOnce(new Error('fail'));
+    await messageEvents.handleMessageCreate(message, client);
+    expect(err).toHaveBeenCalled();
+    err.mockRestore();
+  });
+
+  test('uses default prompt when member missing', async () => {
+    message.member = null;
+    await messageEvents.handleMessageCreate(message, client);
+    expect(mockChatCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        messages: [
+          { role: 'system', content: 'Prompt' },
+          expect.any(Object)
+        ]
+      })
+    );
+  });
+
+  test('personal trigger performs action', async () => {
+    const filter = require('../../../messages.json');
+    filter.words.personal = { action: 'personal', userId: 'u1', response: 'hey' };
+    message.mentions.has.mockReturnValue(false);
+    message.content = 'personal message';
+    await messageEvents.handleMessageCreate(message, client);
+    expect(message.channel.send).toHaveBeenCalledWith('hey');
+    delete filter.words.personal;
+  });
 });
 
 describe('messageEvents performAction', () => {
@@ -159,6 +211,19 @@ describe('messageEvents performAction', () => {
     const res = messageEvents.performAction(message, client, { action: 'delete' });
     expect(message.delete).toHaveBeenCalled();
     expect(responseChannel.send).toHaveBeenCalledTimes(2);
+    expect(res).toBe(true);
+  });
+
+  test('respond action sends channel message', () => {
+    const res = messageEvents.performAction(message, client, { action: 'respond', response: 'hi' });
+    expect(message.channel.send).toHaveBeenCalledWith('hi');
+    expect(res).toBe(true);
+  });
+
+  test('delete action when response channel missing still deletes', () => {
+    client.channels.cache.delete('alert');
+    const res = messageEvents.performAction(message, client, { action: 'delete' });
+    expect(message.delete).toHaveBeenCalled();
     expect(res).toBe(true);
   });
 });

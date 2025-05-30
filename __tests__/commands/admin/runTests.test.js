@@ -47,4 +47,40 @@ describe('/runtests command', () => {
     expect(interaction.editReply).toHaveBeenCalledWith({ content: '❌ Test ran but failed to upload output.', flags: MessageFlags.Ephemeral });
     spy.mockRestore();
   });
+
+  test('includes error and stderr output', async () => {
+    jest.useFakeTimers();
+    const interaction = makeInteraction();
+    const err = new Error('exec fail');
+    exec.mockImplementation((cmd, opts, cb) => cb(err, 'out', 'boom'));
+    fs.writeFileSync.mockReturnValue();
+    fs.unlink.mockImplementation((p, cb) => cb(null));
+
+    await execute(interaction);
+    jest.runAllTimers();
+
+    const written = fs.writeFileSync.mock.calls[0][1];
+    expect(written).toContain('❌ Error');
+    expect(written).toContain(err.message);
+    expect(written).toContain('⚠️ STDERR');
+    expect(fs.unlink).toHaveBeenCalled();
+    jest.useRealTimers();
+  });
+
+  test('logs error when cleanup fails', async () => {
+    jest.useFakeTimers();
+    const interaction = makeInteraction();
+    exec.mockImplementation((cmd, opts, cb) => cb(null, 'out', ''));
+    fs.writeFileSync.mockReturnValue();
+    const unlinkErr = new Error('unlink fail');
+    fs.unlink.mockImplementation((p, cb) => cb(unlinkErr));
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    await execute(interaction);
+    jest.runAllTimers();
+
+    expect(spy).toHaveBeenCalledWith(expect.stringContaining('⚠️ Failed to delete test file'), unlinkErr);
+    spy.mockRestore();
+    jest.useRealTimers();
+  });
 });

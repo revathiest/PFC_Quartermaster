@@ -72,6 +72,63 @@ describe('messageEvents handleMessageCreate', () => {
     await messageEvents.handleMessageCreate(message, client);
     expect(message.reply).toHaveBeenCalledWith("Sorry, I couldn't fetch a reply right now.");
   });
+
+  test('uses custom user prompt when configured', async () => {
+    fs.readFileSync.mockReturnValueOnce(
+      JSON.stringify({ allowedChannelNames: ['general'], default: ['Base'], users: { u1: ['UserPrompt'] } })
+    );
+    await messageEvents.handleMessageCreate(message, client);
+    expect(mockChatCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        messages: [
+          { role: 'system', content: 'UserPrompt' },
+          expect.any(Object)
+        ]
+      })
+    );
+  });
+
+  test('adds role based prompt when matched', async () => {
+    fs.readFileSync.mockReturnValueOnce(
+      JSON.stringify({
+        allowedChannelNames: ['general'],
+        default: ['Base'],
+        roles: { admin: ['RolePrompt'] },
+        roleMappings: { admin: ['Commander'] }
+      })
+    );
+    message.member.roles.cache = [{ name: 'Commander' }];
+    await messageEvents.handleMessageCreate(message, client);
+    expect(mockChatCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        messages: [
+          { role: 'system', content: 'Base\n\nRolePrompt' },
+          expect.any(Object)
+        ]
+      })
+    );
+  });
+
+  test('logs error when message logging fails', async () => {
+    const err = jest.spyOn(console, 'error').mockImplementation(() => {});
+    UsageLog.create.mockRejectedValueOnce(new Error('fail'));
+    message.mentions.has.mockReturnValue(false);
+    message.content = 'hello';
+    await messageEvents.handleMessageCreate(message, client);
+    expect(err).toHaveBeenCalled();
+    err.mockRestore();
+  });
+
+  test('regex triggers performAction', async () => {
+    const spy = jest.spyOn(messageEvents, 'performAction');
+    const filter = require('../../../messages.json');
+    filter.regex['fo+'] = { action: 'respond', response: 'regex' };
+    message.mentions.has.mockReturnValue(false);
+    message.content = 'foooo';
+    await messageEvents.handleMessageCreate(message, client);
+    expect(spy).toHaveBeenCalledWith(message, client, filter.regex['fo+']);
+    spy.mockRestore();
+  });
 });
 
 describe('messageEvents performAction', () => {

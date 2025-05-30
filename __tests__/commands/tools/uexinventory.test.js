@@ -61,3 +61,38 @@ test('button shows inventory', async () => {
   expect(i.update).toHaveBeenCalled();
 });
 
+
+test('option handles missing terminal', async () => {
+  const i = makeInteraction();
+  i.customId = 'uexinventory_terminal';
+  i.values = ['uexinventory_terminal::99::item'];
+  db.UexTerminal.findByPk.mockResolvedValue(null);
+  await command.option(i);
+  expect(i.update).toHaveBeenCalledWith(expect.objectContaining({ content: '❌ Terminal not found.' }));
+});
+
+test('option returns inventory embed', async () => {
+  const i = makeInteraction();
+  i.customId = 'uexinventory_terminal';
+  i.values = ['uexinventory_terminal::1::item'];
+  db.UexTerminal.findByPk.mockResolvedValue({ id: 1, name: 'term' });
+  db.UexItemPrice.findAll.mockResolvedValue([{ item_name: 'a', price_buy: 1, price_sell: 2 }]);
+  await command.option(i);
+  expect(i.update).toHaveBeenCalledWith(expect.objectContaining({ embeds: expect.any(Array) }));
+});
+
+test('button with unknown type replies error', async () => {
+  const i = { customId: 'uexinventory_prev::1::bad::0::false', reply: jest.fn(), update: jest.fn(), channel: { send: jest.fn() } };
+  db.UexTerminal.findByPk.mockResolvedValue({ id: 1, name: 'term' });
+  await command.button(i);
+  expect(i.reply).toHaveBeenCalledWith(expect.objectContaining({ content: expect.stringContaining('Unsupported terminal type') }));
+});
+
+test('button public posts to channel', async () => {
+  const i = { customId: 'uexinventory_public::1::item::0::false', reply: jest.fn(), update: jest.fn(), channel: { send: jest.fn() } };
+  db.UexTerminal.findByPk.mockResolvedValue({ id: 1, name: 'term' });
+  db.UexItemPrice.findAll.mockResolvedValue([{ item_name: 'x', price_buy: 1 }]);
+  await command.button(i);
+  expect(i.channel.send).toHaveBeenCalled();
+  expect(i.update).toHaveBeenCalled();
+});

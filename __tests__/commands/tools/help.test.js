@@ -53,3 +53,39 @@ test('collector end disables components', async () => {
   expect(edit).toHaveBeenCalled();
 });
 
+
+test('collector rejects other user', async () => {
+  const permissions = { has: jest.fn(() => true) };
+  const events = {};
+  const interaction = {
+    user: { id: '1' },
+    member: { permissions },
+    deferReply: jest.fn(),
+    followUp: jest.fn().mockResolvedValue({
+      createMessageComponentCollector: jest.fn(() => ({ on: (e, cb) => { events[e] = cb; } }))
+    })
+  };
+  const client = { commands: new Map([['a', { data: { name: 'a', default_member_permissions: PermissionsBitField.Flags.SendMessages }, help: 'h', category: 'Fun' }]]) };
+  await help.execute(interaction, client);
+  const reply = { user: { id: '2' }, reply: jest.fn() };
+  await events.collect(reply);
+  expect(reply.reply).toHaveBeenCalledWith({ content: 'This menu isn’t for you.', flags: MessageFlags.Ephemeral });
+});
+
+test('collector updates selected category', async () => {
+  const permissions = { has: jest.fn(() => true) };
+  const events = {};
+  const interaction = {
+    user: { id: '1' },
+    member: { permissions },
+    deferReply: jest.fn(),
+    followUp: jest.fn().mockResolvedValue({
+      createMessageComponentCollector: jest.fn(() => ({ on: (e, cb) => { events[e] = cb; } }))
+    })
+  };
+  const client = { commands: new Map([['a', { data: { name: 'a', default_member_permissions: PermissionsBitField.Flags.SendMessages }, help: 'h', category: 'Fun' }]]) };
+  await help.execute(interaction, client);
+  const update = jest.fn();
+  await events.collect({ user: { id: '1' }, values: ['Fun'], update });
+  expect(update).toHaveBeenCalled();
+});

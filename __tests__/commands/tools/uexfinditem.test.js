@@ -54,3 +54,22 @@ test('button forwards to handleSelection', async () => {
   expect(i.editReply).toHaveBeenCalled();
 });
 
+
+test('single match selects automatically', async () => {
+  isUserVerified.mockResolvedValue(true);
+  db.UexItemPrice.findAll.mockResolvedValueOnce([{ id_item: 1, item_name: 'med' }]);
+  db.UexCommodityPrice.findAll.mockResolvedValue([]);
+  db.UexVehiclePurchasePrice.findAll.mockResolvedValue([]);
+  // results for handleSelection
+  db.UexItemPrice.findAll.mockResolvedValueOnce([{ price_buy: 5, price_sell: 6, terminal: { name: 'T' } }]);
+  const i = makeInteraction();
+  await command.execute(i);
+  expect(i.editReply).toHaveBeenCalledWith(expect.objectContaining({ embeds: expect.any(Array) }));
+});
+
+test('handleSelection no records found', async () => {
+  const i = { customId: 'uexfinditem::item::1::0', deferUpdate: jest.fn(), editReply: jest.fn() };
+  db.UexItemPrice.findAll.mockResolvedValue([]);
+  await command.button(i);
+  expect(i.editReply).toHaveBeenCalledWith('No location data found for that entry.');
+});

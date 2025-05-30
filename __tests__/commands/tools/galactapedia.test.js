@@ -79,3 +79,48 @@ test('handles detail fetch failure', async () => {
   expect(i.editReply).toHaveBeenCalledWith('❌ Failed to fetch Galactapedia detail.');
 });
 
+
+test('no matches found', async () => {
+  isUserVerified.mockResolvedValue(true);
+  const i = makeInteraction();
+  db.GalactapediaEntry.findOne.mockResolvedValue(null);
+  db.GalactapediaEntry.findAll.mockResolvedValue([]);
+
+  await command.execute(i);
+
+  expect(i.editReply).toHaveBeenCalledWith(expect.stringContaining('No Galactapedia entries'));
+});
+
+test('selection timeout handled', async () => {
+  isUserVerified.mockResolvedValue(true);
+  const i = makeInteraction();
+  db.GalactapediaEntry.findOne.mockResolvedValue(null);
+  db.GalactapediaEntry.findAll.mockResolvedValue([{ id: 1, title: 't', slug: 's' }]);
+  i.channel.awaitMessageComponent.mockRejectedValue(new Error('timeout'));
+
+  await command.execute(i);
+
+  expect(i.editReply).toHaveBeenLastCalledWith({ content: '❌ Selection timed out.', components: [] });
+});
+
+test('fetches and stores detail when missing', async () => {
+  isUserVerified.mockResolvedValue(true);
+  const i = makeInteraction();
+  db.GalactapediaEntry.findOne.mockResolvedValue({ id: 3, title: 'x', rsi_url: 'u', api_url: 'api', thumbnail: 't' });
+  db.GalactapediaDetail.findByPk
+    .mockResolvedValueOnce(null)
+    .mockResolvedValueOnce({ content: 'desc' });
+  fetchSCDataByUrl.mockResolvedValue({ data: {
+    translations: { en_EN: 'desc' },
+    categories: [{ category_id: 1, category_name: 'c' }],
+    tags: [{ id: 2, name: 'tag' }],
+    properties: [{ name: 'p', value: 'v' }],
+    related_articles: [{ id: 5, title: 'r', url: 'l', api_url: 'a' }]
+  }});
+
+  await command.execute(i);
+
+  expect(db.GalactapediaCategory.destroy).toHaveBeenCalled();
+  expect(db.GalactapediaTag.upsert).toHaveBeenCalled();
+  expect(i.editReply).toHaveBeenCalledWith(expect.objectContaining({ embeds: expect.any(Array) }));
+});

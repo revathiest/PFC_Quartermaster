@@ -23,6 +23,13 @@ module.exports = {
     '!**/node_modules/**',
     '!**/__mocks__/**'
   ],
-
+    "coverageThreshold": {
+    "global": {
+      "branches": 80,
+      "functions": 80,
+      "lines": 80,
+      "statements": 80
+    }
+  },
   verbose: true
 };

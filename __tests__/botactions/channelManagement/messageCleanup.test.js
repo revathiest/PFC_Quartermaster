@@ -46,11 +46,10 @@ describe('deleteMessages', () => {
       ['1', { id: '1', pinned: false, createdTimestamp: now - 2 * 86400000, author: { tag: 'a', id: 'u' } }],
       ['2', { id: '2', pinned: false, createdTimestamp: now - 20 * 86400000, delete: jest.fn(), author: { tag: 'a', id: 'u' } }]
     ]);
-    channel.messages.fetch.mockResolvedValue(msgs);
-    channel.messages.fetch.mockRejectedValueOnce({ code: 10008 });
+    channel.messages.fetch.mockResolvedValueOnce(msgs).mockRejectedValueOnce({ code: 10008 });
     db.SnapChannel.findAll.mockResolvedValue([{ channelId: 'c1', purgeTimeInDays: 1 }]);
     const p = deleteMessages(client);
-    jest.runAllTimers();
+    await jest.runAllTimersAsync();
     await p;
     expect(channel.messages.fetch).toHaveBeenCalled();
   });
@@ -59,11 +58,61 @@ describe('deleteMessages', () => {
     db.SnapChannel.findAll.mockRejectedValue(new Error('db fail'));
 
     const p = deleteMessages(client);
-    jest.runAllTimers();
+    await jest.runAllTimersAsync();
     await p;
 
     expect(errorSpy).toHaveBeenCalled();
     expect(client.channels.fetch).not.toHaveBeenCalled();
     errorSpy.mockRestore();
+  });
+
+  test('handles channel fetch failure gracefully', async () => {
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    db.SnapChannel.findAll.mockResolvedValue([{ channelId: 'c1', purgeTimeInDays: 1 }]);
+    client.channels.fetch.mockRejectedValue(new Error('nope'));
+
+    const p = deleteMessages(client);
+    await jest.runAllTimersAsync();
+    await p;
+
+    expect(errorSpy).toHaveBeenCalled();
+    expect(channel.messages.fetch).not.toHaveBeenCalled();
+    errorSpy.mockRestore();
+  });
+
+  test('skips unsupported channel types', async () => {
+    db.SnapChannel.findAll.mockResolvedValue([{ channelId: 'c1', purgeTimeInDays: 1 }]);
+    client.channels.fetch.mockResolvedValue({ id: 'c1', type: 2 });
+
+    const p = deleteMessages(client);
+    await jest.runAllTimersAsync();
+    await p;
+
+    expect(client.channels.fetch).toHaveBeenCalledWith('c1');
+    expect(channel.messages.fetch).not.toHaveBeenCalled();
+  });
+
+  test('deletes very old messages individually', async () => {
+    const now = Date.now();
+    const makeCollection = entries => {
+      const col = new Map(entries);
+      col.filter = fn => makeCollection([...col].filter(([id, m]) => fn(m)));
+      return col;
+    };
+    const oldMsg = { id: '2', pinned: false, createdTimestamp: now - 20 * 86400000, delete: jest.fn(), author: { tag: 'a', id: 'u' } };
+    const msgs = makeCollection([
+      ['2', oldMsg]
+    ]);
+    channel.messages.fetch
+      .mockResolvedValueOnce(msgs)
+      .mockRejectedValueOnce({ code: 10008 });
+    db.SnapChannel.findAll.mockResolvedValue([{ channelId: 'c1', purgeTimeInDays: 1 }]);
+
+    const p = deleteMessages(client);
+    await jest.runAllTimersAsync();
+    await p;
+
+    expect(oldMsg.delete).toHaveBeenCalled();
+    expect(channel.bulkDelete).not.toHaveBeenCalled();
   });
 });

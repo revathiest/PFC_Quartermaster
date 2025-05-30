@@ -51,3 +51,31 @@ test('displays existing entry detail', async () => {
   expect(embed.title).toBe('Test');
 });
 
+test('shows menu when multiple matches', async () => {
+  isUserVerified.mockResolvedValue(true);
+  const i = makeInteraction();
+  db.GalactapediaEntry.findOne.mockResolvedValue(null);
+  db.GalactapediaEntry.findAll.mockResolvedValue([{ id: 1, title: 't', slug: 's' }]);
+  db.GalactapediaEntry.findByPk.mockResolvedValue({ id: 1, title: 't', rsi_url: 'url', api_url: 'api' });
+  fetchSCDataByUrl.mockResolvedValue({ data: {} });
+  i.channel.awaitMessageComponent.mockResolvedValue({ deferUpdate: jest.fn(), values: ['1'] });
+  db.GalactapediaDetail.findByPk.mockResolvedValue({ content: 'c' });
+
+  await command.execute(i);
+
+  expect(i.editReply).toHaveBeenCalledWith(expect.objectContaining({ components: expect.any(Array) }));
+  expect(i.channel.awaitMessageComponent).toHaveBeenCalled();
+});
+
+test('handles detail fetch failure', async () => {
+  isUserVerified.mockResolvedValue(true);
+  const i = makeInteraction();
+  db.GalactapediaEntry.findOne.mockResolvedValue({ id: 2, title: 't', rsi_url: 'u', api_url: 'a' });
+  db.GalactapediaDetail.findByPk.mockResolvedValue(null);
+  fetchSCDataByUrl.mockRejectedValue(new Error('fail'));
+
+  await command.execute(i);
+
+  expect(i.editReply).toHaveBeenCalledWith('❌ Failed to fetch Galactapedia detail.');
+});
+

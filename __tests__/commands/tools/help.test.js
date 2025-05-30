@@ -30,3 +30,26 @@ test('option ignores unrelated custom id', async () => {
   expect(spy).not.toHaveBeenCalled();
 });
 
+test('collector end disables components', async () => {
+  const permissions = { has: jest.fn(() => true) };
+  const edit = jest.fn();
+  const interaction = {
+    member: { permissions },
+    deferReply: jest.fn(),
+    followUp: jest.fn().mockResolvedValue({
+      edit,
+      deleted: false,
+      editable: true,
+      createMessageComponentCollector: jest.fn(() => ({
+        on: (evt, cb) => evt === 'end' && cb()
+      }))
+    })
+  };
+
+  const client = { commands: new Map([['a', { data: { name: 'a' }, help: 'h' }]]) };
+
+  await help.execute(interaction, client);
+
+  expect(edit).toHaveBeenCalled();
+});
+

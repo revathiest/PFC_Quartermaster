@@ -44,3 +44,33 @@ test('shows vehicle detail when found', async () => {
   expect(embed.title).toContain('Ship');
 });
 
+test('prompts selection when multiple matches', async () => {
+  isUserVerified.mockResolvedValue(true);
+  const i = makeInteraction();
+  db.Vehicle.findOne.mockResolvedValue(null);
+  db.Vehicle.findAll.mockResolvedValue([{ uuid: '1', name: 'Ship', version: 'v' }]);
+  i.channel.awaitMessageComponent.mockResolvedValue({ deferUpdate: jest.fn(), values: ['1'] });
+  db.Vehicle.findByPk.mockResolvedValue({ uuid: '1', updated_at: new Date(), name: 'Ship' });
+  db.VehicleDetail.findByPk.mockResolvedValue({ uuid: '1', name: 'Ship', updated_at: new Date() });
+
+  await command.execute(i);
+
+  expect(i.channel.awaitMessageComponent).toHaveBeenCalled();
+  expect(i.editReply).toHaveBeenCalled();
+});
+
+test('fetches detail when outdated', async () => {
+  isUserVerified.mockResolvedValue(true);
+  const i = makeInteraction();
+  const old = new Date(Date.now() - 1000);
+  db.Vehicle.findOne.mockResolvedValue({ uuid: '1', updated_at: new Date(), name: 'Ship', link: 'u' });
+  db.VehicleDetail.findByPk.mockResolvedValue({ uuid: '1', updated_at: old });
+  const { fetchSCDataByUrl } = require('../../../utils/fetchSCData');
+  fetchSCDataByUrl.mockResolvedValue({ data: { uuid: '1', name: 'Ship', updated_at: new Date(), version: 'v' } });
+  db.VehicleDetail.upsert.mockResolvedValue();
+
+  await command.execute(i);
+
+  expect(fetchSCDataByUrl).toHaveBeenCalled();
+});
+

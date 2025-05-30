@@ -37,4 +37,30 @@ describe('/schedule option handler', () => {
     expect(pendingChannelSelection['user1']).toBeUndefined();
     expect(interaction.reply).toHaveBeenCalledWith({ content: expect.stringContaining('successfully'), flags: MessageFlags.Ephemeral });
   });
+
+  test('handles invalid channel id type', async () => {
+    const interaction = makeInteraction();
+    pendingChannelSelection['user1'] = { title: 't', description: 'd', author: 'a', time: 'now' };
+    interaction.user = { id: 'user1' };
+    interaction.values = [123];
+    await option(interaction, {});
+    expect(interaction.reply).toHaveBeenCalledWith({ content: expect.stringContaining('Invalid channel'), flags: MessageFlags.Ephemeral });
+  });
+
+  test('handles database save error', async () => {
+    const interaction = makeInteraction();
+    pendingChannelSelection['user1'] = { title: 't', description: 'd', author: 'a', time: 'now' };
+    interaction.user = { id: 'user1' };
+    saveAnnouncementToDatabase.mockRejectedValue(new Error('dbfail'));
+    await option(interaction, {});
+    expect(interaction.reply).toHaveBeenCalledWith({ content: expect.stringContaining('Failed to schedule'), flags: MessageFlags.Ephemeral });
+  });
+});
+
+describe('/schedule execute', () => {
+  test('shows modal to user', async () => {
+    const interaction = makeInteraction();
+    await execute(interaction);
+    expect(interaction.showModal).toHaveBeenCalled();
+  });
 });

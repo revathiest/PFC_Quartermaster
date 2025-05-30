@@ -36,3 +36,28 @@ test('no terminals found', async () => {
   expect(i.reply).toHaveBeenCalledWith(expect.objectContaining({ content: expect.stringContaining('No terminals found') }));
 });
 
+test('lists terminal types when found', async () => {
+  isUserVerified.mockResolvedValue(true);
+  db.UexTerminal.findAll.mockResolvedValue([{ id: 1, type: 'store', name: 't' }]);
+  const i = makeInteraction();
+  await command.execute(i);
+  expect(i.reply).toHaveBeenCalledWith(expect.objectContaining({ components: expect.any(Array) }));
+});
+
+test('option selects terminal', async () => {
+  const i = makeInteraction();
+  i.customId = 'uexinventory_type::Area18';
+  i.values = ['store'];
+  db.UexTerminal.findAll.mockResolvedValue([{ id: 1, type: 'store', name: 't' }]);
+  await command.option(i);
+  expect(i.update).toHaveBeenCalled();
+});
+
+test('button shows inventory', async () => {
+  const i = { customId: 'uexinventory_prev::1::item::1::false', reply: jest.fn(), update: jest.fn(), channel: { send: jest.fn() } };
+  db.UexTerminal.findByPk.mockResolvedValue({ id: 1, name: 'term' });
+  db.UexItemPrice.findAll.mockResolvedValue([{ item_name: 'thing', price_buy: 1, price_sell: 2 }]);
+  await command.button(i);
+  expect(i.update).toHaveBeenCalled();
+});
+

@@ -31,4 +31,34 @@ describe('/sync-org-ranks command', () => {
     expect(fetchRsiProfileInfo).toHaveBeenCalledWith('foo');
     expect(interaction.editReply).toHaveBeenCalledWith(expect.any(String));
   });
+
+  test('handles no PFCS members found', async () => {
+    const interaction = makeInteraction();
+    VerifiedUser.findAll.mockResolvedValue([]);
+
+    await execute(interaction);
+
+    expect(interaction.editReply).toHaveBeenCalledWith('No verified PFCS members found.');
+  });
+
+  test('returns success when roles match', async () => {
+    const interaction = makeInteraction();
+    VerifiedUser.findAll.mockResolvedValue([{ rsiHandle: 'foo', discordUserId: 'id1', rsiOrgId: 'PFCS' }]);
+    fetchRsiProfileInfo.mockResolvedValue({ orgId: 'PFCS', orgRank: 'captain' });
+
+    await execute(interaction);
+
+    expect(interaction.editReply).toHaveBeenCalledWith(expect.stringContaining('All verified PFCS members'));
+  });
+
+  test('continues on profile fetch error', async () => {
+    const interaction = makeInteraction();
+    VerifiedUser.findAll.mockResolvedValue([{ rsiHandle: 'foo', discordUserId: 'id1', rsiOrgId: 'PFCS' }]);
+    fetchRsiProfileInfo.mockRejectedValue(new Error('fail'));
+
+    await execute(interaction);
+
+    expect(fetchRsiProfileInfo).toHaveBeenCalled();
+    expect(interaction.editReply).toHaveBeenCalled();
+  });
 });

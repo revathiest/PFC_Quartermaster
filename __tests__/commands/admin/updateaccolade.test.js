@@ -46,4 +46,22 @@ describe('/updateaccolade command', () => {
     expect(buildAccoladeEmbed).toHaveBeenCalled();
     expect(interaction.reply).toHaveBeenCalledWith({ content: expect.stringContaining('updated'), flags: MessageFlags.Ephemeral });
   });
+
+  test('rejects when accolade not found', async () => {
+    const interaction = makeInteraction();
+    Accolade.findOne.mockResolvedValue(null);
+
+    await execute(interaction);
+
+    expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ content: expect.stringContaining('not registered'), flags: MessageFlags.Ephemeral }));
+  });
+
+  test('requires at least one field to update', async () => {
+    const interaction = makeInteraction(null, null);
+    Accolade.findOne.mockResolvedValue({ role_id: 'r1', name: 'Test', save: jest.fn() });
+
+    await execute(interaction);
+
+    expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ content: expect.stringContaining('at least one field'), flags: MessageFlags.Ephemeral }));
+  });
 });

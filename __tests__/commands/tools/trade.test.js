@@ -36,3 +36,58 @@ test('button routes to subcommand handler', async () => {
   expect(mod.button).toHaveBeenCalledWith(interaction, {});
 });
 
+test('button ignores unrelated ids', async () => {
+  const interaction = { customId: 'other', deferUpdate: jest.fn() };
+  await trade.button(interaction, {});
+  expect(safeReply).not.toHaveBeenCalled();
+});
+
+test('option missing handler sends warning', async () => {
+  jest.resetModules();
+  jest.mock('../../../commands/tools/trade/missing', () => ({}), { virtual: true });
+  const interaction = { customId: 'trade::missing', deferUpdate: jest.fn() };
+  await trade.option(interaction, {});
+  expect(safeReply).toHaveBeenCalled();
+});
+
+test('execute handles require error', async () => {
+  const interaction = { options: { getSubcommand: jest.fn(() => 'missingErr') } };
+  await trade.execute(interaction, {});
+  expect(safeReply).toHaveBeenCalled();
+});
+
+test('initialization warns for invalid subcommand file', () => {
+  jest.resetModules();
+  jest.doMock('fs', () => ({ readdirSync: () => ['bad.js'] }));
+  jest.mock('../../../commands/tools/trade/bad.js', () => ({}), { virtual: true });
+  const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+  jest.isolateModules(() => {
+    require('../../../commands/tools/trade');
+  });
+
+  jest.unmock('fs');
+
+  expect(warn).toHaveBeenCalled();
+  warn.mockRestore();
+});
+
+test('button missing handler sends warning', async () => {
+  jest.resetModules();
+  jest.doMock('../../../commands/tools/trade/badbtn', () => ({}), { virtual: true });
+  jest.doMock('../../../utils/trade/tradeHandlers', () => ({ safeReply: jest.fn() }));
+  const { safeReply: mockReply } = require('../../../utils/trade/tradeHandlers');
+  const interaction = { customId: 'trade_badbtn_select::x', deferUpdate: jest.fn() };
+  await require('../../../commands/tools/trade').button(interaction, {});
+  expect(mockReply).toHaveBeenCalled();
+});
+
+test('button require error handled', async () => {
+  jest.resetModules();
+  jest.doMock('../../../utils/trade/tradeHandlers', () => ({ safeReply: jest.fn() }));
+  const { safeReply: mockReply } = require('../../../utils/trade/tradeHandlers');
+  const interaction = { customId: 'trade_err_select::x', deferUpdate: jest.fn() };
+  await require('../../../commands/tools/trade').button(interaction, {});
+  expect(mockReply).toHaveBeenCalled();
+});
+

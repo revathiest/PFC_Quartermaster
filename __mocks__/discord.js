@@ -120,6 +120,26 @@ const ButtonBuilder = jest.fn().mockImplementation(function () {
   return this;
 });
 
+const ModalBuilder = jest.fn().mockImplementation(function () {
+  return {
+    setCustomId: jest.fn().mockReturnThis(),
+    setTitle: jest.fn().mockReturnThis(),
+    addComponents: jest.fn().mockReturnThis(),
+  };
+});
+
+const TextInputBuilder = jest.fn().mockImplementation(function () {
+  return {
+    setCustomId: jest.fn().mockReturnThis(),
+    setLabel: jest.fn().mockReturnThis(),
+    setStyle: jest.fn().mockReturnThis(),
+    setPlaceholder: jest.fn().mockReturnThis(),
+    setRequired: jest.fn().mockReturnThis(),
+  };
+});
+
+const TextInputStyle = { Short: 1, Paragraph: 2 };
+
 const ButtonStyle = {
   Primary: 1,
   Secondary: 2,
@@ -235,6 +255,9 @@ module.exports = {
   SlashCommandSubcommandBuilder: SlashCommandBuilder,
   EmbedBuilder,
   AttachmentBuilder,
+  ModalBuilder,
+  TextInputBuilder,
+  TextInputStyle,
   PermissionFlagsBits,
   PermissionsBitField,
   ComponentType

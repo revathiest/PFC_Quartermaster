@@ -37,3 +37,20 @@ test('responds with no matches', async () => {
   expect(i.editReply).toHaveBeenCalledWith('No matches found. Try refining your search.');
 });
 
+test('handleSelect builds table', async () => {
+  isUserVerified.mockResolvedValue(true);
+  db.UexItemPrice.findAll.mockResolvedValue([]);
+  db.UexCommodityPrice.findAll.mockResolvedValue([{ id_commodity: 1, commodity_name: 'med', price_buy: 10, price_sell: 0, terminal: { name: 'T1' } }]);
+  const i = makeInteraction();
+  await command.execute(i);
+  const select = i.editReply.mock.calls[0][0].components;
+  expect(select).toBeDefined();
+});
+
+test('button forwards to handleSelection', async () => {
+  const i = { customId: 'uexfinditem::commodity::1::0', deferUpdate: jest.fn(), editReply: jest.fn() };
+  db.UexCommodityPrice.findAll.mockResolvedValue([{ price_buy: 5, price_sell: 6, terminal: { name: 'X' } }]);
+  await command.button(i);
+  expect(i.editReply).toHaveBeenCalled();
+});
+

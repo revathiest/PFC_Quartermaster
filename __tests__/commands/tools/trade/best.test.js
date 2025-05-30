@@ -45,3 +45,17 @@ test('option processes ship selection', async () => {
   expect(shared.safeReply).toHaveBeenCalled();
 });
 
+test('option handles missing cached state', async () => {
+  const interaction = {
+    customId: 'trade::best::select_ship',
+    values: ['1'],
+    user: { id: '1', tag: 't' },
+    deferUpdate: jest.fn()
+  };
+  shared.TradeStateCache.get.mockReturnValue(undefined);
+
+  await command.option(interaction, {});
+
+  expect(interaction.deferUpdate).toHaveBeenCalled();
+});
+

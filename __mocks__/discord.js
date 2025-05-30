@@ -77,6 +77,13 @@ const PermissionFlagsBits = {
   ManageRoles: 0x00010000
 };
 
+const PermissionsBitField = {
+  Flags: { SendMessages: 0x00000000 },
+  resolve: (bits) => bits
+};
+
+const ComponentType = { StringSelect: 'StringSelect' };
+
 const MessageFlags = {
   Ephemeral: 1 << 6,
 };
@@ -113,10 +120,34 @@ const ButtonBuilder = jest.fn().mockImplementation(function () {
   return this;
 });
 
+const ModalBuilder = jest.fn().mockImplementation(function () {
+  return {
+    setCustomId: jest.fn().mockReturnThis(),
+    setTitle: jest.fn().mockReturnThis(),
+    addComponents: jest.fn().mockReturnThis(),
+  };
+});
+
+const TextInputBuilder = jest.fn().mockImplementation(function () {
+  return {
+    setCustomId: jest.fn().mockReturnThis(),
+    setLabel: jest.fn().mockReturnThis(),
+    setStyle: jest.fn().mockReturnThis(),
+    setPlaceholder: jest.fn().mockReturnThis(),
+    setRequired: jest.fn().mockReturnThis(),
+  };
+});
+
+const TextInputStyle = { Short: 1, Paragraph: 2 };
+
 const ButtonStyle = {
   Primary: 1,
   Secondary: 2,
 };
+
+const AttachmentBuilder = jest.fn(function(path) {
+  this.path = path;
+});
 
 const SlashCommandBuilder = jest.fn(() => {
   const builder = {
@@ -223,5 +254,11 @@ module.exports = {
   SlashCommandBuilder,
   SlashCommandSubcommandBuilder: SlashCommandBuilder,
   EmbedBuilder,
-  PermissionFlagsBits
+  AttachmentBuilder,
+  ModalBuilder,
+  TextInputBuilder,
+  TextInputStyle,
+  PermissionFlagsBits,
+  PermissionsBitField,
+  ComponentType
 };

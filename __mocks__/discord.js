@@ -77,6 +77,13 @@ const PermissionFlagsBits = {
   ManageRoles: 0x00010000
 };
 
+const PermissionsBitField = {
+  Flags: { SendMessages: 0x00000000 },
+  resolve: (bits) => bits
+};
+
+const ComponentType = { StringSelect: 'StringSelect' };
+
 const MessageFlags = {
   Ephemeral: 1 << 6,
 };
@@ -228,5 +235,7 @@ module.exports = {
   SlashCommandSubcommandBuilder: SlashCommandBuilder,
   EmbedBuilder,
   AttachmentBuilder,
-  PermissionFlagsBits
+  PermissionFlagsBits,
+  PermissionsBitField,
+  ComponentType
 };

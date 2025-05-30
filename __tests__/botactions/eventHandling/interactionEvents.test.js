@@ -259,4 +259,90 @@ describe('handleInteraction', () => {
       flags: MessageFlags.Ephemeral
     });
   });
+
+  test('button command uses customId when message lacks commandName', async () => {
+    const button = jest.fn();
+    const client = { commands: new Map([['foo', { data: { name: 'foo' }, button }]]) };
+    const interaction = {
+      isCommand: () => false,
+      isButton: () => true,
+      isStringSelectMenu: () => false,
+      isModalSubmit: () => false,
+      customId: 'foo::btn',
+      message: { interaction: {} },
+      guild: { id: 'g1' },
+      replied: false,
+      deferred: false,
+      reply: jest.fn()
+    };
+    await handleInteraction(interaction, client);
+    expect(button).toHaveBeenCalledWith(interaction, client);
+    expect(logInteraction).toHaveBeenCalledWith(expect.objectContaining({ commandName: 'foo' }));
+  });
+
+  test('logs unsupported interaction type', async () => {
+    const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    const interaction = {
+      isCommand: () => false,
+      isButton: () => false,
+      isStringSelectMenu: () => false,
+      isModalSubmit: () => false,
+      guild: {}
+    };
+    await handleInteraction(interaction, { commands: new Map() });
+    expect(logSpy).toHaveBeenCalledWith('⚠️ Received an unsupported interaction type.');
+    logSpy.mockRestore();
+  });
+
+  test('executes command when command is a function', async () => {
+    const cmdFn = jest.fn();
+    const client = { commands: new Map([['foo', cmdFn]]) };
+    const interaction = {
+      isCommand: () => true,
+      isButton: () => false,
+      isStringSelectMenu: () => false,
+      isModalSubmit: () => false,
+      commandName: 'foo',
+      guild: { id: 'g1' }
+    };
+    await handleInteraction(interaction, client);
+    expect(cmdFn).toHaveBeenCalledWith(interaction);
+  });
+
+  test('edits reply when command error occurs after reply', async () => {
+    const execute = jest.fn().mockRejectedValue(new Error('boom'));
+    const client = { commands: new Map([['foo', { execute }]]) };
+    const interaction = {
+      isCommand: () => true,
+      isButton: () => false,
+      isStringSelectMenu: () => false,
+      isModalSubmit: () => false,
+      commandName: 'foo',
+      guild: { id: 'g1' },
+      replied: true,
+      deferred: false,
+      reply: jest.fn(),
+      editReply: jest.fn()
+    };
+    await handleInteraction(interaction, client);
+    expect(interaction.editReply).toHaveBeenCalledWith({ content: '❌ There was an error while executing this command!' });
+  });
+
+  test('modal submit with unknown id does nothing', async () => {
+    const interaction = {
+      isCommand: () => false,
+      isButton: () => false,
+      isStringSelectMenu: () => false,
+      isModalSubmit: () => true,
+      customId: 'other',
+      user: { id: 'u3' },
+      guild: {},
+      fields: { getTextInputValue: jest.fn() },
+      reply: jest.fn()
+    };
+    await handleInteraction(interaction, { commands: new Map() });
+    expect(createChannelSelectMenu).not.toHaveBeenCalled();
+    expect(pendingChannelSelection.u3).toBeUndefined();
+    expect(interaction.reply).not.toHaveBeenCalled();
+  });
 });

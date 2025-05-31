@@ -112,13 +112,10 @@ const {
     } else {
     embed.addFields(
         { name: '**Channel**', value: Object.keys(messageCounts).map(id => `<#${id}>`).join('\n'), inline: true },
-        { name: '**Messages**', value: Object.values(messageCounts).join('\n'), inline: true }
+        { name: '**Messages**', value: Object.values(messageCounts).join('\n'), inline: true },
+        { name: 'Messages Edited/Deleted', value: `Edits: ${editCount}\nDeletes: ${deleteCount}`, inline: true }
     );
     }
-    embed.addFields(
-        { name: 'Messages Edited', value: `${editCount}`, inline: true },
-        { name: 'Messages Deleted', value: `${deleteCount}`, inline: true }
-    );
 
     // ==== VOICE SECTION ====
     embed.addFields({ name: '🎙️ Voice', value: ' ' });
@@ -147,4 +144,4 @@ const {
       await interaction.editReply({ embeds: [embed]});
     }
   };
-  
+

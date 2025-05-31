@@ -112,13 +112,11 @@ const {
     embed.addFields({ name: 'No text activity', value: 'No messages sent during the last 30 days.', inline: false });
     } else {
       const channels = Object.keys(messageStats);
-      const maxSent = Math.max(...channels.map(id => String(messageStats[id].sent).length));
-      const maxEdit = Math.max(...channels.map(id => String(messageStats[id].edited).length));
-      const maxDel = Math.max(...channels.map(id => String(messageStats[id].deleted).length));
+      const COLUMN_WIDTH = 5; // support up to 5 digit numbers for alignment
       const format = (num, width) => String(num).padStart(width, ' ');
       const messageValues = channels.map(id => {
         const s = messageStats[id];
-        return `${format(s.sent, maxSent)} / ${format(s.edited, maxEdit)} / ${format(s.deleted, maxDel)}`;
+        return `${format(s.sent, COLUMN_WIDTH)} / ${format(s.edited, COLUMN_WIDTH)} / ${format(s.deleted, COLUMN_WIDTH)}`;
       }).join('\n');
     embed.addFields(
         { name: '**Channel**', value: channels.map(id => `<#${id}>`).join('\n'), inline: true },

@@ -4,32 +4,35 @@ const { UsageLog } = require('../../config/database');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('loglookup')
-    .setDescription('Query UsageLog entries by user, event, or message ID')
-    .addStringOption(opt =>
+    .setDescription('Query UsageLog entries by user or event type')
+    .addUserOption(opt =>
       opt.setName('user')
-        .setDescription('Discord user ID to filter by')
+        .setDescription('User to filter by')
         .setRequired(false))
     .addStringOption(opt =>
       opt.setName('event')
         .setDescription('Event type to filter by')
-        .setRequired(false))
-    .addStringOption(opt =>
-      opt.setName('message-id')
-        .setDescription('Specific message ID to look up')
-        .setRequired(false))
+        .setRequired(false)
+        .addChoices(
+          { name: 'Command Used', value: 'command_used' },
+          { name: 'Message Created', value: 'message_create' },
+          { name: 'Message Edited', value: 'message_edit' },
+          { name: 'Message Deleted', value: 'message_delete' },
+          { name: 'Voice Join', value: 'voice_join' },
+          { name: 'Voice Leave', value: 'voice_leave' },
+        ))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-  help: 'Searches recent usage logs with optional filters for user, event type, or message ID. (Admin Only)',
+  help: 'Searches recent usage logs with optional filters for user or event type. (Admin Only)',
   category: 'Admin',
 
   async execute(interaction) {
-    const userId = interaction.options.getString('user');
+    const user = interaction.options.getUser('user');
+    const userId = user ? user.id : null;
     const eventType = interaction.options.getString('event');
-    const messageId = interaction.options.getString('message-id');
 
     const where = { server_id: interaction.guild.id };
     if (userId) where.user_id = userId;
     if (eventType) where.event_type = eventType;
-    if (messageId) where.message_id = messageId;
 
     try {
       const logs = await UsageLog.findAll({

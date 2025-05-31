@@ -114,10 +114,11 @@ const {
       const channels = Object.keys(messageStats);
       const COLUMN_WIDTH = 5; // support up to 5 digit numbers for alignment
       const format = (num, width) => String(num).padStart(width, ' ');
-      const messageValues = channels.map(id => {
+      const messageLines = channels.map(id => {
         const s = messageStats[id];
         return `${format(s.sent, COLUMN_WIDTH)} / ${format(s.edited, COLUMN_WIDTH)} / ${format(s.deleted, COLUMN_WIDTH)}`;
-      }).join('\n');
+      });
+      const messageValues = `\`\`\`${messageLines.join('\n')}\`\`\``;
     embed.addFields(
         { name: '**Channel**', value: channels.map(id => `<#${id}>`).join('\n'), inline: true },
         { name: '**Messages Sent/Edited/Deleted**', value: messageValues, inline: true }

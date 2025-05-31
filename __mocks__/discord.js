@@ -168,6 +168,7 @@ const SlashCommandBuilder = jest.fn(() => {
         setName(name) { option.name = name; return this; },
         setDescription(desc) { option.description = desc; return this; },
         setRequired(req) { option.required = req; return this; },
+        addChoices: jest.fn(),
       });
       this.options.push(option);
       return this;

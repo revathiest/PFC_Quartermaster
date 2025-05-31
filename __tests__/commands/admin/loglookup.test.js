@@ -7,7 +7,10 @@ const command = require('../../../commands/admin/loglookup');
 function makeInteraction(opts = {}) {
   return {
     guild: { id: 'guild' },
-    options: { getString: jest.fn(name => opts[name]) },
+    options: {
+      getString: jest.fn(name => opts[name]),
+      getUser: jest.fn(name => opts[name]),
+    },
     reply: jest.fn(),
   };
 }
@@ -17,7 +20,7 @@ beforeEach(() => { jest.clearAllMocks(); });
 describe('/loglookup command', () => {
   test('queries with provided filters', async () => {
     UsageLog.findAll.mockResolvedValue([]);
-    const interaction = makeInteraction({ user: 'u1', event: 'message_delete', 'message-id': 'm1' });
+    const interaction = makeInteraction({ user: { id: 'u1' }, event: 'message_delete' });
 
     await command.execute(interaction);
 
@@ -26,7 +29,6 @@ describe('/loglookup command', () => {
         server_id: 'guild',
         user_id: 'u1',
         event_type: 'message_delete',
-        message_id: 'm1',
       }),
       order: [['timestamp', 'DESC']],
       limit: 20,

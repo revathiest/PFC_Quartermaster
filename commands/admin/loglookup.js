@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, MessageFlags } = require('discord.js');
-const { UsageLog } = require('../../config/database');
+const { UsageLog, VoiceLog } = require('../../config/database');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -35,11 +35,14 @@ module.exports = {
     if (eventType) where.event_type = eventType;
 
     try {
-      const logs = await UsageLog.findAll({
+      const queryOpts = {
         where,
         order: [['timestamp', 'DESC']],
         limit: 20,
-      });
+      };
+
+      const useVoiceLogs = eventType === 'voice_join' || eventType === 'voice_leave';
+      const logs = useVoiceLogs ? await VoiceLog.findAll(queryOpts) : await UsageLog.findAll(queryOpts);
 
       if (!logs.length) {
         return interaction.reply({ content: 'No matching logs found.', flags: MessageFlags.Ephemeral });
@@ -56,6 +59,7 @@ module.exports = {
         if (log.channel_id) details.push(`Channel: <#${log.channel_id}>`);
         if (log.message_id) details.push(`Message ID: ${log.message_id}`);
         if (log.message_content) details.push(`Content: ${log.message_content.slice(0, 80)}`);
+        if (log.duration) details.push(`Duration: ${Math.round(log.duration)}s`);
 
         embed.addFields({
           name: `${log.event_type} – ${new Date(log.timestamp).toLocaleString()}`,

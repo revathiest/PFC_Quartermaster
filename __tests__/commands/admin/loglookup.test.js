@@ -1,7 +1,10 @@
-jest.mock('../../../config/database', () => ({ UsageLog: { findAll: jest.fn() } }));
+jest.mock('../../../config/database', () => ({
+  UsageLog: { findAll: jest.fn() },
+  VoiceLog: { findAll: jest.fn() },
+}));
 
 const { MessageFlags } = require('discord.js');
-const { UsageLog } = require('../../../config/database');
+const { UsageLog, VoiceLog } = require('../../../config/database');
 const command = require('../../../commands/admin/loglookup');
 
 function makeInteraction(opts = {}) {
@@ -49,9 +52,34 @@ describe('/loglookup command', () => {
     expect(embed.data.fields[0].value).toContain('hi');
   });
 
+  test('uses VoiceLog for voice events', async () => {
+    VoiceLog.findAll.mockResolvedValue([]);
+    const interaction = makeInteraction({ event: 'voice_join' });
+
+    await command.execute(interaction);
+
+    expect(VoiceLog.findAll).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({
+        server_id: 'guild',
+        event_type: 'voice_join',
+      }),
+      order: [['timestamp', 'DESC']],
+      limit: 20,
+    }));
+  });
+
   test('handles query errors', async () => {
     UsageLog.findAll.mockRejectedValue(new Error('fail'));
     const interaction = makeInteraction();
+
+    await command.execute(interaction);
+
+    expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ content: expect.stringContaining('error'), flags: MessageFlags.Ephemeral }));
+  });
+
+  test('handles voice log query errors', async () => {
+    VoiceLog.findAll.mockRejectedValue(new Error('fail'));
+    const interaction = makeInteraction({ event: 'voice_leave' });
 
     await command.execute(interaction);
 

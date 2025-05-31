@@ -55,19 +55,20 @@ const {
         }
       });
   
-      const messageCounts = {};
+      const messageStats = {};
       const commandCounts = {};
-      let editCount = 0;
-      let deleteCount = 0;
   
       for (const log of usageLogs) {
         if (log.interaction_type === 'message' && log.channel_id) {
-          messageCounts[log.channel_id] = (messageCounts[log.channel_id] || 0) + 1;
-          if (log.event_type === 'message_edit' || log.event_type === 'message_update') {
-            editCount++;
+          if (!messageStats[log.channel_id]) {
+            messageStats[log.channel_id] = { sent: 0, edited: 0, deleted: 0 };
           }
-          if (log.event_type === 'message_delete') {
-            deleteCount++;
+          if (log.event_type === 'message_edit' || log.event_type === 'message_update') {
+            messageStats[log.channel_id].edited++;
+          } else if (log.event_type === 'message_delete') {
+            messageStats[log.channel_id].deleted++;
+          } else {
+            messageStats[log.channel_id].sent++;
           }
         }
         if (log.interaction_type === 'command' && log.command_name) {
@@ -107,13 +108,21 @@ const {
 
     // ==== MESSAGES SECTION ====
     embed.addFields({ name: '📝 Messages', value: ' ' }); // thin space to render the section nicely
-    if (Object.keys(messageCounts).length === 0) {
+    if (Object.keys(messageStats).length === 0) {
     embed.addFields({ name: 'No text activity', value: 'No messages sent during the last 30 days.', inline: false });
     } else {
+      const channels = Object.keys(messageStats);
+      const maxSent = Math.max(...channels.map(id => String(messageStats[id].sent).length));
+      const maxEdit = Math.max(...channels.map(id => String(messageStats[id].edited).length));
+      const maxDel = Math.max(...channels.map(id => String(messageStats[id].deleted).length));
+      const format = (num, width) => String(num).padStart(width, ' ');
+      const messageValues = channels.map(id => {
+        const s = messageStats[id];
+        return `${format(s.sent, maxSent)} / ${format(s.edited, maxEdit)} / ${format(s.deleted, maxDel)}`;
+      }).join('\n');
     embed.addFields(
-        { name: '**Channel**', value: Object.keys(messageCounts).map(id => `<#${id}>`).join('\n'), inline: true },
-        { name: '**Messages**', value: Object.values(messageCounts).join('\n'), inline: true },
-        { name: 'Messages Edited/Deleted', value: `Edits: ${editCount}\nDeletes: ${deleteCount}`, inline: true }
+        { name: '**Channel**', value: channels.map(id => `<#${id}>`).join('\n'), inline: true },
+        { name: '**Messages Sent/Edited/Deleted**', value: messageValues, inline: true }
     );
     }
 

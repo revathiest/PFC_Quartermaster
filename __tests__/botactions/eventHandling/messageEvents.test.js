@@ -227,3 +227,42 @@ describe('messageEvents performAction', () => {
     expect(res).toBe(true);
   });
 });
+
+describe('messageEvents delete and update handlers', () => {
+  let msg;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    msg = { id: 'm1', content: 'text', guild: { id: 'g1' }, channel: { id: 'c1' }, author: { id: 'u1', bot: false } };
+  });
+
+  test('logs message delete', async () => {
+    const log = jest.spyOn(console, 'log').mockImplementation(() => {});
+    await messageEvents.handleMessageDelete(msg);
+    expect(UsageLog.create).toHaveBeenCalledWith(expect.objectContaining({ event_type: 'message_delete', message_id: 'm1' }));
+    expect(log).toHaveBeenCalled();
+    log.mockRestore();
+  });
+
+  test('logs message update', async () => {
+    const log = jest.spyOn(console, 'log').mockImplementation(() => {});
+    const newMsg = { ...msg, content: 'new' };
+    await messageEvents.handleMessageUpdate(msg, newMsg);
+    expect(UsageLog.create).toHaveBeenCalledWith(expect.objectContaining({ event_type: 'message_edit', message_content: 'new' }));
+    expect(log).toHaveBeenCalled();
+    log.mockRestore();
+  });
+
+  test('ignores bot messages', async () => {
+    await messageEvents.handleMessageDelete({ ...msg, author: { bot: true } });
+    await messageEvents.handleMessageUpdate(msg, { ...msg, author: { bot: true } });
+    expect(UsageLog.create).not.toHaveBeenCalled();
+  });
+
+  test('logs error on delete failure', async () => {
+    UsageLog.create.mockRejectedValueOnce(new Error('fail'));
+    const err = jest.spyOn(console, 'error').mockImplementation(() => {});
+    await messageEvents.handleMessageDelete(msg);
+    expect(err).toHaveBeenCalled();
+    err.mockRestore();
+  });
+});

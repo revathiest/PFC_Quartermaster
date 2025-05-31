@@ -180,6 +180,50 @@ module.exports = {
         }
     },
 
+    handleMessageDelete: async function (message) {
+        if (!message.guild || message.author?.bot) return;
+
+        const serverId = message.guild.id;
+
+        try {
+            await UsageLog.create({
+                user_id: message.author?.id,
+                interaction_type: 'message',
+                event_type: 'message_delete',
+                message_id: message.id,
+                message_content: message.content,
+                channel_id: message.channel.id,
+                server_id: serverId,
+                event_time: new Date(),
+            });
+            console.log('🗑️ Message delete logged successfully');
+        } catch (error) {
+            console.error('❌ Error logging message delete:', error);
+        }
+    },
+
+    handleMessageUpdate: async function (oldMessage, newMessage) {
+        if (!newMessage.guild || newMessage.author?.bot) return;
+
+        const serverId = newMessage.guild.id;
+
+        try {
+            await UsageLog.create({
+                user_id: newMessage.author?.id,
+                interaction_type: 'message',
+                event_type: 'message_edit',
+                message_id: newMessage.id,
+                message_content: newMessage.content,
+                channel_id: newMessage.channel.id,
+                server_id: serverId,
+                event_time: new Date(),
+            });
+            console.log('✏️ Message edit logged successfully');
+        } catch (error) {
+            console.error('❌ Error logging message edit:', error);
+        }
+    },
+
     performAction: function (message, client, actionDetail) {
         if (actionDetail.action === "personal") {
             if (

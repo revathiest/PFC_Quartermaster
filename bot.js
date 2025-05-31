@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const { initClient } = require('./botactions/initClient');
-const { interactionHandler, handleMessageCreate, handleReactionAdd, handleReactionRemove, handleVoiceStateUpdate } = require('./botactions/eventHandling');
+const { interactionHandler, handleMessageCreate, handleMessageDelete, handleMessageUpdate, handleReactionAdd, handleReactionRemove, handleVoiceStateUpdate } = require('./botactions/eventHandling');
 const { registerChannels } = require('./botactions/channelManagement');
 const { registerCommands } = require('./utils/commandRegistration');
 const { initializeDatabase } = require('./config/database');
@@ -113,6 +113,8 @@ const initializeBot = async () => {
     await interactionHandler.handleInteraction(interaction, client);
   });
   client.on('messageCreate', message => handleMessageCreate(message, client));
+  client.on('messageDelete', message => handleMessageDelete(message));
+  client.on('messageUpdate', (oldMessage, newMessage) => handleMessageUpdate(oldMessage, newMessage));
   client.on('messageReactionAdd', (reaction, user) => handleReactionAdd(reaction, user));
   client.on('messageReactionRemove', (reaction, user) => handleReactionRemove(reaction, user));
   client.on('voiceStateUpdate', (oldState, newState) => handleVoiceStateUpdate(oldState, newState, client));

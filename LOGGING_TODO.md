@@ -9,6 +9,10 @@
 * `messageCreate` logging to DB via `UsageLog.create`
 * AI prompt handling + OpenAI completions tracked
 * Role-based and regex-based action detection
+* Reaction adds/removals logged in `botactions/eventHandling/reactionEvents.js`
+* Voice join/leave events via `voiceStateUpdate` in `botactions/eventHandling/voiceEvents.js`
+* Interaction logging handled in `botactions/eventHandling/interactionEvents/logInteraction.js`
+* Logs are streamed to Discord via `sendToDiscordLogChannel` and `jobs/flushLogs.js`
 
 ---
 
@@ -26,10 +30,6 @@
 
 ##### ➕ Other Event Types (Future Consideration)
 
-* Reactions:
-
-  * `messageReactionAdd`
-  * `messageReactionRemove`
 * Member changes:
 
   * `guildMemberRemove` (for leaves or kicks)
@@ -41,7 +41,6 @@
   * `channelUpdate`
 * Voice activity:
 
-  * `voiceStateUpdate`
 * Moderation context:
 
   * Attempt to include executor from audit logs (requires permissions).

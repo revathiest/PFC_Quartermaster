@@ -51,7 +51,7 @@ Object.values(sequelize.models).forEach(model => {
 
 const initializeDatabase = async () => {
     try {
-        console.log('🧩 Starting database synchronization...\n');
+        console.log('🧩 Starting database synchronization...');
 
         for (const [modelName, model] of Object.entries(sequelize.models)) {
             try {

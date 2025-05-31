@@ -11,7 +11,6 @@ function loadCommandsRecursively(dir, commandList = [], commandMap = new Map()) 
     const parentFilePath = path.join(path.dirname(dir), parentFileName);
 
     if (fs.existsSync(parentFilePath)) {
-        console.log(`📁 Skipping subcommand folder "${dir}" — paired with "${parentFileName}"`);
         return { commandList, commandMap };
     }
 
@@ -22,7 +21,6 @@ function loadCommandsRecursively(dir, commandList = [], commandMap = new Map()) 
             loadCommandsRecursively(fullPath, commandList, commandMap);
         } else if (file.isFile() && file.name.endsWith('.js')) {
             try {
-                console.log(`🔍 Attempting to load: ${fullPath}`);
 
                 const command = require(fullPath);
 
@@ -32,7 +30,6 @@ function loadCommandsRecursively(dir, commandList = [], commandMap = new Map()) 
 
                 commandMap.set(command.data.name, command);
                 commandList.push(command.data.toJSON());
-                console.log(`✅ Loaded command: ${command.data.name}`);
             } catch (err) {
                 console.warn(`⚠️ Failed to load "${file.name}": ${err.message}`);
                 console.warn(err);

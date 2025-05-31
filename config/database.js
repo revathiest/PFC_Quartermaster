@@ -56,7 +56,6 @@ const initializeDatabase = async () => {
         for (const [modelName, model] of Object.entries(sequelize.models)) {
             try {
                 await model.sync({ alter: false }); // Change to force: true or alter: true if needed
-                console.log(`📦 Synced model: ${modelName}`);
             } catch (modelError) {
                 console.error(`❌ Failed to sync model: ${modelName}`, modelError);
             }

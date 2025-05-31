@@ -12,7 +12,7 @@ module.exports = {
         const oldChannelName = oldChannelId ? await getChannelNameById(oldChannelId, client).catch(() => null) : null;
         const userName = userId ? await getUserNameById(userId, client).catch(() => null) : null;
 
-        console.log(`🎧 Voice state update: old = ${oldChannelName}, new = ${newChannelName}`);
+        console.log(`📌 Voice state update: old = ${oldChannelName}, new = ${newChannelName}`);
 
         if (!oldChannelId && newChannelId) {
             await VoiceLog.create({
@@ -22,7 +22,7 @@ module.exports = {
                 server_id: serverId,
                 start_time: new Date(),
             });
-            console.log(`➕ ${userName} joined voice channel: ${newChannelName}`);
+            console.log(`✅ ${userName} joined voice channel: ${newChannelName}`);
         } else if (oldChannelId && !newChannelId) {
             const joinLog = await VoiceLog.findOne({
                 where: {
@@ -47,7 +47,7 @@ module.exports = {
                     start_time: joinTimestamp,
                     end_time: leaveTimestamp,
                 });
-                console.log(`➖ ${userName} left voice channel: ${oldChannelName}`);
+                console.log(`✅ ${userName} left voice channel: ${oldChannelName}`);
             }
         } else if (oldChannelId && newChannelId && oldChannelId !== newChannelId) {
             console.log(`🔁 ${userName} moved from ${oldChannelName} to ${newChannelName}`);
@@ -74,7 +74,7 @@ module.exports = {
                     start_time: joinTimestamp,
                     end_time: switchTimestamp,
                 });
-                console.log(`📤 Logged leave: ${userName} from ${oldChannelName}`);
+                console.log(`📌 Logged leave: ${userName} from ${oldChannelName}`);
 
                 await VoiceLog.create({
                     user_id: userId,
@@ -83,7 +83,7 @@ module.exports = {
                     server_id: serverId,
                     start_time: switchTimestamp,
                 });
-                console.log(`📥 Logged join: ${userName} to ${newChannelName}`);
+                console.log(`📌 Logged join: ${userName} to ${newChannelName}`);
             } else {
                 await VoiceLog.create({
                     user_id: userId,

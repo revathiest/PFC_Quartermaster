@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const { initClient } = require('./botactions/initClient');
-const { interactionHandler, handleMessageCreate, handleMessageDelete, handleMessageUpdate, handleReactionAdd, handleReactionRemove, handleVoiceStateUpdate } = require('./botactions/eventHandling');
+const { interactionHandler, handleMessageCreate, handleMessageDelete, handleMessageUpdate, handleReactionAdd, handleReactionRemove, handleVoiceStateUpdate, handleGuildMemberRemove, handleGuildBanAdd, handleGuildMemberUpdate } = require('./botactions/eventHandling');
 const { registerChannels } = require('./botactions/channelManagement');
 const { registerCommands } = require('./utils/commandRegistration');
 const { initializeDatabase } = require('./config/database');
@@ -118,6 +118,8 @@ const initializeBot = async () => {
   client.on('messageReactionAdd', (reaction, user) => handleReactionAdd(reaction, user));
   client.on('messageReactionRemove', (reaction, user) => handleReactionRemove(reaction, user));
   client.on('voiceStateUpdate', (oldState, newState) => handleVoiceStateUpdate(oldState, newState, client));
+  client.on('guildMemberRemove', member => handleGuildMemberRemove(member));
+  client.on('guildBanAdd', ban => handleGuildBanAdd(ban));
   client.on('guildScheduledEventCreate', async event => handleCreateEvent(event, client));
   client.on('guildScheduledEventUpdate', async (oldEvent, newEvent) => handleUpdateEvent(oldEvent, newEvent, client));
   client.on('guildScheduledEventDelete', async event => handleDeleteEvent(event, client));
@@ -134,6 +136,7 @@ const initializeBot = async () => {
   client.on('guildMemberUpdate', async (oldMember, newMember) => {
     await handleRoleAssignment(oldMember, newMember, client);
     await enforceNicknameFormat(oldMember, newMember);
+    await handleGuildMemberUpdate(oldMember, newMember);
   });
 
   client.once('ready', async () => {

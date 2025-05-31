@@ -2,6 +2,7 @@ const interactionHandler = require('./eventHandling/interactionEvents');
 const { handleMessageCreate, handleMessageDelete, handleMessageUpdate } = require('./eventHandling/messageEvents');
 const { handleReactionAdd, handleReactionRemove } = require('./eventHandling/reactionEvents');
 const { handleVoiceStateUpdate } = require('./eventHandling/voiceEvents');
+const { handleGuildMemberRemove, handleGuildBanAdd, handleGuildMemberUpdate } = require('./eventHandling/moderationEvents');
 
 module.exports = {
     interactionHandler,
@@ -10,5 +11,8 @@ module.exports = {
     handleMessageUpdate,
     handleReactionAdd,
     handleReactionRemove,
-    handleVoiceStateUpdate
+    handleVoiceStateUpdate,
+    handleGuildMemberRemove,
+    handleGuildBanAdd,
+    handleGuildMemberUpdate
 }

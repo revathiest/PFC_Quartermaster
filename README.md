@@ -12,6 +12,7 @@ A powerful Discord bot built for the **Pyro Freelancers Corps**, designed to man
 - ✅ Log file creation & Discord log channel syncing
 - ✅ Handles guild member updates & role assignments
 - ✅ Modular design for scalability
+- ✅ `/loglookup` command for quick audit of recent events (admin only)
 
 ## 🛠️ Installation
 

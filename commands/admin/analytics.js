@@ -9,7 +9,7 @@ module.exports = {
     .setDescription('Generate analytics reports')
     .addSubcommand(sub =>
       sub.setName('usage')
-        .setDescription('Generate a usage report')
+        .setDescription('Generate a usage report (includes message edits and deletes)')
     )
     .addSubcommand(sub =>
       sub.setName('voice')
@@ -25,7 +25,7 @@ module.exports = {
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
-  help: 'Generates usage, voice, or channel-specific analytics reports. (Admin Only)',
+  help: 'Generates usage, voice, or channel-specific analytics reports. Usage reports include message edits and deletes. (Admin Only)',
   category: 'Discord',
 
   async execute(interaction, client) {

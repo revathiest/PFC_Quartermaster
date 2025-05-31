@@ -56,7 +56,9 @@ describe('/usagestats command', () => {
     isUserVerified.mockResolvedValue(true);
     isAdmin.mockResolvedValue(true);
     db.UsageLog.findAll.mockResolvedValue([
-      { interaction_type:'message', channel_id:'1' },
+      { interaction_type:'message', channel_id:'1', event_type:'message' },
+      { interaction_type:'message', channel_id:'1', event_type:'message_edit' },
+      { interaction_type:'message', channel_id:'1', event_type:'message_delete' },
       { interaction_type:'command', command_name:'ping' }
     ]);
     db.VoiceLog.findAll.mockResolvedValue([
@@ -69,6 +71,7 @@ describe('/usagestats command', () => {
 
     const embed = interaction.editReply.mock.calls[0][0].embeds[0];
     expect(embed.data.title).toContain('Usage Summary');
-    expect(embed.data.fields.length).toBeGreaterThan(0);
+    expect(embed.data.fields.find(f => f.name === 'Messages Edited').value).toBe('1');
+    expect(embed.data.fields.find(f => f.name === 'Messages Deleted').value).toBe('1');
   });
 });

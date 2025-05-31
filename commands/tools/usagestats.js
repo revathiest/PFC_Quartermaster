@@ -57,10 +57,18 @@ const {
   
       const messageCounts = {};
       const commandCounts = {};
+      let editCount = 0;
+      let deleteCount = 0;
   
       for (const log of usageLogs) {
         if (log.interaction_type === 'message' && log.channel_id) {
           messageCounts[log.channel_id] = (messageCounts[log.channel_id] || 0) + 1;
+          if (log.event_type === 'message_edit' || log.event_type === 'message_update') {
+            editCount++;
+          }
+          if (log.event_type === 'message_delete') {
+            deleteCount++;
+          }
         }
         if (log.interaction_type === 'command' && log.command_name) {
           commandCounts[log.command_name] = (commandCounts[log.command_name] || 0) + 1;
@@ -107,6 +115,10 @@ const {
         { name: '**Messages**', value: Object.values(messageCounts).join('\n'), inline: true }
     );
     }
+    embed.addFields(
+        { name: 'Messages Edited', value: `${editCount}`, inline: true },
+        { name: 'Messages Deleted', value: `${deleteCount}`, inline: true }
+    );
 
     // ==== VOICE SECTION ====
     embed.addFields({ name: '🎙️ Voice', value: ' ' });

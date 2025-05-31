@@ -71,7 +71,7 @@ describe('/usagestats command', () => {
 
     const embed = interaction.editReply.mock.calls[0][0].embeds[0];
     expect(embed.data.title).toContain('Usage Summary');
-    const field = embed.data.fields.find(f => f.name === 'Messages Edited/Deleted');
-    expect(field.value).toBe('Edits: 1\nDeletes: 1');
+    const field = embed.data.fields.find(f => f.name === '**Messages Sent/Edited/Deleted**');
+    expect(field.value.trim()).toBe('1 / 1 / 1');
   });
 });

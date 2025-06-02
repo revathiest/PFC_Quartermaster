@@ -127,7 +127,6 @@ module.exports = {
     if (interaction.customId.startsWith('hunt_poi_edit::')) {
       const [, poiId, pageStr] = interaction.customId.split('::');
       const page = parseInt(pageStr, 10) || 0;
-      await interaction.deferUpdate();
       try {
         const poi = await HuntPoi.findByPk(poiId);
         if (!poi) {

@@ -15,9 +15,6 @@ const { HuntPoi } = require('../../../config/database');
 const allowedRoles = ['Admiral', 'Fleet Admiral'];
 
 const PAGE_SIZE = 10;
-const EDIT_TIMEOUT = 5 * 60 * 1000;
-// key: `${userId}:${poiId}` -> { name, description, hint, timeout }
-let pendingEdits = new Map();
 
 function chunkArray(arr, size) {
   const pages = [];
@@ -135,15 +132,8 @@ module.exports = {
           return interaction.followUp({ content: '❌ POI not found.', flags: MessageFlags.Ephemeral });
         }
         const modal = new ModalBuilder()
-          .setCustomId(`hunt_poi_edit_step1::${poiId}`)
-          .setTitle('Edit POI (1/2)');
-
-        const nameInput = new TextInputBuilder()
-          .setCustomId('name')
-          .setLabel('Name')
-          .setStyle(TextInputStyle.Short)
-          .setRequired(true)
-          .setValue(poi.name);
+          .setCustomId(`hunt_poi_edit_form::${poiId}`)
+          .setTitle('Edit POI');
 
         const descriptionInput = new TextInputBuilder()
           .setCustomId('description')
@@ -159,10 +149,33 @@ module.exports = {
           .setRequired(false)
           .setValue(poi.hint || '');
 
+        const locationInput = new TextInputBuilder()
+          .setCustomId('location')
+          .setLabel('Location')
+          .setStyle(TextInputStyle.Short)
+          .setRequired(false)
+          .setValue(poi.location || '');
+
+        const imageInput = new TextInputBuilder()
+          .setCustomId('image')
+          .setLabel('Image URL')
+          .setStyle(TextInputStyle.Short)
+          .setRequired(false)
+          .setValue(poi.image_url || '');
+
+        const pointsInput = new TextInputBuilder()
+          .setCustomId('points')
+          .setLabel('Points')
+          .setStyle(TextInputStyle.Short)
+          .setRequired(true)
+          .setValue(String(poi.points));
+
         modal.addComponents(
-          new ActionRowBuilder().addComponents(nameInput),
           new ActionRowBuilder().addComponents(descriptionInput),
-          new ActionRowBuilder().addComponents(hintInput)
+          new ActionRowBuilder().addComponents(hintInput),
+          new ActionRowBuilder().addComponents(locationInput),
+          new ActionRowBuilder().addComponents(imageInput),
+          new ActionRowBuilder().addComponents(pointsInput)
         );
 
         return interaction.showModal(modal);
@@ -209,83 +222,29 @@ module.exports = {
   },
 
   async modal(interaction) {
-    if (interaction.customId.startsWith('hunt_poi_edit_step1::')) {
-      const [, poiId] = interaction.customId.split('::');
-      const name = interaction.fields.getTextInputValue('name');
-      const description = interaction.fields.getTextInputValue('description');
-      const hint = interaction.fields.getTextInputValue('hint');
-
-      try {
-        const poi = await HuntPoi.findByPk(poiId);
-        if (!poi) {
-          return interaction.reply({ content: '❌ POI not found.', flags: MessageFlags.Ephemeral });
-        }
-        const key = `${interaction.user.id}:${poiId}`;
-        if (pendingEdits.has(key)) clearTimeout(pendingEdits.get(key).timeout);
-        const timeout = setTimeout(() => pendingEdits.delete(key), EDIT_TIMEOUT);
-        pendingEdits.set(key, { name, description, hint, timeout });
-
-        const modal = new ModalBuilder()
-          .setCustomId(`hunt_poi_edit_step2::${poiId}`)
-          .setTitle('Edit POI (2/2)');
-
-        const locationInput = new TextInputBuilder()
-          .setCustomId('location')
-          .setLabel('Location')
-          .setStyle(TextInputStyle.Short)
-          .setRequired(false)
-          .setValue(poi.location || '');
-
-        const imageInput = new TextInputBuilder()
-          .setCustomId('image')
-          .setLabel('Image URL')
-          .setStyle(TextInputStyle.Short)
-          .setRequired(false)
-          .setValue(poi.image_url || '');
-
-        const pointsInput = new TextInputBuilder()
-          .setCustomId('points')
-          .setLabel('Points')
-          .setStyle(TextInputStyle.Short)
-          .setRequired(true)
-          .setValue(String(poi.points));
-
-        modal.addComponents(
-          new ActionRowBuilder().addComponents(locationInput),
-          new ActionRowBuilder().addComponents(imageInput),
-          new ActionRowBuilder().addComponents(pointsInput)
-        );
-
-        return interaction.showModal(modal);
-      } catch (err) {
-        console.error('❌ Failed to build followup modal:', err);
-        return interaction.reply({ content: '❌ Failed to build followup modal.', flags: MessageFlags.Ephemeral });
-      }
-    }
-
-    if (!interaction.customId.startsWith('hunt_poi_edit_step2::')) return;
+    if (!interaction.customId.startsWith('hunt_poi_edit_form::')) return;
     const [, poiId] = interaction.customId.split('::');
-    const key = `${interaction.user.id}:${poiId}`;
-    const cache = pendingEdits.get(key);
-    if (!cache) {
-      return interaction.reply({ content: '❌ Edit session expired.', flags: MessageFlags.Ephemeral });
-    }
-    clearTimeout(cache.timeout);
-    pendingEdits.delete(key);
+    const description = interaction.fields.getTextInputValue('description');
+    const hint = interaction.fields.getTextInputValue('hint');
     const location = interaction.fields.getTextInputValue('location');
     const image = interaction.fields.getTextInputValue('image');
     const points = parseInt(interaction.fields.getTextInputValue('points'), 10);
 
     try {
-      await HuntPoi.update({
-        name: cache.name,
-        description: cache.description || null,
-        hint: cache.hint || null,
+      const poi = await HuntPoi.findByPk(poiId);
+      if (!poi) {
+        return interaction.reply({ content: '❌ POI not found.', flags: MessageFlags.Ephemeral });
+      }
+
+      await poi.update({
+        description: description || null,
+        hint: hint || null,
         location: location || null,
         image_url: image || null,
         points,
         updated_by: interaction.user.id
-      }, { where: { id: poiId } });
+      });
+
       await interaction.reply({ content: '✅ POI updated.', flags: MessageFlags.Ephemeral });
     } catch (err) {
       console.error('❌ Failed to update POI:', err);

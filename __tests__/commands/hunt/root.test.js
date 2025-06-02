@@ -61,7 +61,7 @@ test('option routes to poi list handler', async () => {
 });
 
 test('modal routes to poi list handler', async () => {
-  const interaction = { customId: 'hunt_poi_edit_step1::1', replied: false, deferred: false };
+  const interaction = { customId: 'hunt_poi_edit_form::1', replied: false, deferred: false };
   const list = require('../../../commands/hunt/poi/list.js');
   await command.modal(interaction, {});
   expect(list.modal).toHaveBeenCalledWith(interaction, {});

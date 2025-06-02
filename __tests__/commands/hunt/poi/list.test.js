@@ -6,7 +6,7 @@ const { HuntPoi } = require('../../../../config/database');
 const command = require('../../../../commands/hunt/poi/list');
 const { MessageFlags } = require('../../../../__mocks__/discord.js');
 
-const makeInteraction = () => ({ reply: jest.fn() });
+const makeInteraction = () => ({ reply: jest.fn(), editReply: jest.fn() });
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -33,6 +33,7 @@ test('lists pois when present', async () => {
 
   const reply = interaction.reply.mock.calls[0][0];
   expect(reply.embeds[0].data.title).toContain('Points of Interest');
+  expect(reply.embeds[0].data.footer.text).toContain('Page 1 of 1');
   expect(reply.flags).toBe(MessageFlags.Ephemeral);
 });
 
@@ -50,5 +51,24 @@ test('handles fetch errors', async () => {
     flags: MessageFlags.Ephemeral
   });
   spy.mockRestore();
+});
+
+test('button paginates results', async () => {
+  const pois = Array.from({ length: 11 }, (_, i) => ({ name: `P${i}`, points: i, hint: 'h' }));
+  HuntPoi.findAll.mockResolvedValue(pois);
+  const interaction = {
+    customId: 'hunt_poi_page::1',
+    deferUpdate: jest.fn().mockImplementation(function () { this.deferred = true; return Promise.resolve(); }),
+    editReply: jest.fn(),
+    reply: jest.fn(),
+    deferred: false,
+    replied: false
+  };
+
+  await command.button(interaction);
+
+  expect(interaction.deferUpdate).toHaveBeenCalled();
+  const embed = interaction.editReply.mock.calls[0][0].embeds[0];
+  expect(embed.data.footer.text).toContain('Page 2 of');
 });
 

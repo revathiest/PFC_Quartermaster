@@ -74,6 +74,29 @@ test('fetches detail when outdated', async () => {
   expect(fetchSCDataByUrl).toHaveBeenCalled();
 });
 
+test('no vehicles found', async () => {
+  isUserVerified.mockResolvedValue(true);
+  const i = makeInteraction();
+  db.Vehicle.findOne.mockResolvedValue(null);
+  db.Vehicle.findAll.mockResolvedValue([]);
+
+  await command.execute(i);
+
+  expect(i.editReply).toHaveBeenCalledWith(expect.stringContaining('No vehicles'));
+});
+
+test('selection timeout handled', async () => {
+  isUserVerified.mockResolvedValue(true);
+  const i = makeInteraction();
+  db.Vehicle.findOne.mockResolvedValue(null);
+  db.Vehicle.findAll.mockResolvedValue([{ uuid: '1', name: 'Ship', version: 'v' }]);
+  i.channel.awaitMessageComponent.mockRejectedValue(new Error('timeout'));
+
+  await command.execute(i);
+
+  expect(i.editReply).toHaveBeenLastCalledWith({ content: expect.stringContaining('Timed out'), components: [] });
+});
+
 test('logs error when fetch fails', async () => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
   isUserVerified.mockResolvedValue(true);

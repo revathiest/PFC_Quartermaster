@@ -42,6 +42,20 @@ test('creates poi and replies', async () => {
   });
 });
 
+test('handles missing optional image', async () => {
+  const interaction = makeInteraction();
+  interaction.options.getString = jest.fn(key => ({
+    name: 'Bravo',
+    hint: 'hint',
+    location: 'loc',
+    image: null
+  }[key]));
+
+  await command.execute(interaction);
+
+  expect(HuntPoi.create).toHaveBeenCalledWith(expect.objectContaining({ image_url: null }));
+});
+
 test('handles db error', async () => {
   const interaction = makeInteraction();
   const err = new Error('fail');

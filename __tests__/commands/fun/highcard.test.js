@@ -22,7 +22,7 @@ const makeChallengeInteraction = (self = false, hasTester = false) => ({
   options: { getSubcommand: jest.fn(() => 'challenge'), getUser: jest.fn(() => ({ id: self ? 'challenger' : 'opponent' })) },
   guild: makeGuild(hasTester),
   reply: jest.fn(),
-  followUp: jest.fn(),
+  followUp: jest.fn(() => Promise.resolve()),
 });
 
 const makeAcceptInteraction = (userId = 'opponent') => ({
@@ -37,6 +37,8 @@ beforeEach(() => {
   jest.useFakeTimers();
   jest.resetModules();
   highcard = require('../../../commands/fun/highcard');
+  jest.spyOn(console, 'log').mockImplementation(() => {});
+  jest.spyOn(console, 'error').mockImplementation(() => {});
 });
 
 afterEach(() => {
@@ -87,5 +89,49 @@ test('rejects challenge when opponent already challenged', async () => {
     content: expect.stringContaining('already has a pending challenge'),
     flags: MessageFlags.Ephemeral,
   });
+});
+
+test('challenge times out if not accepted', async () => {
+  const challenge = makeChallengeInteraction();
+  await highcard.execute(challenge);
+
+  jest.runAllTimers();
+  expect(challenge.followUp).toHaveBeenCalledWith(expect.objectContaining({
+    content: expect.stringContaining('timed out')
+  }));
+});
+
+test('accepting draws resulting in a tie sends tie message', async () => {
+  const challenge = makeChallengeInteraction();
+  await highcard.execute(challenge);
+
+  const accept = makeAcceptInteraction();
+  jest
+    .spyOn(Math, 'random')
+    .mockReturnValueOnce(0) // pick 2 of Spades
+    .mockReturnValueOnce(12 / 51); // pick 2 of Hearts after splice
+
+  await highcard.execute(accept);
+  Math.random.mockRestore();
+
+  expect(accept.reply).toHaveBeenCalled();
+  expect(accept.reply.mock.calls[0][0].content).toContain("It's a tie! Both drew");
+});
+
+test('challenger wins when drawing higher card', async () => {
+  const challenge = makeChallengeInteraction();
+  await highcard.execute(challenge);
+
+  const accept = makeAcceptInteraction();
+  jest
+    .spyOn(Math, 'random')
+    .mockReturnValueOnce(12 / 52) // challenger draws Ace of Spades
+    .mockReturnValueOnce(0); // opponent draws 3 of Spades after splice
+
+  await highcard.execute(accept);
+  Math.random.mockRestore();
+
+  expect(accept.reply).toHaveBeenCalled();
+  expect(accept.reply.mock.calls[0][0].content).toContain('wins with');
 });
 

@@ -26,6 +26,8 @@ const makeInteraction = (emoji = '<:medal:1>', desc = 'desc') => {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.spyOn(console, 'log').mockImplementation(() => {});
+  jest.spyOn(console, 'error').mockImplementation(() => {});
 });
 
 describe('/updateaccolade command', () => {
@@ -63,5 +65,35 @@ describe('/updateaccolade command', () => {
     await execute(interaction);
 
     expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ content: expect.stringContaining('at least one field'), flags: MessageFlags.Ephemeral }));
+  });
+
+  test('creates a new message when previous one is missing', async () => {
+    const guild = {
+      channels: { fetch: jest.fn(() => ({
+        type: 0,
+        messages: { fetch: jest.fn(() => Promise.reject(new Error('no msg'))) },
+        send: jest.fn(() => ({ id: 'new' }))
+      })) },
+      members: { fetch: jest.fn(() => Promise.resolve()), cache: { filter: jest.fn(() => ({ map: fn => [] })) } }
+    };
+    const interaction = { options: { getRole: jest.fn(() => ({ id: 'r1' })), getString: jest.fn(() => '<:e:1>') }, guild, reply: jest.fn() };
+    const accolade = { role_id: 'r1', name: 'Test', save: jest.fn(), channel_id: 'c1', message_id: 'old', emoji: '', description: '' };
+    Accolade.findOne.mockResolvedValue(accolade);
+    buildAccoladeEmbed.mockReturnValue('embed');
+
+    await execute(interaction);
+
+    expect(guild.channels.fetch).toHaveBeenCalledWith('c1');
+    expect(accolade.message_id).toBe('new');
+    expect(accolade.save).toHaveBeenCalledTimes(2);
+    expect(interaction.reply).toHaveBeenCalledWith({ content: expect.stringContaining('updated'), flags: MessageFlags.Ephemeral });
+  });
+
+  test('logs an error when channel fetch fails', async () => {
+    const interaction = makeInteraction();
+    Accolade.findOne.mockResolvedValue({ role_id: 'r1', name: 'Test', save: jest.fn(), channel_id: 'c1', message_id: 'm1' });
+    interaction.guild.channels.fetch.mockRejectedValue(new Error('fail'));
+    await execute(interaction);
+    expect(console.error).toHaveBeenCalled();
   });
 });

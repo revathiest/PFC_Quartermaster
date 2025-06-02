@@ -30,6 +30,21 @@ const VoiceLog = {
   findAll: jest.fn()
 };
 
+const Hunt = {
+  findAll: jest.fn(),
+  create: jest.fn()
+};
+
+const HuntPoi = {
+  findAll: jest.fn(),
+  create: jest.fn()
+};
+
+const HuntSubmission = {
+  findAll: jest.fn(),
+  create: jest.fn()
+};
+
 // Simple mock Sequelize-like instance
 const sequelize = {
   models: {
@@ -71,5 +86,8 @@ module.exports = {
   UsageLog,
   VoiceLog,
   sequelize,
-  initializeDatabase
+  initializeDatabase,
+  Hunt,
+  HuntPoi,
+  HuntSubmission
 };

@@ -73,3 +73,16 @@ test('handleSelection no records found', async () => {
   await command.button(i);
   expect(i.editReply).toHaveBeenCalledWith('No location data found for that entry.');
 });
+
+test('pagination generates nav buttons', async () => {
+  const i = { customId: 'uexfinditem::commodity::1::1', deferUpdate: jest.fn(), editReply: jest.fn() };
+  const records = [];
+  for (let x = 0; x < 25; x++) records.push({ price_buy: 1, price_sell: 0, terminal: { name: 'T' + x } });
+  db.UexCommodityPrice.findAll.mockResolvedValue(records);
+  await command.button(i);
+  const row = i.editReply.mock.calls[0][0].components[0];
+  const first = row.addComponents.mock.calls[0][0];
+  const second = row.addComponents.mock.calls[0][1];
+  expect(first.data.disabled).toBe(false);
+  expect(second.data.disabled).toBe(true);
+});

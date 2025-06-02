@@ -21,7 +21,7 @@ module.exports = {
           { name: 'Voice Join', value: 'voice_join' },
           { name: 'Voice Leave', value: 'voice_leave' },
         ))
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+    .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
   help: 'Searches recent usage logs with optional filters for user or event type. (Admin Only)',
   category: 'Admin',
 

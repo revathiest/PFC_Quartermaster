@@ -1,4 +1,5 @@
 # 🗞 Scavenger Hunt TODO List
+When completing items on this list, it is important to update the items to keep clear track of what is done and what is still pending.
 
 ## 🧠 Core Concepts
 

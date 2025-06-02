@@ -74,3 +74,17 @@ test('fetches detail when outdated', async () => {
   expect(fetchSCDataByUrl).toHaveBeenCalled();
 });
 
+test('logs error when fetch fails', async () => {
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+  isUserVerified.mockResolvedValue(true);
+  const i = makeInteraction();
+  const old = new Date(Date.now() - 1000);
+  db.Vehicle.findOne.mockResolvedValue({ uuid: '1', updated_at: new Date(), name: 'Ship', link: 'u' });
+  db.VehicleDetail.findByPk.mockResolvedValue({ uuid: '1', updated_at: old });
+  const { fetchSCDataByUrl } = require('../../../utils/fetchSCData');
+  fetchSCDataByUrl.mockRejectedValue(new Error('fail'));
+  await command.execute(i);
+  expect(console.error).toHaveBeenCalled();
+  expect(i.editReply).toHaveBeenCalledWith('❌ Failed to fetch or store updated vehicle details.');
+});
+

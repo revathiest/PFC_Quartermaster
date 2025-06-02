@@ -65,4 +65,20 @@ describe('/uexterminals command', () => {
     expect(embed.data.title).toContain('Terminals in');
     expect(update).toHaveBeenCalled();
   });
+
+  test('button public updates or sends to channel', async () => {
+    db.UexTerminal.findAll.mockResolvedValue([{ code:'A1', name:'T1', space_station_name:'Port' }]);
+    const update = jest.fn();
+    const send = jest.fn();
+    const btn = {
+      customId: 'uexterminals_page::Port::0::true',
+      update,
+      channel: { send },
+      message: { interaction: true },
+      deferUpdate: jest.fn()
+    };
+    await command.button(btn);
+    expect(send).toHaveBeenCalled();
+    expect(btn.deferUpdate).toHaveBeenCalled();
+  });
 });

@@ -96,3 +96,11 @@ test('button public posts to channel', async () => {
   expect(i.channel.send).toHaveBeenCalled();
   expect(i.update).toHaveBeenCalled();
 });
+
+test('button replies when no inventory records', async () => {
+  const i = { customId: 'uexinventory_prev::1::item::0::false', reply: jest.fn(), update: jest.fn(), channel: { send: jest.fn() } };
+  db.UexTerminal.findByPk.mockResolvedValue({ id: 1, name: 'term' });
+  db.UexItemPrice.findAll.mockResolvedValue([]);
+  await command.button(i);
+  expect(i.reply).toHaveBeenCalledWith(expect.objectContaining({ content: expect.stringContaining('No inventory data') }));
+});

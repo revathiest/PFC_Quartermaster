@@ -9,6 +9,15 @@ When completing items on this list, it is important to update the items to keep 
 * Hunt status is automatically managed by linked Discord Scheduled Events
 * All command responses are ephemeral except that when evidence is submitted, a non-ephemeral message is added in the hunt activity channel
 
+## Current Status
+
+Initial scaffolding for the scavenger hunt exists on the `scavenger` branch. The following pieces are implemented:
+
+* `/hunt help`, `/hunt list`, and `/hunt set-channels` commands
+* Sequelize models for `Hunt`, `HuntPoi`, and `HuntSubmission`
+
+All remaining checklist items are still pending.
+
 ---
 
 ## ✅ Functional Requirements
@@ -79,7 +88,7 @@ When completing items on this list, it is important to update the items to keep 
 ### 🛡 Channel Restrictions
 
 * [x] `/hunt help` is always allowed in any channel
-* [ ] `/hunt set-channels` — brings up a UI with currently configured channels (or blank), and allows setting:
+* [x] `/hunt set-channels` — brings up a UI with currently configured channels (or blank), and allows setting:
 
   * Activity channel (where commands can be run)
   * Submission review channel (where mod actions are logged)

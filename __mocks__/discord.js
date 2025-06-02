@@ -283,6 +283,7 @@ module.exports = {
   StringSelectMenuBuilder,
   ButtonStyle,
   SlashCommandBuilder,
+  SlashCommandSubcommandGroupBuilder: SlashCommandBuilder,
   SlashCommandSubcommandBuilder: SlashCommandBuilder,
   EmbedBuilder,
   AttachmentBuilder,

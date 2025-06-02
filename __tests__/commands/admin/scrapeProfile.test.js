@@ -21,6 +21,27 @@ describe('/scrape-profile command', () => {
     expect(interaction.reply).toHaveBeenCalledWith({ embeds: [expect.any(Object)], flags: MessageFlags.Ephemeral });
   });
 
+  test('uses fallback values when profile fields are missing', async () => {
+    const interaction = makeInteraction();
+    fetchRsiProfileInfo.mockResolvedValue({ handle: 'Handle' });
+
+    await execute(interaction);
+
+    const replyArg = interaction.reply.mock.calls[0][0];
+    const embed = replyArg.embeds[0];
+
+    expect(embed.thumbnail).toBeUndefined();
+    expect(embed.fields).toEqual(
+      expect.arrayContaining([
+        { name: 'Enlisted', value: 'N/A', inline: true },
+        { name: 'Organization', value: 'N/A', inline: true },
+        { name: 'Org Rank', value: 'N/A', inline: true },
+        { name: 'Org Tag', value: 'N/A', inline: true },
+        { name: 'Bio', value: 'No bio provided.' }
+      ])
+    );
+  });
+
   test('handles errors', async () => {
     const interaction = makeInteraction();
     const spy = jest.spyOn(console, 'error').mockImplementation(() => {});

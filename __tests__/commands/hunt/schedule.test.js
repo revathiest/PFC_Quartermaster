@@ -75,3 +75,15 @@ test('handles database failure', async () => {
   expect(interaction.reply).toHaveBeenCalledWith({ content: '❌ Failed to schedule hunt.', flags: MessageFlags.Ephemeral });
   spy.mockRestore();
 });
+
+test('defines subcommand options in required-first order', () => {
+  const data = command.data();
+  const optionSummary = data.options.map(o => ({ name: o.name, required: o.required }));
+  expect(optionSummary).toEqual([
+    { name: 'name', required: true },
+    { name: 'start', required: true },
+    { name: 'end', required: true },
+    { name: 'channel', required: true },
+    { name: 'description', required: false },
+  ]);
+});

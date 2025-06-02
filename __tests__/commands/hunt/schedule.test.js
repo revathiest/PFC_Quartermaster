@@ -83,7 +83,7 @@ test('defines subcommand options in required-first order', () => {
     { name: 'name', required: true },
     { name: 'start', required: true },
     { name: 'end', required: true },
-    { name: 'channel', required: true },
-    { name: 'description', required: false },
+    { name: 'description', required: true },
+    { name: 'channel', required: false },
   ]);
 });

@@ -143,12 +143,6 @@ module.exports = {
           .setRequired(true)
           .setValue(poi.name);
 
-        const descInput = new TextInputBuilder()
-          .setCustomId('description')
-          .setLabel('Description')
-          .setStyle(TextInputStyle.Paragraph)
-          .setRequired(true)
-          .setValue(poi.description || '');
 
         const hintInput = new TextInputBuilder()
           .setCustomId('hint')
@@ -180,7 +174,6 @@ module.exports = {
 
         modal.addComponents(
           new ActionRowBuilder().addComponents(nameInput),
-          new ActionRowBuilder().addComponents(descInput),
           new ActionRowBuilder().addComponents(hintInput),
           new ActionRowBuilder().addComponents(locationInput),
           new ActionRowBuilder().addComponents(imageInput),
@@ -232,7 +225,6 @@ module.exports = {
     if (!interaction.customId.startsWith('hunt_poi_edit_modal::')) return;
     const [, poiId] = interaction.customId.split('::');
     const name = interaction.fields.getTextInputValue('name');
-    const description = interaction.fields.getTextInputValue('description');
     const hint = interaction.fields.getTextInputValue('hint');
     const location = interaction.fields.getTextInputValue('location');
     const image = interaction.fields.getTextInputValue('image');
@@ -241,7 +233,6 @@ module.exports = {
     try {
       await HuntPoi.update({
         name,
-        description,
         hint: hint || null,
         location: location || null,
         image_url: image || null,

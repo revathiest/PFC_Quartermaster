@@ -7,6 +7,7 @@ When completing items on this list, it is important to update the items to keep 
 * Users must take selfies with specific Points of Interest (POIs)
 * Each scavenger hunt is a discrete event instance (but the system supports future re-use)
 * Hunt status is automatically managed by linked Discord Scheduled Events
+* All command responses are ephemeral except that when evidence is submitted, a non-ephemeral message is added in the hunt activity channel
 
 ---
 
@@ -77,7 +78,6 @@ When completing items on this list, it is important to update the items to keep 
 
 ### 🛡 Channel Restrictions
 
-* [ ] All `/hunt` commands fail outside the configured activity channel with a helpful error message
 * [x] `/hunt help` is always allowed in any channel
 * [ ] `/hunt set-channels` — brings up a UI with currently configured channels (or blank), and allows setting:
 

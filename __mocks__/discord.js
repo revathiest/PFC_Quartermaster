@@ -11,6 +11,7 @@ class MockInteraction {
     this.options = {
       getString: jest.fn().mockImplementation(key => options[key]),
       getSubcommand: jest.fn(() => options.subcommand || null),
+      getSubcommandGroup: jest.fn(() => options.subcommandGroup || null),
     };
     this.user = user;
     this.member = member;
@@ -253,6 +254,47 @@ const SlashCommandBuilder = jest.fn(() => {
       };
       fn(subBuilder);
       this.options.push(sub);
+      return this;
+    },
+    addSubcommandGroup(fn) {
+      const group = { type: 'subcommandgroup', name: undefined, description: undefined, options: [] };
+      const groupBuilder = {
+        setName(name) { group.name = name; return this; },
+        setDescription(desc) { group.description = desc; return this; },
+        addSubcommand(subFn) {
+          const sub = { type: 'subcommand', name: undefined, description: undefined, options: [] };
+          const subBuilder = {
+            setName(n) { sub.name = n; return this; },
+            setDescription(d) { sub.description = d; return this; },
+            addStringOption(strFn) {
+              const opt = { type: 'string', name: undefined, description: undefined, required: false };
+              strFn({
+                setName(nm) { opt.name = nm; return this; },
+                setDescription(ds) { opt.description = ds; return this; },
+                setRequired(r) { opt.required = r; return this; },
+                addChoices: jest.fn()
+              });
+              sub.options.push(opt);
+              return this;
+            },
+            addIntegerOption(intFn) {
+              const opt = { type: 'integer', name: undefined, description: undefined, required: false };
+              intFn({
+                setName(nm) { opt.name = nm; return this; },
+                setDescription(ds) { opt.description = ds; return this; },
+                setRequired(r) { opt.required = r; return this; },
+              });
+              sub.options.push(opt);
+              return this;
+            },
+          };
+          subFn(subBuilder);
+          group.options.push(sub);
+          return this;
+        }
+      };
+      fn(groupBuilder);
+      this.options.push(group);
       return this;
     },
     addRoleOption(fn) {

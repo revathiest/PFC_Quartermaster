@@ -196,42 +196,65 @@ async function handleSelectMenu(interaction, client) {
 }
 
 async function handleModalSubmit(interaction, client) {
-  if (interaction.customId === 'scheduleModal') {
-    const title = interaction.fields.getTextInputValue('title');
-    const description = interaction.fields.getTextInputValue('description');
-    const author = 'PFC Quartermaster';
-    const time = interaction.fields.getTextInputValue('time');
+  try {
+    if (interaction.customId === 'scheduleModal') {
+      const title = interaction.fields.getTextInputValue('title');
+      const description = interaction.fields.getTextInputValue('description');
+      const author = 'PFC Quartermaster';
+      const time = interaction.fields.getTextInputValue('time');
 
-    const parsedTime = chrono.parseDate(time);
-    if (!parsedTime || isNaN(parsedTime)) {
+      const parsedTime = chrono.parseDate(time);
+      if (!parsedTime || isNaN(parsedTime)) {
+        await interaction.reply({
+          content: '❌ Could not understand that time. Try something like "tomorrow at 5pm" or "in 15 minutes".',
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      const pad = (num) => num.toString().padStart(2, '0');
+      const formatDateToLocalSQL = (date) => {
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ` +
+          `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+      };
+
+      const formattedTime = formatDateToLocalSQL(parsedTime);
+
+      pendingChannelSelection[interaction.user.id] = {
+        title,
+        description,
+        author,
+        time: formattedTime,
+      };
+
+      const selectMenu = await createChannelSelectMenu(interaction.guild, 'schedule');
       await interaction.reply({
-        content: '❌ Could not understand that time. Try something like "tomorrow at 5pm" or "in 15 minutes".',
+        content: '📢 Please select a channel:',
+        components: [selectMenu],
         flags: MessageFlags.Ephemeral,
       });
       return;
     }
 
-    const pad = (num) => num.toString().padStart(2, '0');
-    const formatDateToLocalSQL = (date) => {
-      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ` +
-        `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-    };
+    const prefix = getPrefixFromCustomId(interaction.customId);
+    const command = [...client.commands.values()].find(cmd =>
+      typeof cmd.modal === 'function' && cmd.data?.name && interaction.customId.startsWith(cmd.data.name)
+    );
 
-    const formattedTime = formatDateToLocalSQL(parsedTime);
+    if (command) {
+      await command.modal(interaction, client);
+      return;
+    }
 
-    pendingChannelSelection[interaction.user.id] = {
-      title,
-      description,
-      author,
-      time: formattedTime,
-    };
-
-    const selectMenu = await createChannelSelectMenu(interaction.guild, 'schedule');
-    await interaction.reply({
-      content: '📢 Please select a channel:',
-      components: [selectMenu],
-      flags: MessageFlags.Ephemeral,
-    });
+    console.warn(`⚠️ No modal handler found for prefix "${prefix}".`);
+    if (!interaction.replied && !interaction.deferred) {
+      await interaction.reply({ content: '❌ Modal handler not found.', flags: MessageFlags.Ephemeral });
+    }
+  } catch (err) {
+    console.error('❌ [ERROR] handleModalSubmit() failed:', err);
+    if (!interaction.replied && !interaction.deferred) {
+      await interaction.reply({ content: '❌ Something went wrong.', flags: MessageFlags.Ephemeral });
+    }
   }
 }
 

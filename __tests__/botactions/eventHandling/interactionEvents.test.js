@@ -97,6 +97,27 @@ describe('handleInteraction', () => {
     expect(interaction.reply).toHaveBeenCalledWith({ content: '📢 Please select a channel:', components: ['menu'], flags: MessageFlags.Ephemeral });
   });
 
+  test('dispatches to command modal handler', async () => {
+    const modal = jest.fn();
+    const client = { commands: new Map([['foo', { data: { name: 'foo' }, modal }]]) };
+    const interaction = {
+      isCommand: () => false,
+      isButton: () => false,
+      isStringSelectMenu: () => false,
+      isModalSubmit: () => true,
+      customId: 'foo::step',
+      guild: { id: 'g1' },
+      replied: false,
+      deferred: false,
+      fields: { getTextInputValue: jest.fn() },
+      reply: jest.fn()
+    };
+
+    await handleInteraction(interaction, client);
+
+    expect(modal).toHaveBeenCalledWith(interaction, client);
+  });
+
   test('replies when command not found', async () => {
     const interaction = {
       isCommand: () => true,
@@ -328,7 +349,7 @@ describe('handleInteraction', () => {
     expect(interaction.editReply).toHaveBeenCalledWith({ content: '❌ There was an error while executing this command!' });
   });
 
-  test('modal submit with unknown id does nothing', async () => {
+  test('modal submit with unknown id replies with handler not found', async () => {
     const interaction = {
       isCommand: () => false,
       isButton: () => false,
@@ -341,8 +362,6 @@ describe('handleInteraction', () => {
       reply: jest.fn()
     };
     await handleInteraction(interaction, { commands: new Map() });
-    expect(createChannelSelectMenu).not.toHaveBeenCalled();
-    expect(pendingChannelSelection.u3).toBeUndefined();
-    expect(interaction.reply).not.toHaveBeenCalled();
+    expect(interaction.reply).toHaveBeenCalledWith({ content: '❌ Modal handler not found.', flags: MessageFlags.Ephemeral });
   });
 });

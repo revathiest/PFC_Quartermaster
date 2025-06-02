@@ -189,11 +189,20 @@ test('modal updates poi information', async () => {
     customId: 'hunt_poi_edit_step1::1',
     fields: { getTextInputValue: jest.fn(() => 'val') },
     user: { id: 'u' },
-    showModal: jest.fn(),
     reply: jest.fn()
   };
 
   await command.modal(step1);
+  expect(step1.reply).toHaveBeenCalled();
+
+  const continueBtn = {
+    customId: 'hunt_poi_edit_step2_btn::1',
+    showModal: jest.fn(),
+    reply: jest.fn()
+  };
+
+  await command.button(continueBtn);
+  expect(continueBtn.showModal).toHaveBeenCalled();
 
   const step2 = {
     customId: 'hunt_poi_edit_step2::1',
@@ -211,8 +220,13 @@ test('modal updates poi information', async () => {
 test('modal handles update failure', async () => {
   HuntPoi.findByPk = jest.fn().mockResolvedValue({ location: '', image_url: '', points: 1 });
   HuntPoi.update = jest.fn(() => Promise.reject(new Error('fail')));
-  const step1 = { customId: 'hunt_poi_edit_step1::1', fields: { getTextInputValue: jest.fn(() => 'val') }, user: { id: 'u' }, showModal: jest.fn(), reply: jest.fn() };
+
+  const step1 = { customId: 'hunt_poi_edit_step1::1', fields: { getTextInputValue: jest.fn(() => 'val') }, user: { id: 'u' }, reply: jest.fn() };
   await command.modal(step1);
+
+  const btn = { customId: 'hunt_poi_edit_step2_btn::1', showModal: jest.fn(), reply: jest.fn() };
+  await command.button(btn);
+
   const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   const step2 = { customId: 'hunt_poi_edit_step2::1', fields: { getTextInputValue: jest.fn(() => 'val') }, user: { id: 'u' }, reply: jest.fn() };
 

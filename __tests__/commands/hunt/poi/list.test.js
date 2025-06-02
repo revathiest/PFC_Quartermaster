@@ -1,5 +1,5 @@
 jest.mock('../../../../config/database', () => ({
-  HuntPoi: { findAll: jest.fn() }
+  HuntPoi: { findAll: jest.fn(), findByPk: jest.fn() }
 }));
 
 const { HuntPoi } = require('../../../../config/database');
@@ -34,8 +34,8 @@ test('replies when no pois exist', async () => {
 
 test('lists pois when present', async () => {
   HuntPoi.findAll.mockResolvedValue([
-    { name: 'A', points: 5, hint: 'h1' },
-    { name: 'B', points: 10, hint: 'h2' }
+    { name: 'A', points: 5, hint: 'h1', status: 'active' },
+    { name: 'B', points: 10, hint: 'h2', status: 'active' }
   ]);
   const interaction = makeInteraction();
 
@@ -64,7 +64,7 @@ test('handles fetch errors', async () => {
 });
 
 test('button paginates results', async () => {
-  const pois = Array.from({ length: 11 }, (_, i) => ({ name: `P${i}`, points: i, hint: 'h' }));
+  const pois = Array.from({ length: 11 }, (_, i) => ({ name: `P${i}`, points: i, hint: 'h', status: 'active' }));
   HuntPoi.findAll.mockResolvedValue(pois);
   const interaction = {
     customId: 'hunt_poi_page::1',
@@ -84,7 +84,7 @@ test('button paginates results', async () => {
 
 test('admin sees select menu', async () => {
   HuntPoi.findAll.mockResolvedValue([
-    { id: '1', name: 'Alpha', points: 5, hint: 'h1' }
+    { id: '1', name: 'Alpha', points: 5, hint: 'h1', status: 'active' }
   ]);
   const interaction = makeInteraction(['Admiral']);
 
@@ -96,7 +96,7 @@ test('admin sees select menu', async () => {
 
 test('select menu highlights poi', async () => {
   HuntPoi.findAll.mockResolvedValue([
-    { id: '1', name: 'Alpha', points: 5, hint: 'h1' }
+    { id: '1', name: 'Alpha', points: 5, hint: 'h1', status: 'active' }
   ]);
   const interaction = {
     customId: 'hunt_poi_select::0',
@@ -115,5 +115,30 @@ test('select menu highlights poi', async () => {
   const embed = interaction.editReply.mock.calls[0][0].embeds[0];
   expect(embed.data.fields[0].name).toContain('Alpha');
   expect(interaction.editReply.mock.calls[0][0].components.length).toBeGreaterThan(1);
+});
+
+test('archive button marks poi archived', async () => {
+  const update = jest.fn();
+  HuntPoi.findByPk.mockResolvedValue({ update });
+  HuntPoi.findAll.mockResolvedValue([
+    { id: '1', name: 'Alpha', points: 5, hint: 'h1', status: 'archived' }
+  ]);
+
+  const interaction = {
+    customId: 'hunt_poi_archive::1::0',
+    deferUpdate: jest.fn().mockImplementation(function () { this.deferred = true; return Promise.resolve(); }),
+    editReply: jest.fn(),
+    followUp: jest.fn(),
+    member: { roles: { cache: { map: fn => ['Admiral'].map(r => fn({ name: r })) } } },
+    user: { id: 'u1' },
+    deferred: false,
+    replied: false
+  };
+
+  await command.button(interaction);
+
+  expect(update).toHaveBeenCalledWith({ status: 'archived', updated_by: 'u1' });
+  const embed = interaction.editReply.mock.calls[0][0].embeds[0];
+  expect(embed.data.fields[0].name).toContain('~~');
 });
 

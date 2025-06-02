@@ -28,35 +28,44 @@ function buildEmbed(pois, page, totalPages, highlightId) {
     .setFooter({ text: `Page ${page + 1} of ${totalPages}` });
 
   for (const poi of pois) {
-    const name = `${poi.id === highlightId ? '➡️ ' : ''}${poi.name} (${poi.points} pts)`;
+    let name = poi.name;
+    if (poi.status === 'archived') name = `~~${name}~~`;
+    if (poi.id === highlightId) name = `➡️ ${name}`;
+    name += ` (${poi.points} pts)`;
     embed.addFields({ name, value: poi.hint });
   }
   return embed;
 }
 
 function buildSelectRow(pois, page) {
+  const options = pois
+    .filter(p => p.status === 'active')
+    .map(p => ({ label: p.name, value: p.id }));
+  if (!options.length) return null;
   const menu = new StringSelectMenuBuilder()
     .setCustomId(`hunt_poi_select::${page}`)
     .setPlaceholder('Select a POI')
-    .addOptions(pois.map(p => ({ label: p.name, value: p.id })));
+    .addOptions(options);
   return new ActionRowBuilder().addComponents(menu);
 }
 
-function buildActionRow(poiId, page) {
+function buildActionRow(poiId, page, disabled = false) {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId(`hunt_poi_edit::${poiId}::${page}`)
       .setLabel('✏️ Edit')
-      .setStyle(ButtonStyle.Primary),
+      .setStyle(ButtonStyle.Primary)
+      .setDisabled(disabled),
     new ButtonBuilder()
       .setCustomId(`hunt_poi_archive::${poiId}::${page}`)
       .setLabel('📦 Archive')
       .setStyle(ButtonStyle.Secondary)
+      .setDisabled(disabled)
   );
 }
 
 async function sendPage(interaction, page, highlightId, isAdmin) {
-  const pois = await HuntPoi.findAll({ where: { status: 'active' }, order: [['name', 'ASC']] });
+  const pois = await HuntPoi.findAll({ order: [['name', 'ASC']] });
   if (!pois.length) {
     const method = interaction.replied || interaction.deferred ? 'editReply' : 'reply';
     return interaction[method]({ content: '❌ No POIs found.', flags: MessageFlags.Ephemeral });
@@ -69,8 +78,14 @@ async function sendPage(interaction, page, highlightId, isAdmin) {
 
   const components = [];
   if (isAdmin) {
-    components.push(buildSelectRow(pagePois, pageNum));
-    if (highlightId) components.push(buildActionRow(highlightId, pageNum));
+    const selectRow = buildSelectRow(pagePois, pageNum);
+    if (selectRow) components.push(selectRow);
+
+    if (highlightId) {
+      const target = pagePois.find(p => p.id === highlightId);
+      const disabled = target?.status !== 'active';
+      components.push(buildActionRow(highlightId, pageNum, disabled));
+    }
   }
 
   if (chunks.length > 1) {
@@ -207,7 +222,7 @@ module.exports = {
         await poi.update({ status: 'archived', updated_by: interaction.user.id });
         const roles = interaction.member?.roles?.cache?.map(r => r.name) || [];
         const isAdmin = allowedRoles.some(r => roles.includes(r));
-        await sendPage(interaction, page, null, isAdmin);
+        await sendPage(interaction, page, poiId, isAdmin);
       } catch (err) {
         console.error('❌ Failed to archive POI:', err);
       }

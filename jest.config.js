@@ -31,5 +31,9 @@ module.exports = {
       "statements": 80
     }
   },
-  verbose: true
+
+  // === SILENT MODE ===
+  verbose: false,
+  silent: true,
+  reporters: ['default']
 };

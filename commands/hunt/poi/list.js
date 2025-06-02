@@ -172,50 +172,7 @@ module.exports = {
       return;
     }
 
-    if (interaction.customId.startsWith('hunt_poi_edit_step2_btn::')) {
-      const [, poiId] = interaction.customId.split('::');
-      try {
-        const poi = await HuntPoi.findByPk(poiId);
-        if (!poi) {
-          return interaction.reply({ content: '❌ POI not found.', flags: MessageFlags.Ephemeral });
-        }
-        const modal = new ModalBuilder()
-          .setCustomId(`hunt_poi_edit_step2::${poiId}`)
-          .setTitle('Edit POI (2/2)');
 
-        const locationInput = new TextInputBuilder()
-          .setCustomId('location')
-          .setLabel('Location')
-          .setStyle(TextInputStyle.Short)
-          .setRequired(false)
-          .setValue(poi.location || '');
-
-        const imageInput = new TextInputBuilder()
-          .setCustomId('image')
-          .setLabel('Image URL')
-          .setStyle(TextInputStyle.Short)
-          .setRequired(false)
-          .setValue(poi.image_url || '');
-
-        const pointsInput = new TextInputBuilder()
-          .setCustomId('points')
-          .setLabel('Points')
-          .setStyle(TextInputStyle.Short)
-          .setRequired(true)
-          .setValue(String(poi.points));
-
-        modal.addComponents(
-          new ActionRowBuilder().addComponents(locationInput),
-          new ActionRowBuilder().addComponents(imageInput),
-          new ActionRowBuilder().addComponents(pointsInput)
-        );
-
-        return interaction.showModal(modal);
-      } catch (err) {
-        console.error('❌ Failed to build followup modal:', err);
-        return interaction.reply({ content: '❌ Failed to build followup modal.', flags: MessageFlags.Ephemeral });
-      }
-    }
 
     if (interaction.customId.startsWith('hunt_poi_archive::')) {
       const [, poiId, pageStr] = interaction.customId.split('::');
@@ -268,18 +225,38 @@ module.exports = {
         const timeout = setTimeout(() => pendingEdits.delete(key), EDIT_TIMEOUT);
         pendingEdits.set(key, { name, description, hint, timeout });
 
-        const button = new ButtonBuilder()
-          .setCustomId(`hunt_poi_edit_step2_btn::${poiId}`)
-          .setLabel('Continue to Step 2')
-          .setStyle(ButtonStyle.Primary);
+        const modal = new ModalBuilder()
+          .setCustomId(`hunt_poi_edit_step2::${poiId}`)
+          .setTitle('Edit POI (2/2)');
 
-        const row = new ActionRowBuilder().addComponents(button);
+        const locationInput = new TextInputBuilder()
+          .setCustomId('location')
+          .setLabel('Location')
+          .setStyle(TextInputStyle.Short)
+          .setRequired(false)
+          .setValue(poi.location || '');
 
-        return interaction.reply({
-          content: 'Step 1 saved. Click below to continue editing.',
-          components: [row],
-          flags: MessageFlags.Ephemeral
-        });
+        const imageInput = new TextInputBuilder()
+          .setCustomId('image')
+          .setLabel('Image URL')
+          .setStyle(TextInputStyle.Short)
+          .setRequired(false)
+          .setValue(poi.image_url || '');
+
+        const pointsInput = new TextInputBuilder()
+          .setCustomId('points')
+          .setLabel('Points')
+          .setStyle(TextInputStyle.Short)
+          .setRequired(true)
+          .setValue(String(poi.points));
+
+        modal.addComponents(
+          new ActionRowBuilder().addComponents(locationInput),
+          new ActionRowBuilder().addComponents(imageInput),
+          new ActionRowBuilder().addComponents(pointsInput)
+        );
+
+        return interaction.showModal(modal);
       } catch (err) {
         console.error('❌ Failed to build followup modal:', err);
         return interaction.reply({ content: '❌ Failed to build followup modal.', flags: MessageFlags.Ephemeral });

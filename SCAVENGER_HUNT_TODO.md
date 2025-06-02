@@ -14,7 +14,7 @@
 ### 📌 Event ("Hunt") Management
 
 * [ ] `/hunt schedule` — creates both a new scavenger hunt and a linked Discord Scheduled Event (name, description, start, end, channel)
-* [ ] `/hunt list` — list all hunts by status
+* [x] `/hunt list` — list all hunts by status
 * [ ] Hunt `status` auto-syncs based on linked Discord Event lifecycle:
 
   * scheduled → upcoming
@@ -77,7 +77,7 @@
 ### 🛡 Channel Restrictions
 
 * [ ] All `/hunt` commands fail outside the configured activity channel with a helpful error message
-* [ ] `/hunt help` is always allowed in any channel
+* [x] `/hunt help` is always allowed in any channel
 * [ ] `/hunt set-channels` — brings up a UI with currently configured channels (or blank), and allows setting:
 
   * Activity channel (where commands can be run)
@@ -87,6 +87,8 @@
 ---
 
 ## 📦 Data Models (Sequelize-style)
+
+* ✅ Sequelize models implemented for Hunt, HuntPoi and HuntSubmission
 
 ### Hunt
 

@@ -135,7 +135,7 @@ include them.
 * Use dependency injection for testability.
 * Ensure clear separation between Discord I/O, DB logic, and pure utilities.
 * Ensure that all tests have proper teardown.  use --detectOpenHandles to find leaks.  Ensure that .unref() is called on any active timers.
-
+* Whenever working with interactions, modals, buttons, etc. ensure that appropriate handlers exist and are tested
 ---
 
 This document defines canonical guidelines for all contributors and AI agents participating in the development of this project. No shortcuts. No exceptions.

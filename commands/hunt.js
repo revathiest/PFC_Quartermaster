@@ -81,4 +81,32 @@ module.exports = {
       await interaction.reply({ content: '❌ Button handler not found.', flags: MessageFlags.Ephemeral });
     }
   }
+
+  ,
+  async option(interaction, client) {
+    const prefix = interaction.customId.split('::')[0];
+
+    if (!prefix.startsWith('hunt_')) return;
+
+    if (prefix.startsWith('hunt_poi_')) {
+      try {
+        const list = require('./hunt/poi/list');
+        if (typeof list.option === 'function') {
+          await list.option(interaction, client);
+          return;
+        }
+      } catch (err) {
+        console.error(`❌ Failed to handle option for ${prefix}:`, err);
+        if (!interaction.replied && !interaction.deferred) {
+          await interaction.reply({ content: '❌ Something went wrong.', flags: MessageFlags.Ephemeral });
+        }
+        return;
+      }
+    }
+
+    console.warn(`⚠️ [HUNT] No select menu handler found for prefix "${prefix}".`);
+    if (!interaction.replied && !interaction.deferred) {
+      await interaction.reply({ content: '❌ Select menu handler not found.', flags: MessageFlags.Ephemeral });
+    }
+  }
 };

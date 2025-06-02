@@ -133,7 +133,9 @@ module.exports = {
         flags: MessageFlags.Ephemeral
       });
     }
-    
+
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
     const location = interaction.options.getString('location');
     const locationFilter = { [Op.like]: `%${location}%` };
 
@@ -169,6 +171,7 @@ module.exports = {
 
   async option(interaction) {
     if (interaction.customId === 'uexinventory_terminal') {
+      await interaction.deferUpdate();
       const [prefix, terminalId, selectedType] = interaction.values[0].split('::');
 
       const terminal = await db.UexTerminal.findByPk(terminalId);
@@ -184,6 +187,8 @@ module.exports = {
       const { embed, components } = await buildInventoryEmbed(interaction, terminal, selectedType);
       return interaction.update({ embeds: [embed], components });
     }
+
+    await interaction.deferUpdate();
 
     const [, location] = interaction.customId.split('::');
     const selectedType = interaction.values[0];
@@ -233,6 +238,8 @@ module.exports = {
   },
 
   async button(interaction) {
+    await interaction.deferUpdate();
+
     const [action, terminalId, type, pageStr, isPublicRaw] = interaction.customId.split('::');
     const page = parseInt(pageStr, 10);
     const isPublic = isPublicRaw === 'true' || action === 'uexinventory_public';

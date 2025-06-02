@@ -9,6 +9,10 @@ const { MessageFlags } = require('../../../../__mocks__/discord.js');
 const makeInteraction = (roles = []) => ({
   reply: jest.fn(),
   editReply: jest.fn(),
+  deferReply: jest.fn().mockImplementation(function () {
+    this.deferred = true;
+    return Promise.resolve();
+  }),
   member: {
     roles: {
       cache: {
@@ -26,7 +30,8 @@ test('replies when no pois exist', async () => {
 
   await command.execute(interaction);
 
-  expect(interaction.reply).toHaveBeenCalledWith({
+  expect(interaction.deferReply).toHaveBeenCalled();
+  expect(interaction.editReply).toHaveBeenCalledWith({
     content: '❌ No POIs found.',
     flags: MessageFlags.Ephemeral
   });
@@ -41,7 +46,8 @@ test('lists pois when present', async () => {
 
   await command.execute(interaction);
 
-  const reply = interaction.reply.mock.calls[0][0];
+  expect(interaction.deferReply).toHaveBeenCalled();
+  const reply = interaction.editReply.mock.calls[0][0];
   expect(reply.embeds[0].data.title).toContain('Points of Interest');
   expect(reply.embeds[0].data.footer.text).toContain('Page 1 of 1');
   expect(reply.flags).toBe(MessageFlags.Ephemeral);
@@ -56,6 +62,7 @@ test('handles fetch errors', async () => {
   await command.execute(interaction);
 
   expect(spy).toHaveBeenCalled();
+  expect(interaction.deferReply).toHaveBeenCalled();
   expect(interaction.reply).toHaveBeenCalledWith({
     content: '❌ Error fetching POIs.',
     flags: MessageFlags.Ephemeral
@@ -90,7 +97,8 @@ test('admin sees select menu', async () => {
 
   await command.execute(interaction);
 
-  const reply = interaction.reply.mock.calls[0][0];
+  expect(interaction.deferReply).toHaveBeenCalled();
+  const reply = interaction.editReply.mock.calls[0][0];
   expect(reply.components.length).toBeGreaterThan(0);
 });
 

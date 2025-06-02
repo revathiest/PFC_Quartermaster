@@ -6,7 +6,17 @@ const { HuntPoi } = require('../../../../config/database');
 const command = require('../../../../commands/hunt/poi/list');
 const { MessageFlags } = require('../../../../__mocks__/discord.js');
 
-const makeInteraction = () => ({ reply: jest.fn(), editReply: jest.fn() });
+const makeInteraction = (roles = []) => ({
+  reply: jest.fn(),
+  editReply: jest.fn(),
+  member: {
+    roles: {
+      cache: {
+        map: (fn) => roles.map(r => fn({ name: r }))
+      }
+    }
+  }
+});
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -70,5 +80,40 @@ test('button paginates results', async () => {
   expect(interaction.deferUpdate).toHaveBeenCalled();
   const embed = interaction.editReply.mock.calls[0][0].embeds[0];
   expect(embed.data.footer.text).toContain('Page 2 of');
+});
+
+test('admin sees select menu', async () => {
+  HuntPoi.findAll.mockResolvedValue([
+    { id: '1', name: 'Alpha', points: 5, hint: 'h1' }
+  ]);
+  const interaction = makeInteraction(['Admiral']);
+
+  await command.execute(interaction);
+
+  const reply = interaction.reply.mock.calls[0][0];
+  expect(reply.components.length).toBeGreaterThan(0);
+});
+
+test('select menu highlights poi', async () => {
+  HuntPoi.findAll.mockResolvedValue([
+    { id: '1', name: 'Alpha', points: 5, hint: 'h1' }
+  ]);
+  const interaction = {
+    customId: 'hunt_poi_select::0',
+    values: ['1'],
+    deferUpdate: jest.fn().mockImplementation(function () { this.deferred = true; return Promise.resolve(); }),
+    editReply: jest.fn(),
+    member: { roles: { cache: { map: fn => ['Admiral'].map(r => fn({ name: r })) } } },
+    reply: jest.fn(),
+    deferred: false,
+    replied: false
+  };
+
+  await command.option(interaction);
+
+  expect(interaction.deferUpdate).toHaveBeenCalled();
+  const embed = interaction.editReply.mock.calls[0][0].embeds[0];
+  expect(embed.data.fields[0].name).toContain('Alpha');
+  expect(interaction.editReply.mock.calls[0][0].components.length).toBeGreaterThan(1);
 });
 

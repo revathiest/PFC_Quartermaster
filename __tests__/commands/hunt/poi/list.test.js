@@ -147,7 +147,7 @@ test('edit button shows modal when poi exists', async () => {
 
   expect(interaction.showModal).toHaveBeenCalled();
   const modal = interaction.showModal.mock.calls[0][0];
-  expect(modal.addComponents.mock.calls[0].length).toBe(6);
+  expect(modal.addComponents.mock.calls[0].length).toBe(3);
   expect(interaction.deferUpdate).not.toHaveBeenCalled();
 });
 
@@ -183,28 +183,42 @@ test('pagination error is logged', async () => {
 });
 
 test('modal updates poi information', async () => {
+  HuntPoi.findByPk = jest.fn().mockResolvedValue({ location: '', image_url: '', points: 1 });
   HuntPoi.update = jest.fn(() => Promise.resolve());
-  const interaction = {
-    customId: 'hunt_poi_edit_modal::1::0',
+  const step1 = {
+    customId: 'hunt_poi_edit_step1::1',
+    fields: { getTextInputValue: jest.fn(() => 'val') },
+    user: { id: 'u' },
+    showModal: jest.fn(),
+    reply: jest.fn()
+  };
+
+  await command.modal(step1);
+
+  const step2 = {
+    customId: 'hunt_poi_edit_step2::1',
     fields: { getTextInputValue: jest.fn(() => 'val') },
     user: { id: 'u' },
     reply: jest.fn()
   };
 
-  await command.modal(interaction);
+  await command.modal(step2);
 
-  expect(HuntPoi.update).toHaveBeenCalledWith(expect.objectContaining({ description: 'val' }), expect.any(Object));
-  expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ content: '✅ POI updated.' }));
+  expect(HuntPoi.update).toHaveBeenCalledWith(expect.objectContaining({ name: 'val' }), expect.any(Object));
+  expect(step2.reply).toHaveBeenCalledWith(expect.objectContaining({ content: '✅ POI updated.' }));
 });
 
 test('modal handles update failure', async () => {
+  HuntPoi.findByPk = jest.fn().mockResolvedValue({ location: '', image_url: '', points: 1 });
   HuntPoi.update = jest.fn(() => Promise.reject(new Error('fail')));
+  const step1 = { customId: 'hunt_poi_edit_step1::1', fields: { getTextInputValue: jest.fn(() => 'val') }, user: { id: 'u' }, showModal: jest.fn(), reply: jest.fn() };
+  await command.modal(step1);
   const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-  const interaction = { customId: 'hunt_poi_edit_modal::1::0', fields: { getTextInputValue: jest.fn(() => 'val') }, user: { id: 'u' }, reply: jest.fn() };
+  const step2 = { customId: 'hunt_poi_edit_step2::1', fields: { getTextInputValue: jest.fn(() => 'val') }, user: { id: 'u' }, reply: jest.fn() };
 
-  await command.modal(interaction);
+  await command.modal(step2);
 
   expect(errSpy).toHaveBeenCalled();
-  expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ content: '❌ Failed to update POI.' }));
+  expect(step2.reply).toHaveBeenCalledWith(expect.objectContaining({ content: '❌ Failed to update POI.' }));
 });
 

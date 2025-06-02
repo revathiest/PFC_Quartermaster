@@ -37,9 +37,9 @@ All remaining checklist items are still pending.
 * [x] `/hunt poi create` — create a reusable POI (name, hint, location, image, points)
 * [x] `/hunt poi list` — displays a paginated embed of POIs with a select menu for current page items
 
-  * [ ] Selecting an item highlights the POI and displays buttons to either ✏️ Edit or 📦 Archive
-  * [ ] Edit opens a modal with prefilled data (name, description, hint, location, image url, points)
-  * [ ] Archive immediately archives the selected POI
+  * [x] Selecting an item highlights the POI and displays buttons to either ✏️ Edit or 📦 Archive
+  * [x] Edit opens a modal with prefilled data (name, description, hint, location, image url, points)
+  * [x] Archive immediately archives the selected POI
   * [x] Pagination updates both the embed and the select menu
   * [ ] Admin view restricts these controls to `Admiral` and `Fleet Admiral` roles
 * [ ] POIs exist globally and are not tied to a specific hunt

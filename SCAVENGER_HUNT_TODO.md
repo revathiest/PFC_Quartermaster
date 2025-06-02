@@ -34,8 +34,8 @@ All remaining checklist items are still pending.
 
 ### 🗺 POI Management (shared across all hunts)
 
-* [ ] `/hunt poi create` — create a reusable POI (name, hint, location, image, points)
-* [ ] `/hunt poi list` — displays a paginated embed of POIs with a select menu for current page items
+* [x] `/hunt poi create` — create a reusable POI (name, hint, location, image, points)
+* [x] `/hunt poi list` — displays a paginated embed of POIs with a select menu for current page items
 
   * Selecting an item highlights the POI and displays buttons to either ✏️ Edit or 📦 Archive
   * Edit opens a modal with prefilled data

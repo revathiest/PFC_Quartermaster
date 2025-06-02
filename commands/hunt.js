@@ -80,9 +80,8 @@ module.exports = {
     if (!interaction.replied && !interaction.deferred) {
       await interaction.reply({ content: '❌ Button handler not found.', flags: MessageFlags.Ephemeral });
     }
-  }
+  },
 
-  ,
   async option(interaction, client) {
     const prefix = interaction.customId.split('::')[0];
 
@@ -107,6 +106,33 @@ module.exports = {
     console.warn(`⚠️ [HUNT] No select menu handler found for prefix "${prefix}".`);
     if (!interaction.replied && !interaction.deferred) {
       await interaction.reply({ content: '❌ Select menu handler not found.', flags: MessageFlags.Ephemeral });
+    }
+  },
+
+  async modal(interaction, client) {
+    const prefix = interaction.customId.split('::')[0];
+
+    if (!prefix.startsWith('hunt_')) return;
+
+    if (prefix.startsWith('hunt_poi_')) {
+      try {
+        const list = require('./hunt/poi/list');
+        if (typeof list.modal === 'function') {
+          await list.modal(interaction, client);
+          return;
+        }
+      } catch (err) {
+        console.error(`❌ Failed to handle modal for ${prefix}:`, err);
+        if (!interaction.replied && !interaction.deferred) {
+          await interaction.reply({ content: '❌ Something went wrong.', flags: MessageFlags.Ephemeral });
+        }
+        return;
+      }
+    }
+
+    console.warn(`⚠️ [HUNT] No modal handler found for prefix "${prefix}".`);
+    if (!interaction.replied && !interaction.deferred) {
+      await interaction.reply({ content: '❌ Modal handler not found.', flags: MessageFlags.Ephemeral });
     }
   }
 };

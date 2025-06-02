@@ -147,7 +147,7 @@ test('edit button shows modal when poi exists', async () => {
 
   expect(interaction.showModal).toHaveBeenCalled();
   const modal = interaction.showModal.mock.calls[0][0];
-  expect(modal.addComponents.mock.calls[0].length).toBeLessThanOrEqual(5);
+  expect(modal.addComponents.mock.calls[0].length).toBe(6);
   expect(interaction.deferUpdate).not.toHaveBeenCalled();
 });
 
@@ -193,7 +193,7 @@ test('modal updates poi information', async () => {
 
   await command.modal(interaction);
 
-  expect(HuntPoi.update).toHaveBeenCalled();
+  expect(HuntPoi.update).toHaveBeenCalledWith(expect.objectContaining({ description: 'val' }), expect.any(Object));
   expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ content: '✅ POI updated.' }));
 });
 

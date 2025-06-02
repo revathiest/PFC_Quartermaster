@@ -42,6 +42,9 @@ const VerifiedUser = require('../models/verifiedUser')(sequelize);
 const AmbientMessage = require('../models/ambiEntMessage')(sequelize);
 const AmbientChannel = require('../models/ambientChannel')(sequelize);
 const AmbientSetting = require('../models/ambientSetting')(sequelize);
+const Hunt = require('../models/hunt')(sequelize);
+const HuntPoi = require('../models/huntPoi')(sequelize);
+const HuntSubmission = require('../models/huntSubmission')(sequelize);
 
 Object.values(sequelize.models).forEach(model => {
     if (typeof model.associate === 'function') {
@@ -100,5 +103,8 @@ module.exports = {
     VerifiedUser,
     AmbientMessage,
     AmbientChannel,
-    AmbientSetting
+    AmbientSetting,
+    Hunt,
+    HuntPoi,
+    HuntSubmission
 };

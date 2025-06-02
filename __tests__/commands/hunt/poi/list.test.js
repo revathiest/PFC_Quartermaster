@@ -155,6 +155,7 @@ test('edit button shows modal when poi exists', async () => {
 
   expect(interaction.showModal).toHaveBeenCalled();
   const modal = interaction.showModal.mock.calls[0][0];
+  expect(modal.setTitle).toHaveBeenCalledWith(expect.stringContaining('X'));
   expect(modal.addComponents.mock.calls[0].length).toBe(5);
   expect(interaction.deferUpdate).not.toHaveBeenCalled();
 });

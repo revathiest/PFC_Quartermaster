@@ -3,10 +3,16 @@ const {
   EmbedBuilder,
   ActionRowBuilder,
   ButtonBuilder,
+  StringSelectMenuBuilder,
+  ModalBuilder,
+  TextInputBuilder,
+  TextInputStyle,
   ButtonStyle,
   MessageFlags
 } = require('discord.js');
 const { HuntPoi } = require('../../../config/database');
+
+const allowedRoles = ['Admiral', 'Fleet Admiral'];
 
 const PAGE_SIZE = 10;
 
@@ -16,18 +22,40 @@ function chunkArray(arr, size) {
   return pages;
 }
 
-function buildEmbed(pois, page, totalPages) {
+function buildEmbed(pois, page, totalPages, highlightId) {
   const embed = new EmbedBuilder()
     .setTitle('Points of Interest')
     .setFooter({ text: `Page ${page + 1} of ${totalPages}` });
 
   for (const poi of pois) {
-    embed.addFields({ name: `${poi.name} (${poi.points} pts)`, value: poi.hint });
+    const name = `${poi.id === highlightId ? '➡️ ' : ''}${poi.name} (${poi.points} pts)`;
+    embed.addFields({ name, value: poi.hint });
   }
   return embed;
 }
 
-async function sendPage(interaction, page) {
+function buildSelectRow(pois, page) {
+  const menu = new StringSelectMenuBuilder()
+    .setCustomId(`hunt_poi_select::${page}`)
+    .setPlaceholder('Select a POI')
+    .addOptions(pois.map(p => ({ label: p.name, value: p.id })));
+  return new ActionRowBuilder().addComponents(menu);
+}
+
+function buildActionRow(poiId, page) {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`hunt_poi_edit::${poiId}::${page}`)
+      .setLabel('✏️ Edit')
+      .setStyle(ButtonStyle.Primary),
+    new ButtonBuilder()
+      .setCustomId(`hunt_poi_archive::${poiId}::${page}`)
+      .setLabel('📦 Archive')
+      .setStyle(ButtonStyle.Secondary)
+  );
+}
+
+async function sendPage(interaction, page, highlightId, isAdmin) {
   const pois = await HuntPoi.findAll({ where: { status: 'active' }, order: [['name', 'ASC']] });
   if (!pois.length) {
     const method = interaction.replied || interaction.deferred ? 'editReply' : 'reply';
@@ -36,9 +64,15 @@ async function sendPage(interaction, page) {
 
   const chunks = chunkArray(pois, PAGE_SIZE);
   const pageNum = Math.min(Math.max(page, 0), chunks.length - 1);
-  const embed = buildEmbed(chunks[pageNum] || [], pageNum, chunks.length);
+  const pagePois = chunks[pageNum] || [];
+  const embed = buildEmbed(pagePois, pageNum, chunks.length, highlightId);
 
   const components = [];
+  if (isAdmin) {
+    components.push(buildSelectRow(pagePois, pageNum));
+    if (highlightId) components.push(buildActionRow(highlightId, pageNum));
+  }
+
   if (chunks.length > 1) {
     components.push(new ActionRowBuilder().addComponents(
       new ButtonBuilder()
@@ -64,8 +98,10 @@ module.exports = {
     .setDescription('List available POIs'),
 
   async execute(interaction) {
+    const roles = interaction.member?.roles?.cache?.map(r => r.name) || [];
+    const isAdmin = allowedRoles.some(r => roles.includes(r));
     try {
-      await sendPage(interaction, 0);
+      await sendPage(interaction, 0, null, isAdmin);
     } catch (err) {
       console.error('❌ Failed to list POIs:', err);
       const method = interaction.replied ? 'editReply' : 'reply';
@@ -74,14 +110,149 @@ module.exports = {
   },
 
   async button(interaction) {
-    if (!interaction.customId.startsWith('hunt_poi_page::')) return;
+    if (interaction.customId.startsWith('hunt_poi_page::')) {
+      const [, pageStr] = interaction.customId.split('::');
+      const page = parseInt(pageStr, 10) || 0;
+      await interaction.deferUpdate();
+      const roles = interaction.member?.roles?.cache?.map(r => r.name) || [];
+      const isAdmin = allowedRoles.some(r => roles.includes(r));
+      try {
+        await sendPage(interaction, page, null, isAdmin);
+      } catch (err) {
+        console.error('❌ Failed to paginate POIs:', err);
+      }
+      return;
+    }
+
+    if (interaction.customId.startsWith('hunt_poi_edit::')) {
+      const [, poiId, pageStr] = interaction.customId.split('::');
+      const page = parseInt(pageStr, 10) || 0;
+      await interaction.deferUpdate();
+      try {
+        const poi = await HuntPoi.findByPk(poiId);
+        if (!poi) {
+          return interaction.followUp({ content: '❌ POI not found.', flags: MessageFlags.Ephemeral });
+        }
+        const modal = new ModalBuilder()
+          .setCustomId(`hunt_poi_edit_modal::${poiId}::${page}`)
+          .setTitle('Edit POI');
+
+        const nameInput = new TextInputBuilder()
+          .setCustomId('name')
+          .setLabel('Name')
+          .setStyle(TextInputStyle.Short)
+          .setRequired(true)
+          .setValue(poi.name);
+
+        const descInput = new TextInputBuilder()
+          .setCustomId('description')
+          .setLabel('Description')
+          .setStyle(TextInputStyle.Paragraph)
+          .setRequired(true)
+          .setValue(poi.description || '');
+
+        const hintInput = new TextInputBuilder()
+          .setCustomId('hint')
+          .setLabel('Hint')
+          .setStyle(TextInputStyle.Short)
+          .setRequired(false)
+          .setValue(poi.hint || '');
+
+        const locationInput = new TextInputBuilder()
+          .setCustomId('location')
+          .setLabel('Location')
+          .setStyle(TextInputStyle.Short)
+          .setRequired(false)
+          .setValue(poi.location || '');
+
+        const imageInput = new TextInputBuilder()
+          .setCustomId('image')
+          .setLabel('Image URL')
+          .setStyle(TextInputStyle.Short)
+          .setRequired(false)
+          .setValue(poi.image_url || '');
+
+        const pointsInput = new TextInputBuilder()
+          .setCustomId('points')
+          .setLabel('Points')
+          .setStyle(TextInputStyle.Short)
+          .setRequired(true)
+          .setValue(String(poi.points));
+
+        modal.addComponents(
+          new ActionRowBuilder().addComponents(nameInput),
+          new ActionRowBuilder().addComponents(descInput),
+          new ActionRowBuilder().addComponents(hintInput),
+          new ActionRowBuilder().addComponents(locationInput),
+          new ActionRowBuilder().addComponents(imageInput),
+          new ActionRowBuilder().addComponents(pointsInput)
+        );
+
+        return interaction.showModal(modal);
+      } catch (err) {
+        console.error('❌ Failed to build edit modal:', err);
+      }
+      return;
+    }
+
+    if (interaction.customId.startsWith('hunt_poi_archive::')) {
+      const [, poiId, pageStr] = interaction.customId.split('::');
+      const page = parseInt(pageStr, 10) || 0;
+      await interaction.deferUpdate();
+      try {
+        const poi = await HuntPoi.findByPk(poiId);
+        if (!poi) {
+          return interaction.followUp({ content: '❌ POI not found.', flags: MessageFlags.Ephemeral });
+        }
+        await poi.update({ status: 'archived', updated_by: interaction.user.id });
+        const roles = interaction.member?.roles?.cache?.map(r => r.name) || [];
+        const isAdmin = allowedRoles.some(r => roles.includes(r));
+        await sendPage(interaction, page, null, isAdmin);
+      } catch (err) {
+        console.error('❌ Failed to archive POI:', err);
+      }
+    }
+  }
+,
+  async option(interaction) {
+    if (!interaction.customId.startsWith('hunt_poi_select::')) return;
     const [, pageStr] = interaction.customId.split('::');
     const page = parseInt(pageStr, 10) || 0;
+    const poiId = interaction.values[0];
     await interaction.deferUpdate();
+    const roles = interaction.member?.roles?.cache?.map(r => r.name) || [];
+    const isAdmin = allowedRoles.some(r => roles.includes(r));
     try {
-      await sendPage(interaction, page);
+      await sendPage(interaction, page, poiId, isAdmin);
     } catch (err) {
-      console.error('❌ Failed to paginate POIs:', err);
+      console.error('❌ Failed to select POI:', err);
+    }
+  },
+
+  async modal(interaction) {
+    if (!interaction.customId.startsWith('hunt_poi_edit_modal::')) return;
+    const [, poiId] = interaction.customId.split('::');
+    const name = interaction.fields.getTextInputValue('name');
+    const description = interaction.fields.getTextInputValue('description');
+    const hint = interaction.fields.getTextInputValue('hint');
+    const location = interaction.fields.getTextInputValue('location');
+    const image = interaction.fields.getTextInputValue('image');
+    const points = parseInt(interaction.fields.getTextInputValue('points'), 10);
+
+    try {
+      await HuntPoi.update({
+        name,
+        description,
+        hint: hint || null,
+        location: location || null,
+        image_url: image || null,
+        points,
+        updated_by: interaction.user.id
+      }, { where: { id: poiId } });
+      await interaction.reply({ content: '✅ POI updated.', flags: MessageFlags.Ephemeral });
+    } catch (err) {
+      console.error('❌ Failed to update POI:', err);
+      await interaction.reply({ content: '❌ Failed to update POI.', flags: MessageFlags.Ephemeral });
     }
   }
 };

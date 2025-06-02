@@ -27,10 +27,10 @@ All remaining checklist items are still pending.
 * [x] `/hunt schedule` — creates both a new scavenger hunt and a linked Discord Scheduled Event (name, description, start, end, channel)
 * [x] `/hunt list` — list all hunts by status
 * [ ] Hunt `status` auto-syncs based on linked Discord Event lifecycle:
-
   * scheduled → upcoming
   * active → active
   * completed → archived
+* [ ] Hunt record should be updated in the database if/when the event is updated in discord
 
 ### 🗺 POI Management (shared across all hunts)
 

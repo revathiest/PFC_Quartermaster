@@ -23,9 +23,13 @@ jest.mock('../../../commands/hunt/poi.js', () => {
   };
 }, { virtual: true });
 
+jest.mock('../../../commands/hunt/poi/list.js', () => ({ button: jest.fn() }), { virtual: true });
+
 fs.readdirSync.mockReturnValue(['help.js', 'poi.js']);
 
 const command = require('../../../commands/hunt');
+
+afterEach(() => jest.clearAllMocks());
 
 test('registers subcommand group', () => {
   const types = command.data.options.map(o => o.type);
@@ -37,4 +41,18 @@ test('routes to group execute', async () => {
   await command.execute(interaction, {});
   const poiModule = require('../../../commands/hunt/poi.js');
   expect(poiModule.execute).toHaveBeenCalled();
+});
+
+test('button routes to poi list handler', async () => {
+  const interaction = { customId: 'hunt_poi_page::1', replied: false, deferred: false };
+  const list = require('../../../commands/hunt/poi/list.js');
+  await command.button(interaction, {});
+  expect(list.button).toHaveBeenCalledWith(interaction, {});
+});
+
+test('button ignores unrelated ids', async () => {
+  const interaction = { customId: 'other', replied: false, deferred: false };
+  const list = require('../../../commands/hunt/poi/list.js');
+  await command.button(interaction, {});
+  expect(list.button).not.toHaveBeenCalled();
 });

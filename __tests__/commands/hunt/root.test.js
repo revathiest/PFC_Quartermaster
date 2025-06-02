@@ -23,7 +23,7 @@ jest.mock('../../../commands/hunt/poi.js', () => {
   };
 }, { virtual: true });
 
-jest.mock('../../../commands/hunt/poi/list.js', () => ({ button: jest.fn(), option: jest.fn() }), { virtual: true });
+jest.mock('../../../commands/hunt/poi/list.js', () => ({ button: jest.fn(), option: jest.fn(), modal: jest.fn() }), { virtual: true });
 jest.mock('../../../commands/hunt/nofunc', () => ({}), { virtual: true });
 jest.mock('../../../commands/hunt/fail', () => ({ execute: jest.fn(() => { throw new Error('boom'); }) }), { virtual: true });
 jest.mock('../../../commands/hunt/badgroup', () => ({ group: true }), { virtual: true });
@@ -58,6 +58,13 @@ test('option routes to poi list handler', async () => {
   const list = require('../../../commands/hunt/poi/list.js');
   await command.option(interaction, {});
   expect(list.option).toHaveBeenCalledWith(interaction, {});
+});
+
+test('modal routes to poi list handler', async () => {
+  const interaction = { customId: 'hunt_poi_edit_step1::1', replied: false, deferred: false };
+  const list = require('../../../commands/hunt/poi/list.js');
+  await command.modal(interaction, {});
+  expect(list.modal).toHaveBeenCalledWith(interaction, {});
 });
 
 test('option ignores unrelated ids', async () => {
@@ -139,6 +146,15 @@ test('option warns on unknown prefix', async () => {
   await command.option(interaction, {});
   expect(warnSpy).toHaveBeenCalled();
   expect(interaction.reply).toHaveBeenCalledWith({ content: '❌ Select menu handler not found.', flags: MessageFlags.Ephemeral });
+  warnSpy.mockRestore();
+});
+
+test('modal warns on unknown prefix', async () => {
+  const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  const interaction = { customId: 'hunt_unknown::1', replied: false, deferred: false, reply: jest.fn() };
+  await command.modal(interaction, {});
+  expect(warnSpy).toHaveBeenCalled();
+  expect(interaction.reply).toHaveBeenCalledWith({ content: '❌ Modal handler not found.', flags: MessageFlags.Ephemeral });
   warnSpy.mockRestore();
 });
 

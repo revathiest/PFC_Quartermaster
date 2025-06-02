@@ -166,21 +166,16 @@ async function handleSelectMenu(interaction, client) {
   try {
     const id = interaction.customId;
 
-    console.log(`[HANDLE_SELECT_MENU] Triggered for customId: ${id}`);
-
     const commandsArray = [...client.commands.values()];
-    console.log(`[HANDLE_SELECT_MENU] Checking ${commandsArray.length} commands for a match...`);
-
     const command = commandsArray.find(cmd => {
       const hasOption = typeof cmd.option === 'function';
       const commandName = cmd.data?.name;
       const idMatches = commandName && id.startsWith(commandName);
-      console.log(`📝 Checking command "${commandName}": hasOption=${hasOption}, idMatches=${idMatches}`);
       return hasOption && idMatches;
     });
 
     if (command) {
-      console.log(`[HANDLE_SELECT_MENU] ✅ Matched command "${command.data.name}". Executing option handler...`);
+      console.log(`✅ Select menu matched command "${command.data.name}"`);
       await command.option(interaction, client);
     } else {
       console.warn(`⚠️ No select menu handler matched for customId: ${id}`);

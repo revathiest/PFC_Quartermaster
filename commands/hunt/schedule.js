@@ -35,15 +35,23 @@ module.exports = {
     }
 
     try {
-      const event = await interaction.guild.scheduledEvents.create({
+      const eventData = {
         name,
         description,
         scheduledStartTime: start,
         scheduledEndTime: end,
         privacyLevel: 2, // GuildOnly
-        entityType: 2, // Voice
-        channel,
-      });
+      };
+
+      if (channel) {
+        eventData.entityType = 2; // Voice
+        eventData.channel = channel;
+      } else {
+        eventData.entityType = 3; // External / Somewhere else
+        eventData.entityMetadata = { location: 'In-Game' };
+      }
+
+      const event = await interaction.guild.scheduledEvents.create(eventData);
 
       await Hunt.create({
         name,

@@ -11,7 +11,7 @@ const { Hunt } = require('../../../config/database');
 const command = require('../../../commands/hunt/schedule');
 const { MessageFlags } = require('discord.js');
 
-const makeInteraction = () => ({
+const makeInteraction = (withChannel = true) => ({
   options: {
     getString: jest.fn(key => ({
       name: 'Test Hunt',
@@ -19,7 +19,7 @@ const makeInteraction = () => ({
       start: 'start',
       end: 'end'
     }[key])),
-    getChannel: jest.fn(() => ({ id: 'chan' }))
+    getChannel: jest.fn(() => withChannel ? { id: 'chan' } : null)
   },
   guild: { scheduledEvents: { create: jest.fn().mockResolvedValue({ id: 'e1' }) } },
   reply: jest.fn()
@@ -35,9 +35,25 @@ test('creates scheduled event and hunt', async () => {
 
   await command.execute(interaction);
 
-  expect(interaction.guild.scheduledEvents.create).toHaveBeenCalledWith(expect.objectContaining({ name: 'Test Hunt' }));
+  expect(interaction.guild.scheduledEvents.create).toHaveBeenCalledWith(expect.objectContaining({
+    name: 'Test Hunt',
+    entityType: 2,
+    channel: { id: 'chan' }
+  }));
   expect(Hunt.create).toHaveBeenCalledWith(expect.objectContaining({ name: 'Test Hunt', discord_event_id: 'e1' }));
   expect(interaction.reply).toHaveBeenCalledWith({ content: expect.stringContaining('Test Hunt'), flags: MessageFlags.Ephemeral });
+});
+
+test('creates external event when channel not provided', async () => {
+  chrono.parseDate.mockImplementation(str => str === 'start' ? new Date('2025-01-01T00:00:00Z') : new Date('2025-01-02T00:00:00Z'));
+  const interaction = makeInteraction(false);
+
+  await command.execute(interaction);
+
+  expect(interaction.guild.scheduledEvents.create).toHaveBeenCalledWith(expect.objectContaining({
+    entityType: 3,
+    entityMetadata: { location: 'In-Game' }
+  }));
 });
 
 test('rejects invalid times', async () => {

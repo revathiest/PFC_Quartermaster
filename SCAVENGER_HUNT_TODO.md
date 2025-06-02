@@ -24,7 +24,7 @@ All remaining checklist items are still pending.
 
 ### 📌 Event ("Hunt") Management
 
-* [ ] `/hunt schedule` — creates both a new scavenger hunt and a linked Discord Scheduled Event (name, description, start, end, channel)
+* [x] `/hunt schedule` — creates both a new scavenger hunt and a linked Discord Scheduled Event (name, description, start, end, channel)
 * [x] `/hunt list` — list all hunts by status
 * [ ] Hunt `status` auto-syncs based on linked Discord Event lifecycle:
 

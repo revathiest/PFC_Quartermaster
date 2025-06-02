@@ -53,5 +53,32 @@ module.exports = {
       console.error(`❌ Failed to execute subcommand ${sub}:`, err);
       await interaction.reply({ content: '❌ Failed to run subcommand.', flags: MessageFlags.Ephemeral });
     }
+  },
+
+  async button(interaction, client) {
+    const prefix = interaction.customId.split('::')[0];
+
+    if (!prefix.startsWith('hunt_')) return;
+
+    if (prefix.startsWith('hunt_poi_')) {
+      try {
+        const list = require('./hunt/poi/list');
+        if (typeof list.button === 'function') {
+          await list.button(interaction, client);
+          return;
+        }
+      } catch (err) {
+        console.error(`❌ Failed to handle button for ${prefix}:`, err);
+        if (!interaction.replied && !interaction.deferred) {
+          await interaction.reply({ content: '❌ Something went wrong.', flags: MessageFlags.Ephemeral });
+        }
+        return;
+      }
+    }
+
+    console.warn(`⚠️ [HUNT] No button handler found for prefix "${prefix}".`);
+    if (!interaction.replied && !interaction.deferred) {
+      await interaction.reply({ content: '❌ Button handler not found.', flags: MessageFlags.Ephemeral });
+    }
   }
 };

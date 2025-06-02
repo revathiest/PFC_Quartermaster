@@ -38,7 +38,8 @@ All remaining checklist items are still pending.
 * [x] `/hunt poi list` — displays a paginated embed of POIs with a select menu for current page items
 
   * [x] Selecting an item highlights the POI and displays buttons to either ✏️ Edit or 📦 Archive
-  * [x] Edit opens a modal with prefilled data (name, description, hint, location, image url, points)
+  * [x] Edit opens a modal with prefilled data (description, hint, location, image url, points)
+    * Name is fixed after creation due to Discord modal limits
   * [x] Archive immediately archives the selected POI
   * [x] Pagination updates both the embed and the select menu
   * [ ] Admin view restricts these controls to `Admiral` and `Fleet Admiral` roles

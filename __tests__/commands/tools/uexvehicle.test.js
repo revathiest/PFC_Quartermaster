@@ -77,4 +77,19 @@ describe('/uexvehicle command', () => {
       ])
     );
   });
+
+  test('option shows fallback when no purchase locations', async () => {
+    const update = jest.fn();
+    db.UexVehicle.findByPk.mockResolvedValue({ id:6, name:'Ship', length:1,width:1,height:1, pledge_cost:50, loaners:'x' });
+    db.UexVehiclePurchasePrice.findAll.mockResolvedValue([]);
+
+    await command.option({ values:['6'], update });
+
+    const fields = update.mock.calls[0][0].embeds[0].data.fields;
+    expect(fields).toEqual(expect.arrayContaining([
+      { name:'Pricing', value: expect.any(String), inline: false },
+      { name:'Loaner Vehicles', value:'x', inline: false },
+      { name:'Purchase Locations', value:'No known locations' }
+    ]));
+  });
 });

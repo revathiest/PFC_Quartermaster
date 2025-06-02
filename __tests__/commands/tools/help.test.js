@@ -89,3 +89,74 @@ test('collector updates selected category', async () => {
   await events.collect({ user: { id: '1' }, values: ['Fun'], update });
   expect(update).toHaveBeenCalled();
 });
+
+test('filters commands by permission and help text', async () => {
+  const { PermissionFlagsBits } = require('../../../__mocks__/discord.js');
+  const permissions = { has: jest.fn(id => id !== PermissionFlagsBits.ManageGuild) };
+  const interaction = {
+    member: { permissions },
+    deferReply: jest.fn(),
+    followUp: jest.fn().mockResolvedValue({ createMessageComponentCollector: jest.fn(() => ({ on: jest.fn() })) })
+  };
+
+  const commands = new Map();
+  commands.set('a', { data: { name: 'a', default_member_permissions: PermissionFlagsBits.ManageGuild }, help: 'desc', category: 'Admin' });
+  commands.set('b', { data: { name: 'b' }, help: 123, category: 'Misc' });
+  commands.set('c', { data: { name: 'c' }, help: 'valid', category: 'Misc' });
+
+  const client = { commands };
+  await help.execute(interaction, client);
+
+  const options = interaction.followUp.mock.calls[0][0].components[0].addComponents.mock.calls[0][0].data.options;
+  const labels = options.map(o => o.label);
+  expect(labels).toEqual(['Misc']);
+});
+
+test('collector end handles deleted message gracefully', async () => {
+  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  const permissions = { has: jest.fn(() => true) };
+  const interaction = {
+    member: { permissions },
+    deferReply: jest.fn(),
+    followUp: jest.fn().mockResolvedValue({
+      deleted: true,
+      editable: false,
+      createMessageComponentCollector: jest.fn(() => ({ on: (evt, cb) => evt === 'end' && cb() }))
+    })
+  };
+  const client = { commands: new Map([['a', { data: { name: 'a' }, help: 'h' }]]) };
+  await help.execute(interaction, client);
+  expect(console.warn).toHaveBeenCalled();
+});
+
+test('collector end logs errors', async () => {
+  const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  const permissions = { has: jest.fn(() => true) };
+  const interaction = {
+    member: { permissions },
+    deferReply: jest.fn(),
+    followUp: jest.fn().mockResolvedValue({
+      edit: jest.fn().mockRejectedValue({ code: 10008 }),
+      deleted: false,
+      editable: true,
+      createMessageComponentCollector: jest.fn(() => ({ on: (evt, cb) => evt === 'end' && cb() }))
+    })
+  };
+  const client = { commands: new Map([['a', { data: { name: 'a' }, help: 'h' }]]) };
+  await help.execute(interaction, client);
+  expect(warnSpy).toHaveBeenCalled();
+
+  const interaction2 = {
+    member: { permissions },
+    deferReply: jest.fn(),
+    followUp: jest.fn().mockResolvedValue({
+      edit: jest.fn().mockRejectedValue(new Error('fail')),
+      deleted: false,
+      editable: true,
+      createMessageComponentCollector: jest.fn(() => ({ on: (evt, cb) => evt === 'end' && cb() }))
+    })
+  };
+  await help.execute(interaction2, client);
+  expect(errorSpy).toHaveBeenCalled();
+});

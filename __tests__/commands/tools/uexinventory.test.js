@@ -17,6 +17,8 @@ const makeInteraction = () => ({
   user: { id: '1' },
   reply: jest.fn(),
   update: jest.fn(),
+  deferReply: jest.fn(),
+  deferUpdate: jest.fn(),
 });
 
 beforeEach(() => jest.clearAllMocks());
@@ -54,7 +56,7 @@ test('option selects terminal', async () => {
 });
 
 test('button shows inventory', async () => {
-  const i = { customId: 'uexinventory_prev::1::item::1::false', reply: jest.fn(), update: jest.fn(), channel: { send: jest.fn() } };
+  const i = { customId: 'uexinventory_prev::1::item::1::false', reply: jest.fn(), update: jest.fn(), channel: { send: jest.fn() }, deferUpdate: jest.fn() };
   db.UexTerminal.findByPk.mockResolvedValue({ id: 1, name: 'term' });
   db.UexItemPrice.findAll.mockResolvedValue([{ item_name: 'thing', price_buy: 1, price_sell: 2 }]);
   await command.button(i);
@@ -82,14 +84,14 @@ test('option returns inventory embed', async () => {
 });
 
 test('button with unknown type replies error', async () => {
-  const i = { customId: 'uexinventory_prev::1::bad::0::false', reply: jest.fn(), update: jest.fn(), channel: { send: jest.fn() } };
+  const i = { customId: 'uexinventory_prev::1::bad::0::false', reply: jest.fn(), update: jest.fn(), channel: { send: jest.fn() }, deferUpdate: jest.fn() };
   db.UexTerminal.findByPk.mockResolvedValue({ id: 1, name: 'term' });
   await command.button(i);
   expect(i.reply).toHaveBeenCalledWith(expect.objectContaining({ content: expect.stringContaining('Unsupported terminal type') }));
 });
 
 test('button public posts to channel', async () => {
-  const i = { customId: 'uexinventory_public::1::item::0::false', reply: jest.fn(), update: jest.fn(), channel: { send: jest.fn() } };
+  const i = { customId: 'uexinventory_public::1::item::0::false', reply: jest.fn(), update: jest.fn(), channel: { send: jest.fn() }, deferUpdate: jest.fn() };
   db.UexTerminal.findByPk.mockResolvedValue({ id: 1, name: 'term' });
   db.UexItemPrice.findAll.mockResolvedValue([{ item_name: 'x', price_buy: 1 }]);
   await command.button(i);
@@ -98,7 +100,7 @@ test('button public posts to channel', async () => {
 });
 
 test('button replies when no inventory records', async () => {
-  const i = { customId: 'uexinventory_prev::1::item::0::false', reply: jest.fn(), update: jest.fn(), channel: { send: jest.fn() } };
+  const i = { customId: 'uexinventory_prev::1::item::0::false', reply: jest.fn(), update: jest.fn(), channel: { send: jest.fn() }, deferUpdate: jest.fn() };
   db.UexTerminal.findByPk.mockResolvedValue({ id: 1, name: 'term' });
   db.UexItemPrice.findAll.mockResolvedValue([]);
   await command.button(i);

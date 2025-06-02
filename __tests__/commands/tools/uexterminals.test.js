@@ -59,6 +59,7 @@ describe('/uexterminals command', () => {
       customId: 'uexterminals_page::Port::0::false',
       update,
       message: {},
+      deferUpdate: jest.fn(),
     };
     await command.button(btn);
     const embed = update.mock.calls[0][0].embeds[0];

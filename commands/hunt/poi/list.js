@@ -101,6 +101,7 @@ module.exports = {
     const roles = interaction.member?.roles?.cache?.map(r => r.name) || [];
     const isAdmin = allowedRoles.some(r => roles.includes(r));
     try {
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
       await sendPage(interaction, 0, null, isAdmin);
     } catch (err) {
       console.error('❌ Failed to list POIs:', err);

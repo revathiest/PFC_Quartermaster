@@ -101,7 +101,9 @@ module.exports = {
           flags: MessageFlags.Ephemeral
         });
       }
-      
+
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
       const location = interaction.options.getString('location');
       const lowered = location.toLowerCase();
     
@@ -142,6 +144,8 @@ module.exports = {
     },   
 
   async button(interaction) {
+    await interaction.deferUpdate();
+
     const [action, location, pageStr, isPublicRaw] = interaction.customId.split('::');
     const page = parseInt(pageStr, 10) || 0;
     const actionName = action.replace('uexterminals_', '');

@@ -12,13 +12,13 @@ module.exports = {
       opt.setName('start').setDescription('Start time').setRequired(true))
     .addStringOption(opt =>
       opt.setName('end').setDescription('End time').setRequired(true))
+    .addStringOption(opt =>
+      opt.setName('description').setDescription('Hunt description').setRequired(true))
     .addChannelOption(opt =>
       opt.setName('channel')
         .setDescription('Event voice channel')
         .addChannelTypes(ChannelType.GuildVoice, ChannelType.GuildStageVoice)
-        .setRequired(true))
-    .addStringOption(opt =>
-      opt.setName('description').setDescription('Hunt description').setRequired(false)),
+        .setRequired(false)),
 
   async execute(interaction) {
     const name = interaction.options.getString('name');

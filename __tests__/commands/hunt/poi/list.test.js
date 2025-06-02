@@ -130,6 +130,7 @@ test('edit button replies when poi missing', async () => {
   await command.button(interaction);
 
   expect(interaction.followUp).toHaveBeenCalledWith(expect.objectContaining({ content: expect.stringContaining('POI not found') }));
+  expect(interaction.deferUpdate).not.toHaveBeenCalled();
 });
 
 test('edit button shows modal when poi exists', async () => {
@@ -145,6 +146,7 @@ test('edit button shows modal when poi exists', async () => {
   await command.button(interaction);
 
   expect(interaction.showModal).toHaveBeenCalled();
+  expect(interaction.deferUpdate).not.toHaveBeenCalled();
 });
 
 test('archive button archives poi', async () => {

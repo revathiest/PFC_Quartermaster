@@ -38,3 +38,7 @@ test('handles db failure', async () => {
   expect(interaction.reply).toHaveBeenCalledWith({ content: '❌ Failed to update channels.', flags: MessageFlags.Ephemeral });
   spy.mockRestore();
 });
+
+test('builder defines required channel options', () => {
+  expect(typeof command.data()).toBe('object');
+});

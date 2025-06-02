@@ -136,6 +136,7 @@ const TextInputBuilder = jest.fn().mockImplementation(function () {
     setStyle: jest.fn().mockReturnThis(),
     setPlaceholder: jest.fn().mockReturnThis(),
     setRequired: jest.fn().mockReturnThis(),
+    setValue: jest.fn().mockReturnThis(),
   };
 });
 

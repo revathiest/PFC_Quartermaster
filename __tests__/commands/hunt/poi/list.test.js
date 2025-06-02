@@ -117,3 +117,90 @@ test('select menu highlights poi', async () => {
   expect(interaction.editReply.mock.calls[0][0].components.length).toBeGreaterThan(1);
 });
 
+test('edit button replies when poi missing', async () => {
+  HuntPoi.findByPk = jest.fn().mockResolvedValue(null);
+  const interaction = {
+    customId: 'hunt_poi_edit::1::0',
+    deferUpdate: jest.fn(() => Promise.resolve()),
+    showModal: jest.fn(),
+    followUp: jest.fn(),
+    user: { id: 'u' }
+  };
+
+  await command.button(interaction);
+
+  expect(interaction.followUp).toHaveBeenCalledWith(expect.objectContaining({ content: expect.stringContaining('POI not found') }));
+});
+
+test('edit button shows modal when poi exists', async () => {
+  HuntPoi.findByPk = jest.fn().mockResolvedValue({ id: '1', name: 'X', description: '', hint: '', location: '', image_url: '', points: 1 });
+  const interaction = {
+    customId: 'hunt_poi_edit::1::0',
+    deferUpdate: jest.fn(() => Promise.resolve()),
+    showModal: jest.fn(() => Promise.resolve()),
+    followUp: jest.fn(),
+    user: { id: 'u' }
+  };
+
+  await command.button(interaction);
+
+  expect(interaction.showModal).toHaveBeenCalled();
+});
+
+test('archive button archives poi', async () => {
+  const update = jest.fn();
+  HuntPoi.findByPk = jest.fn().mockResolvedValue({ update });
+  const interaction = {
+    customId: 'hunt_poi_archive::1::0',
+    deferUpdate: jest.fn(() => Promise.resolve()),
+    followUp: jest.fn(),
+    member: { roles: { cache: { map: fn => ['Admiral'].map(r => fn({ name: r })) } } },
+    user: { id: 'u' }
+  };
+
+  await command.button(interaction);
+
+  expect(update).toHaveBeenCalledWith({ status: 'archived', updated_by: 'u' });
+});
+
+test('archive button replies when poi missing', async () => {
+  HuntPoi.findByPk = jest.fn().mockResolvedValue(null);
+  const interaction = { customId: 'hunt_poi_archive::2::0', deferUpdate: jest.fn(() => Promise.resolve()), followUp: jest.fn(), user: { id: 'u' } };
+  await command.button(interaction);
+  expect(interaction.followUp).toHaveBeenCalledWith(expect.objectContaining({ content: expect.stringContaining('POI not found') }));
+});
+
+test('pagination error is logged', async () => {
+  HuntPoi.findAll.mockRejectedValue(new Error('fail'));
+  const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  const interaction = { customId: 'hunt_poi_page::1', deferUpdate: jest.fn(() => Promise.resolve()), editReply: jest.fn(), member: { roles: { cache: { map: fn => [] } } } };
+  await command.button(interaction);
+  expect(errSpy).toHaveBeenCalled();
+});
+
+test('modal updates poi information', async () => {
+  HuntPoi.update = jest.fn(() => Promise.resolve());
+  const interaction = {
+    customId: 'hunt_poi_edit_modal::1::0',
+    fields: { getTextInputValue: jest.fn(() => 'val') },
+    user: { id: 'u' },
+    reply: jest.fn()
+  };
+
+  await command.modal(interaction);
+
+  expect(HuntPoi.update).toHaveBeenCalled();
+  expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ content: '✅ POI updated.' }));
+});
+
+test('modal handles update failure', async () => {
+  HuntPoi.update = jest.fn(() => Promise.reject(new Error('fail')));
+  const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  const interaction = { customId: 'hunt_poi_edit_modal::1::0', fields: { getTextInputValue: jest.fn(() => 'val') }, user: { id: 'u' }, reply: jest.fn() };
+
+  await command.modal(interaction);
+
+  expect(errSpy).toHaveBeenCalled();
+  expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ content: '❌ Failed to update POI.' }));
+});
+

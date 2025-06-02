@@ -35,6 +35,18 @@ test('lists hunts when present', async () => {
   expect(reply.flags).toBe(MessageFlags.Ephemeral);
 });
 
+test('lists hunts with missing dates as N/A', async () => {
+  Hunt.findAll.mockResolvedValue([
+    { name: 'No Dates', status: 'active', starts_at: null, ends_at: null }
+  ]);
+  const interaction = makeInteraction();
+
+  await command.execute(interaction);
+
+  const fields = interaction.reply.mock.calls[0][0].embeds[0].data.fields;
+  expect(fields[0].value).toContain('N/A');
+});
+
 test('handles fetch errors', async () => {
   const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
   Hunt.findAll.mockRejectedValue(new Error('fail'));

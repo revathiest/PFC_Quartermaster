@@ -86,3 +86,11 @@ test('pagination generates nav buttons', async () => {
   expect(first.data.disabled).toBe(false);
   expect(second.data.disabled).toBe(true);
 });
+
+test('pagination previous page', async () => {
+  const i = { customId: 'uexfinditem::commodity::1::0', deferUpdate: jest.fn(), editReply: jest.fn() };
+  const records = Array.from({ length: 15 }, () => ({ price_buy: 1, price_sell: 0, terminal: { name: 'T' } }));
+  db.UexCommodityPrice.findAll.mockResolvedValue(records);
+  await command.button(i);
+  expect(i.editReply).toHaveBeenCalled();
+});

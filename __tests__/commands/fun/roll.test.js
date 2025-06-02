@@ -24,6 +24,16 @@ test('sends embed with dice result', async () => {
   expect(embed.fields[1].value).toBe('**7**');
 });
 
+test('sends embed without reason when not provided', async () => {
+  parseDice.mockReturnValue({ total: 4, rolls: ['4'] });
+  const interaction = { options: { getString: jest.fn(key => (key === 'formula' ? 'd4' : null)) }, reply: jest.fn() };
+
+  await roll.execute(interaction);
+
+  const embed = interaction.reply.mock.calls[0][0].embeds[0].toJSON();
+  expect(embed.footer).toEqual({ text: null });
+});
+
 test('handles invalid formula error', async () => {
   parseDice.mockImplementation(() => { throw new Error('bad'); });
   const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});

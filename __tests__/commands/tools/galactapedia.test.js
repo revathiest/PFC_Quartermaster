@@ -124,3 +124,16 @@ test('fetches and stores detail when missing', async () => {
   expect(db.GalactapediaTag.upsert).toHaveBeenCalled();
   expect(i.editReply).toHaveBeenCalledWith(expect.objectContaining({ embeds: expect.any(Array) }));
 });
+
+test('handles missing translation content gracefully', async () => {
+  isUserVerified.mockResolvedValue(true);
+  const i = makeInteraction();
+  db.GalactapediaEntry.findOne.mockResolvedValue({ id: 4, title: 'n', rsi_url: 'u', api_url: 'api' });
+  db.GalactapediaDetail.findByPk.mockResolvedValue(null);
+  fetchSCDataByUrl.mockResolvedValue({ data: { } });
+  db.GalactapediaDetail.findByPk.mockResolvedValueOnce(null).mockResolvedValueOnce({ content: 'No content found.' });
+
+  await command.execute(i);
+
+  expect(i.editReply).toHaveBeenCalledWith(expect.objectContaining({ embeds: expect.any(Array) }));
+});

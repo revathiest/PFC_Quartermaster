@@ -16,3 +16,4 @@ bot.log
 *.log
 logs/
 google-service-account.json
+googleCredentials.json

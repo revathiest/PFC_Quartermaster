@@ -40,7 +40,7 @@ All remaining checklist items are still pending.
   * Selecting an item highlights the POI and displays buttons to either ✏️ Edit or 📦 Archive
   * Edit opens a modal with prefilled data
   * Archive immediately archives the selected POI
-  * Pagination updates both the embed and the select menu
+  * [x] Pagination updates both the embed and the select menu
 * [ ] POIs exist globally and are not tied to a specific hunt
 * [ ] All POI management uses select menus and modals to avoid reliance on raw IDs
 

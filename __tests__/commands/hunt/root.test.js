@@ -23,7 +23,7 @@ jest.mock('../../../commands/hunt/poi.js', () => {
   };
 }, { virtual: true });
 
-jest.mock('../../../commands/hunt/poi/list.js', () => ({ button: jest.fn() }), { virtual: true });
+jest.mock('../../../commands/hunt/poi/list.js', () => ({ button: jest.fn(), option: jest.fn() }), { virtual: true });
 jest.mock('../../../commands/hunt/nofunc', () => ({}), { virtual: true });
 jest.mock('../../../commands/hunt/fail', () => ({ execute: jest.fn(() => { throw new Error('boom'); }) }), { virtual: true });
 jest.mock('../../../commands/hunt/badgroup', () => ({ group: true }), { virtual: true });
@@ -51,6 +51,20 @@ test('button routes to poi list handler', async () => {
   const list = require('../../../commands/hunt/poi/list.js');
   await command.button(interaction, {});
   expect(list.button).toHaveBeenCalledWith(interaction, {});
+});
+
+test('option routes to poi list handler', async () => {
+  const interaction = { customId: 'hunt_poi_select::0', replied: false, deferred: false };
+  const list = require('../../../commands/hunt/poi/list.js');
+  await command.option(interaction, {});
+  expect(list.option).toHaveBeenCalledWith(interaction, {});
+});
+
+test('option ignores unrelated ids', async () => {
+  const interaction = { customId: 'other', replied: false, deferred: false };
+  const list = require('../../../commands/hunt/poi/list.js');
+  await command.option(interaction, {});
+  expect(list.option).not.toHaveBeenCalled();
 });
 
 test('button ignores unrelated ids', async () => {
@@ -116,6 +130,15 @@ test('button warns on unknown prefix', async () => {
   await command.button(interaction, {});
   expect(warnSpy).toHaveBeenCalled();
   expect(interaction.reply).toHaveBeenCalledWith({ content: '❌ Button handler not found.', flags: MessageFlags.Ephemeral });
+  warnSpy.mockRestore();
+});
+
+test('option warns on unknown prefix', async () => {
+  const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  const interaction = { customId: 'hunt_unknown::1', replied: false, deferred: false, reply: jest.fn() };
+  await command.option(interaction, {});
+  expect(warnSpy).toHaveBeenCalled();
+  expect(interaction.reply).toHaveBeenCalledWith({ content: '❌ Select menu handler not found.', flags: MessageFlags.Ephemeral });
   warnSpy.mockRestore();
 });
 

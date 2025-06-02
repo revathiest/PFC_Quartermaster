@@ -145,6 +145,12 @@ const ButtonStyle = {
   Secondary: 2,
 };
 
+const ChannelType = {
+  GuildText: 'GUILD_TEXT',
+  GuildVoice: 'GUILD_VOICE',
+  GuildStageVoice: 'GUILD_STAGE_VOICE'
+};
+
 const AttachmentBuilder = jest.fn(function(path) {
   this.path = path;
 });
@@ -193,6 +199,18 @@ const SlashCommandBuilder = jest.fn(() => {
       this.options.push(option);
       return this;
     },
+    addChannelOption(fn) {
+      const option = { type: 'channel', name: undefined, description: undefined, required: false, channel_types: [] };
+      const optBuilder = {
+        setName(name) { option.name = name; return this; },
+        setDescription(desc) { option.description = desc; return this; },
+        setRequired(req) { option.required = req; return this; },
+        addChannelTypes: jest.fn(function(...types) { option.channel_types.push(...types); return this; })
+      };
+      fn(optBuilder);
+      this.options.push(option);
+      return this;
+    },
     addSubcommand(fn) {
       const sub = { type: 'subcommand', name: undefined, description: undefined, options: [] };
       const subBuilder = {
@@ -217,6 +235,18 @@ const SlashCommandBuilder = jest.fn(() => {
             setRequired(r) { opt.required = r; return this; },
             addChoices: jest.fn()
           });
+          sub.options.push(opt);
+          return this;
+        },
+        addChannelOption(chFn) {
+          const opt = { type: 'channel', name: undefined, description: undefined, required: false, channel_types: [] };
+          const optBuilder = {
+            setName(n) { opt.name = n; return this; },
+            setDescription(d) { opt.description = d; return this; },
+            setRequired(r) { opt.required = r; return this; },
+            addChannelTypes: jest.fn(function(...types) { opt.channel_types.push(...types); return this; })
+          };
+          chFn(optBuilder);
           sub.options.push(opt);
           return this;
         }
@@ -261,5 +291,6 @@ module.exports = {
   TextInputStyle,
   PermissionFlagsBits,
   PermissionsBitField,
-  ComponentType
+  ComponentType,
+  ChannelType
 };

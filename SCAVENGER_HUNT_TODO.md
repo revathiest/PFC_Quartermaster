@@ -7,6 +7,15 @@
 * Each scavenger hunt is a discrete event instance (but the system supports future re-use)
 * Hunt status is automatically managed by linked Discord Scheduled Events
 
+## Current Status
+
+Initial scaffolding for the scavenger hunt exists on the `scavenger` branch. The following pieces are implemented:
+
+* `/hunt help`, `/hunt list`, and `/hunt set-channels` commands
+* Sequelize models for `Hunt`, `HuntPoi`, and `HuntSubmission`
+
+All remaining checklist items are still pending.
+
 ---
 
 ## ✅ Functional Requirements
@@ -14,7 +23,7 @@
 ### 📌 Event ("Hunt") Management
 
 * [ ] `/hunt schedule` — creates both a new scavenger hunt and a linked Discord Scheduled Event (name, description, start, end, channel)
-* [ ] `/hunt list` — list all hunts by status
+* [x] `/hunt list` — list all hunts by status
 * [ ] Hunt `status` auto-syncs based on linked Discord Event lifecycle:
 
   * scheduled → upcoming
@@ -77,8 +86,8 @@
 ### 🛡 Channel Restrictions
 
 * [ ] All `/hunt` commands fail outside the configured activity channel with a helpful error message
-* [ ] `/hunt help` is always allowed in any channel
-* [ ] `/hunt set-channels` — brings up a UI with currently configured channels (or blank), and allows setting:
+* [x] `/hunt help` is always allowed in any channel
+* [x] `/hunt set-channels` — brings up a UI with currently configured channels (or blank), and allows setting:
 
   * Activity channel (where commands can be run)
   * Submission review channel (where mod actions are logged)
@@ -87,6 +96,8 @@
 ---
 
 ## 📦 Data Models (Sequelize-style)
+
+* ✅ Sequelize models implemented for Hunt, HuntPoi and HuntSubmission
 
 ### Hunt
 

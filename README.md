@@ -110,6 +110,15 @@ project root, or you can export them in your shell before running the bot.
 - `OPENAI_API_KEY` - API key used for OpenAI requests.
 - `OPENAI_MODEL` - Model name to use when calling the OpenAI API.
 - `UEX_API_TOKEN` - Authentication token for the UEX trading API.
+- `GOOGLE_SERVICE_ACCOUNT_FILE` - Path to your service account JSON key for Google Drive access.
+
+## 🗄️ Google Drive Setup
+
+1. Create a service account in the Google Cloud console and enable the **Drive API**.
+2. Download the JSON key file for that service account.
+3. Save the file somewhere safe, e.g. `google-service-account.json`, and add the filename to `.gitignore`.
+4. Set the environment variable `GOOGLE_SERVICE_ACCOUNT_FILE` to the path of this JSON file.
+5. The bot will use these credentials to authenticate when accessing Google Drive.
 
 ## 🏃‍♂️ Usage
 

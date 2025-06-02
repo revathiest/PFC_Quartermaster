@@ -67,6 +67,7 @@ include them.
 * [ ] Commit messages are concise, descriptive, and reference issues.
 * [ ] Code is modular, documented, and free from console logging.
 * [ ] Mocks cleaned with `beforeEach`/`afterEach`.
+* [ ] When working with a TODO list, the list has been updated with items completed.
 
 ---
 

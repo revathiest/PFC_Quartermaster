@@ -58,6 +58,13 @@ test('handles db error', async () => {
   spy.mockRestore();
 });
 
+test('uses null image when not provided', async () => {
+  const interaction = makeInteraction();
+  interaction.options.getString.mockImplementation(key => ({ name:'Alpha', hint:'Find me', location:'Area18' }[key]));
+  await command.execute(interaction);
+  expect(HuntPoi.create).toHaveBeenCalledWith(expect.objectContaining({ image_url: null }));
+});
+
 test('defines command options', () => {
   const data = command.data();
   const optionSummary = data.options.map(o => ({ name: o.name, required: o.required }));

@@ -56,3 +56,25 @@ test('button ignores unrelated ids', async () => {
   await command.button(interaction, {});
   expect(list.button).not.toHaveBeenCalled();
 });
+
+test('execute replies when subcommand missing', async () => {
+  const interaction = new MockInteraction({ options: { subcommand: 'missing' } });
+  await command.execute(interaction, {});
+  expect(interaction.replyContent).toMatch('Failed to run subcommand');
+});
+
+test('execute handles subcommand error', async () => {
+  const help = require('../../../commands/hunt/help.js');
+  help.execute.mockRejectedValue(new Error('fail'));
+  const interaction = new MockInteraction({ options: { subcommand: 'help' } });
+  await command.execute(interaction, {});
+  expect(interaction.replyContent).toMatch('Failed to run');
+});
+
+test('button handles errors from poi list', async () => {
+  const list = require('../../../commands/hunt/poi/list.js');
+  list.button.mockRejectedValue(new Error('bad'));
+  const interaction = { customId: 'hunt_poi_page::1', replied: false, deferred: false, reply: jest.fn() };
+  await command.button(interaction, {});
+  expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ content: expect.stringContaining('Something went wrong') }));
+});

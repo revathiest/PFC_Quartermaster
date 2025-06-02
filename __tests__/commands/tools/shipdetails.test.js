@@ -88,3 +88,16 @@ test('logs error when fetch fails', async () => {
   expect(i.editReply).toHaveBeenCalledWith('❌ Failed to fetch or store updated vehicle details.');
 });
 
+test('warns when api data missing uuid', async () => {
+  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  isUserVerified.mockResolvedValue(true);
+  const i = makeInteraction();
+  const old = new Date(Date.now() - 1000);
+  db.Vehicle.findOne.mockResolvedValue({ uuid: '1', updated_at: new Date(), name: 'Ship', link: 'u' });
+  db.VehicleDetail.findByPk.mockResolvedValue({ uuid: '1', updated_at: old });
+  const { fetchSCDataByUrl } = require('../../../utils/fetchSCData');
+  fetchSCDataByUrl.mockResolvedValue({ data: { name: 'Ship', updated_at: new Date(), version: 'v' } });
+  await command.execute(i);
+  expect(console.warn).toHaveBeenCalled();
+});
+

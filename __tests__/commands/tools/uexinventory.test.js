@@ -71,6 +71,15 @@ test('option handles missing terminal', async () => {
   expect(i.update).toHaveBeenCalledWith(expect.objectContaining({ content: '❌ Terminal not found.' }));
 });
 
+test('option no terminals of selected type', async () => {
+  const i = makeInteraction();
+  i.customId = 'uexinventory_type::Area18';
+  i.values = ['store'];
+  db.UexTerminal.findAll.mockResolvedValue([]);
+  await command.option(i);
+  expect(i.update).toHaveBeenCalledWith(expect.objectContaining({ content: expect.stringContaining('No terminals of type') }));
+});
+
 test('option returns inventory embed', async () => {
   const i = makeInteraction();
   i.customId = 'uexinventory_terminal';

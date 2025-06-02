@@ -38,3 +38,11 @@ test('handles invalid formula error', async () => {
   errSpy.mockRestore();
 });
 
+test('omits footer when no reason provided', async () => {
+  parseDice.mockReturnValue({ total: 4, rolls: ['4'] });
+  const interaction = { options: { getString: jest.fn(key => (key === 'formula' ? 'd4' : null)) }, reply: jest.fn() };
+  await roll.execute(interaction);
+  const footer = interaction.reply.mock.calls[0][0].embeds[0].data.footer.text;
+  expect(footer).toBeNull();
+});
+

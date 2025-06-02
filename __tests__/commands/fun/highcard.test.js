@@ -89,3 +89,19 @@ test('rejects challenge when opponent already challenged', async () => {
   });
 });
 
+test('self challenge allowed with tester role', async () => {
+  const interaction = makeChallengeInteraction(true, true);
+  await highcard.execute(interaction);
+  expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ content: expect.stringContaining('has challenged') }));
+});
+
+test('challenge tie same value', async () => {
+  const challenge = makeChallengeInteraction();
+  await highcard.execute(challenge);
+  const accept = makeAcceptInteraction();
+  jest.spyOn(Math, 'random').mockReturnValueOnce(0).mockReturnValueOnce(0.24);
+  await highcard.execute(accept);
+  Math.random.mockRestore();
+  expect(accept.reply.mock.calls[0][0].content).toContain("It's a tie");
+});
+

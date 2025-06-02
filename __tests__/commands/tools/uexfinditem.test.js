@@ -86,3 +86,15 @@ test('pagination generates nav buttons', async () => {
   expect(first.data.disabled).toBe(false);
   expect(second.data.disabled).toBe(true);
 });
+
+test('vehicle search branch', async () => {
+  isUserVerified.mockResolvedValue(true);
+  db.UexItemPrice.findAll.mockResolvedValue([]);
+  db.UexCommodityPrice.findAll.mockResolvedValue([]);
+  db.UexVehiclePurchasePrice.findAll
+    .mockResolvedValueOnce([{ id_vehicle: 2, vehicle_name: 'ship' }])
+    .mockResolvedValueOnce([{ price_buy: 10, price_sell: 0, terminal: { name: 'A' } }]);
+  const i = makeInteraction();
+  await command.execute(i);
+  expect(i.editReply).toHaveBeenCalledWith(expect.objectContaining({ embeds: expect.any(Array) }));
+});

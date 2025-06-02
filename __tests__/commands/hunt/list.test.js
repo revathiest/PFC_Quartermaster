@@ -49,3 +49,13 @@ test('handles fetch errors', async () => {
   });
   spy.mockRestore();
 });
+
+test('handles hunts with missing dates', async () => {
+  Hunt.findAll.mockResolvedValue([
+    { name: 'Test', status: 'active', starts_at: null, ends_at: null }
+  ]);
+  const interaction = makeInteraction();
+  await command.execute(interaction);
+  const value = interaction.reply.mock.calls[0][0].embeds[0].data.fields[0].value;
+  expect(value).toContain('N/A');
+});

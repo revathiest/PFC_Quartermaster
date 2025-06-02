@@ -81,4 +81,11 @@ describe('/uexterminals command', () => {
     expect(send).toHaveBeenCalled();
     expect(btn.deferUpdate).toHaveBeenCalled();
   });
+
+  test('button replies when no matches', async () => {
+    db.UexTerminal.findAll.mockResolvedValue([]);
+    const btn = { customId: 'uexterminals_page::Port::0::false', reply: jest.fn(), update: jest.fn() };
+    await command.button(btn);
+    expect(btn.reply).toHaveBeenCalledWith(expect.objectContaining({ content: expect.stringContaining('No terminals') }));
+  });
 });

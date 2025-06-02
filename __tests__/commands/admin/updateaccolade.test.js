@@ -64,4 +64,21 @@ describe('/updateaccolade command', () => {
 
     expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ content: expect.stringContaining('at least one field'), flags: MessageFlags.Ephemeral }));
   });
+
+  test('sends new message when old one missing', async () => {
+    const interaction = makeInteraction();
+    const acc = { role_id: 'r1', name: 'Test', save: jest.fn(), channel_id: 'c1', message_id: 'm1', emoji: '', description: '' };
+    Accolade.findOne.mockResolvedValue(acc);
+    buildAccoladeEmbed.mockReturnValue('embed');
+    interaction.guild.channels.fetch.mockResolvedValue({
+      type: 0,
+      messages: { fetch: jest.fn(() => Promise.reject(new Error('404'))) },
+      send: jest.fn(() => ({ id: 'new' }))
+    });
+
+    await execute(interaction);
+
+    expect(acc.save).toHaveBeenCalled();
+    expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ content: expect.stringContaining('updated') }));
+  });
 });

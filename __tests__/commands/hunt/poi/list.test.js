@@ -72,3 +72,25 @@ test('button paginates results', async () => {
   expect(embed.data.footer.text).toContain('Page 2 of');
 });
 
+test('button ignores unrelated id', async () => {
+  const interaction = { customId: 'other', deferUpdate: jest.fn(), reply: jest.fn() };
+  await command.button(interaction);
+  expect(interaction.deferUpdate).not.toHaveBeenCalled();
+});
+
+test('editReply when interaction already replied', async () => {
+  HuntPoi.findAll.mockResolvedValue([{ name: 'A', points: 1, hint: 'h' }]);
+  const interaction = { replied: true, deferred: false, reply: jest.fn(), editReply: jest.fn() };
+  await command.execute(interaction);
+  expect(interaction.editReply).toHaveBeenCalled();
+});
+
+test('button logs error on failure', async () => {
+  const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  HuntPoi.findAll.mockRejectedValueOnce(new Error('fail'));
+  const interaction = { customId: 'hunt_poi_page::0', deferUpdate: jest.fn(), editReply: jest.fn(), reply: jest.fn(), deferred:false, replied:false };
+  await command.button(interaction);
+  expect(spy).toHaveBeenCalled();
+  spy.mockRestore();
+});
+

@@ -132,9 +132,9 @@ module.exports = {
         if (!poi) {
           return interaction.followUp({ content: '❌ POI not found.', flags: MessageFlags.Ephemeral });
         }
-        const modal = new ModalBuilder()
-          .setCustomId(`hunt_poi_edit_form::${poiId}`)
-          .setTitle('Edit POI');
+          const modal = new ModalBuilder()
+            .setCustomId(`hunt_poi_edit_form::${poiId}`)
+            .setTitle(`Edit POI - ${poi.name}`);
 
         const descriptionInput = new TextInputBuilder()
           .setCustomId('description')

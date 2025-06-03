@@ -6,8 +6,8 @@ When completing items on this list, it is important to update the items to keep 
 * Screenshot-based scavenger hunt in Star Citizen
 * Users must take selfies with specific Points of Interest (POIs)
 * Each scavenger hunt is a discrete event instance (but the system supports future re-use)
-* Hunt status is automatically managed by linked Discord Scheduled Events
-* All command responses are ephemeral except that when evidence is submitted, a non-ephemeral message is added in the hunt activity channel
+* Hunt status is derived from start and end dates. Linked Discord events ensure these dates match
+* All command responses are ephemeral. Evidence submissions delete the uploaded image to prevent spam
 
 ## Current Status
 
@@ -20,8 +20,7 @@ The following pieces are implemented:
 * Submission workflow with Google Drive storage and review buttons
 * `/hunt leaderboard` and `/hunt my-submissions` for score viewing
 
-The remaining work mainly covers automatic event sync, channel gating and
-per-user score breakdowns.
+The remaining work mainly covers automatic event sync and per-user score breakdowns.
 
 ---
 
@@ -31,11 +30,8 @@ per-user score breakdowns.
 
 * [x] `/hunt schedule` — creates both a new scavenger hunt and a linked Discord Scheduled Event (name, description, start, end, channel)
 * [x] `/hunt list` — list all hunts by status
-* [ ] Hunt `status` auto-syncs based on linked Discord Event lifecycle:
-  * scheduled → upcoming
-  * active → active
-  * completed → archived
-* [ ] Hunt record should be updated in the database if/when the event is updated in discord
+* [ ] Hunt start and end times auto-sync with the linked Discord Scheduled Event
+* [ ] Hunt record should update its dates when the Discord event changes
 
 ### 🗺 POI Management (shared across all hunts)
 
@@ -90,7 +86,7 @@ per-user score breakdowns.
 ### 🗓 Discord Integration
 
 * [x] Link hunt to a Discord Scheduled Event
-* [ ] Bot auto-syncs hunt status from Discord Event lifecycle
+* [ ] Bot ensures hunt dates match the linked Discord Event
 
 ### 🛡 Channel Restrictions
 
@@ -99,7 +95,8 @@ per-user score breakdowns.
 
   * Activity channel (where commands can be run)
   * Submission review channel (where mod actions are logged)
-* [ ] Block all `/hunt` commands if used outside the designated activity channel
+* [ ] ~~Block all `/hunt` commands if used outside the designated activity channel~~
+* [x] No channel restrictions necessary because commands are ephemeral and evidence images are deleted
 
 ---
 
@@ -115,7 +112,7 @@ per-user score breakdowns.
 * discord\_event\_id (string, optional)
 * starts\_at (timestamp)
 * ends\_at (timestamp)
-* status (enum: upcoming, active, archived)
+* ~~status (enum: upcoming, active, archived)~~ (derived from dates)
 
 ### POI
 

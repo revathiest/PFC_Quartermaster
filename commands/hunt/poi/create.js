@@ -1,7 +1,7 @@
 const { SlashCommandSubcommandBuilder, MessageFlags } = require('discord.js');
 const { HuntPoi } = require('../../../config/database');
 
-const allowedRoles = ['Admiral', 'Fleet Admiral'];
+const allowedRoles = ['Admiral', 'Fleet Admiral', 'Commodore', 'Captain', 'Commander'];
 
 module.exports = {
   data: () => new SlashCommandSubcommandBuilder()

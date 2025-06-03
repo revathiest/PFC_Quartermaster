@@ -6,7 +6,8 @@ const { Config } = require('../../../config/database');
 const command = require('../../../commands/hunt/set-channels');
 const { MessageFlags } = require('discord.js');
 
-const makeInteraction = () => ({
+const makeInteraction = (roles = ['Admiral']) => ({
+  member: { roles: { cache: { map: fn => roles.map(r => fn({ name: r })) } } },
   options: {
     getChannel: jest.fn(name => ({ id: name === 'activity' ? 'a1' : 'r1' }))
   },
@@ -14,6 +15,16 @@ const makeInteraction = () => ({
 });
 
 beforeEach(() => jest.clearAllMocks());
+
+test('blocks users without required role', async () => {
+  const interaction = makeInteraction(['Member']);
+  await command.execute(interaction);
+  expect(interaction.reply).toHaveBeenCalledWith({
+    content: 'You do not have permission to use this command.',
+    flags: MessageFlags.Ephemeral
+  });
+  expect(Config.upsert).not.toHaveBeenCalled();
+});
 
 test('stores channel ids and replies', async () => {
   const interaction = makeInteraction();

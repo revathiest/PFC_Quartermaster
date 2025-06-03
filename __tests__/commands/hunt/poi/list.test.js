@@ -256,7 +256,7 @@ test('submit button processes uploaded screenshot', async () => {
   Config.findOne
     .mockResolvedValueOnce({ value: 'a' })
     .mockResolvedValueOnce({ value: 'r' });
-  HuntSubmission.create.mockResolvedValue({ update: jest.fn() });
+  HuntSubmission.create.mockResolvedValue({ id: 's1', update: jest.fn() });
   HuntPoi.findByPk = jest.fn().mockResolvedValue({ name: 'Alpha Beta' });
   const activityCh = { send: jest.fn() };
   const reviewCh = { send: jest.fn().mockResolvedValue({ id: 'm' }) };
@@ -285,6 +285,10 @@ test('submit button processes uploaded screenshot', async () => {
   const fileName = uploadScreenshot.mock.calls[0][3];
   expect(fileName).toMatch(/^Alpha_Beta_\d{4}-\d{2}-\d{2}_\d{4}\.jpg$/);
   expect(HuntSubmission.create).toHaveBeenCalled();
+  expect(reviewCh.send).toHaveBeenCalledWith(expect.objectContaining({
+    content: expect.stringContaining('Alpha Beta'),
+    components: expect.any(Array)
+  }));
   expect(interaction.followUp).toHaveBeenCalledWith(expect.objectContaining({ content: '✅ Submission received.' }));
 });
 
@@ -306,5 +310,56 @@ test('submit button handles timeout', async () => {
     content: '❌ Timed out waiting for file upload.'
   }));
   expect(HuntSubmission.create).not.toHaveBeenCalled();
+});
+
+test('approve button updates submission', async () => {
+  const update = jest.fn();
+  HuntSubmission.findByPk = jest.fn().mockResolvedValue({ update, review_channel_id: 'r', review_message_id: 'm' });
+  const msg = { edit: jest.fn(), content: 'x' };
+  const ch = { messages: { fetch: jest.fn(() => Promise.resolve(msg)) } };
+  const interaction = {
+    customId: 'hunt_poi_approve::s1',
+    deferUpdate: jest.fn(() => Promise.resolve()),
+    client: { channels: { fetch: jest.fn(() => Promise.resolve(ch)) } },
+    user: { id: 'u' }
+  };
+
+  await command.button(interaction);
+
+  expect(update).toHaveBeenCalledWith(expect.objectContaining({ status: 'approved' }));
+  expect(ch.messages.fetch).toHaveBeenCalledWith('m');
+  expect(msg.edit).toHaveBeenCalled();
+});
+
+test('reject button shows modal', async () => {
+  const interaction = { customId: 'hunt_poi_reject::s1', showModal: jest.fn() };
+  await command.button(interaction);
+  expect(interaction.showModal).toHaveBeenCalled();
+});
+
+test('reject modal updates submission', async () => {
+  const update = jest.fn();
+  HuntSubmission.findByPk = jest.fn().mockResolvedValue({
+    update,
+    review_channel_id: 'r',
+    review_message_id: 'm'
+  });
+  const msg = { edit: jest.fn(), content: 'x' };
+  const ch = { messages: { fetch: jest.fn(() => Promise.resolve(msg)) } };
+  const fields = { getTextInputValue: jest.fn(() => 'bad') };
+  const interaction = {
+    customId: 'hunt_poi_reject_form::s1',
+    fields,
+    user: { id: 'u' },
+    client: { channels: { fetch: jest.fn(() => Promise.resolve(ch)) } },
+    reply: jest.fn()
+  };
+
+  await command.modal(interaction);
+
+  expect(update).toHaveBeenCalledWith(expect.objectContaining({ status: 'rejected', review_comment: 'bad' }));
+  expect(ch.messages.fetch).toHaveBeenCalledWith('m');
+  expect(msg.edit).toHaveBeenCalled();
+  expect(interaction.reply).toHaveBeenCalled();
 });
 

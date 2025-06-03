@@ -278,9 +278,19 @@ module.exports = {
         }
         if (reviewConfig) {
           const ch = await interaction.client.channels.fetch(reviewConfig.value);
-          const reviewMsg = await ch.send(
-            `Submission from <@${interaction.user.id}> for POI ${poiId}: ${file.webViewLink}`
-          );
+          const reviewMsg = await ch.send({
+            content: `Submission from <@${interaction.user.id}> for POI ${poi.name}: ${file.webViewLink}`,
+            components: [new ActionRowBuilder().addComponents(
+              new ButtonBuilder()
+                .setCustomId(`hunt_poi_approve::${submission.id}`)
+                .setLabel('Approve')
+                .setStyle(ButtonStyle.Success),
+              new ButtonBuilder()
+                .setCustomId(`hunt_poi_reject::${submission.id}`)
+                .setLabel('Reject')
+                .setStyle(ButtonStyle.Danger)
+            )]
+          });
           await submission.update({ review_channel_id: ch.id, review_message_id: reviewMsg.id });
         }
 
@@ -290,6 +300,42 @@ module.exports = {
         await interaction.followUp({ content: '❌ Failed to submit proof.', flags: MessageFlags.Ephemeral });
       }
       return;
+    }
+
+    if (interaction.customId.startsWith('hunt_poi_approve::')) {
+      const [, submissionId] = interaction.customId.split('::');
+      await interaction.deferUpdate();
+      try {
+        const sub = await HuntSubmission.findByPk(submissionId);
+        if (!sub) return;
+        await sub.update({ status: 'approved', reviewer_id: interaction.user.id, reviewed_at: new Date() });
+        try {
+          if (sub.review_channel_id && sub.review_message_id) {
+            const ch = await interaction.client.channels.fetch(sub.review_channel_id);
+            const msg = await ch.messages.fetch(sub.review_message_id);
+            await msg.edit({ content: `${msg.content}\n✅ Approved by <@${interaction.user.id}>`, components: [] });
+          }
+        } catch (err) {
+          console.error('❌ Failed to update review message:', err);
+        }
+      } catch (err) {
+        console.error('❌ Failed to approve submission:', err);
+      }
+      return;
+    }
+
+    if (interaction.customId.startsWith('hunt_poi_reject::')) {
+      const [, submissionId] = interaction.customId.split('::');
+      const modal = new ModalBuilder()
+        .setCustomId(`hunt_poi_reject_form::${submissionId}`)
+        .setTitle('Reject Submission');
+      const reasonInput = new TextInputBuilder()
+        .setCustomId('reason')
+        .setLabel('Reason')
+        .setStyle(TextInputStyle.Paragraph)
+        .setRequired(true);
+      modal.addComponents(new ActionRowBuilder().addComponents(reasonInput));
+      return interaction.showModal(modal);
     }
 
 
@@ -330,33 +376,68 @@ module.exports = {
 
   async modal(interaction) {
 
-    if (!interaction.customId.startsWith('hunt_poi_edit_form::')) return;
-    const [, poiId] = interaction.customId.split('::');
-    const description = interaction.fields.getTextInputValue('description');
-    const hint = interaction.fields.getTextInputValue('hint');
-    const location = interaction.fields.getTextInputValue('location');
-    const image = interaction.fields.getTextInputValue('image');
-    const points = parseInt(interaction.fields.getTextInputValue('points'), 10);
+    if (interaction.customId.startsWith('hunt_poi_edit_form::')) {
+      const [, poiId] = interaction.customId.split('::');
+      const description = interaction.fields.getTextInputValue('description');
+      const hint = interaction.fields.getTextInputValue('hint');
+      const location = interaction.fields.getTextInputValue('location');
+      const image = interaction.fields.getTextInputValue('image');
+      const points = parseInt(interaction.fields.getTextInputValue('points'), 10);
 
-    try {
-      const poi = await HuntPoi.findByPk(poiId);
-      if (!poi) {
-        return interaction.reply({ content: '❌ POI not found.', flags: MessageFlags.Ephemeral });
+      try {
+        const poi = await HuntPoi.findByPk(poiId);
+        if (!poi) {
+          return interaction.reply({ content: '❌ POI not found.', flags: MessageFlags.Ephemeral });
+        }
+
+        await poi.update({
+          description: description || null,
+          hint: hint || null,
+          location: location || null,
+          image_url: image || null,
+          points,
+          updated_by: interaction.user.id
+        });
+
+        await interaction.reply({ content: '✅ POI updated.', flags: MessageFlags.Ephemeral });
+      } catch (err) {
+        console.error('❌ Failed to update POI:', err);
+        await interaction.reply({ content: '❌ Failed to update POI.', flags: MessageFlags.Ephemeral });
       }
+      return;
+    }
 
-      await poi.update({
-        description: description || null,
-        hint: hint || null,
-        location: location || null,
-        image_url: image || null,
-        points,
-        updated_by: interaction.user.id
-      });
+    if (interaction.customId.startsWith('hunt_poi_reject_form::')) {
+      const [, subId] = interaction.customId.split('::');
+      const reason = interaction.fields.getTextInputValue('reason');
+      try {
+        const sub = await HuntSubmission.findByPk(subId);
+        if (!sub) {
+          return interaction.reply({ content: '❌ Submission not found.', flags: MessageFlags.Ephemeral });
+        }
 
-      await interaction.reply({ content: '✅ POI updated.', flags: MessageFlags.Ephemeral });
-    } catch (err) {
-      console.error('❌ Failed to update POI:', err);
-      await interaction.reply({ content: '❌ Failed to update POI.', flags: MessageFlags.Ephemeral });
+        await sub.update({
+          status: 'rejected',
+          review_comment: reason,
+          reviewer_id: interaction.user.id,
+          reviewed_at: new Date()
+        });
+
+        try {
+          if (sub.review_channel_id && sub.review_message_id) {
+            const ch = await interaction.client.channels.fetch(sub.review_channel_id);
+            const msg = await ch.messages.fetch(sub.review_message_id);
+            await msg.edit({ content: `${msg.content}\n❌ Rejected by <@${interaction.user.id}>: ${reason}`, components: [] });
+          }
+        } catch (err) {
+          console.error('❌ Failed to update review message:', err);
+        }
+
+        await interaction.reply({ content: '✅ Submission rejected.', flags: MessageFlags.Ephemeral });
+      } catch (err) {
+        console.error('❌ Failed to reject submission:', err);
+        await interaction.reply({ content: '❌ Failed to reject submission.', flags: MessageFlags.Ephemeral });
+      }
     }
   }
 };

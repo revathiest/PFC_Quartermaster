@@ -15,8 +15,10 @@ Initial scaffolding for the scavenger hunt exists on the `scavenger` branch. The
 
 * `/hunt help`, `/hunt list`, and `/hunt set-channels` commands
 * Sequelize models for `Hunt`, `HuntPoi`, and `HuntSubmission`
+* `/hunt schedule` and full POI management with select menus/modals
+* Submission workflow with Google Drive storage and review buttons
 
-All remaining checklist items are still pending.
+The remaining work mainly covers scoring, automatic event sync, `/hunt my-submissions`, and channel gating.
 
 ---
 
@@ -43,14 +45,14 @@ All remaining checklist items are still pending.
   * [x] Archive immediately archives the selected POI
   * [x] Pagination updates both the embed and the select menu
   * [x] Admin view restricts these controls to `Admiral` and `Fleet Admiral` roles
-* [ ] POIs exist globally and are not tied to a specific hunt
-* [ ] All POI management uses select menus and modals to avoid reliance on raw IDs
+* [x] POIs exist globally and are not tied to a specific hunt
+* [x] All POI management uses select menus and modals to avoid reliance on raw IDs
 
 ### 📤 Submission & Review
 
-* [ ] Rejected submissions can be replaced by resubmitting, which resets their status to pending
+* [x] Rejected submissions can be replaced by resubmitting, which resets their status to pending
 
-* [ ] Submitting proof for the same POI multiple times will overwrite the user's previous submission
+* [x] Submitting proof for the same POI multiple times will overwrite the user's previous submission
 
 * [x] `/hunt poi list` (non-mod view) — displays a paginated embed of POIs with a select menu for current page items
 
@@ -60,7 +62,7 @@ All remaining checklist items are still pending.
 
 * [ ] `/hunt my-submissions` — view own submissions for the current hunt
 
-* [ ] Submissions are reviewed externally via Google Drive
+* [x] Submissions are reviewed externally via Google Drive
 
   * Submissions start in a pending state and must be approved or rejected by moderators
   * Each submission is echoed to a designated review channel
@@ -69,11 +71,11 @@ All remaining checklist items are still pending.
   * Rejecting a submission opens a modal requiring the moderator to enter a reason (review\_comment is mandatory)
   * Once a submission is acted on, the message is updated to reflect its status and the buttons are removed
 
-* [ ] Submissions must include selfie image and are automatically tied to the currently active hunt
+* [x] Submissions must include selfie image and are automatically tied to the currently active hunt
 
 ### 🏆 Scoring & Leaderboard
 
-* [ ] POIs have point values
+* [x] POIs have point values
 * [ ] Approving a submission grants the user points
 * [ ] Ties are broken by the earliest final submission (earlier timestamp wins)
 * [ ] `/hunt leaderboard` — shows scores for the current active or most recent hunt
@@ -84,7 +86,7 @@ All remaining checklist items are still pending.
 
 ### 🗓 Discord Integration
 
-* [ ] Link hunt to a Discord Scheduled Event
+* [x] Link hunt to a Discord Scheduled Event
 * [ ] Bot auto-syncs hunt status from Discord Event lifecycle
 
 ### 🛡 Channel Restrictions

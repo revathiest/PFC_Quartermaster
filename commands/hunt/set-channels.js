@@ -1,7 +1,6 @@
 const {
   SlashCommandSubcommandBuilder,
   ChannelType,
-  PermissionFlagsBits,
   MessageFlags
 } = require('discord.js');
 const { Config } = require('../../config/database');
@@ -12,7 +11,6 @@ module.exports = {
   data: () => new SlashCommandSubcommandBuilder()
     .setName('set-channels')
     .setDescription('Configure hunt activity and review channels')
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addChannelOption(opt =>
       opt.setName('activity')
         .setDescription('Channel where /hunt commands are allowed')

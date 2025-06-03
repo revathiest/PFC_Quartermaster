@@ -244,10 +244,11 @@ module.exports = {
         if (!response.ok) throw new Error('Failed to fetch attachment');
         const buffer = await response.buffer();
         const mime = attachment.contentType || response.headers.get('content-type');
+        const folderName = interaction.member?.displayName || interaction.user.username;
         const file = await uploadScreenshot(
           drive,
           rootFolder,
-          interaction.user.id,
+          folderName,
           `${poiId}.jpg`,
           buffer,
           mime

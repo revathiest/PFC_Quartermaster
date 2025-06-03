@@ -42,7 +42,9 @@ const HuntPoi = {
 
 const HuntSubmission = {
   findAll: jest.fn(),
-  create: jest.fn()
+  findByPk: jest.fn(),
+  create: jest.fn(),
+  update: jest.fn()
 };
 
 // Simple mock Sequelize-like instance

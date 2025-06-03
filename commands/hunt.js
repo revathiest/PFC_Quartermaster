@@ -103,6 +103,22 @@ module.exports = {
       }
     }
 
+    if (prefix === 'hunt_leaderboard_select') {
+      try {
+        const leaderboard = require('./hunt/leaderboard');
+        if (typeof leaderboard.option === 'function') {
+          await leaderboard.option(interaction, client);
+          return;
+        }
+      } catch (err) {
+        console.error(`❌ Failed to handle option for ${prefix}:`, err);
+        if (!interaction.replied && !interaction.deferred) {
+          await interaction.reply({ content: '❌ Something went wrong.', flags: MessageFlags.Ephemeral });
+        }
+        return;
+      }
+    }
+
     console.warn(`⚠️ [HUNT] No select menu handler found for prefix "${prefix}".`);
     if (!interaction.replied && !interaction.deferred) {
       await interaction.reply({ content: '❌ Select menu handler not found.', flags: MessageFlags.Ephemeral });

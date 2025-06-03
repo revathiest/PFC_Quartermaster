@@ -24,6 +24,7 @@ jest.mock('../../../commands/hunt/poi.js', () => {
 }, { virtual: true });
 
 jest.mock('../../../commands/hunt/poi/list.js', () => ({ button: jest.fn(), option: jest.fn(), modal: jest.fn() }), { virtual: true });
+jest.mock('../../../commands/hunt/leaderboard.js', () => ({ option: jest.fn() }), { virtual: true });
 jest.mock('../../../commands/hunt/nofunc', () => ({}), { virtual: true });
 jest.mock('../../../commands/hunt/fail', () => ({ execute: jest.fn(() => { throw new Error('boom'); }) }), { virtual: true });
 jest.mock('../../../commands/hunt/badgroup', () => ({ group: true }), { virtual: true });
@@ -58,6 +59,13 @@ test('option routes to poi list handler', async () => {
   const list = require('../../../commands/hunt/poi/list.js');
   await command.option(interaction, {});
   expect(list.option).toHaveBeenCalledWith(interaction, {});
+});
+
+test('option routes to leaderboard handler', async () => {
+  const interaction = { customId: 'hunt_leaderboard_select', replied: false, deferred: false };
+  const leaderboard = require('../../../commands/hunt/leaderboard.js');
+  await command.option(interaction, {});
+  expect(leaderboard.option).toHaveBeenCalledWith(interaction, {});
 });
 
 test('modal routes to poi list handler', async () => {

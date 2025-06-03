@@ -36,9 +36,9 @@ describe('scheduledEvents handlers', () => {
     log.mockRestore();
   });
 
-  test('handleCreateEvent creates hunt when location matches', async () => {
+  test('handleCreateEvent creates hunt when location matches case-insensitively', async () => {
     const { Hunt } = require('../../../config/database');
-    event.location = 'Scavenger Hunt';
+    event.location = 'sCaVeNgEr HuNt';
     await events.handleCreateEvent(event);
     expect(Hunt.create).toHaveBeenCalledWith(expect.objectContaining({
       name: 'Test',

@@ -10,6 +10,7 @@ class MockInteraction {
   }) {
     this.options = {
       getString: jest.fn().mockImplementation(key => options[key]),
+      getAttachment: jest.fn().mockImplementation(key => options[key]),
       getSubcommand: jest.fn(() => options.subcommand || null),
       getSubcommandGroup: jest.fn(() => options.subcommandGroup || null),
     };
@@ -191,6 +192,16 @@ const SlashCommandBuilder = jest.fn(() => {
       this.options.push(option);
       return this;
     },
+    addAttachmentOption(fn) {
+      const option = { type: 'attachment', name: undefined, description: undefined, required: false };
+      fn({
+        setName(name) { option.name = name; return this; },
+        setDescription(desc) { option.description = desc; return this; },
+        setRequired(req) { option.required = req; return this; },
+      });
+      this.options.push(option);
+      return this;
+    },
     addUserOption(fn) {
       const option = { type: 'user', name: undefined, description: undefined, required: false };
       fn({
@@ -278,17 +289,27 @@ const SlashCommandBuilder = jest.fn(() => {
               sub.options.push(opt);
               return this;
             },
-            addIntegerOption(intFn) {
-              const opt = { type: 'integer', name: undefined, description: undefined, required: false };
-              intFn({
-                setName(nm) { opt.name = nm; return this; },
-                setDescription(ds) { opt.description = ds; return this; },
-                setRequired(r) { opt.required = r; return this; },
-              });
-              sub.options.push(opt);
-              return this;
-            },
-          };
+        addIntegerOption(intFn) {
+          const opt = { type: 'integer', name: undefined, description: undefined, required: false };
+          intFn({
+            setName(nm) { opt.name = nm; return this; },
+            setDescription(ds) { opt.description = ds; return this; },
+            setRequired(r) { opt.required = r; return this; },
+          });
+          sub.options.push(opt);
+          return this;
+        },
+        addAttachmentOption(attFn) {
+          const opt = { type: 'attachment', name: undefined, description: undefined, required: false };
+          attFn({
+            setName(nm) { opt.name = nm; return this; },
+            setDescription(ds) { opt.description = ds; return this; },
+            setRequired(r) { opt.required = r; return this; },
+          });
+          sub.options.push(opt);
+          return this;
+        },
+      };
           subFn(subBuilder);
           group.options.push(sub);
           return this;

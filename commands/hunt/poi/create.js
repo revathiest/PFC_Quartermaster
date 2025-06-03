@@ -9,13 +9,13 @@ module.exports = {
     .addStringOption(opt => opt.setName('hint').setDescription('Hint for hunters').setRequired(true))
     .addStringOption(opt => opt.setName('location').setDescription('Location').setRequired(true))
     .addIntegerOption(opt => opt.setName('points').setDescription('Point value').setRequired(true))
-    .addStringOption(opt => opt.setName('image').setDescription('Image URL').setRequired(false)),
+    .addAttachmentOption(opt => opt.setName('image').setDescription('Image file').setRequired(false)),
 
   async execute(interaction) {
     const name = interaction.options.getString('name');
     const hint = interaction.options.getString('hint');
     const location = interaction.options.getString('location');
-    const image = interaction.options.getString('image');
+    const attachment = interaction.options.getAttachment('image');
     const points = interaction.options.getInteger('points');
     const userId = interaction.user.id;
 
@@ -24,7 +24,7 @@ module.exports = {
         name,
         hint,
         location,
-        image_url: image || null,
+        image_url: attachment ? attachment.url : null,
         points,
         status: 'active',
         created_by: userId

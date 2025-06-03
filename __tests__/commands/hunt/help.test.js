@@ -9,10 +9,10 @@ test('replies with player help embed', async () => {
   expect(reply.flags).toBe(MessageFlags.Ephemeral);
   const fields = reply.embeds[0].data.fields.map(f => f.name);
   expect(fields).toEqual([
-    '/hunt list',
-    '/hunt poi list',
-    '/hunt score [user]',
-    '/hunt leaderboard',
-    '/hunt help'
+    '📜 /hunt list',
+    '📸 /hunt poi list',
+    '📊 /hunt score [user]',
+    '🏆 /hunt leaderboard',
+    '❔ /hunt help'
   ]);
 });

@@ -82,4 +82,26 @@ describe('/uexterminals command', () => {
     expect(send).toHaveBeenCalled();
     expect(btn.deferUpdate).toHaveBeenCalled();
   });
+
+  test('button public paginating existing message', async () => {
+    db.UexTerminal.findAll.mockResolvedValue([{ code:'A1', name:'T1', space_station_name:'Port' }]);
+    const update = jest.fn();
+    const btn = {
+      customId: 'uexterminals_page::Port::1::true',
+      update,
+      channel: { send: jest.fn() },
+      message: {},
+      deferUpdate: jest.fn()
+    };
+    await command.button(btn);
+    expect(update).toHaveBeenCalled();
+  });
+
+  test('button replies when no terminals match', async () => {
+    db.UexTerminal.findAll.mockResolvedValue([]);
+    const reply = jest.fn();
+    const btn = { customId: 'uexterminals_page::Nowhere::0::false', reply, update: jest.fn(), deferUpdate: jest.fn() };
+    await command.button(btn);
+    expect(reply).toHaveBeenCalled();
+  });
 });

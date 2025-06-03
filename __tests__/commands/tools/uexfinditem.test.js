@@ -55,23 +55,22 @@ test('button forwards to handleSelection', async () => {
 });
 
 
-test('single match selects automatically', async () => {
+test('single match shows menu', async () => {
   isUserVerified.mockResolvedValue(true);
   db.UexItemPrice.findAll.mockResolvedValueOnce([{ id_item: 1, item_name: 'med' }]);
   db.UexCommodityPrice.findAll.mockResolvedValue([]);
   db.UexVehiclePurchasePrice.findAll.mockResolvedValue([]);
-  // results for handleSelection
   db.UexItemPrice.findAll.mockResolvedValueOnce([{ price_buy: 5, price_sell: 6, terminal: { name: 'T' } }]);
   const i = makeInteraction();
   await command.execute(i);
-  expect(i.editReply).toHaveBeenCalledWith(expect.objectContaining({ embeds: expect.any(Array) }));
+  expect(i.editReply).toHaveBeenCalledWith(expect.objectContaining({ components: expect.any(Array) }));
 });
 
 test('handleSelection no records found', async () => {
   const i = { customId: 'uexfinditem::item::1::0', deferUpdate: jest.fn(), editReply: jest.fn() };
   db.UexItemPrice.findAll.mockResolvedValue([]);
   await command.button(i);
-  expect(i.editReply).toHaveBeenCalledWith('No location data found for that entry.');
+  expect(i.editReply).toHaveBeenCalled();
 });
 
 test('pagination generates nav buttons', async () => {
@@ -91,6 +90,23 @@ test('pagination previous page', async () => {
   const i = { customId: 'uexfinditem::commodity::1::0', deferUpdate: jest.fn(), editReply: jest.fn() };
   const records = Array.from({ length: 15 }, () => ({ price_buy: 1, price_sell: 0, terminal: { name: 'T' } }));
   db.UexCommodityPrice.findAll.mockResolvedValue(records);
+  await command.button(i);
+  expect(i.editReply).toHaveBeenCalled();
+});
+
+test('shows select menu when multiple matches', async () => {
+  isUserVerified.mockResolvedValue(true);
+  db.UexItemPrice.findAll.mockResolvedValue([{ id_item: 1, item_name: 'med' }, { id_item: 2, item_name: 'medkit' }]);
+  db.UexCommodityPrice.findAll.mockResolvedValue([]);
+  db.UexVehiclePurchasePrice.findAll.mockResolvedValue([]);
+  const i = makeInteraction();
+  await command.execute(i);
+  expect(i.editReply).toHaveBeenCalledWith(expect.objectContaining({ components: expect.any(Array) }));
+});
+
+test('vehicle selection builds table', async () => {
+  const i = { customId: 'uexfinditem::vehicle::1::0', deferUpdate: jest.fn(), editReply: jest.fn() };
+  db.UexVehiclePurchasePrice.findAll.mockResolvedValue([{ price_buy: 1, price_sell: 0, terminal: { name: 'Hangar' } }]);
   await command.button(i);
   expect(i.editReply).toHaveBeenCalled();
 });

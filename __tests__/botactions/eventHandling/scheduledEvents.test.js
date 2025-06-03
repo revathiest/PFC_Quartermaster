@@ -23,7 +23,7 @@ describe('scheduledEvents handlers', () => {
       scheduledStartTimestamp: 1,
       scheduledEndTimestamp: 2,
       creator: { username: 'creator' },
-      location: 'loc',
+      entityMetadata: { location: 'loc' },
       status: 1
     };
   });
@@ -31,14 +31,29 @@ describe('scheduledEvents handlers', () => {
   test('handleCreateEvent saves event', async () => {
     const log = jest.spyOn(console, 'log').mockImplementation(() => {});
     await events.handleCreateEvent(event);
-    expect(handler.saveEventToDatabase).toHaveBeenCalled();
+    expect(handler.saveEventToDatabase).toHaveBeenCalledWith(
+      expect.objectContaining({ location: 'loc' })
+    );
+    expect(log).toHaveBeenCalled();
+    log.mockRestore();
+  });
+
+  test('handleCreateEvent falls back to entityMetadata location', async () => {
+    const log = jest.spyOn(console, 'log').mockImplementation(() => {});
+    const savedLocation = 'FromMeta';
+    delete event.location;
+    event.entityMetadata.location = savedLocation;
+    await events.handleCreateEvent(event);
+    expect(handler.saveEventToDatabase).toHaveBeenCalledWith(
+      expect.objectContaining({ location: savedLocation })
+    );
     expect(log).toHaveBeenCalled();
     log.mockRestore();
   });
 
   test('handleCreateEvent creates hunt when location matches case-insensitively', async () => {
     const { Hunt } = require('../../../config/database');
-    event.location = 'sCaVeNgEr HuNt';
+    event.entityMetadata.location = 'sCaVeNgEr HuNt';
     await events.handleCreateEvent(event);
     expect(Hunt.create).toHaveBeenCalledWith(expect.objectContaining({
       name: 'Test',
@@ -48,21 +63,21 @@ describe('scheduledEvents handlers', () => {
 
   test('handleCreateEvent creates hunt when location contains scavenger hunt text', async () => {
     const { Hunt } = require('../../../config/database');
-    event.location = 'Scavenger Hunt - Round 1 ';
+    event.entityMetadata.location = 'Scavenger Hunt - Round 1 ';
     await events.handleCreateEvent(event);
     expect(Hunt.create).toHaveBeenCalled();
   });
 
   test('handleCreateEvent creates hunt when location uses hyphen', async () => {
     const { Hunt } = require('../../../config/database');
-    event.location = 'Scavenger-Hunt area';
+    event.entityMetadata.location = 'Scavenger-Hunt area';
     await events.handleCreateEvent(event);
     expect(Hunt.create).toHaveBeenCalled();
   });
 
   test('handleCreateEvent creates hunt when location has no spaces', async () => {
     const { Hunt } = require('../../../config/database');
-    event.location = 'ScavengerHunt';
+    event.entityMetadata.location = 'ScavengerHunt';
     await events.handleCreateEvent(event);
     expect(Hunt.create).toHaveBeenCalled();
   });

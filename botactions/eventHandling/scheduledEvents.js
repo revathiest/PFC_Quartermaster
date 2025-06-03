@@ -12,14 +12,17 @@ async function handleCreateEvent (guildScheduledEvent, client) {
         start_time: guildScheduledEvent.scheduledStartTimestamp,
         end_time: guildScheduledEvent.scheduledEndTimestamp,
         event_coordinator: guildScheduledEvent.creator.username,
-        location: guildScheduledEvent.location,
+        location: guildScheduledEvent.location || guildScheduledEvent.entityMetadata?.location,
         status: getStatus(guildScheduledEvent)
     };
 
     try {
         await saveEventToDatabase(event);
         console.log('📌 Scheduled event created and saved to database.');
-        const loc = guildScheduledEvent.location?.toLowerCase().replace(/\s+/g, ' ').trim();
+        const loc = (guildScheduledEvent.location || guildScheduledEvent.entityMetadata?.location)
+            ?.toLowerCase()
+            .replace(/\s+/g, ' ')
+            .trim();
         if (loc && /scavenger[- ]?hunt/.test(loc)) {
             await Hunt.create({
                 name: guildScheduledEvent.name,
@@ -60,7 +63,7 @@ async function handleUpdateEvent(oldGuildScheduledEvent, newGuildScheduledEvent,
         start_time: newGuildScheduledEvent.scheduledStartTimestamp,
         end_time: newGuildScheduledEvent.scheduledEndTimestamp,
         event_coordinator: newGuildScheduledEvent.creator.username,
-        location: newGuildScheduledEvent.location,
+        location: newGuildScheduledEvent.location || newGuildScheduledEvent.entityMetadata?.location,
         status: getStatus(newGuildScheduledEvent.status)
     };
 

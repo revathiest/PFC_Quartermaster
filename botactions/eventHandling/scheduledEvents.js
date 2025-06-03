@@ -19,8 +19,8 @@ async function handleCreateEvent (guildScheduledEvent, client) {
     try {
         await saveEventToDatabase(event);
         console.log('📌 Scheduled event created and saved to database.');
-        const loc = guildScheduledEvent.location?.toLowerCase().trim();
-        if (loc && loc.includes('scavenger hunt')) {
+        const loc = guildScheduledEvent.location?.toLowerCase().replace(/\s+/g, ' ').trim();
+        if (loc && /scavenger[- ]?hunt/.test(loc)) {
             await Hunt.create({
                 name: guildScheduledEvent.name,
                 description: guildScheduledEvent.description,

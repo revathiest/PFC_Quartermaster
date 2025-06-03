@@ -17,7 +17,7 @@ module.exports = {
       for (const h of hunts) {
         const start = h.starts_at ? new Date(h.starts_at).toLocaleString() : 'N/A';
         const end = h.ends_at ? new Date(h.ends_at).toLocaleString() : 'N/A';
-        embed.addFields({ name: `${h.name} (${h.status})`, value: `${start} → ${end}` });
+        embed.addFields({ name: h.name, value: `${start} → ${end}` });
       }
 
       await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });

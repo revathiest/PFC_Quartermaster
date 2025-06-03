@@ -1,4 +1,5 @@
 const { SlashCommandSubcommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
+const { Op } = require('sequelize');
 const { Hunt, HuntSubmission, HuntPoi } = require('../../config/database');
 
 module.exports = {
@@ -9,7 +10,12 @@ module.exports = {
   async execute(interaction) {
     const userId = interaction.user.id;
     try {
-      const hunt = await Hunt.findOne({ where: { status: 'active' } });
+      const hunt = await Hunt.findOne({
+        where: {
+          starts_at: { [Op.lte]: new Date() },
+          ends_at: { [Op.gte]: new Date() }
+        }
+      });
       if (!hunt) {
         return interaction.reply({ content: '❌ No active hunt.', flags: MessageFlags.Ephemeral });
       }

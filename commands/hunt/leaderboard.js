@@ -5,6 +5,7 @@ const {
   StringSelectMenuBuilder,
   MessageFlags
 } = require('discord.js');
+const { Op } = require('sequelize');
 const { Hunt, HuntSubmission, HuntPoi } = require('../../config/database');
 
 async function generateLeaderboardEmbed(hunt) {
@@ -75,7 +76,12 @@ module.exports = {
 
   async execute(interaction) {
     try {
-      let hunt = await Hunt.findOne({ where: { status: 'active' } });
+      let hunt = await Hunt.findOne({
+        where: {
+          starts_at: { [Op.lte]: new Date() },
+          ends_at: { [Op.gte]: new Date() }
+        }
+      });
       if (!hunt) {
         hunt = await Hunt.findOne({ order: [['starts_at', 'DESC']] });
       }

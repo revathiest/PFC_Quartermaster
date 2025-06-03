@@ -10,6 +10,7 @@ const {
   ButtonStyle,
   MessageFlags
 } = require('discord.js');
+const { Op } = require('sequelize');
 const { HuntPoi, Hunt, HuntSubmission, Config } = require('../../../config/database');
 const { createDriveClient, uploadScreenshot } = require('../../../utils/googleDrive');
 const fetch = require('node-fetch');
@@ -238,7 +239,12 @@ module.exports = {
 
       const botType = process.env.BOT_TYPE || 'development';
       try {
-        const hunt = await Hunt.findOne({ where: { status: 'active' } });
+        const hunt = await Hunt.findOne({
+          where: {
+            starts_at: { [Op.lte]: new Date() },
+            ends_at: { [Op.gte]: new Date() }
+          }
+        });
         if (!hunt) {
           return interaction.followUp({ content: '❌ No active hunt.', flags: MessageFlags.Ephemeral });
         }

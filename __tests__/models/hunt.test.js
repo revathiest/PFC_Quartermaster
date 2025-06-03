@@ -11,7 +11,6 @@ describe('Hunt model', () => {
     expect(attrs).toHaveProperty('id');
     expect(attrs).toHaveProperty('name');
     expect(attrs).toHaveProperty('starts_at');
-    expect(attrs).toHaveProperty('status');
     expect(opts.tableName).toBe('hunts');
     expect(model).toEqual({});
   });

@@ -83,8 +83,8 @@ per-user score breakdowns.
 * [x] Ties are broken by the most recent valid submission (later timestamp wins)
 * [x] `/hunt leaderboard` — shows scores for the current active or most recent hunt
 
-  * [ ] Displays a select menu with names of previous hunts at the bottom
-  * [ ] Selecting a past hunt updates the response to show its leaderboard
+* [x] Displays a select menu with names of previous hunts at the bottom
+* [x] Selecting a past hunt updates the response to show its leaderboard
 * [ ] `/hunt score [user]` — shows the score breakdown for yourself or another user (optional parameter)
 
 ### 🗓 Discord Integration

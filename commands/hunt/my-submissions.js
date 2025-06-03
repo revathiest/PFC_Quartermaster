@@ -34,7 +34,7 @@ module.exports = {
         const poi = poiMap.get(sub.poi_id) || { name: 'Unknown', points: 0 };
         if (sub.status === 'approved') total += poi.points;
         const pointsText = sub.status === 'approved' ? ` (+${poi.points} pts)` : '';
-        embed.addFields({ name: poi.name, value: `Status: ${sub.status}${pointsText}` });
+        embed.addFields({ name: `${poi.name} <${sub.status}>${pointsText}`, value: '\u200b' });
       }
 
       embed.setDescription(`Total points earned: ${total}`);

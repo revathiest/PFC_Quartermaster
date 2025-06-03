@@ -49,7 +49,7 @@ test('lists submissions with total points', async () => {
   expect(reply.embeds[0].data.title).toContain('Hunt Submissions');
   expect(reply.embeds[0].data.description).toContain('5');
   const fields = reply.embeds[0].data.fields;
-  expect(fields[0].name).toBe('Alpha');
-  expect(fields[0].value).toContain('approved');
-  expect(fields[1].name).toBe('Bravo');
+  expect(fields[0].name).toBe('Alpha <approved> (+5 pts)');
+  expect(fields[0].value).toBe('\u200b');
+  expect(fields[1].name).toBe('Bravo <rejected>');
 });

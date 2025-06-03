@@ -1,4 +1,5 @@
-const { saveEventToDatabase, updateEventInDatabase, deleteEventFromDatabase, getAllEventsFromDatabase, syncEventsInDatabase} = require('../scheduledEventsHandler')
+const { saveEventToDatabase, updateEventInDatabase, deleteEventFromDatabase, getAllEventsFromDatabase, syncEventsInDatabase} = require('../scheduledEventsHandler');
+const { Hunt } = require('../../config/database');
 const moment = require('moment');
 
 async function handleCreateEvent (guildScheduledEvent, client) {
@@ -18,6 +19,16 @@ async function handleCreateEvent (guildScheduledEvent, client) {
     try {
         await saveEventToDatabase(event);
         console.log('📌 Scheduled event created and saved to database.');
+        if (guildScheduledEvent.location === 'Scavenger Hunt') {
+            await Hunt.create({
+                name: guildScheduledEvent.name,
+                description: guildScheduledEvent.description,
+                discord_event_id: guildScheduledEvent.id,
+                starts_at: new Date(guildScheduledEvent.scheduledStartTimestamp),
+                ends_at: new Date(guildScheduledEvent.scheduledEndTimestamp)
+            });
+            console.log('📌 Scavenger hunt created in database.');
+        }
     } catch (error) {
         console.error('❌ Error saving scheduled event to database:', error);
     }
@@ -55,6 +66,16 @@ async function handleUpdateEvent(oldGuildScheduledEvent, newGuildScheduledEvent,
     try {
         await updateEventInDatabase(eventId, updatedEvent);
         console.log('✅ Scheduled event updated in database.');
+        const hunt = await Hunt.findOne({ where: { discord_event_id: eventId } });
+        if (hunt) {
+            await hunt.update({
+                name: newGuildScheduledEvent.name,
+                description: newGuildScheduledEvent.description,
+                starts_at: new Date(newGuildScheduledEvent.scheduledStartTimestamp),
+                ends_at: new Date(newGuildScheduledEvent.scheduledEndTimestamp)
+            });
+            console.log('✅ Scavenger hunt updated in database.');
+        }
     } catch (error) {
         console.error('❌ Error updating scheduled event in database:', error);
     }

@@ -6,6 +6,8 @@ jest.mock('../../../botactions/scheduledEventsHandler', () => ({
   syncEventsInDatabase: jest.fn()
 }));
 
+jest.mock('../../../config/database', () => require('../../../__mocks__/config/database'));
+
 const handler = require('../../../botactions/scheduledEventsHandler');
 const events = require('../../../botactions/eventHandling/scheduledEvents');
 
@@ -34,6 +36,16 @@ describe('scheduledEvents handlers', () => {
     log.mockRestore();
   });
 
+  test('handleCreateEvent creates hunt when location matches', async () => {
+    const { Hunt } = require('../../../config/database');
+    event.location = 'Scavenger Hunt';
+    await events.handleCreateEvent(event);
+    expect(Hunt.create).toHaveBeenCalledWith(expect.objectContaining({
+      name: 'Test',
+      discord_event_id: 'e1'
+    }));
+  });
+
   test('handleUpdateEvent deletes when ended', async () => {
     await events.handleUpdateEvent(event, { ...event, status: 3 });
     expect(handler.deleteEventFromDatabase).toHaveBeenCalled();
@@ -45,6 +57,16 @@ describe('scheduledEvents handlers', () => {
     expect(handler.updateEventInDatabase).toHaveBeenCalled();
     expect(log).toHaveBeenCalled();
     log.mockRestore();
+  });
+
+  test('handleUpdateEvent updates hunt when present', async () => {
+    const { Hunt } = require('../../../config/database');
+    const huntInstance = { update: jest.fn() };
+    Hunt.findOne.mockResolvedValue(huntInstance);
+    await events.handleUpdateEvent(event, { ...event, status: 2 }, {});
+    expect(huntInstance.update).toHaveBeenCalledWith(expect.objectContaining({
+      name: 'Test'
+    }));
   });
 
   test('handleDeleteEvent removes event', async () => {

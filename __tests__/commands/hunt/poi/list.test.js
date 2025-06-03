@@ -256,7 +256,7 @@ test('submit button processes uploaded screenshot', async () => {
   Config.findOne
     .mockResolvedValueOnce({ value: 'a' })
     .mockResolvedValueOnce({ value: 'r' });
-  HuntSubmission.create.mockResolvedValue({ id: 's1', update: jest.fn() });
+  HuntSubmission.create.mockResolvedValue({ id: 's1', update: jest.fn(), image_url: 'link' });
   HuntSubmission.findOne.mockResolvedValue({ id: 'prev1' });
   HuntPoi.findByPk = jest.fn().mockResolvedValue({ name: 'Alpha Beta' });
   const activityCh = { send: jest.fn() };
@@ -290,7 +290,7 @@ test('submit button processes uploaded screenshot', async () => {
   }));
   const reviewArgs = reviewCh.send.mock.calls[0][0];
   expect(reviewArgs.content).toContain('Alpha Beta');
-  expect(reviewArgs.content).not.toContain('link');
+  expect(reviewArgs.content).toContain('[View screenshot](link)');
   expect(reviewArgs.components).toEqual(expect.any(Array));
   const activityMsg = activityCh.send.mock.calls[0][0];
   expect(activityMsg).toContain('Alpha Beta');
@@ -322,7 +322,7 @@ test('submit button with no existing submission sets supersedes to null', async 
   Config.findOne
     .mockResolvedValueOnce({ value: 'a' })
     .mockResolvedValueOnce({ value: 'r' });
-  HuntSubmission.create.mockResolvedValue({ id: 's1', update: jest.fn() });
+  HuntSubmission.create.mockResolvedValue({ id: 's1', update: jest.fn(), image_url: 'link' });
   HuntSubmission.findOne.mockResolvedValue(null);
   HuntPoi.findByPk = jest.fn().mockResolvedValue({ name: 'Alpha Beta' });
   const activityCh = { send: jest.fn() };

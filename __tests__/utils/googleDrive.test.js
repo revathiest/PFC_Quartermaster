@@ -37,3 +37,18 @@ test('creates drive client using service account key', async () => {
   expect(mockDrive).toHaveBeenCalledWith({ version: 'v3', auth: 'client' });
   expect(drive).toBe('drive');
 });
+const { uploadScreenshot } = require('../../utils/googleDrive');
+
+describe('uploadScreenshot', () => {
+  test('uploads file to user folder', async () => {
+    const create = jest.fn()
+      .mockResolvedValueOnce({ data: { id: 'folder' } })
+      .mockResolvedValueOnce({ data: { id: 'file', webViewLink: 'link' } });
+    const drive = { files: { create } };
+
+    const res = await uploadScreenshot(drive, 'root', 'user', 'file.png', Buffer.from('img'), 'image/png');
+
+    expect(create).toHaveBeenCalledTimes(2);
+    expect(res).toEqual({ id: 'file', webViewLink: 'link' });
+  });
+});

@@ -18,4 +18,18 @@ async function createDriveClient() {
   return google.drive({ version: 'v3', auth: authClient });
 }
 
-module.exports = { createDriveClient };
+async function uploadScreenshot(drive, rootFolderId, userFolderName, fileName, fileBuffer, mimeType) {
+  const folderRes = await drive.files.create({
+    resource: { name: userFolderName, mimeType: 'application/vnd.google-apps.folder', parents: [rootFolderId] },
+    fields: 'id'
+  });
+  const folderId = folderRes.data.id;
+  const fileRes = await drive.files.create({
+    resource: { name: fileName, parents: [folderId] },
+    media: { mimeType, body: fileBuffer },
+    fields: 'id, webViewLink'
+  });
+  return fileRes.data;
+}
+
+module.exports = { createDriveClient, uploadScreenshot };

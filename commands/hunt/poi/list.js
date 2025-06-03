@@ -10,7 +10,9 @@ const {
   ButtonStyle,
   MessageFlags
 } = require('discord.js');
-const { HuntPoi } = require('../../../config/database');
+const { HuntPoi, Hunt, HuntSubmission, Config } = require('../../../config/database');
+const { createDriveClient, uploadScreenshot } = require('../../../utils/googleDrive');
+const fetch = require('node-fetch');
 
 const allowedRoles = ['Admiral', 'Fleet Admiral'];
 
@@ -55,6 +57,15 @@ function buildActionRow(poiId, page) {
   );
 }
 
+function buildSubmitRow(poiId, page) {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`hunt_poi_submit::${poiId}::${page}`)
+      .setLabel('📸 Submit Proof')
+      .setStyle(ButtonStyle.Primary)
+  );
+}
+
 async function sendPage(interaction, page, highlightId, isAdmin) {
   const pois = await HuntPoi.findAll({ where: { status: 'active' }, order: [['name', 'ASC']] });
   if (!pois.length) {
@@ -68,9 +79,10 @@ async function sendPage(interaction, page, highlightId, isAdmin) {
   const embed = buildEmbed(pagePois, pageNum, chunks.length, highlightId);
 
   const components = [];
-  if (isAdmin) {
-    components.push(buildSelectRow(pagePois, pageNum));
-    if (highlightId) components.push(buildActionRow(highlightId, pageNum));
+  components.push(buildSelectRow(pagePois, pageNum));
+  if (highlightId) {
+    if (isAdmin) components.push(buildActionRow(highlightId, pageNum));
+    else components.push(buildSubmitRow(highlightId, pageNum));
   }
 
   if (chunks.length > 1) {
@@ -186,6 +198,28 @@ module.exports = {
       return;
     }
 
+    if (interaction.customId.startsWith('hunt_poi_submit::')) {
+      const [, poiId, pageStr] = interaction.customId.split('::');
+      const page = parseInt(pageStr, 10) || 0;
+      try {
+        const modal = new ModalBuilder()
+          .setCustomId(`hunt_poi_submit_form::${poiId}::${page}`)
+          .setTitle('Submit Proof');
+
+        const urlInput = new TextInputBuilder()
+          .setCustomId('url')
+          .setLabel('Screenshot URL')
+          .setStyle(TextInputStyle.Short)
+          .setRequired(true);
+
+        modal.addComponents(new ActionRowBuilder().addComponents(urlInput));
+        return interaction.showModal(modal);
+      } catch (err) {
+        console.error('❌ Failed to show submit modal:', err);
+      }
+      return;
+    }
+
 
 
     if (interaction.customId.startsWith('hunt_poi_archive::')) {
@@ -223,6 +257,50 @@ module.exports = {
   },
 
   async modal(interaction) {
+    if (interaction.customId.startsWith('hunt_poi_submit_form::')) {
+      const [, poiId] = interaction.customId.split('::');
+      const url = interaction.fields.getTextInputValue('url');
+      const botType = process.env.BOT_TYPE || 'development';
+      try {
+        const hunt = await Hunt.findOne({ where: { status: 'active' } });
+        if (!hunt) {
+          return interaction.reply({ content: '❌ No active hunt.', flags: MessageFlags.Ephemeral });
+        }
+
+        const activityConfig = await Config.findOne({ where: { key: 'hunt_activity_channel', botType } });
+        const reviewConfig = await Config.findOne({ where: { key: 'hunt_review_channel', botType } });
+        const drive = await createDriveClient();
+        const rootFolder = process.env.GOOGLE_DRIVE_HUNT_FOLDER;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Failed to fetch image');
+        const buffer = await response.buffer();
+        const file = await uploadScreenshot(drive, rootFolder, interaction.user.id, `${poiId}.jpg`, buffer, response.headers.get('content-type'));
+
+        const submission = await HuntSubmission.create({
+          hunt_id: hunt.id,
+          poi_id: poiId,
+          user_id: interaction.user.id,
+          image_url: file.webViewLink,
+          status: 'pending'
+        });
+
+        if (activityConfig) {
+          const ch = await interaction.client.channels.fetch(activityConfig.value);
+          await ch.send(`<@${interaction.user.id}> submitted evidence for POI ${poiId}`);
+        }
+        if (reviewConfig) {
+          const ch = await interaction.client.channels.fetch(reviewConfig.value);
+          const msg = await ch.send(`Submission from <@${interaction.user.id}> for POI ${poiId}: ${file.webViewLink}`);
+          await submission.update({ review_channel_id: ch.id, review_message_id: msg.id });
+        }
+
+        return interaction.reply({ content: '✅ Submission received.', flags: MessageFlags.Ephemeral });
+      } catch (err) {
+        console.error('❌ Failed to submit proof:', err);
+        return interaction.reply({ content: '❌ Failed to submit proof.', flags: MessageFlags.Ephemeral });
+      }
+    }
+
     if (!interaction.customId.startsWith('hunt_poi_edit_form::')) return;
     const [, poiId] = interaction.customId.split('::');
     const description = interaction.fields.getTextInputValue('description');

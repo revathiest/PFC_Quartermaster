@@ -1,8 +1,18 @@
 jest.mock('../../../../config/database', () => ({
-  HuntPoi: { findAll: jest.fn() }
+  HuntPoi: { findAll: jest.fn(), findByPk: jest.fn() },
+  Hunt: { findOne: jest.fn() },
+  HuntSubmission: { create: jest.fn() },
+  Config: { findOne: jest.fn() }
 }));
 
-const { HuntPoi } = require('../../../../config/database');
+const { HuntPoi, Hunt, HuntSubmission, Config } = require('../../../../config/database');
+jest.mock('../../../../utils/googleDrive', () => ({
+  createDriveClient: jest.fn(() => ({ files: { create: jest.fn() } })),
+  uploadScreenshot: jest.fn(() => ({ id: 'f', webViewLink: 'link' }))
+}));
+const { createDriveClient, uploadScreenshot } = require('../../../../utils/googleDrive');
+jest.mock('node-fetch');
+const fetch = require('node-fetch');
 const command = require('../../../../commands/hunt/poi/list');
 const { MessageFlags } = require('../../../../__mocks__/discord.js');
 
@@ -22,7 +32,9 @@ const makeInteraction = (roles = []) => ({
   }
 });
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 test('replies when no pois exist', async () => {
   HuntPoi.findAll.mockResolvedValue([]);
@@ -98,6 +110,14 @@ test('admin sees select menu', async () => {
   await command.execute(interaction);
 
   expect(interaction.deferReply).toHaveBeenCalled();
+  const reply = interaction.editReply.mock.calls[0][0];
+  expect(reply.components.length).toBeGreaterThan(0);
+});
+
+test('non-admin sees select menu', async () => {
+  HuntPoi.findAll.mockResolvedValue([{ id:'1', name:'Alpha', points:1, hint:'h' }]);
+  const interaction = makeInteraction();
+  await command.execute(interaction);
   const reply = interaction.editReply.mock.calls[0][0];
   expect(reply.components.length).toBeGreaterThan(0);
 });
@@ -228,5 +248,30 @@ test('modal handles update failure', async () => {
 
   expect(errSpy).toHaveBeenCalled();
   expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ content: '❌ Failed to update POI.' }));
+});
+
+test('submit button shows modal', async () => {
+  const interaction = { customId:'hunt_poi_submit::1::0', showModal: jest.fn(), member:{ roles:{ cache:{ map: fn => [] } } } };
+  await command.button(interaction);
+  expect(interaction.showModal).toHaveBeenCalled();
+});
+
+test('submit modal creates submission', async () => {
+  Hunt.findOne.mockResolvedValue({ id:'h1' });
+  Config.findOne.mockResolvedValueOnce({ value:'a' }).mockResolvedValueOnce({ value:'r' });
+  const activityCh = { send: jest.fn() };
+  const reviewCh = { send: jest.fn().mockResolvedValue({ id:'m' }) };
+  const client = { channels:{ fetch: jest.fn(id => id==='a'?activityCh:reviewCh) } };
+  const fields = { getTextInputValue: jest.fn(()=>'http://img') };
+  const interaction = { customId:'hunt_poi_submit_form::1::0', fields, user:{ id:'u' }, client, reply: jest.fn() };
+  process.env.GOOGLE_DRIVE_HUNT_FOLDER = 'root';
+  fetch.mockResolvedValue({ ok: true, buffer: async () => Buffer.from('img'), headers: { get: () => 'image/png' } });
+  await command.modal(interaction);
+  expect(HuntSubmission.create).toHaveBeenCalled();
+  expect(uploadScreenshot).toHaveBeenCalled();
+  expect(activityCh.send).toHaveBeenCalled();
+  expect(reviewCh.send).toHaveBeenCalled();
+  expect(interaction.reply).toHaveBeenCalled();
+  delete process.env.GOOGLE_DRIVE_HUNT_FOLDER;
 });
 

@@ -20,7 +20,7 @@ The following pieces are implemented:
 * Submission workflow with Google Drive storage and review buttons
 * `/hunt leaderboard` and `/hunt my-submissions` for score viewing
 
-The remaining work mainly covers automatic event sync and per-user score breakdowns.
+The remaining work mainly covers stretch ideas and minor improvements.
 
 ---
 
@@ -30,8 +30,8 @@ The remaining work mainly covers automatic event sync and per-user score breakdo
 
 * [x] `/hunt schedule` — creates both a new scavenger hunt and a linked Discord Scheduled Event (name, description, start, end, channel)
 * [x] `/hunt list` — list all hunts by status
-* [ ] Hunt start and end times auto-sync with the linked Discord Scheduled Event
-* [ ] Hunt record should update its dates when the Discord event changes
+* [x] Hunt start and end times auto-sync with the linked Discord Scheduled Event
+* [x] Hunt record should update its dates when the Discord event changes
 
 ### 🗺 POI Management (shared across all hunts)
 
@@ -86,7 +86,7 @@ The remaining work mainly covers automatic event sync and per-user score breakdo
 ### 🗓 Discord Integration
 
 * [x] Link hunt to a Discord Scheduled Event
-* [ ] Bot ensures hunt dates match the linked Discord Event
+* [x] Bot ensures hunt dates match the linked Discord Event
 
 ### 🛡 Channel Restrictions
 

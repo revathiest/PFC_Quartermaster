@@ -26,15 +26,27 @@ function chunkArray(arr, size) {
 
 function buildEmbed(pois, page, totalPages, highlightId) {
   const embed = new EmbedBuilder()
-    .setTitle('Points of Interest')
-    .setFooter({ text: `Page ${page + 1} of ${totalPages}` });
+    .setTitle('📍 Points of Interest')
+    .setColor(0x2b2d31) // Or theme it by location/POI type
+    .setFooter({ text: `Page ${page + 1} of ${totalPages}` })
+    .setTimestamp();
 
   for (const poi of pois) {
-    const name = `${poi.id === highlightId ? '➡️ ' : ''}${poi.name} (${poi.points} pts)`;
-    embed.addFields({ name, value: poi.hint });
+    // Highlighted POI stands out
+    const isHighlighted = poi.id === highlightId;
+    const pointsEmoji = poi.points >= 15 ? '🌟' : poi.points >= 10 ? '✨' : '🔹';
+
+    const name = `${isHighlighted ? '➡️ ' : ''}${pointsEmoji} ${poi.name} • ${poi.points} pts`;
+    const hint = poi.hint?.length
+      ? poi.hint
+      : '_No hint provided._';
+
+    embed.addFields({ name, value: hint });
   }
+
   return embed;
 }
+
 
 function buildSelectRow(pois, page) {
   const menu = new StringSelectMenuBuilder()

@@ -11,9 +11,9 @@ const makeInteraction = () => ({
     getString: jest.fn(key => ({
       name: 'Alpha',
       hint: 'Find me',
-      location: 'Area18',
-      image: 'img'
+      location: 'Area18'
     }[key])),
+    getAttachment: jest.fn(() => ({ url: 'img' })),
     getInteger: jest.fn(() => 10)
   },
   user: { id: 'u1' },
@@ -47,9 +47,9 @@ test('handles missing optional image', async () => {
   interaction.options.getString = jest.fn(key => ({
     name: 'Bravo',
     hint: 'hint',
-    location: 'loc',
-    image: null
+    location: 'loc'
   }[key]));
+  interaction.options.getAttachment = jest.fn(() => null);
 
   await command.execute(interaction);
 

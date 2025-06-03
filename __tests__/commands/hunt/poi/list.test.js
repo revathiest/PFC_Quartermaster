@@ -15,6 +15,7 @@ jest.mock('node-fetch');
 const fetch = require('node-fetch');
 const command = require('../../../../commands/hunt/poi/list');
 const { MessageFlags } = require('../../../../__mocks__/discord.js');
+const { Collection } = require('@discordjs/collection');
 
 const makeInteraction = (roles = []) => ({
   reply: jest.fn(),
@@ -250,19 +251,56 @@ test('modal handles update failure', async () => {
   expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ content: '❌ Failed to update POI.' }));
 });
 
-test('submit button replies with upload instructions', async () => {
-  const interaction = { customId: 'hunt_poi_submit::1::0', reply: jest.fn(), member: { roles: { cache: { map: fn => [] } } } };
+test('submit button processes uploaded screenshot', async () => {
+  Hunt.findOne.mockResolvedValue({ id: 'h1' });
+  Config.findOne
+    .mockResolvedValueOnce({ value: 'a' })
+    .mockResolvedValueOnce({ value: 'r' });
+  HuntSubmission.create.mockResolvedValue({ update: jest.fn() });
+  const activityCh = { send: jest.fn() };
+  const reviewCh = { send: jest.fn().mockResolvedValue({ id: 'm' }) };
+  const client = { channels: { fetch: jest.fn(id => (id === 'a' ? activityCh : reviewCh)) } };
+  fetch.mockResolvedValue({ ok: true, buffer: async () => Buffer.from('img'), headers: { get: () => 'image/png' } });
+  const message = {
+    attachments: new Collection([['1', { url: 'http://img', contentType: 'image/png' }]]),
+    author: { id: 'u' }
+  };
+  const awaitMessages = jest.fn().mockResolvedValue(new Collection([['1', message]]));
+  const interaction = {
+    customId: 'hunt_poi_submit::1::0',
+    reply: jest.fn(),
+    followUp: jest.fn(),
+    channel: { awaitMessages },
+    user: { id: 'u' },
+    client
+  };
+
   await command.button(interaction);
-  expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({
-    content: expect.stringContaining('/hunt poi upload'),
-    flags: MessageFlags.Ephemeral
-  }));
+
+  expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ flags: MessageFlags.Ephemeral }));
+  expect(awaitMessages).toHaveBeenCalled();
+  expect(uploadScreenshot).toHaveBeenCalled();
+  expect(HuntSubmission.create).toHaveBeenCalled();
+  expect(interaction.followUp).toHaveBeenCalledWith(expect.objectContaining({ content: '✅ Submission received.' }));
 });
 
-test('submit modal is ignored', async () => {
-  const interaction = { customId: 'hunt_poi_submit_form::1::0', fields: {}, reply: jest.fn() };
-  await command.modal(interaction);
-  expect(interaction.reply).not.toHaveBeenCalled();
+test('submit button handles timeout', async () => {
+  const awaitMessages = jest.fn().mockRejectedValue('time');
+  const interaction = {
+    customId: 'hunt_poi_submit::1::0',
+    reply: jest.fn(),
+    followUp: jest.fn(),
+    channel: { awaitMessages },
+    user: { id: 'u' },
+    client: {}
+  };
+
+  await command.button(interaction);
+
+  expect(interaction.reply).toHaveBeenCalled();
+  expect(interaction.followUp).toHaveBeenCalledWith(expect.objectContaining({
+    content: '❌ Timed out waiting for file upload.'
+  }));
   expect(HuntSubmission.create).not.toHaveBeenCalled();
 });
 

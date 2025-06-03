@@ -7,17 +7,17 @@ module.exports = {
 
   async execute(interaction) {
     const embed = new EmbedBuilder()
-      .setTitle('Scavenger Hunt Commands')
-      .setDescription('Submit selfies at points of interest to earn points. Use the commands below to participate or manage hunts.')
+      .setTitle('🧭 How Scavenger Hunts Work')
+      .setDescription(
+        'Snap a selfie with each Point of Interest (POI) during an active hunt and submit it via `/hunt poi list`.\n' +
+        'Approved submissions grant points — accumulate the most before the hunt ends to win.'
+      )
       .addFields(
-        { name: '/hunt help', value: 'Show this help message.' },
-        { name: '/hunt list', value: 'List all hunts and their current status.' },
-        { name: '/hunt schedule', value: 'Create a new hunt and Discord event (admin).' },
-        { name: '/hunt set-channels', value: 'Configure activity and review channels (admin).' },
-        { name: '/hunt poi create', value: 'Create a new Point of Interest (admin).' },
-        { name: '/hunt poi list', value: 'Browse POIs, submit proof, or edit/archive (admin).' },
-        { name: '/hunt my-submissions', value: 'View your submissions and points earned.' },
-        { name: '/hunt score [user]', value: 'View a user\'s submissions and points earned.' }
+        { name: '/hunt list', value: 'View current and upcoming hunts.' },
+        { name: '/hunt poi list', value: 'Browse POIs and submit your selfies.' },
+        { name: '/hunt score [user]', value: 'Check your own or another player\'s progress.' },
+        { name: '/hunt leaderboard', value: 'See who\'s leading the hunt.' },
+        { name: '/hunt help', value: 'Show this help message again.' }
       );
 
     await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });

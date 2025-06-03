@@ -250,28 +250,19 @@ test('modal handles update failure', async () => {
   expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ content: '❌ Failed to update POI.' }));
 });
 
-test('submit button shows modal', async () => {
-  const interaction = { customId:'hunt_poi_submit::1::0', showModal: jest.fn(), member:{ roles:{ cache:{ map: fn => [] } } } };
+test('submit button replies with upload instructions', async () => {
+  const interaction = { customId: 'hunt_poi_submit::1::0', reply: jest.fn(), member: { roles: { cache: { map: fn => [] } } } };
   await command.button(interaction);
-  expect(interaction.showModal).toHaveBeenCalled();
+  expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({
+    content: expect.stringContaining('/hunt poi upload'),
+    flags: MessageFlags.Ephemeral
+  }));
 });
 
-test('submit modal creates submission', async () => {
-  Hunt.findOne.mockResolvedValue({ id:'h1' });
-  Config.findOne.mockResolvedValueOnce({ value:'a' }).mockResolvedValueOnce({ value:'r' });
-  const activityCh = { send: jest.fn() };
-  const reviewCh = { send: jest.fn().mockResolvedValue({ id:'m' }) };
-  const client = { channels:{ fetch: jest.fn(id => id==='a'?activityCh:reviewCh) } };
-  const fields = { getTextInputValue: jest.fn(()=>'http://img') };
-  const interaction = { customId:'hunt_poi_submit_form::1::0', fields, user:{ id:'u' }, client, reply: jest.fn() };
-  process.env.GOOGLE_DRIVE_HUNT_FOLDER = 'root';
-  fetch.mockResolvedValue({ ok: true, buffer: async () => Buffer.from('img'), headers: { get: () => 'image/png' } });
+test('submit modal is ignored', async () => {
+  const interaction = { customId: 'hunt_poi_submit_form::1::0', fields: {}, reply: jest.fn() };
   await command.modal(interaction);
-  expect(HuntSubmission.create).toHaveBeenCalled();
-  expect(uploadScreenshot).toHaveBeenCalled();
-  expect(activityCh.send).toHaveBeenCalled();
-  expect(reviewCh.send).toHaveBeenCalled();
-  expect(interaction.reply).toHaveBeenCalled();
-  delete process.env.GOOGLE_DRIVE_HUNT_FOLDER;
+  expect(interaction.reply).not.toHaveBeenCalled();
+  expect(HuntSubmission.create).not.toHaveBeenCalled();
 });
 

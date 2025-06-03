@@ -199,24 +199,9 @@ module.exports = {
     }
 
     if (interaction.customId.startsWith('hunt_poi_submit::')) {
-      const [, poiId, pageStr] = interaction.customId.split('::');
-      const page = parseInt(pageStr, 10) || 0;
-      try {
-        const modal = new ModalBuilder()
-          .setCustomId(`hunt_poi_submit_form::${poiId}::${page}`)
-          .setTitle('Submit Proof');
-
-        const urlInput = new TextInputBuilder()
-          .setCustomId('url')
-          .setLabel('Screenshot URL')
-          .setStyle(TextInputStyle.Short)
-          .setRequired(true);
-
-        modal.addComponents(new ActionRowBuilder().addComponents(urlInput));
-        return interaction.showModal(modal);
-      } catch (err) {
-        console.error('❌ Failed to show submit modal:', err);
-      }
+      const [, poiId] = interaction.customId.split('::');
+      const content = `Use the /hunt poi upload command with POI ID \`${poiId}\` and attach your screenshot.`;
+      await interaction.reply({ content, flags: MessageFlags.Ephemeral });
       return;
     }
 
@@ -257,49 +242,6 @@ module.exports = {
   },
 
   async modal(interaction) {
-    if (interaction.customId.startsWith('hunt_poi_submit_form::')) {
-      const [, poiId] = interaction.customId.split('::');
-      const url = interaction.fields.getTextInputValue('url');
-      const botType = process.env.BOT_TYPE || 'development';
-      try {
-        const hunt = await Hunt.findOne({ where: { status: 'active' } });
-        if (!hunt) {
-          return interaction.reply({ content: '❌ No active hunt.', flags: MessageFlags.Ephemeral });
-        }
-
-        const activityConfig = await Config.findOne({ where: { key: 'hunt_activity_channel', botType } });
-        const reviewConfig = await Config.findOne({ where: { key: 'hunt_review_channel', botType } });
-        const drive = await createDriveClient();
-        const rootFolder = process.env.GOOGLE_DRIVE_HUNT_FOLDER;
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Failed to fetch image');
-        const buffer = await response.buffer();
-        const file = await uploadScreenshot(drive, rootFolder, interaction.user.id, `${poiId}.jpg`, buffer, response.headers.get('content-type'));
-
-        const submission = await HuntSubmission.create({
-          hunt_id: hunt.id,
-          poi_id: poiId,
-          user_id: interaction.user.id,
-          image_url: file.webViewLink,
-          status: 'pending'
-        });
-
-        if (activityConfig) {
-          const ch = await interaction.client.channels.fetch(activityConfig.value);
-          await ch.send(`<@${interaction.user.id}> submitted evidence for POI ${poiId}`);
-        }
-        if (reviewConfig) {
-          const ch = await interaction.client.channels.fetch(reviewConfig.value);
-          const msg = await ch.send(`Submission from <@${interaction.user.id}> for POI ${poiId}: ${file.webViewLink}`);
-          await submission.update({ review_channel_id: ch.id, review_message_id: msg.id });
-        }
-
-        return interaction.reply({ content: '✅ Submission received.', flags: MessageFlags.Ephemeral });
-      } catch (err) {
-        console.error('❌ Failed to submit proof:', err);
-        return interaction.reply({ content: '❌ Failed to submit proof.', flags: MessageFlags.Ephemeral });
-      }
-    }
 
     if (!interaction.customId.startsWith('hunt_poi_edit_form::')) return;
     const [, poiId] = interaction.customId.split('::');

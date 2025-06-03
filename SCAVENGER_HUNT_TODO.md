@@ -78,7 +78,7 @@ The remaining work mainly covers scoring, automatic event sync, and channel gati
 * [x] POIs have point values
 * [ ] Approving a submission grants the user points
 * [ ] Ties are broken by the earliest final submission (earlier timestamp wins)
-* [ ] `/hunt leaderboard` — shows scores for the current active or most recent hunt
+* [x] `/hunt leaderboard` — shows scores for the current active or most recent hunt
 
   * Displays a select menu with names of previous hunts at the bottom
   * Selecting a past hunt updates the response to show its leaderboard

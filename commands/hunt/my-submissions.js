@@ -48,12 +48,46 @@ module.exports = {
       }
 
       const embed = new EmbedBuilder()
-        .setTitle('Your Hunt Submissions')
-        .setDescription(`Total points earned: ${total}`);
+        .setTitle('🎯 Your Hunt Submissions')
+        .setDescription(`**Total Points Earned:** 🏆 ${total}`)
+        .setColor('Gold')
+        .setTimestamp()
+        .setFooter({ text: 'Keep hunting, Commander.' });
 
-      if (pending.length) embed.addFields({ name: 'Pending', value: pending.join('\n') });
-      if (approved.length) embed.addFields({ name: 'Approved', value: approved.join('\n') });
-      if (rejected.length) embed.addFields({ name: 'Rejected', value: rejected.join('\n') });
+      const formatList = (list, withPoints = false) =>
+        list
+          .map(entry => {
+            if (withPoints) {
+              const match = entry.match(/(.+?) \(\+(\d+) pts\)/);
+              if (match) {
+                const [, name, pts] = match;
+                return `+${pts.padStart(2)} • ${name}`;
+              }
+            }
+            return `• ${entry}`;
+          })
+          .join('\n');
+
+      if (pending.length)
+        embed.addFields({
+          name: '⏳ Pending Submissions',
+          value: formatList(pending),
+          inline: false,
+        });
+
+      if (approved.length)
+        embed.addFields({
+          name: '✅ Approved Submissions',
+          value: formatList(approved, true),
+          inline: false,
+        });
+
+      if (rejected.length)
+        embed.addFields({
+          name: '❌ Rejected Submissions',
+          value: formatList(rejected),
+          inline: false,
+        });
 
       await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     } catch (err) {

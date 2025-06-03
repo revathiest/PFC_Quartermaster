@@ -48,15 +48,15 @@ test('lists submissions grouped by status', async () => {
   await command.execute(interaction);
 
   const reply = interaction.reply.mock.calls[0][0];
-  expect(reply.embeds[0].data.title).toContain('Hunt Submissions');
-  expect(reply.embeds[0].data.description).toContain('5');
+  expect(reply.embeds[0].data.title).toBe('🎯 Your Hunt Submissions');
+  expect(reply.embeds[0].data.description).toBe('**Total Points Earned:** 🏆 5');
   const fields = reply.embeds[0].data.fields;
-  expect(fields[0].name).toBe('Pending');
-  expect(fields[0].value).toBe('Charlie');
-  expect(fields[1].name).toBe('Approved');
-  expect(fields[1].value).toBe('Alpha (+5 pts)');
-  expect(fields[2].name).toBe('Rejected');
-  expect(fields[2].value).toBe('Bravo');
+  expect(fields[0].name).toBe('⏳ Pending Submissions');
+  expect(fields[0].value).toBe('• Charlie');
+  expect(fields[1].name).toBe('✅ Approved Submissions');
+  expect(fields[1].value).toBe('+ 5 • Alpha');
+  expect(fields[2].name).toBe('❌ Rejected Submissions');
+  expect(fields[2].value).toBe('• Bravo');
 });
 
 test('filters superseded submissions', async () => {
@@ -75,5 +75,5 @@ test('filters superseded submissions', async () => {
   const fields = interaction.reply.mock.calls[0][0].embeds[0].data.fields;
   // Only the newer submission should be present
   expect(fields.length).toBe(1);
-  expect(fields[0].value).toBe('Alpha (+5 pts)');
+  expect(fields[0].value).toBe('+ 5 • Alpha');
 });

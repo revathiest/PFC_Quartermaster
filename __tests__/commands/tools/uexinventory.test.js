@@ -106,3 +106,24 @@ test('button replies when no inventory records', async () => {
   await command.button(i);
   expect(i.reply).toHaveBeenCalledWith(expect.objectContaining({ content: expect.stringContaining('No inventory data') }));
 });
+
+test('button fuel type shows header and pagination', async () => {
+  const i = { customId: 'uexinventory_next::1::fuel::0::false', reply: jest.fn(), update: jest.fn(), channel: { send: jest.fn() }, deferUpdate: jest.fn() };
+  db.UexTerminal.findByPk.mockResolvedValue({ id: 1, name: 'FuelTerm' });
+  const records = Array.from({ length: 12 }, () => ({ commodity_name: 'fuel', price_buy: 1 }));
+  db.UexFuelPrice.findAll.mockResolvedValue(records);
+  await command.button(i);
+  const embed = i.update.mock.calls[0][0].embeds[0];
+  expect(embed.data.description).toContain('Fuel Type');
+  const row = i.update.mock.calls[0][0].components[0];
+  expect(row.addComponents).toHaveBeenCalled();
+});
+
+test('button vehicle rent adds make public button', async () => {
+  const i = { customId: 'uexinventory_prev::1::vehicle_rent::1::false', reply: jest.fn(), update: jest.fn(), channel: { send: jest.fn() }, deferUpdate: jest.fn() };
+  db.UexTerminal.findByPk.mockResolvedValue({ id: 1, name: 'term' });
+  db.UexVehicleRentalPrice.findAll.mockResolvedValue([{ vehicle_name: 'bike', price_rent: 2 }]);
+  await command.button(i);
+  const components = i.update.mock.calls[0][0].components;
+  expect(components[components.length - 1].addComponents).toHaveBeenCalled();
+});

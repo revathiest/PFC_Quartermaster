@@ -12,6 +12,9 @@ const { isUserVerified } = require('../../utils/verifyGuard');
 
 const PAGE_SIZE = 20;
 
+const formatPrice = (val) => (val > 0 ? val.toLocaleString().padStart(8) : '     N/A');
+const getLocation = (rec) => (rec.terminal?.name || rec.terminal_name || 'Unknown').padEnd(26).slice(0, 26);
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('uexfinditem')
@@ -53,21 +56,15 @@ module.exports = {
     const vehicleMap = new Map();
 
     items.forEach(i => {
-      if (!itemMap.has(i.item_name)) {
-        itemMap.set(i.item_name, { type: 'item', id: i.id_item, label: `🧪 ${i.item_name}` });
-      }
+      itemMap.set(i.item_name, { type: 'item', id: i.id_item, label: `🧪 ${i.item_name}` });
     });
 
     commodities.forEach(c => {
-      if (!commodityMap.has(c.commodity_name)) {
-        commodityMap.set(c.commodity_name, { type: 'commodity', id: c.id_commodity, label: `💰 ${c.commodity_name}` });
-      }
+      commodityMap.set(c.commodity_name, { type: 'commodity', id: c.id_commodity, label: `💰 ${c.commodity_name}` });
     });
 
     vehicles.forEach(v => {
-      if (!vehicleMap.has(v.vehicle_name)) {
-        vehicleMap.set(v.vehicle_name, { type: 'vehicle', id: v.id_vehicle, label: `🚀 ${v.vehicle_name}` });
-      }
+      vehicleMap.set(v.vehicle_name, { type: 'vehicle', id: v.id_vehicle, label: `🚀 ${v.vehicle_name}` });
     });
 
     const results = [
@@ -78,8 +75,6 @@ module.exports = {
 
     if (results.length === 0) {
       return interaction.editReply('No matches found. Try refining your search.');
-    } else if (results.length === 1) {
-      return handleSelection(interaction, results[0], 0, interaction);
     }
 
     const selectMenu = new StringSelectMenuBuilder()
@@ -116,49 +111,29 @@ module.exports = {
 
 async function handleSelection(interaction, selection, page = 0, sourceInteraction) {
   const { type, id } = selection;
-  let records;
+  const modelMap = {
+    item: UexItemPrice,
+    commodity: UexCommodityPrice,
+    vehicle: UexVehiclePurchasePrice
+  };
+  const model = modelMap[type];
+  const idField = type === 'item' ? 'id_item' : type === 'commodity' ? 'id_commodity' : 'id_vehicle';
+  const records = model ? await model.findAll({
+    where: { [idField]: id },
+    include: { model: UexTerminal, as: 'terminal' },
+    order: [['price_buy', 'ASC']]
+  }) : [];
 
-  switch (type) {
-    case 'item':
-      records = await UexItemPrice.findAll({
-        where: { id_item: id },
-        include: { model: UexTerminal, as: 'terminal' },
-        order: [['price_buy', 'ASC']]
-      });
-      break;
-    case 'commodity':
-      records = await UexCommodityPrice.findAll({
-        where: { id_commodity: id },
-        include: { model: UexTerminal, as: 'terminal' },
-        order: [['price_buy', 'ASC']]
-      });
-      break;
-    case 'vehicle':
-      records = await UexVehiclePurchasePrice.findAll({
-        where: { id_vehicle: id },
-        include: { model: UexTerminal, as: 'terminal' },
-        order: [['price_buy', 'ASC']]
-      });
-      break;
-  }
-
-  if (!records || records.length === 0) {
+  if (records.length === 0) {
     return interaction.editReply('No location data found for that entry.');
   }
 
   const filtered = records.filter(record => (record.price_buy > 0 || record.price_sell > 0));
-  const chunks = [];
-  for (let i = 0; i < filtered.length; i += PAGE_SIZE) {
-    chunks.push(filtered.slice(i, i + PAGE_SIZE));
-  }
+  const chunkCount = Math.ceil(filtered.length / PAGE_SIZE);
+  const chunks = Array.from({ length: chunkCount }, (_, idx) => filtered.slice(idx * PAGE_SIZE, idx * PAGE_SIZE + PAGE_SIZE));
   const chunk = chunks[page] || [];
 
-  const rows = chunk.map(record => {
-    const location = (record.terminal?.name || record.terminal_name || 'Unknown').padEnd(26).slice(0, 26);
-    const buy = record.price_buy > 0 ? record.price_buy.toLocaleString().padStart(8) : '     N/A';
-    const sell = record.price_sell > 0 ? record.price_sell.toLocaleString().padStart(8) : '     N/A';
-    return `| ${location} | ${buy} | ${sell} |`;
-  });
+  const rows = chunk.map(record => `| ${getLocation(record)} | ${formatPrice(record.price_buy)} | ${formatPrice(record.price_sell)} |`);
 
   const header = '| Location                   |      Buy |     Sell |';
   const divider = '|----------------------------|----------|----------|';

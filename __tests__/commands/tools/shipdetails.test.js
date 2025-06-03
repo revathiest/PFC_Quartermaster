@@ -66,12 +66,31 @@ test('fetches detail when outdated', async () => {
   db.Vehicle.findOne.mockResolvedValue({ uuid: '1', updated_at: new Date(), name: 'Ship', link: 'u' });
   db.VehicleDetail.findByPk.mockResolvedValue({ uuid: '1', updated_at: old });
   const { fetchSCDataByUrl } = require('../../../utils/fetchSCData');
-  fetchSCDataByUrl.mockResolvedValue({ data: { uuid: '1', name: 'Ship', updated_at: new Date(), version: 'v' } });
+  fetchSCDataByUrl.mockResolvedValue({
+    data: {
+      uuid: '1',
+      name: 'Ship',
+      updated_at: new Date(),
+      version: 'v',
+      sizes: { length: 0 },
+      emission: { ir: 0 },
+      crew: { min: 0 },
+      mass: 0,
+      speed: { scm: 0 },
+    }
+  });
   db.VehicleDetail.upsert.mockResolvedValue();
-
+  
   await command.execute(i);
 
   expect(fetchSCDataByUrl).toHaveBeenCalled();
+  expect(db.VehicleDetail.upsert).toHaveBeenCalledWith(expect.objectContaining({
+    length: null,
+    ir_emission: null,
+    crew_min: null,
+    mass: null,
+    speed_scm: null
+  }));
 });
 
 test('no vehicles found', async () => {

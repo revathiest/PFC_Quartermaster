@@ -265,7 +265,8 @@ test('submit button processes uploaded screenshot', async () => {
   fetch.mockResolvedValue({ ok: true, buffer: async () => Buffer.from('img'), headers: { get: () => 'image/png' } });
   const message = {
     attachments: new Collection([['1', { url: 'http://img', contentType: 'image/png' }]]),
-    author: { id: 'u' }
+    author: { id: 'u' },
+    delete: jest.fn()
   };
   const awaitMessages = jest.fn().mockResolvedValue(new Collection([['1', message]]));
   process.env.GOOGLE_DRIVE_HUNT_FOLDER = 'root';
@@ -295,6 +296,7 @@ test('submit button processes uploaded screenshot', async () => {
   const activityMsg = activityCh.send.mock.calls[0][0];
   expect(activityMsg).toContain('Alpha Beta');
   expect(interaction.followUp).toHaveBeenCalledWith(expect.objectContaining({ content: '✅ Submission received.' }));
+  expect(message.delete).toHaveBeenCalled();
 });
 
 test('submit button handles timeout', async () => {
@@ -317,6 +319,38 @@ test('submit button handles timeout', async () => {
   expect(HuntSubmission.create).not.toHaveBeenCalled();
 });
 
+test('submit button deletes message when upload fails', async () => {
+  Hunt.findOne.mockResolvedValue({ id: 'h1' });
+  Config.findOne
+    .mockResolvedValueOnce({ value: 'a' })
+    .mockResolvedValueOnce({ value: 'r' });
+  uploadScreenshot.mockRejectedValueOnce(new Error('fail'));
+  HuntPoi.findByPk = jest.fn().mockResolvedValue({ name: 'Alpha Beta' });
+  fetch.mockResolvedValue({ ok: true, buffer: async () => Buffer.from('img'), headers: { get: () => 'image/png' } });
+  const message = {
+    attachments: new Collection([['1', { url: 'http://img', contentType: 'image/png' }]]),
+    author: { id: 'u' },
+    delete: jest.fn()
+  };
+  const awaitMessages = jest.fn().mockResolvedValue(new Collection([['1', message]]));
+  process.env.GOOGLE_DRIVE_HUNT_FOLDER = 'root';
+  const client = { channels: { fetch: jest.fn() } };
+  const interaction = {
+    customId: 'hunt_poi_submit::1::0',
+    reply: jest.fn(),
+    followUp: jest.fn(),
+    channel: { awaitMessages },
+    user: { id: 'u', username: 'Tester' },
+    client
+  };
+
+  await command.button(interaction);
+
+  expect(uploadScreenshot).toHaveBeenCalled();
+  expect(interaction.followUp).toHaveBeenCalledWith(expect.objectContaining({ content: '❌ Failed to submit proof.' }));
+  expect(message.delete).toHaveBeenCalled();
+});
+
 test('submit button with no existing submission sets supersedes to null', async () => {
   Hunt.findOne.mockResolvedValue({ id: 'h1' });
   Config.findOne
@@ -331,7 +365,8 @@ test('submit button with no existing submission sets supersedes to null', async 
   fetch.mockResolvedValue({ ok: true, buffer: async () => Buffer.from('img'), headers: { get: () => 'image/png' } });
   const message = {
     attachments: new Collection([['1', { url: 'http://img', contentType: 'image/png' }]]),
-    author: { id: 'u' }
+    author: { id: 'u' },
+    delete: jest.fn()
   };
   const awaitMessages = jest.fn().mockResolvedValue(new Collection([['1', message]]));
   process.env.GOOGLE_DRIVE_HUNT_FOLDER = 'root';
@@ -349,6 +384,7 @@ test('submit button with no existing submission sets supersedes to null', async 
   expect(HuntSubmission.create).toHaveBeenCalledWith(expect.objectContaining({
     supersedes_submission_id: null
   }));
+  expect(message.delete).toHaveBeenCalled();
 });
 
 test('approve button updates submission', async () => {

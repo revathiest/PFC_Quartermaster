@@ -18,7 +18,19 @@ const makeInteraction = () => ({
   }
 });
 
-beforeEach(() => jest.clearAllMocks());
+let warnSpy;
+let errorSpy;
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+afterEach(() => {
+  warnSpy.mockRestore();
+  errorSpy.mockRestore();
+});
 
 describe('/sync-org-ranks command', () => {
   test('reports mismatches', async () => {
@@ -60,5 +72,17 @@ describe('/sync-org-ranks command', () => {
 
     expect(fetchRsiProfileInfo).toHaveBeenCalled();
     expect(interaction.editReply).toHaveBeenCalled();
+  });
+
+  test('handles member fetch error gracefully', async () => {
+    const interaction = makeInteraction();
+    interaction.guild.members.fetch.mockRejectedValue(new Error('missing'));
+    VerifiedUser.findAll.mockResolvedValue([{ rsiHandle: 'foo', discordUserId: 'id1', rsiOrgId: 'PFCS' }]);
+    fetchRsiProfileInfo.mockResolvedValue({ orgId: 'PFCS', orgRank: 'captain' });
+
+    await execute(interaction);
+
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to fetch Discord member'));
+    expect(interaction.editReply).toHaveBeenCalledWith(expect.stringContaining('All verified PFCS members'));
   });
 });

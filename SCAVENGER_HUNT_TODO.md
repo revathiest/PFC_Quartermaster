@@ -85,7 +85,7 @@ per-user score breakdowns.
 
 * [x] Displays a select menu with names of previous hunts at the bottom
 * [x] Selecting a past hunt updates the response to show its leaderboard
-* [ ] `/hunt score [user]` — shows the score breakdown for yourself or another user (optional parameter)
+* [x] `/hunt score [user]` — shows the score breakdown for yourself or another user (optional parameter)
 
 ### 🗓 Discord Integration
 

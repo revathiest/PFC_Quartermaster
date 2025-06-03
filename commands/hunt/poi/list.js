@@ -285,7 +285,7 @@ module.exports = {
         if (reviewConfig) {
           const ch = await interaction.client.channels.fetch(reviewConfig.value);
           const reviewMsg = await ch.send({
-            content: `Submission from <@${interaction.user.id}> for POI ${poi.name}`,
+            content: `Submission from <@${interaction.user.id}> for POI ${poi.name}. [View screenshot](${submission.image_url})`,
             components: [new ActionRowBuilder().addComponents(
               new ButtonBuilder()
                 .setCustomId(`hunt_poi_approve::${submission.id}`)

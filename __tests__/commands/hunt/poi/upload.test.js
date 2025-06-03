@@ -14,8 +14,12 @@ jest.mock('node-fetch');
 const fetch = require('node-fetch');
 const command = require('../../../../commands/hunt/poi/upload');
 const { MessageFlags } = require('../../../../__mocks__/discord.js');
+const { pendingPoiUploads } = require('../../../../utils/pendingSelections');
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  for (const k of Object.keys(pendingPoiUploads)) delete pendingPoiUploads[k];
+});
 
 test('creates submission with attachment', async () => {
   Hunt.findOne.mockResolvedValue({ id: 'h1' });
@@ -26,13 +30,13 @@ test('creates submission with attachment', async () => {
   fetch.mockResolvedValue({ ok: true, buffer: async () => Buffer.from('img'), headers: { get: () => 'image/png' } });
   const interaction = {
     options: {
-      getString: jest.fn(() => '1'),
       getAttachment: jest.fn(() => ({ url: 'http://img', contentType: 'image/png' }))
     },
     user: { id: 'u' },
     client,
     reply: jest.fn()
   };
+  pendingPoiUploads['u'] = '1';
   process.env.GOOGLE_DRIVE_HUNT_FOLDER = 'root';
   await command.execute(interaction);
   expect(HuntSubmission.create).toHaveBeenCalled();
@@ -40,6 +44,7 @@ test('creates submission with attachment', async () => {
   expect(activityCh.send).toHaveBeenCalled();
   expect(reviewCh.send).toHaveBeenCalled();
   expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ flags: MessageFlags.Ephemeral }));
+  expect(pendingPoiUploads['u']).toBeUndefined();
   delete process.env.GOOGLE_DRIVE_HUNT_FOLDER;
 });
 
@@ -48,17 +53,18 @@ test('handles fetch failure', async () => {
   fetch.mockResolvedValue({ ok: false });
   const interaction = {
     options: {
-      getString: jest.fn(() => '1'),
       getAttachment: jest.fn(() => ({ url: 'http://img', contentType: 'image/png' }))
     },
     user: { id: 'u' },
     client: {},
     reply: jest.fn()
   };
+  pendingPoiUploads['u'] = '1';
   const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
   await command.execute(interaction);
   expect(spy).toHaveBeenCalled();
   expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ content: '❌ Failed to submit proof.' }));
+  expect(pendingPoiUploads['u']).toBeUndefined();
   spy.mockRestore();
 });
 
@@ -66,11 +72,13 @@ test('no active hunt', async () => {
   Hunt.findOne.mockResolvedValue(null);
   const interaction = {
     options: {
-      getString: jest.fn(() => '1'),
       getAttachment: jest.fn(() => ({ url: 'http://img', contentType: 'image/png' }))
     },
+    user: { id: 'u' },
     reply: jest.fn()
   };
+  pendingPoiUploads['u'] = '1';
   await command.execute(interaction);
   expect(interaction.reply).toHaveBeenCalledWith({ content: '❌ No active hunt.', flags: MessageFlags.Ephemeral });
+  expect(pendingPoiUploads['u']).toBeUndefined();
 });

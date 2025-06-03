@@ -15,6 +15,7 @@ jest.mock('node-fetch');
 const fetch = require('node-fetch');
 const command = require('../../../../commands/hunt/poi/list');
 const { MessageFlags } = require('../../../../__mocks__/discord.js');
+const { pendingPoiUploads } = require('../../../../utils/pendingSelections');
 
 const makeInteraction = (roles = []) => ({
   reply: jest.fn(),
@@ -34,6 +35,7 @@ const makeInteraction = (roles = []) => ({
 
 beforeEach(() => {
   jest.clearAllMocks();
+  for (const k of Object.keys(pendingPoiUploads)) delete pendingPoiUploads[k];
 });
 
 test('replies when no pois exist', async () => {
@@ -251,8 +253,9 @@ test('modal handles update failure', async () => {
 });
 
 test('submit button replies with upload instructions', async () => {
-  const interaction = { customId: 'hunt_poi_submit::1::0', reply: jest.fn(), member: { roles: { cache: { map: fn => [] } } } };
+  const interaction = { customId: 'hunt_poi_submit::1::0', reply: jest.fn(), member: { roles: { cache: { map: fn => [] } } }, user: { id: 'u1' } };
   await command.button(interaction);
+  expect(pendingPoiUploads['u1']).toBe('1');
   expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({
     content: expect.stringContaining('/hunt poi upload'),
     flags: MessageFlags.Ephemeral

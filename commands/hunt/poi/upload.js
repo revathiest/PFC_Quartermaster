@@ -4,19 +4,25 @@ const {
 } = require('discord.js');
 const { Hunt, HuntSubmission, Config } = require('../../../config/database');
 const { createDriveClient, uploadScreenshot } = require('../../../utils/googleDrive');
+const { pendingPoiUploads } = require('../../../utils/pendingSelections');
 const fetch = require('node-fetch');
 
 module.exports = {
   data: () => new SlashCommandSubcommandBuilder()
     .setName('upload')
     .setDescription('Upload screenshot proof for a POI')
-    .addStringOption(opt =>
-      opt.setName('poi_id').setDescription('POI ID').setRequired(true))
     .addAttachmentOption(opt =>
       opt.setName('image').setDescription('Screenshot file').setRequired(true)),
 
   async execute(interaction) {
-    const poiId = interaction.options.getString('poi_id');
+    const poiId = pendingPoiUploads[interaction.user.id];
+    if (!poiId) {
+      return interaction.reply({
+        content: '❌ No pending POI found. Use /hunt poi list and choose \`Submit Proof\` first.',
+        flags: MessageFlags.Ephemeral
+      });
+    }
+    delete pendingPoiUploads[interaction.user.id];
     const attachment = interaction.options.getAttachment('image');
 
     const botType = process.env.BOT_TYPE || 'development';

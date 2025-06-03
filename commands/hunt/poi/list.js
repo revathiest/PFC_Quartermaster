@@ -13,6 +13,7 @@ const {
 const { HuntPoi, Hunt, HuntSubmission, Config } = require('../../../config/database');
 const { createDriveClient, uploadScreenshot } = require('../../../utils/googleDrive');
 const fetch = require('node-fetch');
+const { pendingPoiUploads } = require('../../../utils/pendingSelections');
 
 const allowedRoles = ['Admiral', 'Fleet Admiral'];
 
@@ -200,7 +201,8 @@ module.exports = {
 
     if (interaction.customId.startsWith('hunt_poi_submit::')) {
       const [, poiId] = interaction.customId.split('::');
-      const content = `Use the /hunt poi upload command with POI ID \`${poiId}\` and attach your screenshot.`;
+      pendingPoiUploads[interaction.user.id] = poiId;
+      const content = 'Use the /hunt poi upload command and attach your screenshot.';
       await interaction.reply({ content, flags: MessageFlags.Ephemeral });
       return;
     }

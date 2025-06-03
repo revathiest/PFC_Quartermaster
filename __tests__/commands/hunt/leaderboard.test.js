@@ -3,8 +3,10 @@ jest.mock('../../../config/database', () => ({
   HuntSubmission: { findAll: jest.fn() },
   HuntPoi: { findAll: jest.fn() }
 }));
+jest.mock('../../../utils/hunt', () => ({ getActiveHunt: jest.fn() }));
 
 const { Hunt, HuntSubmission, HuntPoi } = require('../../../config/database');
+const { getActiveHunt } = require('../../../utils/hunt');
 const command = require('../../../commands/hunt/leaderboard');
 const { MessageFlags, StringSelectMenuBuilder } = require('discord.js');
 
@@ -23,7 +25,8 @@ afterAll(() => {
 beforeEach(() => jest.clearAllMocks());
 
 test('replies when no hunts exist', async () => {
-  Hunt.findOne.mockResolvedValueOnce(null).mockResolvedValueOnce(null);
+  getActiveHunt.mockResolvedValueOnce(null);
+  Hunt.findOne.mockResolvedValueOnce(null);
   const interaction = makeInteraction();
 
   await command.execute(interaction);
@@ -32,7 +35,8 @@ test('replies when no hunts exist', async () => {
 });
 
 test('shows message when no submissions', async () => {
-  Hunt.findOne.mockResolvedValueOnce(null).mockResolvedValueOnce({ id: 'h1', name: 'Recent' });
+  getActiveHunt.mockResolvedValueOnce(null);
+  Hunt.findOne.mockResolvedValueOnce({ id: 'h1', name: 'Recent' });
   HuntSubmission.findAll.mockResolvedValue([]);
   Hunt.findAll.mockResolvedValue([{ id: 'h1', name: 'Recent' }]);
   const interaction = makeInteraction();
@@ -45,7 +49,8 @@ test('shows message when no submissions', async () => {
 });
 
 test('shows message when submissions not approved', async () => {
-  Hunt.findOne.mockResolvedValueOnce(null).mockResolvedValueOnce({ id: 'h1', name: 'Recent' });
+  getActiveHunt.mockResolvedValueOnce(null);
+  Hunt.findOne.mockResolvedValueOnce({ id: 'h1', name: 'Recent' });
   HuntSubmission.findAll.mockResolvedValue([{ id: 's1', status: 'pending', supersedes_submission_id: null }]);
   Hunt.findAll.mockResolvedValue([{ id: 'h1', name: 'Recent' }]);
   const interaction = makeInteraction();
@@ -57,7 +62,7 @@ test('shows message when submissions not approved', async () => {
 });
 
 test('builds leaderboard from approved submissions', async () => {
-  Hunt.findOne.mockResolvedValue({ id: 'h1', name: 'Hunt' });
+  getActiveHunt.mockResolvedValue({ id: 'h1', name: 'Hunt' });
   HuntSubmission.findAll.mockResolvedValue([
     { id: 's1', user_id: 'u1', poi_id: 'p1', status: 'approved', supersedes_submission_id: null, submitted_at: new Date('2024-01-01') },
     { id: 's2', user_id: 'u2', poi_id: 'p1', status: 'approved', supersedes_submission_id: null, submitted_at: new Date('2024-01-02') }
@@ -77,7 +82,7 @@ test('builds leaderboard from approved submissions', async () => {
 });
 
 test('includes select menu with hunts', async () => {
-  Hunt.findOne.mockResolvedValue({ id: 'h1', name: 'H1' });
+  getActiveHunt.mockResolvedValue({ id: 'h1', name: 'H1' });
   HuntSubmission.findAll.mockResolvedValue([
     { id: 's1', user_id: 'u1', poi_id: 'p1', status: 'approved', supersedes_submission_id: null, submitted_at: new Date('2024-01-01') }
   ]);

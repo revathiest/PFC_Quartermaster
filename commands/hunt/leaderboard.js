@@ -6,6 +6,7 @@ const {
   MessageFlags
 } = require('discord.js');
 const { Hunt, HuntSubmission, HuntPoi } = require('../../config/database');
+const { getActiveHunt } = require('../../utils/hunt');
 
 async function generateLeaderboardEmbed(hunt) {
   const allSubs = await HuntSubmission.findAll({
@@ -75,7 +76,7 @@ module.exports = {
 
   async execute(interaction) {
     try {
-      let hunt = await Hunt.findOne({ where: { status: 'active' } });
+      let hunt = await getActiveHunt();
       if (!hunt) {
         hunt = await Hunt.findOne({ order: [['starts_at', 'DESC']] });
       }

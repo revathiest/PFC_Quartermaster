@@ -1,5 +1,6 @@
 const { SlashCommandSubcommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const { Hunt, HuntSubmission, HuntPoi } = require('../../config/database');
+const { getActiveHunt } = require('../../utils/hunt');
 
 module.exports = {
   data: () => new SlashCommandSubcommandBuilder()
@@ -14,7 +15,7 @@ module.exports = {
     const targetUser = interaction.options.getUser('user') || interaction.user;
     const userId = targetUser.id;
     try {
-      const hunt = await Hunt.findOne({ where: { status: 'active' } });
+      const hunt = await getActiveHunt();
       if (!hunt) {
         return interaction.reply({ content: '❌ No active hunt.', flags: MessageFlags.Ephemeral });
       }

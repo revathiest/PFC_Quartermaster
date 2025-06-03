@@ -1,5 +1,6 @@
 const { SlashCommandSubcommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const { Hunt } = require('../../config/database');
+const { getHuntStatus } = require('../../utils/hunt');
 
 module.exports = {
   data: () => new SlashCommandSubcommandBuilder()
@@ -17,7 +18,8 @@ module.exports = {
       for (const h of hunts) {
         const start = h.starts_at ? new Date(h.starts_at).toLocaleString() : 'N/A';
         const end = h.ends_at ? new Date(h.ends_at).toLocaleString() : 'N/A';
-        embed.addFields({ name: `${h.name} (${h.status})`, value: `${start} → ${end}` });
+        const status = getHuntStatus(h);
+        embed.addFields({ name: `${h.name} (${status})`, value: `${start} → ${end}` });
       }
 
       await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });

@@ -240,16 +240,26 @@ module.exports = {
         const drive = await createDriveClient();
         const rootFolder = process.env.GOOGLE_DRIVE_HUNT_FOLDER;
 
+        const poi = await HuntPoi.findByPk(poiId);
+        if (!poi) {
+          return interaction.followUp({ content: '❌ POI not found.', flags: MessageFlags.Ephemeral });
+        }
+
         const response = await fetch(attachment.url);
         if (!response.ok) throw new Error('Failed to fetch attachment');
         const buffer = await response.buffer();
         const mime = attachment.contentType || response.headers.get('content-type');
         const folderName = interaction.member?.displayName || interaction.user.username;
+        const now = new Date();
+        const pad = n => n.toString().padStart(2, '0');
+        const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}`;
+        const sanitizedName = poi.name.replace(/\s+/g, '_');
+        const fileName = `${sanitizedName}_${timestamp}.jpg`;
         const file = await uploadScreenshot(
           drive,
           rootFolder,
           folderName,
-          `${poiId}.jpg`,
+          fileName,
           buffer,
           mime
         );

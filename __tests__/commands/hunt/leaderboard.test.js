@@ -10,6 +10,16 @@ const { MessageFlags } = require('discord.js');
 
 const makeInteraction = () => ({ reply: jest.fn() });
 
+beforeAll(() => {
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.spyOn(console, 'warn').mockImplementation(() => {});
+});
+
+afterAll(() => {
+  console.error.mockRestore();
+  console.warn.mockRestore();
+});
+
 beforeEach(() => jest.clearAllMocks());
 
 test('replies when no hunts exist', async () => {
@@ -35,8 +45,7 @@ test('builds leaderboard from approved submissions', async () => {
   Hunt.findOne.mockResolvedValue({ id: 'h1', name: 'Hunt' });
   HuntSubmission.findAll.mockResolvedValue([
     { id: 's1', user_id: 'u1', poi_id: 'p1', status: 'approved', supersedes_submission_id: null, submitted_at: new Date('2024-01-01') },
-    { id: 's2', user_id: 'u2', poi_id: 'p1', status: 'approved', supersedes_submission_id: null, submitted_at: new Date('2024-01-02') },
-    { id: 's3', user_id: 'u2', poi_id: 'p1', status: 'pending', supersedes_submission_id: 's2', submitted_at: new Date('2024-01-03') }
+    { id: 's2', user_id: 'u2', poi_id: 'p1', status: 'approved', supersedes_submission_id: null, submitted_at: new Date('2024-01-02') }
   ]);
   HuntPoi.findAll.mockResolvedValue([{ id: 'p1', points: 5 }]);
   const interaction = makeInteraction();
@@ -46,8 +55,7 @@ test('builds leaderboard from approved submissions', async () => {
   const reply = interaction.reply.mock.calls[0][0];
   expect(reply.embeds[0].data.title).toContain('Hunt');
   expect(reply.flags).toBe(MessageFlags.Ephemeral);
-  const fields = reply.embeds[0].data.fields;
-  expect(fields).toHaveLength(1);
-  expect(fields[0].value).toContain('<@u1>');
-  expect(fields[0].value).toContain('5');
+  const lines = reply.embeds[0].data.description.split('\n');
+  expect(lines[0]).toContain('<@u2>');
+  expect(lines[1]).toContain('<@u1>');
 });

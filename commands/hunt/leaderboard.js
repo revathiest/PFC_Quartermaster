@@ -50,7 +50,7 @@ module.exports = {
       const entries = Array.from(scores.entries()).map(([userId, data]) => ({ userId, ...data }));
       entries.sort((a, b) => {
         if (b.points !== a.points) return b.points - a.points;
-        return a.latest - b.latest;
+        return b.latest - a.latest;
       });
 
       const embed = new EmbedBuilder()

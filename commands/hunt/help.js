@@ -15,7 +15,8 @@ module.exports = {
         { name: '/hunt schedule', value: 'Create a new hunt and Discord event (admin).' },
         { name: '/hunt set-channels', value: 'Configure activity and review channels (admin).' },
         { name: '/hunt poi create', value: 'Create a new Point of Interest (admin).' },
-        { name: '/hunt poi list', value: 'Browse POIs, submit proof, or edit/archive (admin).' }
+        { name: '/hunt poi list', value: 'Browse POIs, submit proof, or edit/archive (admin).' },
+        { name: '/hunt my-submissions', value: 'View your submissions and points earned.' }
       );
 
     await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });

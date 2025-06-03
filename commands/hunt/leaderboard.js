@@ -13,15 +13,25 @@ async function generateLeaderboardEmbed(hunt) {
     order: [['submitted_at', 'ASC']]
   });
 
+  const embed = new EmbedBuilder()
+    .setTitle(`🏅 ${hunt.name} Leaderboard`)
+    .setColor('Gold')
+    .setFooter({ text: 'Top hunters ranked by total points' })
+    .setTimestamp();
+
   if (!allSubs.length) {
-    return { error: '❌ No submissions yet for this hunt.' };
+    embed.setDescription('❌ No submissions yet for this hunt.');
+    return { embed };
   }
 
   const supersededIds = new Set(allSubs.map(s => s.supersedes_submission_id).filter(Boolean));
-  const submissions = allSubs.filter(s => s.status === 'approved' && !supersededIds.has(s.id));
+  const submissions = allSubs.filter(
+    s => s.status === 'approved' && !supersededIds.has(s.id)
+  );
 
   if (!submissions.length) {
-    return { error: '❌ No approved submissions yet for this hunt.' };
+    embed.setDescription('❌ No approved submissions yet for this hunt.');
+    return { embed };
   }
 
   const poiIds = [...new Set(submissions.map(s => s.poi_id))];
@@ -44,12 +54,6 @@ async function generateLeaderboardEmbed(hunt) {
     if (b.points !== a.points) return b.points - a.points;
     return b.latest - a.latest;
   });
-
-  const embed = new EmbedBuilder()
-    .setTitle(`🏅 ${hunt.name} Leaderboard`)
-    .setColor('Gold')
-    .setFooter({ text: 'Top hunters ranked by total points' })
-    .setTimestamp();
 
   const medals = ['🥇', '🥈', '🥉'];
   const list = entries
@@ -79,10 +83,7 @@ module.exports = {
         return interaction.reply({ content: '❌ No scavenger hunts found.', flags: MessageFlags.Ephemeral });
       }
 
-      const { embed, error } = await generateLeaderboardEmbed(hunt);
-      if (error) {
-        return interaction.reply({ content: error, flags: MessageFlags.Ephemeral });
-      }
+      const { embed } = await generateLeaderboardEmbed(hunt);
 
       const hunts = await Hunt.findAll({ order: [['starts_at', 'DESC']] });
       const menu = new StringSelectMenuBuilder()
@@ -109,10 +110,7 @@ module.exports = {
         return interaction.update({ content: '❌ Hunt not found.', components: [], flags: MessageFlags.Ephemeral });
       }
 
-      const { embed, error } = await generateLeaderboardEmbed(hunt);
-      if (error) {
-        return interaction.update({ content: error, components: [], flags: MessageFlags.Ephemeral });
-      }
+      const { embed } = await generateLeaderboardEmbed(hunt);
 
       const hunts = await Hunt.findAll({ order: [['starts_at', 'DESC']] });
       const menu = new StringSelectMenuBuilder()

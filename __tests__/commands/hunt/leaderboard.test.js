@@ -31,14 +31,29 @@ test('replies when no hunts exist', async () => {
   expect(interaction.reply).toHaveBeenCalledWith({ content: '❌ No scavenger hunts found.', flags: MessageFlags.Ephemeral });
 });
 
-test('replies when no submissions', async () => {
+test('shows message when no submissions', async () => {
   Hunt.findOne.mockResolvedValueOnce(null).mockResolvedValueOnce({ id: 'h1', name: 'Recent' });
   HuntSubmission.findAll.mockResolvedValue([]);
+  Hunt.findAll.mockResolvedValue([{ id: 'h1', name: 'Recent' }]);
   const interaction = makeInteraction();
 
   await command.execute(interaction);
 
-  expect(interaction.reply).toHaveBeenCalledWith({ content: '❌ No submissions yet for this hunt.', flags: MessageFlags.Ephemeral });
+  const reply = interaction.reply.mock.calls[0][0];
+  expect(reply.embeds[0].data.description).toBe('❌ No submissions yet for this hunt.');
+  expect(reply.components).toBeDefined();
+});
+
+test('shows message when submissions not approved', async () => {
+  Hunt.findOne.mockResolvedValueOnce(null).mockResolvedValueOnce({ id: 'h1', name: 'Recent' });
+  HuntSubmission.findAll.mockResolvedValue([{ id: 's1', status: 'pending', supersedes_submission_id: null }]);
+  Hunt.findAll.mockResolvedValue([{ id: 'h1', name: 'Recent' }]);
+  const interaction = makeInteraction();
+
+  await command.execute(interaction);
+
+  const reply = interaction.reply.mock.calls[0][0];
+  expect(reply.embeds[0].data.description).toBe('❌ No approved submissions yet for this hunt.');
 });
 
 test('builds leaderboard from approved submissions', async () => {

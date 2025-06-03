@@ -257,6 +257,7 @@ test('submit button processes uploaded screenshot', async () => {
     .mockResolvedValueOnce({ value: 'a' })
     .mockResolvedValueOnce({ value: 'r' });
   HuntSubmission.create.mockResolvedValue({ update: jest.fn() });
+  HuntPoi.findByPk = jest.fn().mockResolvedValue({ name: 'Alpha Beta' });
   const activityCh = { send: jest.fn() };
   const reviewCh = { send: jest.fn().mockResolvedValue({ id: 'm' }) };
   const client = { channels: { fetch: jest.fn(id => (id === 'a' ? activityCh : reviewCh)) } };
@@ -266,12 +267,13 @@ test('submit button processes uploaded screenshot', async () => {
     author: { id: 'u' }
   };
   const awaitMessages = jest.fn().mockResolvedValue(new Collection([['1', message]]));
+  process.env.GOOGLE_DRIVE_HUNT_FOLDER = 'root';
   const interaction = {
     customId: 'hunt_poi_submit::1::0',
     reply: jest.fn(),
     followUp: jest.fn(),
     channel: { awaitMessages },
-    user: { id: 'u' },
+    user: { id: 'u', username: 'Tester' },
     client
   };
 
@@ -280,6 +282,8 @@ test('submit button processes uploaded screenshot', async () => {
   expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ flags: MessageFlags.Ephemeral }));
   expect(awaitMessages).toHaveBeenCalled();
   expect(uploadScreenshot).toHaveBeenCalled();
+  const fileName = uploadScreenshot.mock.calls[0][3];
+  expect(fileName).toMatch(/^Alpha_Beta_\d{4}-\d{2}-\d{2}_\d{4}\.jpg$/);
   expect(HuntSubmission.create).toHaveBeenCalled();
   expect(interaction.followUp).toHaveBeenCalledWith(expect.objectContaining({ content: '✅ Submission received.' }));
 });

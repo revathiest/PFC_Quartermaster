@@ -304,6 +304,12 @@ module.exports = {
       } catch (err) {
         console.error('❌ Failed to submit proof:', err);
         await interaction.followUp({ content: '❌ Failed to submit proof.', flags: MessageFlags.Ephemeral });
+      } finally {
+        try {
+          await msg.delete();
+        } catch (err) {
+          console.error('❌ Failed to delete evidence message:', err);
+        }
       }
       return;
     }

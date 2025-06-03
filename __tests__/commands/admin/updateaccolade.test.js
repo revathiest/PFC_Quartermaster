@@ -9,10 +9,17 @@ const { Accolade } = require('../../../config/database');
 const { buildAccoladeEmbed } = require('../../../utils/accoladeEmbedBuilder');
 const { MessageFlags } = require('discord.js');
 
-const makeInteraction = (emoji = '<:medal:1>', desc = 'desc') => {
+const makeInteraction = (emoji = '<:medal:1>', desc = 'desc', members = []) => {
   const guild = {
     channels: { fetch: jest.fn(() => ({ type: 0, messages: { fetch: jest.fn(() => Promise.resolve({ edit: jest.fn() })) }, send: jest.fn(() => ({ id: 'mid' })) })) },
-    members: { fetch: jest.fn(() => Promise.resolve()), cache: { filter: jest.fn(() => ({ map: fn => [] })) } }
+    members: {
+      fetch: jest.fn(() => Promise.resolve()),
+      cache: {
+        filter: jest.fn(fn => ({
+          map: mapFn => members.filter(fn).map(mapFn)
+        }))
+      }
+    }
   };
   return {
     options: {
@@ -38,7 +45,8 @@ describe('/updateaccolade command', () => {
   });
 
   test('updates accolade and message', async () => {
-    const interaction = makeInteraction();
+    const members = [{ roles: { cache: { has: () => true } } }];
+    const interaction = makeInteraction(undefined, undefined, members);
     Accolade.findOne.mockResolvedValue({ role_id: 'r1', name: 'Test', save: jest.fn(), channel_id: 'c1', message_id: 'm1', emoji: '', description: '' });
     buildAccoladeEmbed.mockReturnValue('embed');
 
@@ -68,13 +76,17 @@ describe('/updateaccolade command', () => {
   });
 
   test('creates a new message when previous one is missing', async () => {
+    const member = { roles: { cache: { has: () => true } } };
     const guild = {
       channels: { fetch: jest.fn(() => ({
         type: 0,
         messages: { fetch: jest.fn(() => Promise.reject(new Error('no msg'))) },
         send: jest.fn(() => ({ id: 'new' }))
       })) },
-      members: { fetch: jest.fn(() => Promise.resolve()), cache: { filter: jest.fn(() => ({ map: fn => [] })) } }
+      members: {
+        fetch: jest.fn(() => Promise.resolve()),
+        cache: { filter: jest.fn(fn => ({ map: mapFn => [member].filter(fn).map(mapFn) })) }
+      }
     };
     const interaction = { options: { getRole: jest.fn(() => ({ id: 'r1' })), getString: jest.fn(() => '<:e:1>') }, guild, reply: jest.fn() };
     const accolade = { role_id: 'r1', name: 'Test', save: jest.fn(), channel_id: 'c1', message_id: 'old', emoji: '', description: '' };

@@ -53,6 +53,20 @@ describe('scheduledEvents handlers', () => {
     expect(Hunt.create).toHaveBeenCalled();
   });
 
+  test('handleCreateEvent creates hunt when location uses hyphen', async () => {
+    const { Hunt } = require('../../../config/database');
+    event.location = 'Scavenger-Hunt area';
+    await events.handleCreateEvent(event);
+    expect(Hunt.create).toHaveBeenCalled();
+  });
+
+  test('handleCreateEvent creates hunt when location has no spaces', async () => {
+    const { Hunt } = require('../../../config/database');
+    event.location = 'ScavengerHunt';
+    await events.handleCreateEvent(event);
+    expect(Hunt.create).toHaveBeenCalled();
+  });
+
   test('handleUpdateEvent deletes when ended', async () => {
     await events.handleUpdateEvent(event, { ...event, status: 3 });
     expect(handler.deleteEventFromDatabase).toHaveBeenCalled();

@@ -11,14 +11,17 @@ When completing items on this list, it is important to update the items to keep 
 
 ## Current Status
 
-Initial scaffolding for the scavenger hunt exists on the `scavenger` branch. The following pieces are implemented:
+Initial scaffolding for the scavenger hunt exists on the `scavenger` branch.
+The following pieces are implemented:
 
 * `/hunt help`, `/hunt list`, and `/hunt set-channels` commands
 * Sequelize models for `Hunt`, `HuntPoi`, and `HuntSubmission`
 * `/hunt schedule` and full POI management with select menus/modals
 * Submission workflow with Google Drive storage and review buttons
+* `/hunt leaderboard` and `/hunt my-submissions` for score viewing
 
-The remaining work mainly covers scoring, automatic event sync, and channel gating.
+The remaining work mainly covers automatic event sync, channel gating and
+per-user score breakdowns.
 
 ---
 
@@ -76,12 +79,12 @@ The remaining work mainly covers scoring, automatic event sync, and channel gati
 ### 🏆 Scoring & Leaderboard
 
 * [x] POIs have point values
-* [ ] Approving a submission grants the user points
-* [ ] Ties are broken by the earliest final submission (earlier timestamp wins)
+* [x] Approving a submission grants the user points
+* [x] Ties are broken by the most recent valid submission (later timestamp wins)
 * [x] `/hunt leaderboard` — shows scores for the current active or most recent hunt
 
-  * Displays a select menu with names of previous hunts at the bottom
-  * Selecting a past hunt updates the response to show its leaderboard
+  * [ ] Displays a select menu with names of previous hunts at the bottom
+  * [ ] Selecting a past hunt updates the response to show its leaderboard
 * [ ] `/hunt score [user]` — shows the score breakdown for yourself or another user (optional parameter)
 
 ### 🗓 Discord Integration

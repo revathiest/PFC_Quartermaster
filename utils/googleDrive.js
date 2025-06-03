@@ -21,18 +21,31 @@ async function createDriveClient() {
 const { PassThrough } = require('stream');
 
 async function uploadScreenshot(drive, rootFolderId, userFolderName, fileName, fileBuffer, mimeType) {
-  const folderRes = await drive.files.create({
-    resource: { name: userFolderName, mimeType: 'application/vnd.google-apps.folder', parents: [rootFolderId] },
-    fields: 'id'
+  const listRes = await drive.files.list({
+    q: `'${rootFolderId}' in parents and name='${userFolderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+    fields: 'files(id)',
+    spaces: 'drive'
   });
-  const folderId = folderRes.data.id;
+
+  let folderId = listRes.data.files?.[0]?.id;
+
+  if (!folderId) {
+    const folderRes = await drive.files.create({
+      resource: { name: userFolderName, mimeType: 'application/vnd.google-apps.folder', parents: [rootFolderId] },
+      fields: 'id'
+    });
+    folderId = folderRes.data.id;
+  }
+
   const bufferStream = new PassThrough();
   bufferStream.end(fileBuffer);
+
   const fileRes = await drive.files.create({
     resource: { name: fileName, parents: [folderId] },
     media: { mimeType, body: bufferStream },
     fields: 'id, webViewLink'
   });
+
   return fileRes.data;
 }
 

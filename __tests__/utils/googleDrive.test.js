@@ -40,15 +40,37 @@ test('creates drive client using service account key', async () => {
 const { uploadScreenshot } = require('../../utils/googleDrive');
 
 describe('uploadScreenshot', () => {
-  test('uploads file to user folder', async () => {
+  test('creates user folder when missing', async () => {
+    const list = jest.fn().mockResolvedValue({ data: { files: [] } });
     const create = jest.fn()
       .mockResolvedValueOnce({ data: { id: 'folder' } })
       .mockResolvedValueOnce({ data: { id: 'file', webViewLink: 'link' } });
-    const drive = { files: { create } };
+    const drive = { files: { list, create } };
 
     const res = await uploadScreenshot(drive, 'root', 'user', 'file.png', Buffer.from('img'), 'image/png');
 
+    expect(list).toHaveBeenCalledWith(expect.objectContaining({
+      q: expect.stringContaining("'root' in parents"),
+    }));
     expect(create).toHaveBeenCalledTimes(2);
+    expect(create).toHaveBeenNthCalledWith(1, expect.objectContaining({
+      resource: expect.objectContaining({ name: 'user' })
+    }));
+    expect(res).toEqual({ id: 'file', webViewLink: 'link' });
+  });
+
+  test('reuses existing user folder', async () => {
+    const list = jest.fn().mockResolvedValue({ data: { files: [{ id: 'folder' }] } });
+    const create = jest.fn().mockResolvedValueOnce({ data: { id: 'file', webViewLink: 'link' } });
+    const drive = { files: { list, create } };
+
+    const res = await uploadScreenshot(drive, 'root', 'user', 'file.png', Buffer.from('img'), 'image/png');
+
+    expect(list).toHaveBeenCalled();
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(create).toHaveBeenCalledWith(expect.objectContaining({
+      resource: expect.objectContaining({ name: 'file.png', parents: ['folder'] })
+    }));
     expect(res).toEqual({ id: 'file', webViewLink: 'link' });
   });
 });

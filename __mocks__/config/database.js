@@ -32,7 +32,8 @@ const VoiceLog = {
 
 const Hunt = {
   findAll: jest.fn(),
-  create: jest.fn()
+  create: jest.fn(),
+  findOne: jest.fn()
 };
 
 const HuntPoi = {

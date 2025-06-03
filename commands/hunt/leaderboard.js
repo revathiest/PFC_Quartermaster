@@ -54,12 +54,22 @@ module.exports = {
       });
 
       const embed = new EmbedBuilder()
-        .setTitle(`🏅 ${hunt.name} Leaderboard`)
-        .setColor('Gold');
-
-      for (const [index, entry] of entries.entries()) {
-        embed.addFields({ name: `#${index + 1}`, value: `<@${entry.userId}> - ${entry.points} pts` });
-      }
+      .setTitle(`🏅 ${hunt.name} Leaderboard`)
+      .setColor('Gold')
+      .setFooter({ text: 'Top hunters ranked by total points' })
+      .setTimestamp();
+    
+    const medals = ['🥇', '🥈', '🥉'];
+    
+    const list = entries
+      .map((entry, index) => {
+        const rank = medals[index] ?? `#${index + 1}`;
+        const paddedPoints = entry.points.toString().padStart(3, ' ');
+        return `${rank} ${paddedPoints} pts — <@${entry.userId}>`;
+      })
+      .join('\n');
+    
+    embed.setDescription(list);    
 
       await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     } catch (err) {

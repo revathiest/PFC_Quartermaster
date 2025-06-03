@@ -18,7 +18,7 @@ Initial scaffolding for the scavenger hunt exists on the `scavenger` branch. The
 * `/hunt schedule` and full POI management with select menus/modals
 * Submission workflow with Google Drive storage and review buttons
 
-The remaining work mainly covers scoring, automatic event sync, `/hunt my-submissions`, and channel gating.
+The remaining work mainly covers scoring, automatic event sync, and channel gating.
 
 ---
 
@@ -60,7 +60,7 @@ The remaining work mainly covers scoring, automatic event sync, `/hunt my-submis
   * [x] Clicking submit opens a modal or image upload interaction for selfie submission
   * [x] Pagination updates both the embed and select menu
 
-* [ ] `/hunt my-submissions` — view own submissions for the current hunt
+* [x] `/hunt my-submissions` — view own submissions for the current hunt
 
 * [x] Submissions are reviewed externally via Google Drive
 

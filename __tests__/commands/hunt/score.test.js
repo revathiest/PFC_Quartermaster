@@ -3,8 +3,10 @@ jest.mock('../../../config/database', () => ({
   HuntSubmission: { findAll: jest.fn() },
   HuntPoi: { findAll: jest.fn() }
 }));
+jest.mock('../../../utils/hunt', () => ({ getActiveHunt: jest.fn() }));
 
 const { Hunt, HuntSubmission, HuntPoi } = require('../../../config/database');
+const { getActiveHunt } = require('../../../utils/hunt');
 const command = require('../../../commands/hunt/score');
 const { MessageFlags } = require('../../../__mocks__/discord.js');
 
@@ -17,7 +19,7 @@ const makeInteraction = (targetId = null) => ({
 beforeEach(() => jest.clearAllMocks());
 
 test('replies when no active hunt', async () => {
-  Hunt.findOne.mockResolvedValue(null);
+  getActiveHunt.mockResolvedValue(null);
   const interaction = makeInteraction();
 
   await command.execute(interaction);
@@ -26,7 +28,7 @@ test('replies when no active hunt', async () => {
 });
 
 test('replies when no submissions', async () => {
-  Hunt.findOne.mockResolvedValue({ id: 'h1' });
+  getActiveHunt.mockResolvedValue({ id: 'h1' });
   HuntSubmission.findAll.mockResolvedValue([]);
   const interaction = makeInteraction('u2');
 
@@ -36,7 +38,7 @@ test('replies when no submissions', async () => {
 });
 
 test('lists submissions grouped by status', async () => {
-  Hunt.findOne.mockResolvedValue({ id: 'h1' });
+  getActiveHunt.mockResolvedValue({ id: 'h1' });
   HuntSubmission.findAll.mockResolvedValue([
     { id: 's1', poi_id: 'p1', status: 'approved', supersedes_submission_id: null },
     { id: 's2', poi_id: 'p2', status: 'rejected', supersedes_submission_id: null },
@@ -64,7 +66,7 @@ test('lists submissions grouped by status', async () => {
 });
 
 test("uses username in title when targeting another user", async () => {
-  Hunt.findOne.mockResolvedValue({ id: 'h1' });
+  getActiveHunt.mockResolvedValue({ id: 'h1' });
   HuntSubmission.findAll.mockResolvedValue([
     { id: 's1', poi_id: 'p1', status: 'approved', supersedes_submission_id: null }
   ]);
@@ -78,7 +80,7 @@ test("uses username in title when targeting another user", async () => {
 });
 
 test('filters superseded submissions', async () => {
-  Hunt.findOne.mockResolvedValue({ id: 'h1' });
+  getActiveHunt.mockResolvedValue({ id: 'h1' });
   HuntSubmission.findAll.mockResolvedValue([
     { id: 's1', poi_id: 'p1', status: 'approved', supersedes_submission_id: null },
     { id: 's2', poi_id: 'p1', status: 'approved', supersedes_submission_id: 's1' }

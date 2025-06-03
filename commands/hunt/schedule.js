@@ -59,7 +59,6 @@ module.exports = {
         discord_event_id: event.id,
         starts_at: start,
         ends_at: end,
-        status: 'upcoming',
       });
 
       await interaction.reply({ content: `✅ Hunt "${name}" scheduled.`, flags: MessageFlags.Ephemeral });

@@ -26,10 +26,6 @@ module.exports = (sequelize) => {
     ends_at: {
       type: DataTypes.DATE,
       allowNull: false
-    },
-    status: {
-      type: DataTypes.ENUM('upcoming', 'active', 'archived'),
-      allowNull: false
     }
   }, {
     tableName: 'hunts',

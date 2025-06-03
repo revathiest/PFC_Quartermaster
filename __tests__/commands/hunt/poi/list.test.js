@@ -4,8 +4,10 @@ jest.mock('../../../../config/database', () => ({
   HuntSubmission: { create: jest.fn(), findOne: jest.fn() },
   Config: { findOne: jest.fn() }
 }));
+jest.mock('../../../../utils/hunt', () => ({ getActiveHunt: jest.fn() }));
 
 const { HuntPoi, Hunt, HuntSubmission, Config } = require('../../../../config/database');
+const { getActiveHunt } = require('../../../../utils/hunt');
 jest.mock('../../../../utils/googleDrive', () => ({
   createDriveClient: jest.fn(() => ({ files: { create: jest.fn() } })),
   uploadScreenshot: jest.fn(() => ({ id: 'f', webViewLink: 'link' }))
@@ -252,7 +254,7 @@ test('modal handles update failure', async () => {
 });
 
 test('submit button processes uploaded screenshot', async () => {
-  Hunt.findOne.mockResolvedValue({ id: 'h1' });
+  getActiveHunt.mockResolvedValue({ id: 'h1' });
   Config.findOne
     .mockResolvedValueOnce({ value: 'a' })
     .mockResolvedValueOnce({ value: 'r' });
@@ -320,7 +322,7 @@ test('submit button handles timeout', async () => {
 });
 
 test('submit button deletes message when upload fails', async () => {
-  Hunt.findOne.mockResolvedValue({ id: 'h1' });
+  getActiveHunt.mockResolvedValue({ id: 'h1' });
   Config.findOne
     .mockResolvedValueOnce({ value: 'a' })
     .mockResolvedValueOnce({ value: 'r' });
@@ -352,7 +354,7 @@ test('submit button deletes message when upload fails', async () => {
 });
 
 test('submit button with no existing submission sets supersedes to null', async () => {
-  Hunt.findOne.mockResolvedValue({ id: 'h1' });
+  getActiveHunt.mockResolvedValue({ id: 'h1' });
   Config.findOne
     .mockResolvedValueOnce({ value: 'a' })
     .mockResolvedValueOnce({ value: 'r' });

@@ -11,6 +11,7 @@ const {
   MessageFlags
 } = require('discord.js');
 const { HuntPoi, Hunt, HuntSubmission, Config } = require('../../../config/database');
+const { getActiveHunt } = require('../../../utils/hunt');
 const { createDriveClient, uploadScreenshot } = require('../../../utils/googleDrive');
 const fetch = require('node-fetch');
 
@@ -238,7 +239,7 @@ module.exports = {
 
       const botType = process.env.BOT_TYPE || 'development';
       try {
-        const hunt = await Hunt.findOne({ where: { status: 'active' } });
+        const hunt = await getActiveHunt();
         if (!hunt) {
           return interaction.followUp({ content: '❌ No active hunt.', flags: MessageFlags.Ephemeral });
         }

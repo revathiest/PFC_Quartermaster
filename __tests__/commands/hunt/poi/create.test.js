@@ -6,7 +6,7 @@ const { HuntPoi } = require('../../../../config/database');
 const command = require('../../../../commands/hunt/poi/create');
 const { MessageFlags } = require('../../../../__mocks__/discord.js');
 
-const makeInteraction = () => ({
+const makeInteraction = (roles = ['Admiral']) => ({
   options: {
     getString: jest.fn(key => ({
       name: 'Alpha',
@@ -16,6 +16,7 @@ const makeInteraction = () => ({
     getAttachment: jest.fn(() => ({ url: 'img' })),
     getInteger: jest.fn(() => 10)
   },
+  member: { roles: { cache: { map: fn => roles.map(r => fn({ name: r })) } } },
   user: { id: 'u1' },
   reply: jest.fn()
 });
@@ -70,6 +71,18 @@ test('handles db error', async () => {
     flags: MessageFlags.Ephemeral
   });
   spy.mockRestore();
+});
+
+test('rejects when user lacks role', async () => {
+  const interaction = makeInteraction(['Member']);
+
+  await command.execute(interaction);
+
+  expect(interaction.reply).toHaveBeenCalledWith({
+    content: expect.stringContaining('permission'),
+    flags: MessageFlags.Ephemeral
+  });
+  expect(HuntPoi.create).not.toHaveBeenCalled();
 });
 
 test('defines command options', () => {

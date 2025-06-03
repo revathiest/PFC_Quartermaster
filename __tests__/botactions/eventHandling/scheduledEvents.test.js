@@ -46,6 +46,13 @@ describe('scheduledEvents handlers', () => {
     }));
   });
 
+  test('handleCreateEvent creates hunt when location contains scavenger hunt text', async () => {
+    const { Hunt } = require('../../../config/database');
+    event.location = 'Scavenger Hunt - Round 1 ';
+    await events.handleCreateEvent(event);
+    expect(Hunt.create).toHaveBeenCalled();
+  });
+
   test('handleUpdateEvent deletes when ended', async () => {
     await events.handleUpdateEvent(event, { ...event, status: 3 });
     expect(handler.deleteEventFromDatabase).toHaveBeenCalled();

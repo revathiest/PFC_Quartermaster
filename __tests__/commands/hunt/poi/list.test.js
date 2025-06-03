@@ -1,7 +1,7 @@
 jest.mock('../../../../config/database', () => ({
   HuntPoi: { findAll: jest.fn(), findByPk: jest.fn() },
   Hunt: { findOne: jest.fn() },
-  HuntSubmission: { create: jest.fn() },
+  HuntSubmission: { create: jest.fn(), findOne: jest.fn() },
   Config: { findOne: jest.fn() }
 }));
 
@@ -257,6 +257,7 @@ test('submit button processes uploaded screenshot', async () => {
     .mockResolvedValueOnce({ value: 'a' })
     .mockResolvedValueOnce({ value: 'r' });
   HuntSubmission.create.mockResolvedValue({ id: 's1', update: jest.fn() });
+  HuntSubmission.findOne.mockResolvedValue({ id: 'prev1' });
   HuntPoi.findByPk = jest.fn().mockResolvedValue({ name: 'Alpha Beta' });
   const activityCh = { send: jest.fn() };
   const reviewCh = { send: jest.fn().mockResolvedValue({ id: 'm' }) };
@@ -284,11 +285,15 @@ test('submit button processes uploaded screenshot', async () => {
   expect(uploadScreenshot).toHaveBeenCalled();
   const fileName = uploadScreenshot.mock.calls[0][3];
   expect(fileName).toMatch(/^Alpha_Beta_\d{4}-\d{2}-\d{2}_\d{4}\.jpg$/);
-  expect(HuntSubmission.create).toHaveBeenCalled();
-  expect(reviewCh.send).toHaveBeenCalledWith(expect.objectContaining({
-    content: expect.stringContaining('Alpha Beta'),
-    components: expect.any(Array)
+  expect(HuntSubmission.create).toHaveBeenCalledWith(expect.objectContaining({
+    supersedes_submission_id: 'prev1'
   }));
+  const reviewArgs = reviewCh.send.mock.calls[0][0];
+  expect(reviewArgs.content).toContain('Alpha Beta');
+  expect(reviewArgs.content).not.toContain('link');
+  expect(reviewArgs.components).toEqual(expect.any(Array));
+  const activityMsg = activityCh.send.mock.calls[0][0];
+  expect(activityMsg).toContain('Alpha Beta');
   expect(interaction.followUp).toHaveBeenCalledWith(expect.objectContaining({ content: '✅ Submission received.' }));
 });
 
@@ -310,6 +315,40 @@ test('submit button handles timeout', async () => {
     content: '❌ Timed out waiting for file upload.'
   }));
   expect(HuntSubmission.create).not.toHaveBeenCalled();
+});
+
+test('submit button with no existing submission sets supersedes to null', async () => {
+  Hunt.findOne.mockResolvedValue({ id: 'h1' });
+  Config.findOne
+    .mockResolvedValueOnce({ value: 'a' })
+    .mockResolvedValueOnce({ value: 'r' });
+  HuntSubmission.create.mockResolvedValue({ id: 's1', update: jest.fn() });
+  HuntSubmission.findOne.mockResolvedValue(null);
+  HuntPoi.findByPk = jest.fn().mockResolvedValue({ name: 'Alpha Beta' });
+  const activityCh = { send: jest.fn() };
+  const reviewCh = { send: jest.fn().mockResolvedValue({ id: 'm' }) };
+  const client = { channels: { fetch: jest.fn(id => (id === 'a' ? activityCh : reviewCh)) } };
+  fetch.mockResolvedValue({ ok: true, buffer: async () => Buffer.from('img'), headers: { get: () => 'image/png' } });
+  const message = {
+    attachments: new Collection([['1', { url: 'http://img', contentType: 'image/png' }]]),
+    author: { id: 'u' }
+  };
+  const awaitMessages = jest.fn().mockResolvedValue(new Collection([['1', message]]));
+  process.env.GOOGLE_DRIVE_HUNT_FOLDER = 'root';
+  const interaction = {
+    customId: 'hunt_poi_submit::1::0',
+    reply: jest.fn(),
+    followUp: jest.fn(),
+    channel: { awaitMessages },
+    user: { id: 'u', username: 'Tester' },
+    client
+  };
+
+  await command.button(interaction);
+
+  expect(HuntSubmission.create).toHaveBeenCalledWith(expect.objectContaining({
+    supersedes_submission_id: null
+  }));
 });
 
 test('approve button updates submission', async () => {

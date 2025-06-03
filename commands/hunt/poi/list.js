@@ -240,6 +240,11 @@ module.exports = {
         const drive = await createDriveClient();
         const rootFolder = process.env.GOOGLE_DRIVE_HUNT_FOLDER;
 
+        const existing = await HuntSubmission.findOne({
+          where: { hunt_id: hunt.id, poi_id: poiId, user_id: interaction.user.id },
+          order: [['submitted_at', 'DESC']]
+        });
+
         const poi = await HuntPoi.findByPk(poiId);
         if (!poi) {
           return interaction.followUp({ content: '❌ POI not found.', flags: MessageFlags.Ephemeral });
@@ -269,17 +274,18 @@ module.exports = {
           poi_id: poiId,
           user_id: interaction.user.id,
           image_url: file.webViewLink,
-          status: 'pending'
+          status: 'pending',
+          supersedes_submission_id: existing ? existing.id : null
         });
 
         if (activityConfig) {
           const ch = await interaction.client.channels.fetch(activityConfig.value);
-          await ch.send(`<@${interaction.user.id}> submitted evidence for POI ${poiId}`);
+          await ch.send(`<@${interaction.user.id}> submitted evidence for POI ${poi.name}`);
         }
         if (reviewConfig) {
           const ch = await interaction.client.channels.fetch(reviewConfig.value);
           const reviewMsg = await ch.send({
-            content: `Submission from <@${interaction.user.id}> for POI ${poi.name}: ${file.webViewLink}`,
+            content: `Submission from <@${interaction.user.id}> for POI ${poi.name}`,
             components: [new ActionRowBuilder().addComponents(
               new ButtonBuilder()
                 .setCustomId(`hunt_poi_approve::${submission.id}`)

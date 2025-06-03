@@ -42,7 +42,7 @@ All remaining checklist items are still pending.
     * Name is fixed after creation due to Discord modal limits
   * [x] Archive immediately archives the selected POI
   * [x] Pagination updates both the embed and the select menu
-  * [ ] Admin view restricts these controls to `Admiral` and `Fleet Admiral` roles
+  * [x] Admin view restricts these controls to `Admiral` and `Fleet Admiral` roles
 * [ ] POIs exist globally and are not tied to a specific hunt
 * [ ] All POI management uses select menus and modals to avoid reliance on raw IDs
 
@@ -52,11 +52,11 @@ All remaining checklist items are still pending.
 
 * [ ] Submitting proof for the same POI multiple times will overwrite the user's previous submission
 
-* [ ] `/hunt poi list` (non-mod view) — displays a paginated embed of POIs with a select menu for current page items
+* [x] `/hunt poi list` (non-mod view) — displays a paginated embed of POIs with a select menu for current page items
 
-  * Selecting an item shows a 📸 Submit Proof button
-  * Clicking submit opens a modal or image upload interaction for selfie submission
-  * Pagination updates both the embed and select menu
+  * [x] Selecting an item shows a 📸 Submit Proof button
+  * [x] Clicking submit opens a modal or image upload interaction for selfie submission
+  * [x] Pagination updates both the embed and select menu
 
 * [ ] `/hunt my-submissions` — view own submissions for the current hunt
 

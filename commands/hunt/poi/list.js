@@ -458,6 +458,14 @@ module.exports = {
           console.error('❌ Failed to update review message:', err);
         }
 
+        try {
+          const user = await interaction.client.users.fetch(sub.user_id);
+          const poi = await HuntPoi.findByPk(sub.poi_id);
+          await user.send(`Your submission for ${poi ? poi.name : 'this POI'} was rejected: ${reason}`);
+        } catch (err) {
+          console.error('❌ Failed to send rejection DM:', err);
+        }
+
         await interaction.reply({ content: '✅ Submission rejected.', flags: MessageFlags.Ephemeral });
       } catch (err) {
         console.error('❌ Failed to reject submission:', err);

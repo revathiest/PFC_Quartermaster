@@ -419,16 +419,23 @@ test('reject modal updates submission', async () => {
   HuntSubmission.findByPk = jest.fn().mockResolvedValue({
     update,
     review_channel_id: 'r',
-    review_message_id: 'm'
+    review_message_id: 'm',
+    user_id: 'user1',
+    poi_id: 'p1'
   });
+  HuntPoi.findByPk.mockResolvedValue({ name: 'Alpha' });
   const msg = { edit: jest.fn(), content: 'x' };
   const ch = { messages: { fetch: jest.fn(() => Promise.resolve(msg)) } };
   const fields = { getTextInputValue: jest.fn(() => 'bad') };
+  const send = jest.fn();
   const interaction = {
     customId: 'hunt_poi_reject_form::s1',
     fields,
     user: { id: 'u' },
-    client: { channels: { fetch: jest.fn(() => Promise.resolve(ch)) } },
+    client: {
+      channels: { fetch: jest.fn(() => Promise.resolve(ch)) },
+      users: { fetch: jest.fn(() => Promise.resolve({ send })) }
+    },
     reply: jest.fn()
   };
 
@@ -438,5 +445,8 @@ test('reject modal updates submission', async () => {
   expect(ch.messages.fetch).toHaveBeenCalledWith('m');
   expect(msg.edit).toHaveBeenCalled();
   expect(interaction.reply).toHaveBeenCalled();
+  expect(interaction.client.users.fetch).toHaveBeenCalledWith('user1');
+  expect(send).toHaveBeenCalledWith(expect.stringContaining('Alpha')); 
+  expect(send).toHaveBeenCalledWith(expect.stringContaining('bad'));
 });
 

@@ -293,8 +293,8 @@ test('submit button processes uploaded screenshot', async () => {
   }));
   const reviewArgs = reviewCh.send.mock.calls[0][0];
   expect(reviewArgs.content).toContain('Alpha Beta');
-  expect(reviewArgs.content).toContain('[POI image](poi.jpg)');
-  expect(reviewArgs.content).toContain('[View screenshot](link)');
+  expect(reviewArgs.content).toContain('**POI Reference:** [Click to view](poi.jpg)');
+  expect(reviewArgs.content).toContain('**Screenshot:** [Click to view](link)');
   expect(reviewArgs.components).toEqual(expect.any(Array));
   const activityMsg = activityCh.send.mock.calls[0][0];
   expect(activityMsg).toContain('Alpha Beta');
@@ -333,8 +333,8 @@ test('submit button omits link when no image_url', async () => {
   await command.button(interaction);
 
   const reviewArgs = reviewCh.send.mock.calls[0][0];
-  expect(reviewArgs.content).not.toContain('[POI image]');
-  expect(reviewArgs.content).not.toContain('[View screenshot]');
+  expect(reviewArgs.content).not.toContain('**POI Reference:**');
+  expect(reviewArgs.content).not.toContain('**Screenshot:**');
 });
 
 test('submit button handles timeout', async () => {

@@ -260,7 +260,7 @@ test('submit button processes uploaded screenshot', async () => {
     .mockResolvedValueOnce({ value: 'r' });
   HuntSubmission.create.mockResolvedValue({ id: 's1', update: jest.fn(), image_url: 'link' });
   HuntSubmission.findOne.mockResolvedValue({ id: 'prev1' });
-  HuntPoi.findByPk = jest.fn().mockResolvedValue({ name: 'Alpha Beta' });
+  HuntPoi.findByPk = jest.fn().mockResolvedValue({ name: 'Alpha Beta', image_url: 'poi.jpg' });
   const activityCh = { send: jest.fn() };
   const reviewCh = { send: jest.fn().mockResolvedValue({ id: 'm' }) };
   const client = { channels: { fetch: jest.fn(id => (id === 'a' ? activityCh : reviewCh)) } };
@@ -293,6 +293,7 @@ test('submit button processes uploaded screenshot', async () => {
   }));
   const reviewArgs = reviewCh.send.mock.calls[0][0];
   expect(reviewArgs.content).toContain('Alpha Beta');
+  expect(reviewArgs.content).toContain('[POI image](poi.jpg)');
   expect(reviewArgs.content).toContain('[View screenshot](link)');
   expect(reviewArgs.components).toEqual(expect.any(Array));
   const activityMsg = activityCh.send.mock.calls[0][0];
@@ -332,6 +333,7 @@ test('submit button omits link when no image_url', async () => {
   await command.button(interaction);
 
   const reviewArgs = reviewCh.send.mock.calls[0][0];
+  expect(reviewArgs.content).not.toContain('[POI image]');
   expect(reviewArgs.content).not.toContain('[View screenshot]');
 });
 

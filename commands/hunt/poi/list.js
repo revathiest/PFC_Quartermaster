@@ -297,15 +297,20 @@ module.exports = {
         }
         if (reviewConfig) {
           const ch = await interaction.client.channels.fetch(reviewConfig.value);
-          let content = `Submission from <@${interaction.user.id}> for POI ${poi.name}.`;
+          let content = `**📸 New POI Submission**\n`;
+          content += `**User:** <@${interaction.user.id}>\n`;
+          content += `**POI:** ${poi.name}\n`;
+          
           if (poi.image_url) {
-            content += ` [POI image](${poi.image_url})`;
+            content += `**POI Reference:** [Click to view](${poi.image_url})\n`;
           }
           if (submission.image_url) {
-            content += ` [View screenshot](${submission.image_url})`;
+            content += `**Screenshot:** [Click to view](${submission.image_url})\n`;
           }
+
           const reviewMsg = await ch.send({
             content,
+            flags: MessageFlags.SuppressEmbeds, // 👈 disables the image/link previews
             components: [new ActionRowBuilder().addComponents(
               new ButtonBuilder()
                 .setCustomId(`hunt_poi_approve::${submission.id}`)

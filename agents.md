@@ -136,6 +136,44 @@ include them.
 * Ensure clear separation between Discord I/O, DB logic, and pure utilities.
 * Ensure that all tests have proper teardown.  use --detectOpenHandles to find leaks.  Ensure that .unref() is called on any active timers.
 * Whenever working with interactions, modals, buttons, etc. ensure that appropriate handlers exist and are tested
+
+---
+
+## 📏 Guidelines for Splitting Large Files
+
+To keep code maintainable and easy to navigate, apply these criteria to decide when a file should be split:
+
+### 🔢 General Thresholds
+
+* **Over 300–400 lines**: Consider breaking it up.
+* **More than 8–10 top-level functions**: May be doing too much.
+* **Mixed responsibilities**: One file should only do one job.
+* **Frequent scrolling/searching**: A sign it needs to be modularised.
+
+### 🚩 Red Flags
+
+* Contains divider comments like `// ---- Section ----`.
+* Tests are difficult to isolate or mock cleanly.
+* Git diffs are overly large and complex.
+* Comments like "TODO: move this later" linger unresolved.
+
+### 🔧 Common Split Targets
+
+* **Controllers/handlers** — Discord or web entry points
+* **Services** — Business or scoring logic
+* **Models** — Sequelize/DB abstraction
+* **Validators** — Input sanitisation and type checks
+* **Utilities** — Small helpers used across modules
+
+### ✅ Ideal Outcomes
+
+* Easier testing and mocking
+* Clearer file navigation
+* Lower merge conflict frequency
+* Increased team agility when contributing
+
+Modularity is a discipline. When in doubt — split it out.
+
 ---
 
 This document defines canonical guidelines for all contributors and AI agents participating in the development of this project. No shortcuts. No exceptions.

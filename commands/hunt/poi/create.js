@@ -1,4 +1,4 @@
-const { SlashCommandSubcommandBuilder, MessageFlags, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandSubcommandBuilder, MessageFlags } = require('discord.js');
 const { HuntPoi } = require('../../../config/database');
 const { createDriveClient, uploadScreenshot } = require('../../../utils/googleDrive');
 const fetch = require('node-fetch');
@@ -7,7 +7,6 @@ module.exports = {
   data: () => new SlashCommandSubcommandBuilder()
     .setName('create')
     .setDescription('Create a point of interest')
-    .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers)
     .addStringOption(opt => opt.setName('name').setDescription('POI name').setRequired(true))
     .addStringOption(opt => opt.setName('hint').setDescription('Hint for hunters').setRequired(true))
     .addStringOption(opt => opt.setName('location').setDescription('Location').setRequired(true))

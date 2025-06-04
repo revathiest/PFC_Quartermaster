@@ -1,4 +1,4 @@
-const { SlashCommandSubcommandGroupBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandSubcommandGroupBuilder, MessageFlags, PermissionFlagsBits } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 
@@ -29,6 +29,10 @@ module.exports = {
   group: true,
   async execute(interaction, client) {
     const sub = interaction.options.getSubcommand();
+    if (sub === 'create' && !interaction.member.permissions.has(PermissionFlagsBits.KickMembers)) {
+      await interaction.reply({ content: 'You do not have permission to use this subcommand.', flags: MessageFlags.Ephemeral });
+      return;
+    }
     try {
       const subcommand = require(`./poi/${sub}`);
       if (subcommand && typeof subcommand.execute === 'function') {

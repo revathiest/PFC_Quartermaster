@@ -2,8 +2,6 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { removeSnapChannel } = require('../../botactions/channelManagement/snapChannels');
 
-const allowedRoles = ['Admiral', 'Fleet Admiral'];
-
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('removesnapchannel')
@@ -17,11 +15,6 @@ module.exports = {
     category: 'Discord',
 
     async execute(interaction) {
-        const memberRoles = interaction.member.roles.cache.map(role => role.name);
-        if (!allowedRoles.some(role => memberRoles.includes(role))) {
-            await interaction.reply({ content: 'You do not have permission to use this command.', flags: MessageFlags.Ephemeral });
-            return;
-        }
         try {
             const channel = interaction.options.getChannel('channel');
             const guild = interaction.guild;

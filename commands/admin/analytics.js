@@ -1,8 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { generateUsageReport, generateVoiceActivityReport, generateReportByChannel } = require('../../utils/generateAnalytics');
 
-const allowedRoles = ['Admiral', 'Fleet Admiral'];
-
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('analytics')
@@ -29,11 +27,6 @@ module.exports = {
   category: 'Discord',
 
   async execute(interaction, client) {
-    const memberRoles = interaction.member.roles.cache.map(role => role.name);
-
-    if (!allowedRoles.some(role => memberRoles.includes(role))) {
-      return interaction.reply({ content: 'You do not have permission to use this command.', flags: MessageFlags.Ephemeral });
-    }
     const sub = interaction.options.getSubcommand();
     const serverId = interaction.guild.id;
     const channelOption = interaction.options.getChannel('channel');

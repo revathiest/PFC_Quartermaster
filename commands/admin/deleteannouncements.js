@@ -1,8 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { deleteScheduledAnnouncement } = require('../../botactions/scheduling/scheduleHandler');
 
-const allowedRoles = ['Admiral', 'Fleet Admiral'];
-
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('deleteannouncement')
@@ -15,11 +13,6 @@ module.exports = {
     help: 'Deletes a scheduled announcement by its ID. Only available to Admirals and Fleet Admirals. (Admin Only)',
     category: 'Discord',                
     async execute(interaction) {
-        const memberRoles = interaction.member.roles.cache.map(role => role.name);
-        if (!allowedRoles.some(role => memberRoles.includes(role))) {
-            await interaction.reply({ content: 'You do not have permission to use this command.', flags: MessageFlags.Ephemeral });
-            return;
-        }
 
         const id = interaction.options.getString('id');
         const success = await deleteScheduledAnnouncement(id);

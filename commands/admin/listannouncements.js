@@ -1,8 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { getScheduledAnnouncements } = require('../../botactions/scheduling/scheduleHandler');
 
-const allowedRoles = ['Admiral', 'Fleet Admiral'];
-
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('listannouncements')
@@ -12,11 +10,6 @@ module.exports = {
     help: 'Lists all snap channels configured for automatic purge. (Admin Only)',
     category: 'Discord',        
     async execute(interaction) {
-        const memberRoles = interaction.member.roles.cache.map(role => role.name);
-        if (!allowedRoles.some(role => memberRoles.includes(role))) {
-            await interaction.reply({ content: 'You do not have permission to use this command.', flags: MessageFlags.Ephemeral });
-            return;
-        }
 
         const announcements = await getScheduledAnnouncements();
         if (!announcements.length) {

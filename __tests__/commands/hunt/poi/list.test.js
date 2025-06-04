@@ -301,6 +301,40 @@ test('submit button processes uploaded screenshot', async () => {
   expect(message.delete).toHaveBeenCalled();
 });
 
+test('submit button omits link when no image_url', async () => {
+  getActiveHunt.mockResolvedValue({ id: 'h1' });
+  Config.findOne
+    .mockResolvedValueOnce({ value: 'a' })
+    .mockResolvedValueOnce({ value: 'r' });
+  HuntSubmission.create.mockResolvedValue({ id: 's1', update: jest.fn(), image_url: null });
+  HuntSubmission.findOne.mockResolvedValue({ id: 'prev1' });
+  HuntPoi.findByPk = jest.fn().mockResolvedValue({ name: 'Alpha Beta' });
+  const activityCh = { send: jest.fn() };
+  const reviewCh = { send: jest.fn().mockResolvedValue({ id: 'm' }) };
+  const client = { channels: { fetch: jest.fn(id => (id === 'a' ? activityCh : reviewCh)) } };
+  fetch.mockResolvedValue({ ok: true, buffer: async () => Buffer.from('img'), headers: { get: () => 'image/png' } });
+  const message = {
+    attachments: new Collection([['1', { url: 'http://img', contentType: 'image/png' }]]),
+    author: { id: 'u' },
+    delete: jest.fn()
+  };
+  const awaitMessages = jest.fn().mockResolvedValue(new Collection([['1', message]]));
+  process.env.GOOGLE_DRIVE_HUNT_FOLDER = 'root';
+  const interaction = {
+    customId: 'hunt_poi_submit::1::0',
+    reply: jest.fn(),
+    followUp: jest.fn(),
+    channel: { awaitMessages },
+    user: { id: 'u', username: 'Tester' },
+    client
+  };
+
+  await command.button(interaction);
+
+  const reviewArgs = reviewCh.send.mock.calls[0][0];
+  expect(reviewArgs.content).not.toContain('[View screenshot]');
+});
+
 test('submit button handles timeout', async () => {
   const awaitMessages = jest.fn().mockRejectedValue('time');
   const interaction = {

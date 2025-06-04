@@ -1,14 +1,12 @@
-// server.js
 const express = require('express');
 const session = require('express-session');
 const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
 const path = require('path');
+const cors = require('cors');
 const { sequelize } = require('./db');
 const defineSiteContent = require('./models/siteContent');
 const SiteContent = defineSiteContent(sequelize);
-const cors = require('cors')
-
 const config = require('./config.json');
 
 const app = express();
@@ -56,7 +54,6 @@ app.get('/api/content/:section', async (req, res) => {
   }
 });
 
-
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -98,5 +95,10 @@ app.get('/logout', (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Integrate Greenlock
+require('greenlock-express').init({
+  packageRoot: __dirname,
+  configDir: './greenlock.d',
+  maintainerEmail: 'you@example.com',
+  cluster: false
+}).serve(app);

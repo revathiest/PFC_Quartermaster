@@ -1,5 +1,7 @@
 const { SlashCommandSubcommandBuilder, MessageFlags, PermissionFlagsBits } = require('discord.js');
 const { HuntPoi } = require('../../../config/database');
+const { createDriveClient, uploadScreenshot } = require('../../../utils/googleDrive');
+const fetch = require('node-fetch');
 
 module.exports = {
   data: () => new SlashCommandSubcommandBuilder()
@@ -22,11 +24,29 @@ module.exports = {
     const userId = interaction.user.id;
 
     try {
+      let imageUrl = null;
+      if (attachment) {
+        const drive = await createDriveClient();
+        const rootFolder = process.env.GOOGLE_DRIVE_HUNT_FOLDER;
+
+        const response = await fetch(attachment.url);
+        if (!response.ok) throw new Error('Failed to fetch attachment');
+        const buffer = await response.buffer();
+        const mime = attachment.contentType || response.headers.get('content-type');
+        const pad = n => n.toString().padStart(2, '0');
+        const now = new Date();
+        const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}`;
+        const sanitizedName = name.replace(/\s+/g, '_');
+        const fileName = `${sanitizedName}_${timestamp}.jpg`;
+        const file = await uploadScreenshot(drive, rootFolder, 'reference', fileName, buffer, mime);
+        imageUrl = file.webViewLink;
+      }
+
       await HuntPoi.create({
         name,
         hint,
         location,
-        image_url: attachment ? attachment.url : null,
+        image_url: imageUrl,
         points,
         status: 'active',
         created_by: userId

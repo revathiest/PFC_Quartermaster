@@ -2,9 +2,17 @@ jest.mock('../../../../config/database', () => ({
   HuntPoi: { create: jest.fn() }
 }));
 
+jest.mock('../../../../utils/googleDrive', () => ({
+  createDriveClient: jest.fn(() => ({ files: { create: jest.fn() } })),
+  uploadScreenshot: jest.fn(() => ({ webViewLink: 'refLink' }))
+}));
+jest.mock('node-fetch');
+
 const { HuntPoi } = require('../../../../config/database');
 const command = require('../../../../commands/hunt/poi/create');
 const { MessageFlags } = require('../../../../__mocks__/discord.js');
+const { uploadScreenshot } = require('../../../../utils/googleDrive');
+const fetch = require('node-fetch');
 
 const makeInteraction = (roles = ['Admiral']) => ({
   options: {
@@ -21,18 +29,33 @@ const makeInteraction = (roles = ['Admiral']) => ({
   reply: jest.fn()
 });
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  fetch.mockResolvedValue({
+    ok: true,
+    buffer: async () => Buffer.from('img'),
+    headers: { get: () => 'image/png' }
+  });
+  process.env.GOOGLE_DRIVE_HUNT_FOLDER = 'root';
+});
+
+afterEach(() => {
+  delete process.env.GOOGLE_DRIVE_HUNT_FOLDER;
+});
 
 test('creates poi and replies', async () => {
   const interaction = makeInteraction();
 
   await command.execute(interaction);
 
+  expect(uploadScreenshot).toHaveBeenCalled();
+  const fileName = uploadScreenshot.mock.calls[0][3];
+  expect(fileName).toMatch(/^Alpha_\d{4}-\d{2}-\d{2}_\d{4}\.jpg$/);
   expect(HuntPoi.create).toHaveBeenCalledWith(expect.objectContaining({
     name: 'Alpha',
     hint: 'Find me',
     location: 'Area18',
-    image_url: 'img',
+    image_url: 'refLink',
     points: 10,
     status: 'active',
     created_by: 'u1'
@@ -54,6 +77,7 @@ test('handles missing optional image', async () => {
 
   await command.execute(interaction);
 
+  expect(uploadScreenshot).not.toHaveBeenCalled();
   expect(HuntPoi.create).toHaveBeenCalledWith(expect.objectContaining({ image_url: null }));
 });
 
@@ -65,6 +89,7 @@ test('handles db error', async () => {
 
   await command.execute(interaction);
 
+  expect(uploadScreenshot).toHaveBeenCalled();
   expect(spy).toHaveBeenCalled();
   expect(interaction.reply).toHaveBeenCalledWith({
     content: '❌ Failed to create POI.',
@@ -82,6 +107,7 @@ test('rejects when user lacks role', async () => {
     content: expect.stringContaining('permission'),
     flags: MessageFlags.Ephemeral
   });
+  expect(uploadScreenshot).not.toHaveBeenCalled();
   expect(HuntPoi.create).not.toHaveBeenCalled();
 });
 

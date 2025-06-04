@@ -1,14 +1,13 @@
-const { SlashCommandSubcommandBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandSubcommandBuilder, MessageFlags, PermissionFlagsBits } = require('discord.js');
 const { HuntPoi } = require('../../../config/database');
 const { createDriveClient, uploadScreenshot } = require('../../../utils/googleDrive');
 const fetch = require('node-fetch');
-
-const allowedRoles = ['Admiral', 'Fleet Admiral', 'Commodore', 'Captain', 'Commander'];
 
 module.exports = {
   data: () => new SlashCommandSubcommandBuilder()
     .setName('create')
     .setDescription('Create a point of interest')
+    .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers)
     .addStringOption(opt => opt.setName('name').setDescription('POI name').setRequired(true))
     .addStringOption(opt => opt.setName('hint').setDescription('Hint for hunters').setRequired(true))
     .addStringOption(opt => opt.setName('location').setDescription('Location').setRequired(true))
@@ -16,11 +15,6 @@ module.exports = {
     .addAttachmentOption(opt => opt.setName('image').setDescription('Image file').setRequired(false)),
 
   async execute(interaction) {
-    const memberRoles = interaction.member?.roles?.cache?.map(r => r.name) || [];
-    if (!allowedRoles.some(r => memberRoles.includes(r))) {
-      await interaction.reply({ content: 'You do not have permission to use this command.', flags: MessageFlags.Ephemeral });
-      return;
-    }
 
     const name = interaction.options.getString('name');
     const hint = interaction.options.getString('hint');

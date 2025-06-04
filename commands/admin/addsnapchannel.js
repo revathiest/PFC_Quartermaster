@@ -2,7 +2,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { addSnapChannel } = require('../../botactions/channelManagement/snapChannels');
 
-const allowedRoles = ['Admiral', 'Fleet Admiral'];
+// Require Kick Members permission instead of a specific role list
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -16,13 +16,12 @@ module.exports = {
             option.setName('purgetime')
                 .setDescription('Purge time in days (default: 30)')
                 .setRequired(false))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+        .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers),
     help: 'Adds a channel to the snap purge list. Messages in snap channels are auto-deleted after a set time. (Admin Only)',
     category: 'Discord',
                 
     async execute(interaction) {
-        const memberRoles = interaction.member.roles.cache.map(role => role.name);
-        if (!allowedRoles.some(role => memberRoles.includes(role))) {
+        if (!interaction.member.permissions.has(PermissionFlagsBits.KickMembers)) {
             await interaction.reply({ content: 'You do not have permission to use this command.', flags: MessageFlags.Ephemeral });
             return;
         }

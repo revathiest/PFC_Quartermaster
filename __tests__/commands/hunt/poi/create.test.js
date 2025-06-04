@@ -6,7 +6,7 @@ const { HuntPoi } = require('../../../../config/database');
 const command = require('../../../../commands/hunt/poi/create');
 const { MessageFlags } = require('../../../../__mocks__/discord.js');
 
-const makeInteraction = (roles = ['Admiral']) => ({
+const makeInteraction = (hasPerm = true) => ({
   options: {
     getString: jest.fn(key => ({
       name: 'Alpha',
@@ -16,7 +16,7 @@ const makeInteraction = (roles = ['Admiral']) => ({
     getAttachment: jest.fn(() => ({ url: 'img' })),
     getInteger: jest.fn(() => 10)
   },
-  member: { roles: { cache: { map: fn => roles.map(r => fn({ name: r })) } } },
+  member: { permissions: { has: jest.fn(() => hasPerm) } },
   user: { id: 'u1' },
   reply: jest.fn()
 });
@@ -24,7 +24,7 @@ const makeInteraction = (roles = ['Admiral']) => ({
 beforeEach(() => jest.clearAllMocks());
 
 test('creates poi and replies', async () => {
-  const interaction = makeInteraction();
+  const interaction = makeInteraction(true);
 
   await command.execute(interaction);
 
@@ -44,7 +44,7 @@ test('creates poi and replies', async () => {
 });
 
 test('handles missing optional image', async () => {
-  const interaction = makeInteraction();
+  const interaction = makeInteraction(true);
   interaction.options.getString = jest.fn(key => ({
     name: 'Bravo',
     hint: 'hint',
@@ -58,7 +58,7 @@ test('handles missing optional image', async () => {
 });
 
 test('handles db error', async () => {
-  const interaction = makeInteraction();
+  const interaction = makeInteraction(true);
   const err = new Error('fail');
   HuntPoi.create.mockRejectedValue(err);
   const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -74,7 +74,7 @@ test('handles db error', async () => {
 });
 
 test('rejects when user lacks role', async () => {
-  const interaction = makeInteraction(['Member']);
+  const interaction = makeInteraction(false);
 
   await command.execute(interaction);
 

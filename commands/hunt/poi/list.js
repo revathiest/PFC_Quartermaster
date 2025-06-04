@@ -8,14 +8,15 @@ const {
   TextInputBuilder,
   TextInputStyle,
   ButtonStyle,
-  MessageFlags
+  MessageFlags,
+  PermissionFlagsBits
 } = require('discord.js');
 const { HuntPoi, Hunt, HuntSubmission, Config } = require('../../../config/database');
 const { getActiveHunt } = require('../../../utils/hunt');
 const { createDriveClient, uploadScreenshot } = require('../../../utils/googleDrive');
 const fetch = require('node-fetch');
 
-const allowedRoles = ['Admiral', 'Fleet Admiral'];
+// Use Kick Members permission for admin capabilities
 
 const PAGE_SIZE = 10;
 
@@ -123,8 +124,7 @@ module.exports = {
     .setDescription('List available POIs'),
 
   async execute(interaction) {
-    const roles = interaction.member?.roles?.cache?.map(r => r.name) || [];
-    const isAdmin = allowedRoles.some(r => roles.includes(r));
+    const isAdmin = interaction.member.permissions.has(PermissionFlagsBits.KickMembers);
     try {
       await interaction.deferReply({ flags: MessageFlags.Ephemeral });
       await sendPage(interaction, 0, null, isAdmin);
@@ -140,8 +140,7 @@ module.exports = {
       const [, pageStr] = interaction.customId.split('::');
       const page = parseInt(pageStr, 10) || 0;
       await interaction.deferUpdate();
-      const roles = interaction.member?.roles?.cache?.map(r => r.name) || [];
-      const isAdmin = allowedRoles.some(r => roles.includes(r));
+      const isAdmin = interaction.member.permissions.has(PermissionFlagsBits.KickMembers);
       try {
         await sendPage(interaction, page, null, isAdmin);
       } catch (err) {
@@ -379,8 +378,7 @@ module.exports = {
           return interaction.followUp({ content: '❌ POI not found.', flags: MessageFlags.Ephemeral });
         }
         await poi.update({ status: 'archived', updated_by: interaction.user.id });
-        const roles = interaction.member?.roles?.cache?.map(r => r.name) || [];
-        const isAdmin = allowedRoles.some(r => roles.includes(r));
+        const isAdmin = interaction.member.permissions.has(PermissionFlagsBits.KickMembers);
         await sendPage(interaction, page, null, isAdmin);
       } catch (err) {
         console.error('❌ Failed to archive POI:', err);
@@ -394,8 +392,7 @@ module.exports = {
     const page = parseInt(pageStr, 10) || 0;
     const poiId = interaction.values[0];
     await interaction.deferUpdate();
-    const roles = interaction.member?.roles?.cache?.map(r => r.name) || [];
-    const isAdmin = allowedRoles.some(r => roles.includes(r));
+    const isAdmin = interaction.member.permissions.has(PermissionFlagsBits.KickMembers);
     try {
       await sendPage(interaction, page, poiId, isAdmin);
     } catch (err) {

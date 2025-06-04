@@ -1,7 +1,7 @@
-const { SlashCommandSubcommandBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandSubcommandBuilder, MessageFlags, PermissionFlagsBits } = require('discord.js');
 const { HuntPoi } = require('../../../config/database');
 
-const allowedRoles = ['Admiral', 'Fleet Admiral', 'Commodore', 'Captain', 'Commander'];
+// Authorized via Kick Members permission
 
 module.exports = {
   data: () => new SlashCommandSubcommandBuilder()
@@ -14,8 +14,7 @@ module.exports = {
     .addAttachmentOption(opt => opt.setName('image').setDescription('Image file').setRequired(false)),
 
   async execute(interaction) {
-    const memberRoles = interaction.member?.roles?.cache?.map(r => r.name) || [];
-    if (!allowedRoles.some(r => memberRoles.includes(r))) {
+    if (!interaction.member.permissions.has(PermissionFlagsBits.KickMembers)) {
       await interaction.reply({ content: 'You do not have permission to use this command.', flags: MessageFlags.Ephemeral });
       return;
     }

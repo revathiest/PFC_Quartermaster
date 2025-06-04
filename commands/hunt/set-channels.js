@@ -1,11 +1,12 @@
 const {
   SlashCommandSubcommandBuilder,
   ChannelType,
-  MessageFlags
+  MessageFlags,
+  PermissionFlagsBits
 } = require('discord.js');
 const { Config } = require('../../config/database');
 
-const allowedRoles = ['Admiral', 'Fleet Admiral'];
+// Authorization via Kick Members permission
 
 module.exports = {
   data: () => new SlashCommandSubcommandBuilder()
@@ -23,8 +24,7 @@ module.exports = {
         .setRequired(true)),
 
   async execute(interaction) {
-    const memberRoles = interaction.member?.roles?.cache?.map(r => r.name) || [];
-    if (!allowedRoles.some(r => memberRoles.includes(r))) {
+    if (!interaction.member.permissions.has(PermissionFlagsBits.KickMembers)) {
       await interaction.reply({ content: 'You do not have permission to use this command.', flags: MessageFlags.Ephemeral });
       return;
     }

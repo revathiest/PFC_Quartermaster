@@ -19,7 +19,7 @@ const command = require('../../../../commands/hunt/poi/list');
 const { MessageFlags } = require('../../../../__mocks__/discord.js');
 const { Collection } = require('@discordjs/collection');
 
-const makeInteraction = (roles = []) => ({
+const makeInteraction = (hasPerm = false) => ({
   reply: jest.fn(),
   editReply: jest.fn(),
   deferReply: jest.fn().mockImplementation(function () {
@@ -27,11 +27,7 @@ const makeInteraction = (roles = []) => ({
     return Promise.resolve();
   }),
   member: {
-    roles: {
-      cache: {
-        map: (fn) => roles.map(r => fn({ name: r }))
-      }
-    }
+    permissions: { has: jest.fn(() => hasPerm) }
   }
 });
 
@@ -41,7 +37,7 @@ beforeEach(() => {
 
 test('replies when no pois exist', async () => {
   HuntPoi.findAll.mockResolvedValue([]);
-  const interaction = makeInteraction();
+  const interaction = makeInteraction(false);
 
   await command.execute(interaction);
 
@@ -57,7 +53,7 @@ test('lists pois when present', async () => {
     { name: 'A', points: 5, hint: 'h1' },
     { name: 'B', points: 10, hint: 'h2' }
   ]);
-  const interaction = makeInteraction();
+  const interaction = makeInteraction(false);
 
   await command.execute(interaction);
 
@@ -71,7 +67,7 @@ test('lists pois when present', async () => {
 test('handles fetch errors', async () => {
   const err = new Error('fail');
   HuntPoi.findAll.mockRejectedValue(err);
-  const interaction = makeInteraction();
+  const interaction = makeInteraction(false);
   const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
   await command.execute(interaction);
@@ -93,6 +89,7 @@ test('button paginates results', async () => {
     deferUpdate: jest.fn().mockImplementation(function () { this.deferred = true; return Promise.resolve(); }),
     editReply: jest.fn(),
     reply: jest.fn(),
+    member: { permissions: { has: jest.fn(() => false) } },
     deferred: false,
     replied: false
   };
@@ -108,7 +105,7 @@ test('admin sees select menu', async () => {
   HuntPoi.findAll.mockResolvedValue([
     { id: '1', name: 'Alpha', points: 5, hint: 'h1' }
   ]);
-  const interaction = makeInteraction(['Admiral']);
+  const interaction = makeInteraction(true);
 
   await command.execute(interaction);
 
@@ -119,7 +116,7 @@ test('admin sees select menu', async () => {
 
 test('non-admin sees select menu', async () => {
   HuntPoi.findAll.mockResolvedValue([{ id:'1', name:'Alpha', points:1, hint:'h' }]);
-  const interaction = makeInteraction();
+  const interaction = makeInteraction(false);
   await command.execute(interaction);
   const reply = interaction.editReply.mock.calls[0][0];
   expect(reply.components.length).toBeGreaterThan(0);
@@ -134,7 +131,7 @@ test('select menu highlights poi', async () => {
     values: ['1'],
     deferUpdate: jest.fn().mockImplementation(function () { this.deferred = true; return Promise.resolve(); }),
     editReply: jest.fn(),
-    member: { roles: { cache: { map: fn => ['Admiral'].map(r => fn({ name: r })) } } },
+    member: { permissions: { has: jest.fn(() => true) } },
     reply: jest.fn(),
     deferred: false,
     replied: false
@@ -190,7 +187,7 @@ test('archive button archives poi', async () => {
     customId: 'hunt_poi_archive::1::0',
     deferUpdate: jest.fn(() => Promise.resolve()),
     followUp: jest.fn(),
-    member: { roles: { cache: { map: fn => ['Admiral'].map(r => fn({ name: r })) } } },
+    member: { permissions: { has: jest.fn(() => true) } },
     user: { id: 'u' }
   };
 
@@ -209,7 +206,7 @@ test('archive button replies when poi missing', async () => {
 test('pagination error is logged', async () => {
   HuntPoi.findAll.mockRejectedValue(new Error('fail'));
   const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-  const interaction = { customId: 'hunt_poi_page::1', deferUpdate: jest.fn(() => Promise.resolve()), editReply: jest.fn(), member: { roles: { cache: { map: fn => [] } } } };
+  const interaction = { customId: 'hunt_poi_page::1', deferUpdate: jest.fn(() => Promise.resolve()), editReply: jest.fn(), member: { permissions: { has: jest.fn(() => false) } } };
   await command.button(interaction);
   expect(errSpy).toHaveBeenCalled();
 });

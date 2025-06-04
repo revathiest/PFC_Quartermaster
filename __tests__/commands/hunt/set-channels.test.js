@@ -6,8 +6,8 @@ const { Config } = require('../../../config/database');
 const command = require('../../../commands/hunt/set-channels');
 const { MessageFlags } = require('discord.js');
 
-const makeInteraction = (roles = ['Admiral']) => ({
-  member: { roles: { cache: { map: fn => roles.map(r => fn({ name: r })) } } },
+const makeInteraction = (hasPerm = true) => ({
+  member: { permissions: { has: jest.fn(() => hasPerm) } },
   options: {
     getChannel: jest.fn(name => ({ id: name === 'activity' ? 'a1' : 'r1' }))
   },
@@ -17,7 +17,7 @@ const makeInteraction = (roles = ['Admiral']) => ({
 beforeEach(() => jest.clearAllMocks());
 
 test('blocks users without required role', async () => {
-  const interaction = makeInteraction(['Member']);
+  const interaction = makeInteraction(false);
   await command.execute(interaction);
   expect(interaction.reply).toHaveBeenCalledWith({
     content: 'You do not have permission to use this command.',
@@ -27,7 +27,7 @@ test('blocks users without required role', async () => {
 });
 
 test('stores channel ids and replies', async () => {
-  const interaction = makeInteraction();
+  const interaction = makeInteraction(true);
   await command.execute(interaction);
   expect(Config.upsert).toHaveBeenCalledWith({ key: 'hunt_activity_channel', value: 'a1', botType: 'development' });
   expect(Config.upsert).toHaveBeenCalledWith({ key: 'hunt_review_channel', value: 'r1', botType: 'development' });
@@ -38,7 +38,7 @@ test('stores channel ids and replies', async () => {
 });
 
 test('handles db failure', async () => {
-  const interaction = makeInteraction();
+  const interaction = makeInteraction(true);
   const err = new Error('fail');
   const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
   Config.upsert.mockRejectedValue(err);

@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { deleteScheduledAnnouncement } = require('../../botactions/scheduling/scheduleHandler');
 
-const allowedRoles = ['Admiral', 'Fleet Admiral'];
+// Use Kick Members permission instead of role list
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -11,12 +11,11 @@ module.exports = {
             option.setName('id')
                 .setDescription('The ID of the announcement to delete')
                 .setRequired(true))// Already includes:
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+        .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers),
     help: 'Deletes a scheduled announcement by its ID. Only available to Admirals and Fleet Admirals. (Admin Only)',
     category: 'Discord',                
     async execute(interaction) {
-        const memberRoles = interaction.member.roles.cache.map(role => role.name);
-        if (!allowedRoles.some(role => memberRoles.includes(role))) {
+        if (!interaction.member.permissions.has(PermissionFlagsBits.KickMembers)) {
             await interaction.reply({ content: 'You do not have permission to use this command.', flags: MessageFlags.Ephemeral });
             return;
         }

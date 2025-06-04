@@ -2,7 +2,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { removeSnapChannel } = require('../../botactions/channelManagement/snapChannels');
 
-const allowedRoles = ['Admiral', 'Fleet Admiral'];
+// Authorization will use Kick Members permission
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -12,13 +12,12 @@ module.exports = {
             option.setName('channel')
                 .setDescription('The snap channel to remove')
                 .setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+        .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers),
     help: 'Removes a channel from the snap purge list. (Admin Only)',
     category: 'Discord',
 
     async execute(interaction) {
-        const memberRoles = interaction.member.roles.cache.map(role => role.name);
-        if (!allowedRoles.some(role => memberRoles.includes(role))) {
+        if (!interaction.member.permissions.has(PermissionFlagsBits.KickMembers)) {
             await interaction.reply({ content: 'You do not have permission to use this command.', flags: MessageFlags.Ephemeral });
             return;
         }

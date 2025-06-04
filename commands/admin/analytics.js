@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { generateUsageReport, generateVoiceActivityReport, generateReportByChannel } = require('../../utils/generateAnalytics');
 
-const allowedRoles = ['Admiral', 'Fleet Admiral'];
+// Authorization will be handled via Kick Members permission
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -23,15 +23,13 @@ module.exports = {
             .setDescription('Channel to report on')
             .setRequired(true))
     )
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+    .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers),
 
   help: 'Generates usage, voice, or channel-specific analytics reports. Usage reports include message edits and deletes. (Admin Only)',
   category: 'Discord',
 
   async execute(interaction, client) {
-    const memberRoles = interaction.member.roles.cache.map(role => role.name);
-
-    if (!allowedRoles.some(role => memberRoles.includes(role))) {
+    if (!interaction.member.permissions.has(PermissionFlagsBits.KickMembers)) {
       return interaction.reply({ content: 'You do not have permission to use this command.', flags: MessageFlags.Ephemeral });
     }
     const sub = interaction.options.getSubcommand();

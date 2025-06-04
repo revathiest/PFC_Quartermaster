@@ -6,14 +6,14 @@ jest.mock('../../../botactions/channelManagement/snapChannels', () => ({
   listSnapChannels: jest.fn()
 }));
 
-const makeInteraction = (roles = []) => {
+const makeInteraction = (hasPerm = false) => {
   const guild = {
     id: 'guild1',
     name: 'Test Guild',
     channels: { cache: new Map([['c1', { name: 'chan1' }]]) }
   };
   return {
-    member: { roles: { cache: { map: fn => roles.map(r => fn({ name: r })) } } },
+    member: { permissions: { has: jest.fn(() => hasPerm) } },
     guild,
     reply: jest.fn()
   };
@@ -23,7 +23,7 @@ beforeEach(() => jest.clearAllMocks());
 
 describe('/listsnapchannels command', () => {
   test('rejects users without required role', async () => {
-    const interaction = makeInteraction(['User']);
+    const interaction = makeInteraction(false);
     await execute(interaction);
     expect(interaction.reply).toHaveBeenCalledWith({
       content: expect.stringContaining('permission'),
@@ -33,7 +33,7 @@ describe('/listsnapchannels command', () => {
   });
 
   test('lists channels for authorized user', async () => {
-    const interaction = makeInteraction(['Admiral']);
+    const interaction = makeInteraction(true);
     listSnapChannels.mockResolvedValue([{ channelId: 'c1', purgeTimeInDays: 3 }]);
     await execute(interaction);
     expect(listSnapChannels).toHaveBeenCalledWith({ where: { serverId: 'guild1' } });
@@ -44,7 +44,7 @@ describe('/listsnapchannels command', () => {
   });
 
   test('falls back to channelId when channel not found', async () => {
-    const interaction = makeInteraction(['Admiral']);
+    const interaction = makeInteraction(true);
     // Remove the known channel to force fallback path
     interaction.guild.channels.cache = new Map();
     listSnapChannels.mockResolvedValue([{ channelId: 'c2', purgeTimeInDays: 4 }]);
@@ -58,7 +58,7 @@ describe('/listsnapchannels command', () => {
   });
 
   test('handles errors gracefully', async () => {
-    const interaction = makeInteraction(['Fleet Admiral']);
+    const interaction = makeInteraction(true);
     const err = new Error('fail');
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     listSnapChannels.mockRejectedValue(err);

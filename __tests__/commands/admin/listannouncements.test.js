@@ -6,12 +6,10 @@ const { getScheduledAnnouncements } = require('../../../botactions/scheduling/sc
 const { MessageFlags } = require('discord.js');
 const { execute } = require('../../../commands/admin/listannouncements');
 
-function createInteraction(roleNames = ['Admiral']) {
+function createInteraction(hasPerm = true) {
   return {
     member: {
-      roles: {
-        cache: { map: fn => roleNames.map(name => fn({ name })) }
-      }
+      permissions: { has: jest.fn(() => hasPerm) }
     },
     reply: jest.fn()
   };
@@ -23,7 +21,7 @@ describe('/listannouncements command', () => {
   });
 
   test('blocks users without required role', async () => {
-    const interaction = createInteraction(['Member']);
+    const interaction = createInteraction(false);
     await execute(interaction);
     expect(interaction.reply).toHaveBeenCalledWith({
       content: 'You do not have permission to use this command.',
@@ -32,14 +30,14 @@ describe('/listannouncements command', () => {
   });
 
   test('informs when no announcements', async () => {
-    const interaction = createInteraction();
+    const interaction = createInteraction(true);
     getScheduledAnnouncements.mockResolvedValue([]);
     await execute(interaction);
     expect(interaction.reply).toHaveBeenCalledWith('There are no scheduled announcements.');
   });
 
   test('lists announcements when present', async () => {
-    const interaction = createInteraction();
+    const interaction = createInteraction(true);
     getScheduledAnnouncements.mockResolvedValue([
       { id: 1, embedData: JSON.stringify({ title: 'Hello' }), time: 't' }
     ]);

@@ -6,8 +6,8 @@ jest.mock('../../../botactions/channelManagement/snapChannels', () => ({
   removeSnapChannel: jest.fn()
 }));
 
-const makeInteraction = (roles = []) => ({
-  member: { roles: { cache: { map: fn => roles.map(r => fn({ name: r })) } } },
+const makeInteraction = (hasPerm = false) => ({
+  member: { permissions: { has: jest.fn(() => hasPerm) } },
   options: { getChannel: jest.fn(() => ({ id: 'c1', name: 'chan' })) },
   guild: {},
   reply: jest.fn()
@@ -17,7 +17,7 @@ beforeEach(() => jest.clearAllMocks());
 
 describe('/removesnapchannel command', () => {
   test('rejects users without role', async () => {
-    const interaction = makeInteraction(['User']);
+    const interaction = makeInteraction(false);
     await execute(interaction);
     expect(interaction.reply).toHaveBeenCalledWith({
       content: expect.stringContaining('permission'),
@@ -27,7 +27,7 @@ describe('/removesnapchannel command', () => {
   });
 
   test('removes channel when authorized', async () => {
-    const interaction = makeInteraction(['Admiral']);
+    const interaction = makeInteraction(true);
     await execute(interaction);
     expect(removeSnapChannel).toHaveBeenCalledWith('c1');
     expect(interaction.reply).toHaveBeenCalledWith({
@@ -37,7 +37,7 @@ describe('/removesnapchannel command', () => {
   });
 
   test('handles errors gracefully', async () => {
-    const interaction = makeInteraction(['Fleet Admiral']);
+    const interaction = makeInteraction(true);
     const err = new Error('fail');
     const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
     removeSnapChannel.mockRejectedValue(err);

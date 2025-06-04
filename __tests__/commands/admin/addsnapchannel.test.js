@@ -7,8 +7,8 @@ jest.mock('../../../botactions/channelManagement/snapChannels', () => ({
 }));
 
 describe('/addsnapchannel command', () => {
-  const makeInteraction = (roles = []) => ({
-    member: { roles: { cache: { map: fn => roles.map(r => fn({ name: r })) } } },
+  const makeInteraction = (hasPerm = false) => ({
+    member: { permissions: { has: jest.fn(() => hasPerm) } },
     options: {
       getChannel: jest.fn(() => ({ id: 'c1', name: 'chan' })),
       getInteger: jest.fn(() => 7)
@@ -20,7 +20,7 @@ describe('/addsnapchannel command', () => {
   beforeEach(() => jest.clearAllMocks());
 
   test('rejects when user lacks role', async () => {
-    const interaction = makeInteraction(['Member']);
+    const interaction = makeInteraction(false);
     await execute(interaction);
     expect(interaction.reply).toHaveBeenCalledWith({
       content: expect.stringContaining('permission'),
@@ -30,7 +30,7 @@ describe('/addsnapchannel command', () => {
   });
 
   test('adds channel for authorized user', async () => {
-    const interaction = makeInteraction(['Admiral']);
+    const interaction = makeInteraction(true);
     await execute(interaction);
     expect(addSnapChannel).toHaveBeenCalledWith('c1', 7, 'g1');
     expect(interaction.reply).toHaveBeenCalledWith({
@@ -40,7 +40,7 @@ describe('/addsnapchannel command', () => {
   });
 
   test('uses default purge time when none provided', async () => {
-    const interaction = makeInteraction(['Fleet Admiral']);
+    const interaction = makeInteraction(true);
     interaction.options.getInteger = jest.fn(() => null);
     await execute(interaction);
     expect(addSnapChannel).toHaveBeenCalledWith('c1', 30, 'g1');
@@ -51,7 +51,7 @@ describe('/addsnapchannel command', () => {
   });
 
   test('replies with error message on failure', async () => {
-    const interaction = makeInteraction(['Admiral']);
+    const interaction = makeInteraction(true);
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     addSnapChannel.mockRejectedValueOnce(new Error('oops'));
     await execute(interaction);

@@ -2,18 +2,17 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { listSnapChannels } = require('../../botactions/channelManagement/snapChannels');
 
-const allowedRoles = ['Admiral', 'Fleet Admiral'];
+// Authorization via Kick Members permission rather than role list
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('listsnapchannels')
         .setDescription('Lists all snap channels')
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+        .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers),
     help: 'Lists all snap channels configured for automatic purge. (Admin Only)',
     category: 'Discord',
     async execute(interaction) {
-        const memberRoles = interaction.member.roles.cache.map(role => role.name);
-        if (!allowedRoles.some(role => memberRoles.includes(role))) {
+        if (!interaction.member.permissions.has(PermissionFlagsBits.KickMembers)) {
             await interaction.reply({ content: 'You do not have permission to use this command.', flags: MessageFlags.Ephemeral });
             return;
         }

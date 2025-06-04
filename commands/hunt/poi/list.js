@@ -298,6 +298,9 @@ module.exports = {
         if (reviewConfig) {
           const ch = await interaction.client.channels.fetch(reviewConfig.value);
           let content = `Submission from <@${interaction.user.id}> for POI ${poi.name}.`;
+          if (poi.image_url) {
+            content += ` [POI image](${poi.image_url})`;
+          }
           if (submission.image_url) {
             content += ` [View screenshot](${submission.image_url})`;
           }

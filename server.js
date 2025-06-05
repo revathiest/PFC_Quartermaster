@@ -57,8 +57,8 @@ app.get('/api/content/:section', async (req, res) => {
   }
 });
 
-// Static files
-app.use(express.static(path.join(__dirname, 'public')));
+// Static files (allow dotfiles for ACME challenges)
+app.use(express.static(path.join(__dirname, 'public'), { dotfiles: 'allow' }));
 
 // Routes
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));

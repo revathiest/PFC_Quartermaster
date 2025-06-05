@@ -26,10 +26,12 @@ beforeEach(() => {
   delete process.env.HTTP_ONLY;
   jest.spyOn(fs, 'existsSync').mockReturnValue(false);
   jest.spyOn(fs, 'readFileSync').mockReturnValue('');
+  jest.spyOn(console, 'log').mockImplementation(() => {});
 });
 
 afterEach(() => {
   jest.resetModules();
+  jest.restoreAllMocks();
 });
 
 describe('server startup modes', () => {

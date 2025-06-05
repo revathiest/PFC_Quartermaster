@@ -5,6 +5,7 @@ const DiscordStrategy = require('passport-discord').Strategy;
 const path = require('path');
 const cors = require('cors');
 const https = require('https');
+const http = require('http');
 const fs = require('fs');
 const { sequelize } = require('./db');
 const defineSiteContent = require('./models/siteContent');
@@ -100,8 +101,13 @@ app.get('/logout', (req, res) => {
 const PORT = process.env.PORT || 3000;
 const keyPath = process.env.HTTPS_KEY_PATH || 'key.pem';
 const certPath = process.env.HTTPS_CERT_PATH || 'cert.pem';
+const HTTP_ONLY = process.env.HTTP_ONLY === 'true';
 
-if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+if (HTTP_ONLY) {
+  http.createServer(app).listen(PORT, () => {
+    console.log(`🚀 HTTP server running on port ${PORT}`);
+  });
+} else if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
   const httpsOptions = {
     key: fs.readFileSync(keyPath),
     cert: fs.readFileSync(certPath)

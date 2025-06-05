@@ -18,6 +18,7 @@ const { handleMemberJoin } = require('./botactions/eventHandling/memberJoinEvent
 const { startOrgTagSyncScheduler } = require('./botactions/orgTagSync/syncScheduler');
 const { startAllScheduledJobs } = require('./jobs');
 const { pendingLogs } = require('./jobs/logState')
+const { startApi } = require('./api/server');
 
 const botType = process.env.BOT_TYPE;
 
@@ -177,6 +178,7 @@ const initializeBot = async () => {
 };
 
 if (require.main === module) {
+  startApi();
   initializeBot();
 }
 

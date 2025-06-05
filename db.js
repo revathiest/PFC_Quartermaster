@@ -2,7 +2,7 @@ const { Sequelize } = require('sequelize');
 const config = require('./databaseConfig.json');
 
 // Get the environment or default to 'development'
-const env = process.env.NODE_ENV || 'development';
+const env = process.env.BOT_TYPE || 'development';
 const dbConfig = config[env];
 
 if (!dbConfig) {

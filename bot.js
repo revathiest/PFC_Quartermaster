@@ -160,9 +160,6 @@ const initializeBot = async () => {
 
       startOrgTagSyncScheduler(client);
 
-      const { startServer } = require('./server');
-      startServer();
-
       console.log('🚀 Bot setup complete and ready to go!');
 
       startAllScheduledJobs(client);

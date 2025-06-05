@@ -31,6 +31,7 @@ jest.mock('../botactions/maintenance/logCleanup', () => ({ deleteOldLogs: jest.f
 jest.mock('../botactions/eventHandling/memberJoinEvent', () => ({ handleMemberJoin: jest.fn() }));
 jest.mock('../botactions/orgTagSync/syncScheduler', () => ({ startOrgTagSyncScheduler: jest.fn() }));
 jest.mock('../jobs', () => ({ startAllScheduledJobs: jest.fn() }));
+jest.mock('../api/server', () => ({ startApi: jest.fn() }));
 
 
 let bot;

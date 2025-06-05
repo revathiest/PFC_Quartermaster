@@ -1,13 +1,21 @@
 const { Sequelize } = require('sequelize');
-const config = require('./databaseConfig.json').development;
+const config = require('./databaseConfig.json');
+
+// Get the environment or default to 'development'
+const env = process.env.NODE_ENV || 'development';
+const dbConfig = config[env];
+
+if (!dbConfig) {
+  throw new Error(`No database configuration found for environment: ${env}`);
+}
 
 const sequelize = new Sequelize(
-  config.database,
-  config.username,
-  config.password,
+  dbConfig.database,
+  dbConfig.username,
+  dbConfig.password,
   {
-    host: config.host,
-    dialect: config.dialect,
+    host: dbConfig.host,
+    dialect: dbConfig.dialect,
     logging: false,
   }
 );

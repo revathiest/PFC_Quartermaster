@@ -33,7 +33,7 @@ module.exports = {
   },
 
   // === SILENT MODE ===
-  verbose: false,
-  silent: true,
+  verbose: true,
+  silent: false,
   reporters: ['default']
 };

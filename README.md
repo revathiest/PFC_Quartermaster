@@ -148,7 +148,9 @@ node server.js
 ```
 
 If no certificates are found, the server will attempt to acquire them
-automatically using **Greenlock**.
+automatically using **Greenlock**. Set `HTTP_ONLY=true` to disable TLS
+entirely and serve the API over plain HTTP (useful when certificate
+issuance isn't possible).
 
 ## 📂 Project Structure
 

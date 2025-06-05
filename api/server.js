@@ -14,7 +14,7 @@ function createApp() {
 }
 
 function startApi() {
-  const port = process.env.API_PORT || 25566;
+  const port = process.env.API_PORT || 8003;
   const app = createApp();
   const server = app.listen(port, () => {
     console.log(`\uD83C\uDF10 API server running on port ${port}`); // 🌐

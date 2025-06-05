@@ -4,6 +4,8 @@ const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
 const path = require('path');
 const cors = require('cors');
+const https = require('https');
+const fs = require('fs');
 const { sequelize } = require('./db');
 const defineSiteContent = require('./models/siteContent');
 const SiteContent = defineSiteContent(sequelize);
@@ -95,10 +97,25 @@ app.get('/logout', (req, res) => {
   });
 });
 
-// Integrate Greenlock
-require('greenlock-express').init({
-  packageRoot: __dirname,
-  configDir: './greenlock.d',
-  maintainerEmail: 'you@example.com',
-  cluster: false
-}).serve(app);
+const PORT = process.env.PORT || 3000;
+const keyPath = process.env.HTTPS_KEY_PATH || 'key.pem';
+const certPath = process.env.HTTPS_CERT_PATH || 'cert.pem';
+
+if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+  const httpsOptions = {
+    key: fs.readFileSync(keyPath),
+    cert: fs.readFileSync(certPath)
+  };
+
+  https.createServer(httpsOptions, app).listen(PORT, () => {
+    console.log(`🚀 HTTPS server running on port ${PORT}`);
+  });
+} else {
+  // Integrate Greenlock if no local certs are found
+  require('greenlock-express').init({
+    packageRoot: __dirname,
+    configDir: './greenlock.d',
+    maintainerEmail: 'you@example.com',
+    cluster: false
+  }).serve(app);
+}

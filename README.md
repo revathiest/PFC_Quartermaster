@@ -137,6 +137,19 @@ node bot.js
 Restart the command after each change, or use a tool like `nodemon` to
 watch your files and automatically restart the bot during development.
 
+### Running the HTTPS server
+
+The included `server.js` serves API responses for the website. Provide TLS
+certificates named `key.pem` and `cert.pem` in the project root (or specify
+their paths using `HTTPS_KEY_PATH` and `HTTPS_CERT_PATH`). Start it with:
+
+```bash
+node server.js
+```
+
+If no certificates are found, the server will attempt to acquire them
+automatically using **Greenlock**.
+
 ## 📂 Project Structure
 
 | Path | Purpose |

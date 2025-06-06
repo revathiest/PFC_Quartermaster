@@ -25,9 +25,20 @@
         }
       }
     },
-    "/api/content/:section": {
+    "/api/content/{section}": {
       "get": {
-        "summary": "GET /api/content/:section",
+        "summary": "GET /api/content/{section}",
+        "parameters": [
+          {
+            "name": "section",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The content section to retrieve"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"

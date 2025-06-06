@@ -30,14 +30,32 @@ const spec = {
   paths: {}
 };
 
+function buildPathDetails(path) {
+  const params = [];
+  const openPath = path.replace(/:([^/]+)/g, (_, name) => {
+    params.push(name);
+    return `{${name}}`;
+  });
+  const operation = {
+    summary: `GET ${openPath}`,
+    responses: { 200: { description: 'Success' } }
+  };
+  if (params.length) {
+    operation.parameters = params.map(p => ({
+      name: p,
+      in: 'path',
+      required: true,
+      schema: { type: 'string' },
+      description: `The ${p}`
+    }));
+  }
+  return { openPath, operation };
+}
+
 const directRegex = /app\.get\(['"`]([^'"`]+)['"`]/g;
 while ((m = directRegex.exec(serverSrc))) {
-  spec.paths[m[1]] = {
-    get: {
-      summary: `GET ${m[1]}`,
-      responses: { 200: { description: 'Success' } }
-    }
-  };
+  const { openPath, operation } = buildPathDetails(m[1]);
+  spec.paths[openPath] = { get: operation };
 }
 
 for (const [routerVar, base] of Object.entries(basePaths)) {
@@ -49,12 +67,8 @@ for (const [routerVar, base] of Object.entries(basePaths)) {
   while ((routeMatch = routeRegex.exec(src))) {
     let route = routeMatch[1];
     if (route === '/') route = '';
-    spec.paths[`${base}${route}`] = {
-      get: {
-        summary: `GET ${base}${route}`,
-        responses: { 200: { description: 'Success' } }
-      }
-    };
+    const { openPath, operation } = buildPathDetails(`${base}${route}`);
+    spec.paths[openPath] = { get: operation };
   }
 }
 

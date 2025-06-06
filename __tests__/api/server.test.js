@@ -12,10 +12,13 @@ jest.mock('express', () => {
     app.__server = server;
     return app;
   });
+  express.Router = jest.fn(() => ({ get: jest.fn(), use: jest.fn() }));
   return express;
 }, { virtual: true });
 
 jest.mock('cors', () => jest.fn(() => (req, res, next) => next()), { virtual: true });
+
+jest.mock('../../config/database', () => ({ SiteContent: {} }), { virtual: true });
 
 const express = require('express');
 const { startApi } = require('../../api/server');
@@ -29,7 +32,7 @@ describe('api/server startApi', () => {
     const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     startApi();
     const app = express.mock.results[0].value;
-    expect(app.use).toHaveBeenCalled();
+    expect(app.use).toHaveBeenCalledWith('/api/content', expect.anything());
     expect(app.get).toHaveBeenCalledWith('/api/data', expect.any(Function));
     expect(app.listen).toHaveBeenCalledWith(8003, expect.any(Function));
     expect(logSpy).toHaveBeenCalled();

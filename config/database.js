@@ -42,6 +42,7 @@ const VerifiedUser = require('../models/verifiedUser')(sequelize);
 const AmbientMessage = require('../models/ambiEntMessage')(sequelize);
 const AmbientChannel = require('../models/ambientChannel')(sequelize);
 const AmbientSetting = require('../models/ambientSetting')(sequelize);
+const SiteContent = require('../models/siteContent')(sequelize);
 const Hunt = require('../models/hunt')(sequelize);
 const HuntPoi = require('../models/huntPoi')(sequelize);
 const HuntSubmission = require('../models/huntSubmission')(sequelize);
@@ -104,6 +105,7 @@ module.exports = {
     AmbientMessage,
     AmbientChannel,
     AmbientSetting,
+    SiteContent,
     Hunt,
     HuntPoi,
     HuntSubmission

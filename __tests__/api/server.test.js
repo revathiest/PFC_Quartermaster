@@ -18,7 +18,8 @@ jest.mock('express', () => {
 
 jest.mock('cors', () => jest.fn(() => (req, res, next) => next()), { virtual: true });
 
-jest.mock('../../config/database', () => ({ SiteContent: {}, Event: {} }), { virtual: true });
+jest.mock('../../config/database', () => ({ SiteContent: {}, Event: {}, Accolade: {} }));
+jest.mock('../../config.json', () => ({ guildId: 'g1' }), { virtual: true });
 
 const express = require('express');
 const { startApi } = require('../../api/server');

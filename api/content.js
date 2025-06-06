@@ -14,6 +14,18 @@ async function getContent(req, res) {
   }
 }
 
+async function listSections(req, res) {
+  try {
+    const records = await SiteContent.findAll({ attributes: ['section'] });
+    const sections = records.map(r => r.section);
+    res.json({ sections });
+  } catch (err) {
+    console.error('Failed to load sections:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+}
+
+router.get('/', listSections);
 router.get('/:section', getContent);
 
-module.exports = { router, getContent };
+module.exports = { router, getContent, listSections };

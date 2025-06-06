@@ -1,6 +1,5 @@
-const { getContent } = require('../../api/content');
-
-jest.mock('../../config/database', () => ({ SiteContent: { findOne: jest.fn() } }));
+jest.mock('../../config/database', () => ({ SiteContent: { findOne: jest.fn(), findAll: jest.fn() } }));
+const { getContent, listSections } = require('../../api/content');
 const { SiteContent } = require('../../config/database');
 
 function mockRes() {
@@ -43,6 +42,36 @@ describe('api/content getContent', () => {
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     await getContent(req, res);
+    expect(errorSpy).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Server error' });
+    errorSpy.mockRestore();
+  });
+});
+
+describe('api/content listSections', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('returns section list', async () => {
+    const req = {};
+    const res = mockRes();
+    SiteContent.findAll.mockResolvedValue([{ section: 'about' }, { section: 'faq' }]);
+
+    await listSections(req, res);
+    expect(SiteContent.findAll).toHaveBeenCalledWith({ attributes: ['section'] });
+    expect(res.json).toHaveBeenCalledWith({ sections: ['about', 'faq'] });
+  });
+
+  test('handles errors', async () => {
+    const req = {};
+    const res = mockRes();
+    const err = new Error('fail');
+    SiteContent.findAll.mockRejectedValue(err);
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    await listSections(req, res);
     expect(errorSpy).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({ error: 'Server error' });

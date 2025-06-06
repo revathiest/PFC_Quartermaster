@@ -5,6 +5,7 @@
   "main": "bot.js",
   "scripts": {
     "prestart": "node -e \"process.stdout.write('\\x1Bc')\" && npm install",
+    "pretest": "node scripts/generateSwagger.js",
     "start": "node bot.js",
     "test": "node --no-deprecation -e \"process.stdout.write('\\x1Bc')\" && jest",
     "setup": "node -e \"process.stdout.write('\\x1Bc')\" && npm ci --no-audit && npm test"

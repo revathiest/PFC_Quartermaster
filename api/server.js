@@ -3,11 +3,13 @@ const cors = require('cors');
 const { router: contentRouter } = require('./content');
 const { router: eventsRouter } = require('./events');
 const { router: accoladesRouter } = require('./accolades');
+const { router: docsRouter } = require('./docs');
 
 function createApp() {
   const app = express();
   app.use(cors());
 
+  app.use('/api/docs', docsRouter);
   app.use('/api/content', contentRouter);
   app.use('/api/events', eventsRouter);
   app.use('/api/accolades', accoladesRouter);

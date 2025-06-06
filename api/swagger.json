@@ -1,0 +1,59 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Quartermaster API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/data": {
+      "get": {
+        "summary": "GET /api/data",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/content": {
+      "get": {
+        "summary": "GET /api/content",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/content/:section": {
+      "get": {
+        "summary": "GET /api/content/:section",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/events": {
+      "get": {
+        "summary": "GET /api/events",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/accolades": {
+      "get": {
+        "summary": "GET /api/accolades",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }
+  }
+}

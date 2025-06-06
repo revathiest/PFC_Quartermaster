@@ -28,6 +28,30 @@ async function listAccolades(req, res) {
   }
 }
 
-router.get('/', listAccolades);
+async function getAccolade(req, res) {
+  const { id } = req.params;
+  try {
+    const accolade = await Accolade.findByPk(id);
+    if (!accolade) return res.status(404).json({ error: 'Not found' });
+    const client = getClient();
+    const guild = client?.guilds?.cache.get(config.guildId);
+    if (!client || !guild) {
+      console.error('Discord client unavailable for accolades endpoint');
+      return res.status(500).json({ error: 'Discord client unavailable' });
+    }
+    await guild.members.fetch();
+    const data = accolade.get ? accolade.get({ plain: true }) : accolade;
+    const members = guild.members.cache
+      .filter(m => m.roles.cache.some(r => r.id === data.role_id))
+      .map(m => ({ id: m.id, displayName: m.displayName }));
+    res.json({ accolade: { ...data, recipients: members } });
+  } catch (err) {
+    console.error('Failed to load accolade:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+}
 
-module.exports = { router, listAccolades };
+router.get('/', listAccolades);
+router.get('/:id', getAccolade);
+
+module.exports = { router, listAccolades, getAccolade };

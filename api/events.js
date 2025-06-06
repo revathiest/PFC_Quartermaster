@@ -12,6 +12,19 @@ async function listEvents(req, res) {
   }
 }
 
-router.get('/', listEvents);
+async function getEvent(req, res) {
+  const { id } = req.params;
+  try {
+    const event = await Event.findByPk(id);
+    if (!event) return res.status(404).json({ error: 'Not found' });
+    res.json({ event });
+  } catch (err) {
+    console.error('Failed to load event:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+}
 
-module.exports = { router, listEvents };
+router.get('/', listEvents);
+router.get('/:id', getEvent);
+
+module.exports = { router, listEvents, getEvent };

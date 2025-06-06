@@ -28,6 +28,11 @@
     "/api/content/{section}": {
       "get": {
         "summary": "GET /api/content/{section}",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
         "parameters": [
           {
             "name": "section",
@@ -36,14 +41,9 @@
             "schema": {
               "type": "string"
             },
-            "description": "The content section to retrieve"
+            "description": "The section"
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
+        ]
       }
     },
     "/api/events": {
@@ -56,6 +56,27 @@
         }
       }
     },
+    "/api/events/{id}": {
+      "get": {
+        "summary": "GET /api/events/{id}",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The id"
+          }
+        ]
+      }
+    },
     "/api/accolades": {
       "get": {
         "summary": "GET /api/accolades",
@@ -64,6 +85,27 @@
             "description": "Success"
           }
         }
+      }
+    },
+    "/api/accolades/{id}": {
+      "get": {
+        "summary": "GET /api/accolades/{id}",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The id"
+          }
+        ]
       }
     }
   }

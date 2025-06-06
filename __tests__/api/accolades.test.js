@@ -1,8 +1,8 @@
-jest.mock('../../config/database', () => ({ Accolade: { findAll: jest.fn() } }));
+jest.mock('../../config/database', () => ({ Accolade: { findAll: jest.fn(), findByPk: jest.fn() } }));
 jest.mock('../../discordClient', () => ({ getClient: jest.fn() }));
 jest.mock('../../config.json', () => ({ guildId: 'g1' }), { virtual: true });
 
-const { listAccolades } = require('../../api/accolades');
+const { listAccolades, getAccolade } = require('../../api/accolades');
 const { Accolade } = require('../../config/database');
 const { getClient } = require('../../discordClient');
 
@@ -74,6 +74,53 @@ describe('api/accolades listAccolades', () => {
     expect(spy).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({ error: 'Discord client unavailable' });
+    spy.mockRestore();
+  });
+});
+
+describe('api/accolades getAccolade', () => {
+  beforeEach(() => { jest.clearAllMocks(); });
+
+  test('returns accolade with recipients', async () => {
+    const req = { params: { id: '1' } };
+    const res = mockRes();
+    Accolade.findByPk.mockResolvedValue({ id: 1, role_id: 'r1', name: 'A' });
+    const members = [
+      { id: 'u1', displayName: 'Alice', roles: { cache: [{ id: 'r1' }] } }
+    ];
+    const guild = { members: { fetch: jest.fn().mockResolvedValue(), cache: makeCollection(members) } };
+    getClient.mockReturnValue({ guilds: { cache: { get: jest.fn(() => guild) } } });
+
+    await getAccolade(req, res);
+
+    expect(Accolade.findByPk).toHaveBeenCalledWith('1');
+    expect(guild.members.fetch).toHaveBeenCalled();
+    expect(res.json).toHaveBeenCalledWith({ accolade: { id: 1, role_id: 'r1', name: 'A', recipients: [{ id: 'u1', displayName: 'Alice' }] } });
+  });
+
+  test('returns 404 when not found', async () => {
+    const req = { params: { id: '2' } };
+    const res = mockRes();
+    Accolade.findByPk.mockResolvedValue(null);
+
+    await getAccolade(req, res);
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Not found' });
+  });
+
+  test('handles errors', async () => {
+    const req = { params: { id: '3' } };
+    const res = mockRes();
+    const err = new Error('fail');
+    Accolade.findByPk.mockRejectedValue(err);
+    getClient.mockReturnValue({ guilds: { cache: { get: jest.fn(() => ({ members: { fetch: jest.fn(), cache: makeCollection([]) } })) } } });
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    await getAccolade(req, res);
+
+    expect(spy).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Server error' });
     spy.mockRestore();
   });
 });

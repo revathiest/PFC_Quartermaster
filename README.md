@@ -152,6 +152,10 @@ watch your files and automatically restart the bot during development.
 | /__tests__/ | Jest test suites |
 | /__mocks__/ | Mock data for tests |
 
+## 📖 API Documentation
+
+API endpoints are documented using the OpenAPI specification. After running the tests or starting the server, `api/swagger.json` is regenerated automatically. To view the interactive documentation, start the API and visit [`/api/docs`](http://localhost:8003/api/docs).
+
 ## 🧪 Testing
 
 Testing is configured with **Jest**. Run:

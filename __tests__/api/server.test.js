@@ -31,7 +31,7 @@ describe('api/server startApi', () => {
     const app = express.mock.results[0].value;
     expect(app.use).toHaveBeenCalled();
     expect(app.get).toHaveBeenCalledWith('/api/data', expect.any(Function));
-    expect(app.listen).toHaveBeenCalledWith(25566, expect.any(Function));
+    expect(app.listen).toHaveBeenCalledWith(8003, expect.any(Function));
     expect(logSpy).toHaveBeenCalled();
     logSpy.mockRestore();
   });

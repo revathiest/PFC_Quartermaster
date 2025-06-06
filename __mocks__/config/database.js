@@ -30,6 +30,10 @@ const VoiceLog = {
   findAll: jest.fn()
 };
 
+const SiteContent = {
+  findOne: jest.fn()
+};
+
 const Hunt = {
   findAll: jest.fn(),
   create: jest.fn(),
@@ -88,6 +92,7 @@ module.exports = {
   OrgTag,
   UsageLog,
   VoiceLog,
+  SiteContent,
   sequelize,
   initializeDatabase,
   Hunt,

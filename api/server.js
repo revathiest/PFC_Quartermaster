@@ -1,9 +1,12 @@
 const express = require('express');
 const cors = require('cors');
+const { router: contentRouter } = require('./content');
 
 function createApp() {
   const app = express();
   app.use(cors());
+
+  app.use('/api/content', contentRouter);
 
   // GET /api/data - placeholder for future Sequelize queries
   app.get('/api/data', async (req, res) => {

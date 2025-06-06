@@ -19,6 +19,7 @@ const { startOrgTagSyncScheduler } = require('./botactions/orgTagSync/syncSchedu
 const { startAllScheduledJobs } = require('./jobs');
 const { pendingLogs } = require('./jobs/logState')
 const { startApi } = require('./api/server');
+const { setClient } = require('./discordClient');
 
 const botType = process.env.BOT_TYPE;
 
@@ -108,6 +109,7 @@ const initializeBot = async () => {
   }
 
   const client = initClient();
+  setClient(client);
   client.config = config;
 
   client.on('interactionCreate', async interaction => {

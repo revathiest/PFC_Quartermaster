@@ -107,6 +107,58 @@
           }
         ]
       }
+    },
+    "/api/uex/terminals": {
+      "get": {
+        "summary": "GET /api/uex/terminals",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/uex/terminals/{id}/inventory": {
+      "get": {
+        "summary": "GET /api/uex/terminals/{id}/inventory",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The id"
+          }
+        ]
+      }
+    },
+    "/api/uex/items/{name}/terminals": {
+      "get": {
+        "summary": "GET /api/uex/items/{name}/terminals",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The name"
+          }
+        ]
+      }
     }
   }
 }

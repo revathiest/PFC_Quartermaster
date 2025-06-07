@@ -1,5 +1,5 @@
 const { authMiddleware } = require('../../api/auth');
-const { sign } = require('../../utils/jwt');
+const jwt = require('jsonwebtoken');
 
 describe('api/auth authMiddleware', () => {
   beforeEach(() => {
@@ -16,7 +16,7 @@ describe('api/auth authMiddleware', () => {
   }
 
   test('passes through with valid token', () => {
-    const token = sign({ id: 1 }, 'secret');
+    const token = jwt.sign({ id: 1 }, 'secret');
     const req = { headers: { authorization: `Bearer ${token}` } };
     const res = mockRes();
     const next = jest.fn();
@@ -35,7 +35,7 @@ describe('api/auth authMiddleware', () => {
   });
 
   test('rejects invalid token', () => {
-    const badToken = sign({ id: 1 }, 'other');
+    const badToken = jwt.sign({ id: 1 }, 'other');
     const req = { headers: { authorization: `Bearer ${badToken}` } };
     const res = mockRes();
     const next = jest.fn();

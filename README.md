@@ -111,16 +111,17 @@ project root, or you can export them in your shell before running the bot.
 - `OPENAI_MODEL` - Model name to use when calling the OpenAI API.
 - `UEX_API_TOKEN` - Authentication token for the UEX trading API.
 - `JWT_SECRET` - Secret used to sign API tokens.
-- `JWT_SIGNING_SECRET` - Shared secret for exchanging short-lived JWTs.
-- `TOKEN_IP_WHITELIST` - Comma separated list of IPs allowed to exchange tokens.
+- `DISCORD_CLIENT_ID` - OAuth2 client ID for Discord login.
+- `DISCORD_CLIENT_SECRET` - OAuth2 client secret for Discord login.
 - `GOOGLE_SERVICE_ACCOUNT_FILE` - Path to your service account JSON key for Google Drive access.
 
 ## 🔑 Obtaining an API Token
 
-1. Create a JWT in your website using `JWT_SIGNING_SECRET`. The payload can include any user data.
-2. Send a `POST` request to `/api/token` with a JSON body `{ "token": "<jwt>" }`.
-3. The API validates the token and responds with a new token signed using `JWT_SECRET`.
-4. Use this returned token in the `Authorization: Bearer` header when calling other `/api/*` endpoints.
+1. Redirect the user to Discord's OAuth2 authorization page using your client ID.
+2. After the user approves, Discord will redirect back with a `code` parameter.
+3. Send a `POST` request to `/api/login` with `{ "code": "<code>", "redirectUri": "<your redirect>" }`.
+4. The API exchanges the code for the user's Discord info and returns a JWT signed with `JWT_SECRET`.
+5. Use this token in the `Authorization: Bearer` header when calling protected `/api/*` endpoints.
 
 ## 🗄️ Google Drive Setup
 

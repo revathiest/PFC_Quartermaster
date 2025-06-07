@@ -118,9 +118,9 @@
         }
       }
     },
-    "/api/uex/terminals/{id}/inventory": {
+    "/api/uex/terminals/{id}": {
       "get": {
-        "summary": "GET /api/uex/terminals/{id}/inventory",
+        "summary": "GET /api/uex/terminals/{id}",
         "responses": {
           "200": {
             "description": "Success"

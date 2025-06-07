@@ -74,6 +74,6 @@ async function getTerminalInventory(req, res) {
 }
 
 router.get('/terminals', searchTerminals);
-router.get('/terminals/:id/inventory', getTerminalInventory);
+router.get('/terminals/:id', getTerminalInventory);
 
 module.exports = { router, searchTerminals, getTerminalInventory };

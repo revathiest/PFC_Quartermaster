@@ -17,8 +17,12 @@ function exchangeToken(req, res) {
   const forwarded = (req.headers && req.headers['x-forwarded-for']) || '';
   const clientIp = forwarded.split(',')[0].trim() || req.ip;
   if (!allowedIps.includes(clientIp)) {
-    return res.status(403).json({ error: 'Unauthorized IP' });
+    return res.status(403).json({
+      error: 'Unauthorized IP',
+      ip: clientIp
+    });
   }
+  
   const signingSecret = process.env.JWT_SIGNING_SECRET;
   const secret = process.env.JWT_SECRET;
   if (!signingSecret || !secret) {

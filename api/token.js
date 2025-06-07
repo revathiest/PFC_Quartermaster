@@ -5,6 +5,20 @@ const { verify, sign } = require('../utils/jwt');
 router.use(express.json());
 
 function exchangeToken(req, res) {
+  const ipWhitelistEnv = process.env.TOKEN_IP_WHITELIST;
+  if (!ipWhitelistEnv) {
+    console.error('TOKEN_IP_WHITELIST not configured');
+    return res.status(500).json({ error: 'Server misconfiguration' });
+  }
+  const allowedIps = ipWhitelistEnv
+    .split(',')
+    .map(ip => ip.trim())
+    .filter(Boolean);
+  const forwarded = (req.headers && req.headers['x-forwarded-for']) || '';
+  const clientIp = forwarded.split(',')[0].trim() || req.ip;
+  if (!allowedIps.includes(clientIp)) {
+    return res.status(403).json({ error: 'Unauthorized IP' });
+  }
   const signingSecret = process.env.JWT_SIGNING_SECRET;
   const secret = process.env.JWT_SECRET;
   if (!signingSecret || !secret) {

@@ -73,32 +73,7 @@ async function getTerminalInventory(req, res) {
   }
 }
 
-async function getTerminalsForItem(req, res) {
-  const { name } = req.params;
-  const search = { [Op.like]: `%${name}%` };
-
-  try {
-    const [items, commodities, vehicles] = await Promise.all([
-      UexItemPrice.findAll({ where: { item_name: search }, include: { model: UexTerminal, as: 'terminal' } }),
-      UexCommodityPrice.findAll({ where: { commodity_name: search }, include: { model: UexTerminal, as: 'terminal' } }),
-      UexVehiclePurchasePrice.findAll({ where: { vehicle_name: search }, include: { model: UexTerminal, as: 'terminal' } })
-    ]);
-
-    const terminals = [
-      ...items.map(r => r.terminal).filter(Boolean),
-      ...commodities.map(r => r.terminal).filter(Boolean),
-      ...vehicles.map(r => r.terminal).filter(Boolean)
-    ];
-
-    res.json({ terminals });
-  } catch (err) {
-    console.error('Failed to load terminals for item:', err);
-    res.status(500).json({ error: 'Server error' });
-  }
-}
-
 router.get('/terminals', searchTerminals);
 router.get('/terminals/:id/inventory', getTerminalInventory);
-router.get('/items/:name/terminals', getTerminalsForItem);
 
-module.exports = { router, searchTerminals, getTerminalInventory, getTerminalsForItem };
+module.exports = { router, searchTerminals, getTerminalInventory };

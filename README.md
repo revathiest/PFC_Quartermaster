@@ -110,7 +110,16 @@ project root, or you can export them in your shell before running the bot.
 - `OPENAI_API_KEY` - API key used for OpenAI requests.
 - `OPENAI_MODEL` - Model name to use when calling the OpenAI API.
 - `UEX_API_TOKEN` - Authentication token for the UEX trading API.
+- `JWT_SECRET` - Secret used to sign API tokens.
+- `JWT_SIGNING_SECRET` - Shared secret for exchanging short-lived JWTs.
 - `GOOGLE_SERVICE_ACCOUNT_FILE` - Path to your service account JSON key for Google Drive access.
+
+## 🔑 Obtaining an API Token
+
+1. Create a JWT in your website using `JWT_SIGNING_SECRET`. The payload can include any user data.
+2. Send a `POST` request to `/api/token` with a JSON body `{ "token": "<jwt>" }`.
+3. The API validates the token and responds with a new token signed using `JWT_SECRET`.
+4. Use this returned token in the `Authorization: Bearer` header when calling other `/api/*` endpoints.
 
 ## 🗄️ Google Drive Setup
 

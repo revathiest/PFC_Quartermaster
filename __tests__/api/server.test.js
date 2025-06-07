@@ -12,7 +12,12 @@ jest.mock('express', () => {
     app.__server = server;
     return app;
   });
-  express.Router = jest.fn(() => ({ get: jest.fn(), use: jest.fn() }));
+  express.Router = jest.fn(() => ({
+    get: jest.fn(),
+    use: jest.fn(),
+    post: jest.fn()
+  }));
+  express.json = jest.fn(() => (req, res, next) => next());
   return express;
 }, { virtual: true });
 
@@ -21,6 +26,7 @@ jest.mock('cors', () => jest.fn(() => (req, res, next) => next()), { virtual: tr
 jest.mock('../../config/database', () => ({ SiteContent: {}, Event: {}, Accolade: {} }));
 jest.mock('../../config.json', () => ({ guildId: 'g1' }), { virtual: true });
 jest.mock('../../api/docs', () => ({ router: {} }), { virtual: true });
+jest.mock('../../api/auth', () => ({ authMiddleware: jest.fn((req, res, next) => next()) }));
 
 const express = require('express');
 const { startApi } = require('../../api/server');
@@ -34,7 +40,9 @@ describe('api/server startApi', () => {
     const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     startApi();
     const app = express.mock.results[0].value;
+    expect(app.use).toHaveBeenCalledWith('/api/token', expect.anything());
     expect(app.use).toHaveBeenCalledWith('/api/docs', expect.anything());
+    expect(app.use).toHaveBeenCalledWith('/api', expect.any(Function));
     expect(app.use).toHaveBeenCalledWith('/api/content', expect.anything());
     expect(app.use).toHaveBeenCalledWith('/api/events', expect.anything());
     expect(app.get).toHaveBeenCalledWith('/api/data', expect.any(Function));

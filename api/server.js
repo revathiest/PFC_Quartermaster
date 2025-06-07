@@ -5,12 +5,16 @@ const { router: eventsRouter } = require('./events');
 const { router: accoladesRouter } = require('./accolades');
 const { router: docsRouter } = require('./docs');
 const { router: uexRouter } = require('./uex');
+const { router: tokenRouter } = require('./token');
+const { authMiddleware } = require('./auth');
 
 function createApp() {
   const app = express();
   app.use(cors());
 
+  app.use('/api/token', tokenRouter);
   app.use('/api/docs', docsRouter);
+  app.use('/api', authMiddleware);
   app.use('/api/content', contentRouter);
   app.use('/api/events', eventsRouter);
   app.use('/api/accolades', accoladesRouter);

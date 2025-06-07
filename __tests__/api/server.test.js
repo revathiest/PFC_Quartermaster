@@ -40,7 +40,7 @@ describe('api/server startApi', () => {
     const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     startApi();
     const app = express.mock.results[0].value;
-    expect(app.use).toHaveBeenCalledWith('/api/token', expect.anything());
+    expect(app.use).toHaveBeenCalledWith('/api/login', expect.anything());
     expect(app.use).toHaveBeenCalledWith('/api/docs', expect.anything());
     expect(app.use).toHaveBeenCalledWith('/api', expect.any(Function));
     expect(app.use).toHaveBeenCalledWith('/api/content', expect.anything());

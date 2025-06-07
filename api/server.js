@@ -4,6 +4,7 @@ const { router: contentRouter } = require('./content');
 const { router: eventsRouter } = require('./events');
 const { router: accoladesRouter } = require('./accolades');
 const { router: docsRouter } = require('./docs');
+const { router: uexRouter } = require('./uex');
 
 function createApp() {
   const app = express();
@@ -13,6 +14,7 @@ function createApp() {
   app.use('/api/content', contentRouter);
   app.use('/api/events', eventsRouter);
   app.use('/api/accolades', accoladesRouter);
+  app.use('/api/uex', uexRouter);
 
   // GET /api/data - placeholder for future Sequelize queries
   app.get('/api/data', async (req, res) => {

@@ -10,8 +10,7 @@ jest.mock('../../config/database', () => ({
 const { Op } = require('sequelize');
 const {
   searchTerminals,
-  getTerminalInventory,
-  getTerminalsForItem
+  getTerminalInventory
 } = require('../../api/uex');
 const {
   UexTerminal,
@@ -112,32 +111,3 @@ describe('api/uex getTerminalInventory', () => {
   });
 });
 
-describe('api/uex getTerminalsForItem', () => {
-  beforeEach(() => jest.clearAllMocks());
-
-  test('aggregates terminals from all tables', async () => {
-    const req = { params: { name: 'foo' } };
-    const res = mockRes();
-    UexItemPrice.findAll.mockResolvedValue([{ terminal: { id: 1 } }]);
-    UexCommodityPrice.findAll.mockResolvedValue([{ terminal: { id: 2 } }]);
-    UexVehiclePurchasePrice.findAll.mockResolvedValue([{ terminal: { id: 3 } }]);
-
-    await getTerminalsForItem(req, res);
-
-    expect(res.json).toHaveBeenCalledWith({ terminals: [{ id: 1 }, { id: 2 }, { id: 3 }] });
-  });
-
-  test('handles errors', async () => {
-    const req = { params: { name: 'foo' } };
-    const res = mockRes();
-    UexItemPrice.findAll.mockRejectedValue(new Error('fail'));
-    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
-
-    await getTerminalsForItem(req, res);
-
-    expect(spy).toHaveBeenCalled();
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Server error' });
-    spy.mockRestore();
-  });
-});

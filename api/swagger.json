@@ -138,27 +138,6 @@
           }
         ]
       }
-    },
-    "/api/uex/items/{name}/terminals": {
-      "get": {
-        "summary": "GET /api/uex/items/{name}/terminals",
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        },
-        "parameters": [
-          {
-            "name": "name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "The name"
-          }
-        ]
-      }
     }
   }
 }

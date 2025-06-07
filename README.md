@@ -112,6 +112,7 @@ project root, or you can export them in your shell before running the bot.
 - `UEX_API_TOKEN` - Authentication token for the UEX trading API.
 - `JWT_SECRET` - Secret used to sign API tokens.
 - `JWT_SIGNING_SECRET` - Shared secret for exchanging short-lived JWTs.
+- `TOKEN_IP_WHITELIST` - Comma separated list of IPs allowed to exchange tokens.
 - `GOOGLE_SERVICE_ACCOUNT_FILE` - Path to your service account JSON key for Google Drive access.
 
 ## 🔑 Obtaining an API Token

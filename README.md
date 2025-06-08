@@ -13,6 +13,7 @@ A powerful Discord bot built for the **Pyro Freelancers Corps**, designed to man
 - ✅ Handles guild member updates & role assignments
 - ✅ Modular design for scalability
 - ✅ `/loglookup` command with user lookup and event dropdown (admin only)
+- ✅ `/apitoken` command to generate a JWT for API testing (admin only)
 
 ## 🛠️ Installation
 
@@ -184,6 +185,7 @@ watch your files and automatically restart the bot during development.
 ## 📖 API Documentation
 
 API endpoints are documented using the OpenAPI specification. After running the tests or starting the server, `api/swagger.json` is regenerated automatically. To view the interactive documentation, start the API and visit [`/api/docs`](http://localhost:8003/api/docs).
+Since the API is secured with JWTs, obtain a token via `POST /api/login` and click **Authorize** in the Swagger UI to enter `Bearer <token>` for testing.
 
 ## 🧪 Testing
 

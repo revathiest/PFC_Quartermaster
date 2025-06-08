@@ -27,6 +27,16 @@ const spec = {
     title: 'Quartermaster API',
     version: '1.0.0'
   },
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT'
+      }
+    }
+  },
+  security: [{ bearerAuth: [] }],
   paths: {}
 };
 
@@ -69,6 +79,21 @@ for (const [routerVar, base] of Object.entries(basePaths)) {
     if (route === '/') route = '';
     const { openPath, operation } = buildPathDetails(`${base}${route}`);
     spec.paths[openPath] = { get: operation };
+  }
+}
+
+// Paths that should be publicly accessible (no auth required)
+const publicPaths = [
+  '/api/data',
+  '/api/content',
+  '/api/content/{section}',
+  '/api/events',
+  '/api/events/{id}'
+];
+
+for (const pathKey of publicPaths) {
+  if (spec.paths[pathKey] && spec.paths[pathKey].get) {
+    spec.paths[pathKey].get.security = [];
   }
 }
 

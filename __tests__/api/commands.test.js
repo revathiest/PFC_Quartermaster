@@ -20,7 +20,7 @@ describe('api/commands listCommands', () => {
     const res = mockRes();
 
     await listCommands(req, res);
-    expect(res.json).toHaveBeenCalledWith({ commands: ['/ping', '/trade'] });
+    expect(res.json).toHaveBeenCalledWith({ commands: ['ping', 'trade'] });
   });
 
   test('returns 500 when client missing', async () => {
@@ -48,7 +48,7 @@ describe('api/commands getCommand', () => {
 
     await getCommand(req, res);
 
-    expect(res.json).toHaveBeenCalledWith({ command: { command: '/ping', description: 'desc', aliases: ['pong'], cooldown: '5s' } });
+    expect(res.json).toHaveBeenCalledWith({ command: { command: 'ping', description: 'desc', aliases: ['pong'], cooldown: '5s' } });
   });
 
   test('returns 404 when missing', async () => {

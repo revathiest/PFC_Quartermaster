@@ -10,7 +10,7 @@ async function listCommands(req, res) {
     console.error('Discord client unavailable for commands endpoint');
     return res.status(500).json({ error: 'Discord client unavailable' });
   }
-  const commands = Array.from(client.commands?.keys() || []).map(n => `/${n}`);
+  const commands = Array.from(client.commands?.keys() || []);
   res.json({ commands });
 }
 
@@ -26,7 +26,7 @@ async function getCommand(req, res) {
   if (!cmd) return res.status(404).json({ error: 'Not found' });
   res.json({
     command: {
-      command: `/${cmd.data.name}`,
+      command: cmd.data.name,
       description: cmd.data.description,
       aliases: cmd.aliases || [],
       cooldown: cmd.cooldown ? `${cmd.cooldown}s` : undefined

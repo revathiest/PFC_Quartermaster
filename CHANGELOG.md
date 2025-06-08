@@ -10,4 +10,5 @@
 - Renamed `GET /api/uex/terminals/{id}/inventory` to `GET /api/uex/terminals/{id}`
 - JWT authentication middleware for API routes
 - `/api/token` endpoint for JWT exchange
+- Swagger UI now supports Bearer token authentication via the **Authorize** button
 

@@ -14,6 +14,7 @@
 - Swagger UI now supports Bearer token authentication via the **Authorize** button
 - `/apitoken` command for generating JWTs via Discord
 - Activity log search endpoint under `/api`
+- Activity log search results now include channel and member details
 - `GET /api/members` endpoint to list Discord guild members
 - `GET /api/profile/{userId}` endpoint for member profile info
 - `/api/commands` and `/api/command/{command}` endpoints for command details

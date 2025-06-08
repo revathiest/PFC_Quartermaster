@@ -120,8 +120,8 @@ async function getMember(req, res) {
   }
 }
 
-router.get('/activity-log/search', searchLogs);
-router.post('/activity-log/search', searchLogsPost);
+router.get('/search', searchLogs);
+router.post('/search', searchLogsPost);
 router.get('/commands', listCommands);
 router.get('/command/:command', getCommand);
 router.get('/members', listMembers);

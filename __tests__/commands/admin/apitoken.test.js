@@ -9,7 +9,7 @@ describe('/apitoken command', () => {
   const makeInteraction = () => ({
     reply: jest.fn(),
     user: { id: '1', username: 'Tester' },
-    member: {},
+    member: { displayName: 'Display', roles: { cache: [{ name: 'Admin' }] } },
   });
 
   beforeEach(() => {
@@ -37,6 +37,11 @@ describe('/apitoken command', () => {
     await execute(interaction);
     const [[{ content }]] = interaction.reply.mock.calls;
     const token = content.replace('Bearer ', '');
-    expect(jwt.verify(token, 'secret')).toMatchObject({ id: '1', username: 'Tester' });
+    expect(jwt.verify(token, 'secret')).toMatchObject({
+      id: '1',
+      username: 'Tester',
+      displayName: 'Display',
+      roles: ['Admin']
+    });
   });
 });

@@ -3,6 +3,10 @@ const fetch = require('node-fetch');
 const jwt = require('jsonwebtoken');
 
 jest.mock('node-fetch');
+jest.mock('../../discordClient', () => ({ getClient: jest.fn() }));
+jest.mock('../../config.json', () => ({ guildId: 'g1' }), { virtual: true });
+
+const { getClient } = require('../../discordClient');
 
 function mockRes() {
   return { status: jest.fn().mockReturnThis(), json: jest.fn() };
@@ -14,6 +18,12 @@ describe('api/login discordLogin', () => {
     process.env.DISCORD_CLIENT_ID = 'id';
     process.env.DISCORD_CLIENT_SECRET = 'secret';
     process.env.JWT_SECRET = 'jwt';
+    const guild = {
+      members: {
+        fetch: jest.fn().mockResolvedValue({ displayName: 'Tester', roles: { cache: [{ name: 'Admin' }] } })
+      }
+    };
+    getClient.mockReturnValue({ guilds: { cache: { get: jest.fn(() => guild) } } });
   });
 
   afterEach(() => {
@@ -30,7 +40,12 @@ describe('api/login discordLogin', () => {
     const res = mockRes();
     await discordLogin(req, res);
     const token = res.json.mock.calls[0][0].token;
-    expect(jwt.verify(token, 'jwt')).toMatchObject({ id: '1', username: 'A' });
+    expect(jwt.verify(token, 'jwt')).toMatchObject({
+      id: '1',
+      username: 'A',
+      displayName: 'Tester',
+      roles: ['Admin']
+    });
   });
 
   test('returns 400 when missing data', async () => {
@@ -48,5 +63,20 @@ describe('api/login discordLogin', () => {
     await discordLogin(req, res);
     expect(res.status).toHaveBeenCalledWith(403);
     expect(res.json).toHaveBeenCalledWith({ error: 'Invalid code' });
+  });
+
+  test('returns 500 when client missing', async () => {
+    fetch
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ access_token: 'acc' }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ id: '1', username: 'A' }) });
+    getClient.mockReturnValueOnce(null);
+    const req = { body: { code: 'abc', redirectUri: 'http://x' } };
+    const res = mockRes();
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    await discordLogin(req, res);
+    expect(spy).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Discord client unavailable' });
+    spy.mockRestore();
   });
 });

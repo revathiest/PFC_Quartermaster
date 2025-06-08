@@ -1,6 +1,8 @@
 const express = require('express');
 const fetch = require('node-fetch');
 const jwt = require('jsonwebtoken');
+const { getClient } = require('../discordClient');
+const config = require('../config.json');
 
 const router = express.Router();
 router.use(express.json());
@@ -48,7 +50,30 @@ async function discordLogin(req, res) {
     }
 
     const user = await userRes.json();
-    const payload = { id: user.id, username: user.username };
+
+    const client = getClient();
+    const guild = client?.guilds?.cache.get(config.guildId);
+    if (!client || !guild) {
+      console.error('Discord client unavailable for login endpoint');
+      return res.status(500).json({ error: 'Discord client unavailable' });
+    }
+
+    let member;
+    try {
+      member = await guild.members.fetch(user.id);
+    } catch (err) {
+      console.error('Failed to fetch member:', err);
+      return res.status(500).json({ error: 'Discord fetch error' });
+    }
+
+    const displayName = member.displayName;
+    const roles = member.roles.cache.map(r => r.name);
+    const payload = {
+      id: user.id,
+      username: user.username,
+      displayName,
+      roles
+    };
     const token = jwt.sign(payload, jwtSecret);
     res.json({ token });
   } catch (err) {

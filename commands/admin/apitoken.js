@@ -26,9 +26,13 @@ module.exports = {
       });
     }
 
+    const member = interaction.member || await interaction.guild.members.fetch(interaction.user.id);
+    const roles = member.roles?.cache?.map(r => r.name) || [];
     const payload = {
       id: interaction.user.id,
-      username: interaction.user.username
+      username: interaction.user.username,
+      displayName: member.displayName,
+      roles
     };
     const token = jwt.sign(payload, secret);
 

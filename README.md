@@ -186,7 +186,7 @@ watch your files and automatically restart the bot during development.
 
 API endpoints are documented using the OpenAPI specification. After running the tests or starting the server, `api/swagger.json` is regenerated automatically. To view the interactive documentation, start the API and visit [`/api/docs`](http://localhost:8003/api/docs).
 Since the API is secured with JWTs, obtain a token via `POST /api/login` and click **Authorize** in the Swagger UI to enter `Bearer <token>` for testing.
-The API now includes a `/api/commands` endpoint that lists all registered slash commands and `/api/command/{commandName}` for details about a specific command.
+The API now includes a `/api/commands` endpoint that lists all registered slash commands and `/api/command/{commandName}` for details about a specific command. The command names in the response are returned without the leading `/`.
 
 ## 🧪 Testing
 

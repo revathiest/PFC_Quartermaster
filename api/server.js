@@ -17,6 +17,7 @@ function createApp() {
   app.use('/api/docs', docsRouter);
 
   // Public endpoints
+  app.use('/api/accolades', accoladesRouter);
   app.use('/api/content', contentRouter);
   app.use('/api/events', eventsRouter);
   app.get('/api/data', async (req, res) => {
@@ -25,8 +26,6 @@ function createApp() {
 
   // Protected endpoints
   app.use('/api', authMiddleware);
-  app.use('/api', activityLogRouter);
-  app.use('/api/accolades', accoladesRouter);
   app.use('/api/uex', uexRouter);
 
   return app;

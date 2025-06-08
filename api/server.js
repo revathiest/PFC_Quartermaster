@@ -14,16 +14,18 @@ function createApp() {
 
   app.use('/api/login', loginRouter);
   app.use('/api/docs', docsRouter);
-  app.use('/api', authMiddleware);
+
+  // Public endpoints
   app.use('/api/content', contentRouter);
   app.use('/api/events', eventsRouter);
-  app.use('/api/accolades', accoladesRouter);
-  app.use('/api/uex', uexRouter);
-
-  // GET /api/data - placeholder for future Sequelize queries
   app.get('/api/data', async (req, res) => {
     res.json({ success: true, message: 'API is working' });
   });
+
+  // Protected endpoints
+  app.use('/api', authMiddleware);
+  app.use('/api/accolades', accoladesRouter);
+  app.use('/api/uex', uexRouter);
 
   return app;
 }

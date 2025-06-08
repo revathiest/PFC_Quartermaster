@@ -17,8 +17,8 @@ beforeEach(() => {
 describe('api/members listMembers', () => {
   test('returns members', async () => {
     const members = [
-      { id: '1', user: { username: 'A' } },
-      { id: '2', user: { username: 'B' } }
+      { id: '1', user: { username: 'A' }, displayName: 'A' },
+      { id: '2', user: { username: 'B' }, displayName: 'B' }
     ];
     const guild = {
       members: { fetch: jest.fn().mockResolvedValue(), cache: makeCollection(members) }
@@ -30,7 +30,10 @@ describe('api/members listMembers', () => {
     await listMembers(req, res);
 
     expect(guild.members.fetch).toHaveBeenCalled();
-    expect(res.json).toHaveBeenCalledWith({ members: [{ userId: '1', username: 'A' }, { userId: '2', username: 'B' }] });
+    expect(res.json).toHaveBeenCalledWith({ members: [
+      { userId: '1', username: 'A', displayName: 'A' },
+      { userId: '2', username: 'B', displayName: 'B' }
+    ] });
   });
 
   test('handles fetch errors', async () => {

@@ -109,5 +109,47 @@ for (const pathKey of publicPaths) {
   }
 }
 
+// Add detailed docs for log search endpoints
+if (spec.paths['/api/activity-log/search']) {
+  const logSearch = spec.paths['/api/activity-log/search'];
+
+  if (logSearch.get) {
+    logSearch.get.parameters = [
+      { name: 'page', in: 'query', required: false, schema: { type: 'integer', default: 1 }, description: 'Page number' },
+      { name: 'limit', in: 'query', required: false, schema: { type: 'integer', default: 25 }, description: 'Results per page' },
+      { name: 'type', in: 'query', required: false, schema: { type: 'string' }, description: 'Filter by event type' },
+      { name: 'userId', in: 'query', required: false, schema: { type: 'string' }, description: 'Filter by user ID' },
+      { name: 'command', in: 'query', required: false, schema: { type: 'string' }, description: 'Filter by command name' },
+      { name: 'message', in: 'query', required: false, schema: { type: 'string' }, description: 'Search within message content' }
+    ];
+  }
+
+  if (logSearch.post) {
+    logSearch.post.requestBody = {
+      required: true,
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            properties: {
+              page: { type: 'integer', default: 1 },
+              limit: { type: 'integer', default: 25 },
+              filters: {
+                type: 'object',
+                properties: {
+                  type: { type: 'string' },
+                  userId: { type: 'string' },
+                  command: { type: 'string' },
+                  message: { type: 'string' }
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+  }
+}
+
 fs.writeFileSync(path.join(apiDir, 'swagger.json'), JSON.stringify(spec, null, 2));
 console.log('\uD83D\uDCDD Swagger docs generated'); // 📝

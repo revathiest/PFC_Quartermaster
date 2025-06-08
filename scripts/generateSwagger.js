@@ -40,14 +40,14 @@ const spec = {
   paths: {}
 };
 
-function buildPathDetails(path) {
+function buildPathDetails(path, method = 'get') {
   const params = [];
   const openPath = path.replace(/:([^/]+)/g, (_, name) => {
     params.push(name);
     return `{${name}}`;
   });
   const operation = {
-    summary: `GET ${openPath}`,
+    summary: `${method.toUpperCase()} ${openPath}`,
     responses: { 200: { description: 'Success' } }
   };
   if (params.length) {
@@ -62,23 +62,30 @@ function buildPathDetails(path) {
   return { openPath, operation };
 }
 
-const directRegex = /app\.get\(['"`]([^'"`]+)['"`]/g;
+const methods = ['get', 'post', 'put', 'patch', 'delete'];
+const directPattern = 'app\\.(' + methods.join('|') + ')\\([\'"\\`]([^\'"\\`]+)[\'"\\`]';
+const directRegex = new RegExp(directPattern, 'g');
 while ((m = directRegex.exec(serverSrc))) {
-  const { openPath, operation } = buildPathDetails(m[1]);
-  spec.paths[openPath] = { get: operation };
+  const method = m[1];
+  const { openPath, operation } = buildPathDetails(m[2], method);
+  if (!spec.paths[openPath]) spec.paths[openPath] = {};
+  spec.paths[openPath][method] = operation;
 }
 
 for (const [routerVar, base] of Object.entries(basePaths)) {
   const file = routerFiles[routerVar];
   if (!file) continue;
   const src = fs.readFileSync(path.join(apiDir, file), 'utf8');
-  const routeRegex = /router\.get\(['"`]([^'"`]+)['"`]/g;
+  const routePattern = 'router\\.(' + methods.join('|') + ')\\([\'"\\`]([^\'"\\`]+)[\'"\\`]';
+  const routeRegex = new RegExp(routePattern, 'g');
   let routeMatch;
   while ((routeMatch = routeRegex.exec(src))) {
-    let route = routeMatch[1];
+    const method = routeMatch[1];
+    let route = routeMatch[2];
     if (route === '/') route = '';
-    const { openPath, operation } = buildPathDetails(`${base}${route}`);
-    spec.paths[openPath] = { get: operation };
+    const { openPath, operation } = buildPathDetails(`${base}${route}`, method);
+    if (!spec.paths[openPath]) spec.paths[openPath] = {};
+    spec.paths[openPath][method] = operation;
   }
 }
 
@@ -90,12 +97,57 @@ const publicPaths = [
   '/api/events',
   '/api/events/{id}',
   '/api/accolades',
-  '/api/accolades/{id}'
+  '/api/accolades/{id}',
+  '/api/login'
 ];
 
 for (const pathKey of publicPaths) {
-  if (spec.paths[pathKey] && spec.paths[pathKey].get) {
-    spec.paths[pathKey].get.security = [];
+  if (spec.paths[pathKey]) {
+    for (const method of Object.keys(spec.paths[pathKey])) {
+      spec.paths[pathKey][method].security = [];
+    }
+  }
+}
+
+// Add detailed docs for log search endpoints
+if (spec.paths['/api/activity-log/search']) {
+  const logSearch = spec.paths['/api/activity-log/search'];
+
+  if (logSearch.get) {
+    logSearch.get.parameters = [
+      { name: 'page', in: 'query', required: false, schema: { type: 'integer', default: 1 }, description: 'Page number' },
+      { name: 'limit', in: 'query', required: false, schema: { type: 'integer', default: 25 }, description: 'Results per page' },
+      { name: 'type', in: 'query', required: false, schema: { type: 'string' }, description: 'Filter by event type' },
+      { name: 'userId', in: 'query', required: false, schema: { type: 'string' }, description: 'Filter by user ID' },
+      { name: 'command', in: 'query', required: false, schema: { type: 'string' }, description: 'Filter by command name' },
+      { name: 'message', in: 'query', required: false, schema: { type: 'string' }, description: 'Search within message content' }
+    ];
+  }
+
+  if (logSearch.post) {
+    logSearch.post.requestBody = {
+      required: true,
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            properties: {
+              page: { type: 'integer', default: 1 },
+              limit: { type: 'integer', default: 25 },
+              filters: {
+                type: 'object',
+                properties: {
+                  type: { type: 'string' },
+                  userId: { type: 'string' },
+                  command: { type: 'string' },
+                  message: { type: 'string' }
+                }
+              }
+            }
+          }
+        }
+      }
+    };
   }
 }
 

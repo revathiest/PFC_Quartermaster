@@ -26,6 +26,7 @@ function createApp() {
 
   // Protected endpoints
   app.use('/api', authMiddleware);
+  app.use('/api/activity-log', activityLogRouter);
   app.use('/api/uex', uexRouter);
 
   return app;

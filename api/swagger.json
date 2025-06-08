@@ -140,6 +140,86 @@
         "security": []
       }
     },
+    "/api/activity-log/search": {
+      "get": {
+        "summary": "GET /api/activity-log/search",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/activity-log/search",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/activity-log/commands": {
+      "get": {
+        "summary": "GET /api/activity-log/commands",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/activity-log/command/{command}": {
+      "get": {
+        "summary": "GET /api/activity-log/command/{command}",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "parameters": [
+          {
+            "name": "command",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The command"
+          }
+        ]
+      }
+    },
+    "/api/activity-log/members": {
+      "get": {
+        "summary": "GET /api/activity-log/members",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/activity-log/member/{userId}": {
+      "get": {
+        "summary": "GET /api/activity-log/member/{userId}",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The userId"
+          }
+        ]
+      }
+    },
     "/api/uex/terminals": {
       "get": {
         "summary": "GET /api/uex/terminals",

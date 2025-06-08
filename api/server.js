@@ -5,7 +5,9 @@ const { router: eventsRouter } = require('./events');
 const { router: accoladesRouter } = require('./accolades');
 const { router: docsRouter } = require('./docs');
 const { router: uexRouter } = require('./uex');
-const { router: loginRouter } = require('./login');
+const { router: loginRouter } = require("./login");
+
+const { router: profileRouter } = require('./profile');
 const { router: activityLogRouter } = require('./activityLog');
 const { router: membersRouter } = require('./members');
 const { authMiddleware } = require('./auth');
@@ -27,6 +29,7 @@ function createApp() {
 
   // Protected endpoints
   app.use('/api', authMiddleware);
+  app.use('/api/profile', profileRouter);
   app.use('/api/activity-log', activityLogRouter);
   app.use('/api/uex', uexRouter);
   app.use('/api/members', membersRouter);

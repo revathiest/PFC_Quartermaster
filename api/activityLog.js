@@ -3,7 +3,7 @@ const { Op } = require('sequelize');
 const router = express.Router();
 router.use(express.json());
 
-const { UsageLog } = require('../config/database');
+const { sequelize, UsageLog } = require('../config/database');
 const { getClient } = require('../discordClient');
 const config = require('../config.json');
 
@@ -43,12 +43,30 @@ async function searchLogsPost(req, res) {
   await executeSearch({ page, limit, ...filters }, res);
 }
 
+async function listEventTypes(req, res) {
+  try {
+    const records = await UsageLog.findAll({
+      attributes: [
+        [sequelize.fn('DISTINCT', sequelize.col('event_type')), 'event_type']
+      ],
+      where: { server_id: config.guildId }
+    });
+    const eventTypes = records.map(r => r.get ? r.get('event_type') : r.event_type);
+    res.json({ eventTypes });
+  } catch (err) {
+    console.error('Failed to load event types:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+}
+
 
 router.get('/search', searchLogs);
 router.post('/search', searchLogsPost);
+router.get('/event-types', listEventTypes);
 
 module.exports = {
   router,
   searchLogs,
-  searchLogsPost
+  searchLogsPost,
+  listEventTypes
 };

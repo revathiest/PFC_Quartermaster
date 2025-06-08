@@ -1,11 +1,15 @@
-jest.mock('../../config/database', () => ({ UsageLog: { findAll: jest.fn() } }));
+jest.mock('../../config/database', () => ({
+  UsageLog: { findAll: jest.fn() },
+  sequelize: { fn: jest.fn((name, col) => `${name}(${col})`), col: jest.fn(name => name) }
+}));
 jest.mock('../../discordClient', () => ({ getClient: jest.fn() }));
 jest.mock('../../config.json', () => ({ guildId: 'g1' }), { virtual: true });
 
 const { Op } = require('sequelize');
 const {
   searchLogs,
-  searchLogsPost
+  searchLogsPost,
+  listEventTypes
 } = require('../../api/activityLog');
 const { UsageLog } = require('../../config/database');
 const { getClient } = require('../../discordClient');
@@ -73,5 +77,38 @@ describe('api/activityLog searchLogsPost', () => {
       order: [['timestamp', 'DESC']]
     });
     expect(res.json).toHaveBeenCalledWith({ logs: ['y'] });
+  });
+});
+
+describe('api/activityLog listEventTypes', () => {
+  test('returns event type list', async () => {
+    const req = {};
+    const res = mockRes();
+    UsageLog.findAll.mockResolvedValue([
+      { get: field => (field === 'event_type' ? 'a' : undefined) },
+      { get: field => (field === 'event_type' ? 'b' : undefined) }
+    ]);
+
+    await listEventTypes(req, res);
+
+    expect(UsageLog.findAll).toHaveBeenCalledWith({
+      attributes: [['DISTINCT(event_type)', 'event_type']],
+      where: { server_id: 'g1' }
+    });
+    expect(res.json).toHaveBeenCalledWith({ eventTypes: ['a', 'b'] });
+  });
+
+  test('handles errors', async () => {
+    const req = {};
+    const res = mockRes();
+    UsageLog.findAll.mockRejectedValue(new Error('fail'));
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    await listEventTypes(req, res);
+
+    expect(spy).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Server error' });
+    spy.mockRestore();
   });
 });

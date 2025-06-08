@@ -5,7 +5,7 @@
 - Automatic OpenAPI documentation generation
 - `/api/docs` endpoint serving Swagger UI
 - `GET /api/events/:id` and `GET /api/accolades/:id` endpoints
-- `/api/uex` search endpoints for terminals and inventory
+- Removed `/api/uex/terminals` and `/api/uex/terminals/{id}` endpoints
 - `/api/accolades` endpoints are now public (no JWT required)
 - Removed `GET /api/uex/items/{name}/terminals` endpoint
 - Renamed `GET /api/uex/terminals/{id}/inventory` to `GET /api/uex/terminals/{id}`
@@ -13,7 +13,6 @@
 - `/api/token` endpoint for JWT exchange
 - Swagger UI now supports Bearer token authentication via the **Authorize** button
 - `/apitoken` command for generating JWTs via Discord
-- Activity log search and Discord member/command endpoints under `/api`
-- `/api/commands` endpoint for listing registered slash commands
+- Activity log search endpoint under `/api`
 - `GET /api/members` endpoint to list Discord guild members
 - `GET /api/profile/{userId}` endpoint for member profile info

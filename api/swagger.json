@@ -139,20 +139,8 @@
         ],
         "security": []
       }
-    },
-    "/api/uex/terminals": {
       "get": {
-        "summary": "GET /api/uex/terminals",
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/uex/terminals/{id}": {
-      "get": {
-        "summary": "GET /api/uex/terminals/{id}",
+        "summary": "GET /api/profile/{userId}",
         "responses": {
           "200": {
             "description": "Success"
@@ -160,13 +148,13 @@
         },
         "parameters": [
           {
-            "name": "id",
+            "name": "userId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string"
             },
-            "description": "The id"
+            "description": "The userId"
           }
         ]
       }

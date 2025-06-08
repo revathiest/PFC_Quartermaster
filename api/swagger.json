@@ -139,8 +139,6 @@
         ],
         "security": []
       }
-    },
-    "/api/profile/{userId}": {
       "get": {
         "summary": "GET /api/profile/{userId}",
         "responses": {
@@ -159,6 +157,16 @@
             "description": "The userId"
           }
         ]
+      }
+    },
+    "/api/members": {
+      "get": {
+        "summary": "GET /api/members",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
       }
     }
   }

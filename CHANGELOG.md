@@ -13,4 +13,5 @@
 - `/api/token` endpoint for JWT exchange
 - Swagger UI now supports Bearer token authentication via the **Authorize** button
 - `/apitoken` command for generating JWTs via Discord
+- Activity log search and Discord member/command endpoints under `/api`
 

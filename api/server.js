@@ -6,6 +6,7 @@ const { router: accoladesRouter } = require('./accolades');
 const { router: docsRouter } = require('./docs');
 const { router: uexRouter } = require('./uex');
 const { router: loginRouter } = require('./login');
+const { router: activityLogRouter } = require('./activityLog');
 const { authMiddleware } = require('./auth');
 
 function createApp() {

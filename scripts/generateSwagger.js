@@ -88,7 +88,9 @@ const publicPaths = [
   '/api/content',
   '/api/content/{section}',
   '/api/events',
-  '/api/events/{id}'
+  '/api/events/{id}',
+  '/api/accolades',
+  '/api/accolades/{id}'
 ];
 
 for (const pathKey of publicPaths) {

@@ -30,6 +30,39 @@
         "security": []
       }
     },
+    "/api/accolades": {
+      "get": {
+        "summary": "GET /api/accolades",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/accolades/{id}": {
+      "get": {
+        "summary": "GET /api/accolades/{id}",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The id"
+          }
+        ],
+        "security": []
+      }
+    },
     "/api/content": {
       "get": {
         "summary": "GET /api/content",
@@ -94,37 +127,6 @@
           }
         ],
         "security": []
-      }
-    },
-    "/api/accolades": {
-      "get": {
-        "summary": "GET /api/accolades",
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/accolades/{id}": {
-      "get": {
-        "summary": "GET /api/accolades/{id}",
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "The id"
-          }
-        ]
       }
     },
     "/api/uex/terminals": {

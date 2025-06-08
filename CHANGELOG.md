@@ -15,4 +15,5 @@
 - `/apitoken` command for generating JWTs via Discord
 - Activity log search and Discord member/command endpoints under `/api`
 - `/api/commands` endpoint for listing registered slash commands
-
+- `GET /api/members` endpoint to list Discord guild members
+- `GET /api/profile/{userId}` endpoint for member profile info

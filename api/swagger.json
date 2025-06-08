@@ -139,20 +139,8 @@
         ],
         "security": []
       }
-    },
-    "/api/uex/terminals": {
       "get": {
-        "summary": "GET /api/uex/terminals",
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/uex/terminals/{id}": {
-      "get": {
-        "summary": "GET /api/uex/terminals/{id}",
+        "summary": "GET /api/profile/{userId}",
         "responses": {
           "200": {
             "description": "Success"
@@ -160,13 +148,93 @@
         },
         "parameters": [
           {
-            "name": "id",
+            "name": "userId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string"
             },
-            "description": "The id"
+            "description": "The userId"
+          }
+        ]
+      }
+    },
+    "/api/activity-log/search": {
+      "get": {
+        "summary": "GET /api/activity-log/search",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/activity-log/search",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/commands": {
+      "get": {
+        "summary": "GET /api/commands",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/command/{command}": {
+      "get": {
+        "summary": "GET /api/command/{command}",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "parameters": [
+          {
+            "name": "command",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The command"
+          }
+        ]
+      }
+    },
+    "/api/members": {
+      "get": {
+        "summary": "GET /api/members",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/member/{userId}": {
+      "get": {
+        "summary": "GET /api/member/{userId}",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The userId"
           }
         ]
       }

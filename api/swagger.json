@@ -210,6 +210,16 @@
         }
       }
     },
+    "/api/activity-log/event-types": {
+      "get": {
+        "summary": "GET /api/activity-log/event-types",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/members": {
       "get": {
         "summary": "GET /api/members",

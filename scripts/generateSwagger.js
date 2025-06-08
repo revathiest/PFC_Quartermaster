@@ -82,5 +82,20 @@ for (const [routerVar, base] of Object.entries(basePaths)) {
   }
 }
 
+// Paths that should be publicly accessible (no auth required)
+const publicPaths = [
+  '/api/data',
+  '/api/content',
+  '/api/content/{section}',
+  '/api/events',
+  '/api/events/{id}'
+];
+
+for (const pathKey of publicPaths) {
+  if (spec.paths[pathKey] && spec.paths[pathKey].get) {
+    spec.paths[pathKey].get.security = [];
+  }
+}
+
 fs.writeFileSync(path.join(apiDir, 'swagger.json'), JSON.stringify(spec, null, 2));
 console.log('\uD83D\uDCDD Swagger docs generated'); // 📝

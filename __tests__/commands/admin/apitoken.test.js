@@ -37,11 +37,13 @@ describe('/apitoken command', () => {
     await execute(interaction);
     const [[{ content }]] = interaction.reply.mock.calls;
     const token = content.replace('Bearer ', '');
-    expect(jwt.verify(token, 'secret')).toMatchObject({
+    const decoded = jwt.verify(token, 'secret');
+    expect(decoded).toMatchObject({
       id: '1',
       username: 'Tester',
       displayName: 'Display',
       roles: ['Admin']
     });
+    expect(decoded.exp - decoded.iat).toBe(1800);
   });
 });

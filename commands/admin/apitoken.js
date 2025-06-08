@@ -34,7 +34,7 @@ module.exports = {
       displayName: member.displayName,
       roles
     };
-    const token = jwt.sign(payload, secret);
+    const token = jwt.sign(payload, secret, { expiresIn: '30m' });
 
     await interaction.reply({
       content: `Bearer ${token}`,

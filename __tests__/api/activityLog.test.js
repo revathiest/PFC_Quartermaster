@@ -14,7 +14,10 @@ function mockRes() {
   return { status: jest.fn().mockReturnThis(), json: jest.fn() };
 }
 
-const makeCollection = arr => ({ map: fn => arr.map(fn) });
+const makeCollection = arr => ({
+  map: fn => arr.map(fn),
+  get: id => arr.find(i => i.id === id)
+});
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -24,7 +27,13 @@ describe('api/activityLog searchLogs', () => {
   test('returns logs with filters', async () => {
     const req = { query: { page: '2', limit: '1', type: 'LOGIN', userId: 'u1', command: 'ping', message: 'hi' } };
     const res = mockRes();
-    UsageLog.findAll.mockResolvedValue(['x']);
+    const logs = [{ channel_id: 'c1', user_id: 'u1', toJSON() { return { channel_id: 'c1', user_id: 'u1' }; } }];
+    UsageLog.findAll.mockResolvedValue(logs);
+    const guild = {
+      members: { fetch: jest.fn().mockResolvedValue(), cache: makeCollection([{ id: 'u1', user: { username: 'bob' }, displayName: 'Bob' }]) },
+      channels: { cache: makeCollection([{ id: 'c1', name: 'general' }]) }
+    };
+    getClient.mockReturnValue({ guilds: { cache: { get: jest.fn(() => guild) } } });
 
     await searchLogs(req, res);
 
@@ -40,13 +49,19 @@ describe('api/activityLog searchLogs', () => {
       offset: 1,
       order: [['timestamp', 'DESC']]
     });
-    expect(res.json).toHaveBeenCalledWith({ logs: ['x'] });
+    expect(guild.members.fetch).toHaveBeenCalled();
+    expect(res.json).toHaveBeenCalledWith({ logs: [{ channel_id: 'c1', user_id: 'u1', channelName: 'general', memberName: 'bob', displayName: 'Bob' }] });
   });
 
   test('handles errors', async () => {
     const req = { query: {} };
     const res = mockRes();
     UsageLog.findAll.mockRejectedValue(new Error('fail'));
+    const guild = {
+      members: { fetch: jest.fn().mockResolvedValue(), cache: makeCollection([]) },
+      channels: { cache: makeCollection([]) }
+    };
+    getClient.mockReturnValue({ guilds: { cache: { get: jest.fn(() => guild) } } });
     const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     await searchLogs(req, res);
@@ -56,13 +71,33 @@ describe('api/activityLog searchLogs', () => {
     expect(res.json).toHaveBeenCalledWith({ error: 'Server error' });
     spy.mockRestore();
   });
+
+  test('returns 500 when client missing', async () => {
+    getClient.mockReturnValue(null);
+    const req = { query: {} };
+    const res = mockRes();
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    await searchLogs(req, res);
+
+    expect(spy).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Discord client unavailable' });
+    spy.mockRestore();
+  });
 });
 
 describe('api/activityLog searchLogsPost', () => {
   test('returns logs using body', async () => {
     const req = { body: { page: 1, limit: 2, filters: { command: 'trade' } } };
     const res = mockRes();
-    UsageLog.findAll.mockResolvedValue(['y']);
+    const logs = [{ channel_id: 'c1', user_id: 'u1', toJSON() { return { channel_id: 'c1', user_id: 'u1' }; } }];
+    UsageLog.findAll.mockResolvedValue(logs);
+    const guild = {
+      members: { fetch: jest.fn().mockResolvedValue(), cache: makeCollection([{ id: 'u1', user: { username: 'bob' }, displayName: 'Bob' }]) },
+      channels: { cache: makeCollection([{ id: 'c1', name: 'general' }]) }
+    };
+    getClient.mockReturnValue({ guilds: { cache: { get: jest.fn(() => guild) } } });
 
     await searchLogsPost(req, res);
 
@@ -72,6 +107,21 @@ describe('api/activityLog searchLogsPost', () => {
       offset: 0,
       order: [['timestamp', 'DESC']]
     });
-    expect(res.json).toHaveBeenCalledWith({ logs: ['y'] });
+    expect(guild.members.fetch).toHaveBeenCalled();
+    expect(res.json).toHaveBeenCalledWith({ logs: [{ channel_id: 'c1', user_id: 'u1', channelName: 'general', memberName: 'bob', displayName: 'Bob' }] });
+  });
+
+  test('returns 500 when client missing', async () => {
+    getClient.mockReturnValue(null);
+    const req = { body: {} };
+    const res = mockRes();
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    await searchLogsPost(req, res);
+
+    expect(spy).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Discord client unavailable' });
+    spy.mockRestore();
   });
 });

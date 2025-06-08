@@ -1,0 +1,40 @@
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
+const jwt = require('jsonwebtoken');
+const { isAdmin } = require('../../botactions/userManagement/permissions');
+
+module.exports = {
+  data: new SlashCommandBuilder()
+    .setName('apitoken')
+    .setDescription('Generate a JWT for API testing (admin only)')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+  help: 'Generates a JWT for API testing. Only administrators may use this command.',
+  category: 'Admin',
+  async execute(interaction) {
+    if (!isAdmin(interaction)) {
+      return interaction.reply({
+        content: '❌ You do not have permission to run this command.',
+        flags: MessageFlags.Ephemeral
+      });
+    }
+
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      console.error('❌ JWT_SECRET not configured');
+      return interaction.reply({
+        content: '❌ Server misconfiguration.',
+        flags: MessageFlags.Ephemeral
+      });
+    }
+
+    const payload = {
+      id: interaction.user.id,
+      username: interaction.user.username
+    };
+    const token = jwt.sign(payload, secret);
+
+    await interaction.reply({
+      content: `Bearer ${token}`,
+      flags: MessageFlags.Ephemeral
+    });
+  }
+};

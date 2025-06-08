@@ -128,7 +128,17 @@ project root, or you can export them in your shell before running the bot.
 2. Add a login link on your site that points to:
    `https://discord.com/api/oauth2/authorize?client_id=<CLIENT_ID>&redirect_uri=<REDIRECT>&response_type=code&scope=identify`.
 3. After Discord redirects back to `<REDIRECT>` with a `?code=...` parameter, POST that code to `/api/login` with `{ code, redirectUri: '<REDIRECT>' }`.
-4. Store the returned JWT (e.g. in `localStorage`) and include it in an `Authorization: Bearer` header when calling any `/api/*` routes.
+   ```js
+   // Example using fetch()
+   fetch('https://api.pyrofreelancercorps.com/api/login', {
+     method: 'POST',
+     headers: { 'Content-Type': 'application/json' },
+     body: JSON.stringify({ code, redirectUri: '<REDIRECT>' })
+   })
+     .then(res => res.json())
+     .then(({ token }) => localStorage.setItem('pfcToken', token));
+   ```
+4. Store the returned JWT (e.g. in `localStorage`) and include it in an `Authorization: Bearer` header when calling any `/api/*` routes. If the API responds with `{ error: 'Missing token' }`, verify the header is set or that you're using `POST /api/login` rather than `GET`.
 5. Optionally decode the JWT on the client to display the user's Discord username.
 
 ## 🗄️ Google Drive Setup

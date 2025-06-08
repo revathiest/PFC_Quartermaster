@@ -250,6 +250,16 @@
           }
         ]
       }
+    },
+    "/api/members": {
+      "get": {
+        "summary": "GET /api/members",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
     }
   }
 }

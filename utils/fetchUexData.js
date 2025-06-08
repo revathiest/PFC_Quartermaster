@@ -15,7 +15,6 @@ async function fetchUexData(endpoint) {
 
     const response = await fetch(url, {
       headers: {
-        Authorization: `Bearer ${process.env.UEX_API_TOKEN}`,
         Accept: 'application/json'
       }
     });

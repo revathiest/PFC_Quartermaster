@@ -109,18 +109,37 @@ project root, or you can export them in your shell before running the bot.
   settings. Defaults to `development` if not provided.
 - `OPENAI_API_KEY` - API key used for OpenAI requests.
 - `OPENAI_MODEL` - Model name to use when calling the OpenAI API.
-- `UEX_API_TOKEN` - Authentication token for the UEX trading API.
 - `JWT_SECRET` - Secret used to sign API tokens.
-- `JWT_SIGNING_SECRET` - Shared secret for exchanging short-lived JWTs.
-- `TOKEN_IP_WHITELIST` - Comma separated list of IPs allowed to exchange tokens.
+- `DISCORD_CLIENT_ID` - OAuth2 client ID for Discord login.
+- `DISCORD_CLIENT_SECRET` - OAuth2 client secret for Discord login.
 - `GOOGLE_SERVICE_ACCOUNT_FILE` - Path to your service account JSON key for Google Drive access.
 
 ## 🔑 Obtaining an API Token
 
-1. Create a JWT in your website using `JWT_SIGNING_SECRET`. The payload can include any user data.
-2. Send a `POST` request to `/api/token` with a JSON body `{ "token": "<jwt>" }`.
-3. The API validates the token and responds with a new token signed using `JWT_SECRET`.
-4. Use this returned token in the `Authorization: Bearer` header when calling other `/api/*` endpoints.
+1. Redirect the user to Discord's OAuth2 authorization page using your client ID.
+2. After the user approves, Discord will redirect back with a `code` parameter.
+3. Send a `POST` request to `/api/login` with `{ "code": "<code>", "redirectUri": "<your redirect>" }`.
+4. The API exchanges the code for the user's Discord info and returns a JWT signed with `JWT_SECRET`.
+5. Use this token in the `Authorization: Bearer` header when calling protected `/api/*` endpoints.
+
+## 🌐 Integrating Discord Login on a Website
+
+1. Ensure `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, and `JWT_SECRET` are set in your environment.
+2. Add a login link on your site that points to:
+   `https://discord.com/api/oauth2/authorize?client_id=<CLIENT_ID>&redirect_uri=<REDIRECT>&response_type=code&scope=identify`.
+3. After Discord redirects back to `<REDIRECT>` with a `?code=...` parameter, POST that code to `/api/login` with `{ code, redirectUri: '<REDIRECT>' }`.
+   ```js
+   // Example using fetch()
+   fetch('https://api.pyrofreelancercorps.com/api/login', {
+     method: 'POST',
+     headers: { 'Content-Type': 'application/json' },
+     body: JSON.stringify({ code, redirectUri: '<REDIRECT>' })
+   })
+     .then(res => res.json())
+     .then(({ token }) => localStorage.setItem('pfcToken', token));
+   ```
+4. Store the returned JWT (e.g. in `localStorage`) and include it in an `Authorization: Bearer` header when calling any `/api/*` routes. If the API responds with `{ error: 'Missing token' }`, verify the header is set or that you're using `POST /api/login` rather than `GET`.
+5. Optionally decode the JWT on the client to display the user's Discord username.
 
 ## 🗄️ Google Drive Setup
 

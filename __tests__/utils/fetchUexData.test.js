@@ -8,7 +8,6 @@ describe('fetchUexData', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    process.env.UEX_API_TOKEN = 'token';
   });
 
   afterEach(() => {
@@ -24,7 +23,7 @@ describe('fetchUexData', () => {
     const data = await fetchUexData('vehicles');
 
     expect(fetch).toHaveBeenCalledWith('https://api.uexcorp.space/2.0/vehicles', {
-      headers: { Authorization: 'Bearer token', Accept: 'application/json' }
+      headers: { Accept: 'application/json' }
     });
     expect(data).toEqual({ success: true });
   });

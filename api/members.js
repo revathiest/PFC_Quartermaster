@@ -14,7 +14,8 @@ async function listMembers(req, res) {
     await guild.members.fetch();
     const members = guild.members.cache.map(m => ({
       userId: m.id,
-      username: m.user.username
+      username: m.user.username,
+      displayName: m.displayName
     }));
     res.json({ members });
   } catch (err) {

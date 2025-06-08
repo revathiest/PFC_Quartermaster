@@ -13,6 +13,7 @@ A powerful Discord bot built for the **Pyro Freelancers Corps**, designed to man
 - ✅ Handles guild member updates & role assignments
 - ✅ Modular design for scalability
 - ✅ `/loglookup` command with user lookup and event dropdown (admin only)
+- ✅ `/apitoken` command to generate a JWT for API testing (admin only)
 
 ## 🛠️ Installation
 

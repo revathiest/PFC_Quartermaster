@@ -30,6 +30,17 @@
         "security": []
       }
     },
+    "/api/login": {
+      "post": {
+        "summary": "POST /api/login",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": []
+      }
+    },
     "/api/accolades": {
       "get": {
         "summary": "GET /api/accolades",

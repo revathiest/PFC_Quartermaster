@@ -61,6 +61,8 @@ module.exports = {
           `2. Add this code to your **bio**: \`\`\`${code}\`\`\``,
           `3. Once it's saved, click the button below to complete verification.`,
           ``,
+          `NOTE: Members of known orgs will automatically be updated with the appropriate org [TAG] and Discord roles unless your membership status is redacted.`,
+          ``,
           `⚠️ This code will expire in 15 minutes.`,
         ].join('\n'),
         components: [row]

@@ -24,6 +24,7 @@ function createApp() {
   app.use('/api/accolades', accoladesRouter);
   app.use('/api/content', contentRouter);
   app.use('/api/events', eventsRouter);
+  app.use('/api/officers', officersRouter);
   app.get('/api/data', async (req, res) => {
     res.json({ success: true, message: 'API is working' });
   });
@@ -34,7 +35,6 @@ function createApp() {
   app.use('/api', commandsRouter);
   app.use('/api/activity-log', activityLogRouter);
   app.use('/api/members', membersRouter);
-  app.use('/api/officers', officersRouter);
 
   return app;
 }

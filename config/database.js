@@ -39,6 +39,7 @@ const Accolade = require('../models/accolade')(sequelize);
 const OrgTag = require('../models/orgTag')(sequelize);
 const VerificationCode = require('../models/verificationCode')(sequelize);
 const VerifiedUser = require('../models/verifiedUser')(sequelize);
+const OfficerBio = require('../models/officerBio')(sequelize);
 const AmbientMessage = require('../models/ambiEntMessage')(sequelize);
 const AmbientChannel = require('../models/ambientChannel')(sequelize);
 const AmbientSetting = require('../models/ambientSetting')(sequelize);
@@ -102,6 +103,7 @@ module.exports = {
     OrgTag,
     VerificationCode,
     VerifiedUser,
+    OfficerBio,
     AmbientMessage,
     AmbientChannel,
     AmbientSetting,

@@ -9,6 +9,7 @@ const { router: loginRouter } = require("./login");
 const { router: profileRouter } = require('./profile');
 const { router: activityLogRouter } = require('./activityLog');
 const { router: membersRouter } = require('./members');
+const { router: officersRouter } = require('./officers');
 const { router: commandsRouter } = require('./commands');
 const { authMiddleware } = require('./auth');
 
@@ -33,6 +34,7 @@ function createApp() {
   app.use('/api', commandsRouter);
   app.use('/api/activity-log', activityLogRouter);
   app.use('/api/members', membersRouter);
+  app.use('/api/officers', officersRouter);
 
   return app;
 }

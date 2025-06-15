@@ -8,6 +8,8 @@
 - `GET /api/activity-log/event-types` endpoint returning unique event types
 - Removed `/api/uex/terminals` and `/api/uex/terminals/{id}` endpoints
 - `/api/accolades` endpoints are now public (no JWT required)
+- `GET /api/officers` endpoint listing officers and their bios
+- `/officerbio` slash command allowing officers to set their bio
 - Removed `GET /api/uex/items/{name}/terminals` endpoint
 - Renamed `GET /api/uex/terminals/{id}/inventory` to `GET /api/uex/terminals/{id}`
 - JWT authentication middleware for API routes

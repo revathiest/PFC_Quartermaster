@@ -324,6 +324,16 @@
           }
         }
       }
+    },
+    "/api/officers": {
+      "get": {
+        "summary": "GET /api/officers",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
     }
   }
 }

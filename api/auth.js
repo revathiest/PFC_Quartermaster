@@ -19,4 +19,12 @@ function authMiddleware(req, res, next) {
   next();
 }
 
-module.exports = { authMiddleware };
+function requireServerAdmin(req, res, next) {
+  const roles = req.user?.roles || [];
+  if (!roles.includes('Fleet Admiral')) {
+    return res.status(403).json({ error: 'Insufficient role' });
+  }
+  next();
+}
+
+module.exports = { authMiddleware, requireServerAdmin };

@@ -9,6 +9,7 @@ const { router: loginRouter } = require("./login");
 const { router: profileRouter } = require('./profile');
 const { router: activityLogRouter } = require('./activityLog');
 const { router: membersRouter } = require('./members');
+const { router: officersRouter } = require('./officers');
 const { router: commandsRouter } = require('./commands');
 const { authMiddleware } = require('./auth');
 
@@ -23,6 +24,7 @@ function createApp() {
   app.use('/api/accolades', accoladesRouter);
   app.use('/api/content', contentRouter);
   app.use('/api/events', eventsRouter);
+  app.use('/api/officers', officersRouter);
   app.get('/api/data', async (req, res) => {
     res.json({ success: true, message: 'API is working' });
   });

@@ -105,6 +105,30 @@
           }
         ],
         "security": []
+      },
+      "put": {
+        "summary": "PUT /api/content/{section}",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "parameters": [
+          {
+            "name": "section",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The section"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/events": {
@@ -137,6 +161,17 @@
             "description": "The id"
           }
         ],
+        "security": []
+      }
+    },
+    "/api/officers": {
+      "get": {
+        "summary": "GET /api/officers",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
         "security": []
       }
     },

@@ -167,7 +167,8 @@
           "200": {
             "description": "Success"
           }
-        }
+        },
+        "security": []
       }
     },
     "/api/profile/{userId}": {

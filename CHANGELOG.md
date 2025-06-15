@@ -28,3 +28,6 @@
 - `/api/commands` and `/api/command/{command}` endpoints for command details
 - `/api/commands` now returns command names without the leading `/`
 - Documented `/api/activity-log/search` parameters and request body in Swagger
+
+### Fixed
+- Officer endpoint incorrectly marked as secured in Swagger docs

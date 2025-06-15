@@ -27,7 +27,10 @@ jest.mock('cors', () => jest.fn(() => (req, res, next) => next()), { virtual: tr
 jest.mock('../../config/database', () => ({ SiteContent: {}, Event: {}, Accolade: {} }));
 jest.mock('../../config.json', () => ({ guildId: 'g1' }), { virtual: true });
 jest.mock('../../api/docs', () => ({ router: {} }), { virtual: true });
-jest.mock('../../api/auth', () => ({ authMiddleware: jest.fn((req, res, next) => next()) }));
+jest.mock('../../api/auth', () => ({
+  authMiddleware: jest.fn((req, res, next) => next()),
+  requireServerAdmin: jest.fn((req, res, next) => next())
+}));
 
 const express = require('express');
 const { startApi } = require('../../api/server');

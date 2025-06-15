@@ -18,6 +18,7 @@
 - Swagger UI now supports Bearer token authentication via the **Authorize** button
 - `/apitoken` command for generating JWTs via Discord
 - `/apitoken` tokens now expire after 30 minutes
+- `PUT /api/content/{section}` endpoint for updating site content (admin only)
 - Activity log search endpoint under `/api`
 - Activity log search results now include channel and member details
 - `GET /api/members` endpoint to list Discord guild members

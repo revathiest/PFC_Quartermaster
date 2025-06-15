@@ -124,7 +124,11 @@
             "description": "The section"
           }
         ],
-        "security": []
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/events": {

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { SiteContent } = require('../config/database');
-const { requireServerAdmin } = require('./auth');
+const { authMiddleware, requireServerAdmin } = require('./auth');
 
 router.use(express.json());
 
@@ -48,6 +48,6 @@ async function updateContent(req, res) {
 
 router.get('/', listSections);
 router.get('/:section', getContent);
-router.put('/:section', requireServerAdmin, updateContent);
+router.put('/:section', authMiddleware, requireServerAdmin, updateContent);
 
 module.exports = { router, getContent, listSections, updateContent };

@@ -1,4 +1,4 @@
-const { authMiddleware } = require('../../api/auth');
+const { authMiddleware, requireServerAdmin } = require('../../api/auth');
 const jwt = require('jsonwebtoken');
 
 describe('api/auth authMiddleware', () => {
@@ -42,6 +42,28 @@ describe('api/auth authMiddleware', () => {
     authMiddleware(req, res, next);
     expect(res.status).toHaveBeenCalledWith(403);
     expect(res.json).toHaveBeenCalledWith({ error: 'Invalid token' });
+    expect(next).not.toHaveBeenCalled();
+  });
+});
+
+describe('api/auth requireServerAdmin', () => {
+  function mockRes() { return { status: jest.fn().mockReturnThis(), json: jest.fn() }; }
+
+  test('passes with Admin role', () => {
+    const req = { user: { roles: ['Admin'] } };
+    const res = mockRes();
+    const next = jest.fn();
+    requireServerAdmin(req, res, next);
+    expect(next).toHaveBeenCalled();
+  });
+
+  test('rejects when role missing', () => {
+    const req = { user: { roles: ['User'] } };
+    const res = mockRes();
+    const next = jest.fn();
+    requireServerAdmin(req, res, next);
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Insufficient role' });
     expect(next).not.toHaveBeenCalled();
   });
 });

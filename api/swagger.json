@@ -105,6 +105,26 @@
           }
         ],
         "security": []
+      },
+      "put": {
+        "summary": "PUT /api/content/{section}",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "parameters": [
+          {
+            "name": "section",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The section"
+          }
+        ],
+        "security": []
       }
     },
     "/api/events": {
@@ -138,6 +158,16 @@
           }
         ],
         "security": []
+      }
+    },
+    "/api/officers": {
+      "get": {
+        "summary": "GET /api/officers",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
       }
     },
     "/api/profile/{userId}": {
@@ -318,16 +348,6 @@
     "/api/members": {
       "get": {
         "summary": "GET /api/members",
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/officers": {
-      "get": {
-        "summary": "GET /api/officers",
         "responses": {
           "200": {
             "description": "Success"

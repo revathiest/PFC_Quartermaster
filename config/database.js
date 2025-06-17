@@ -37,6 +37,7 @@ const UexVehicleRentalPrice = require('../models/uexVehicleRentalPrice')(sequeli
 const UexPoi = require('../models/uexPoi')(sequelize);
 const Accolade = require('../models/accolade')(sequelize);
 const OrgTag = require('../models/orgTag')(sequelize);
+const Org = require('../models/org')(sequelize);
 const VerificationCode = require('../models/verificationCode')(sequelize);
 const VerifiedUser = require('../models/verifiedUser')(sequelize);
 const OfficerBio = require('../models/officerBio')(sequelize);
@@ -101,6 +102,7 @@ module.exports = {
     UexPoi,
     Accolade,
     OrgTag,
+    Org,
     VerificationCode,
     VerifiedUser,
     OfficerBio,

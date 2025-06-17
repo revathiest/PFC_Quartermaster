@@ -12,6 +12,8 @@
 - `/api/officers` endpoint is now public (no JWT required)
 - `GET /api/orgs` endpoint returning data for organizations listed in `org_tags`
 - `GET /api/orgs/{sid}` endpoint returning a single organization by ID
+- Organization data now cached in database and retrieved from local storage
+- API sync job updated to populate organization cache
 - `/officerbio` slash command allowing officers to set their bio
 - Removed `GET /api/uex/items/{name}/terminals` endpoint
 - Renamed `GET /api/uex/terminals/{id}/inventory` to `GET /api/uex/terminals/{id}`

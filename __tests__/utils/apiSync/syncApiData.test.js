@@ -15,6 +15,7 @@ jest.mock('../../../botactions/api/syncEndpoints', () => ({
   syncUexVehiclePurchasePrices: jest.fn().mockResolvedValue({}),
   syncUexVehicleRentalPrices: jest.fn().mockResolvedValue({}),
   syncUexPois: jest.fn().mockResolvedValue({}),
+  syncOrgs: jest.fn().mockResolvedValue({}),
 }));
 
 describe('runFullApiSync', () => {
@@ -51,7 +52,7 @@ describe('runFullApiSync', () => {
     const interaction = new MockInteraction({});
     const editSpy = jest.spyOn(interaction, 'editReply');
     const results = await runFullApiSync(interaction);
-    expect(editSpy).toHaveBeenCalledTimes(14);
+    expect(editSpy).toHaveBeenCalledTimes(15);
     const lastCall = editSpy.mock.calls.at(-1)[0];
     const embedData = lastCall.embeds[0].toJSON();
     expect(embedData.title).toBe('✅ API Sync Complete');

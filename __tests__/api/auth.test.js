@@ -50,7 +50,7 @@ describe('api/auth requireServerAdmin', () => {
   function mockRes() { return { status: jest.fn().mockReturnThis(), json: jest.fn() }; }
 
   test('passes with Admin role', () => {
-    const req = { user: { roles: ['Admin'] } };
+    const req = { user: { roles: ['Fleet Admiral'] } };
     const res = mockRes();
     const next = jest.fn();
     requireServerAdmin(req, res, next);

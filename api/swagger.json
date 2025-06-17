@@ -13,11 +13,6 @@
       }
     }
   },
-  "security": [
-    {
-      "bearerAuth": []
-    }
-  ],
   "paths": {
     "/api/data": {
       "get": {
@@ -26,8 +21,7 @@
           "200": {
             "description": "Success"
           }
-        },
-        "security": []
+        }
       }
     },
     "/api/login": {
@@ -38,7 +32,28 @@
             "description": "Success"
           }
         },
-        "security": []
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "redirectUri": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "redirectUri"
+                ]
+              }
+            }
+          }
+        }
       }
     },
     "/api/accolades": {
@@ -48,8 +63,7 @@
           "200": {
             "description": "Success"
           }
-        },
-        "security": []
+        }
       }
     },
     "/api/accolades/{id}": {
@@ -70,8 +84,7 @@
             },
             "description": "The id"
           }
-        ],
-        "security": []
+        ]
       }
     },
     "/api/content": {
@@ -81,8 +94,7 @@
           "200": {
             "description": "Success"
           }
-        },
-        "security": []
+        }
       }
     },
     "/api/content/{section}": {
@@ -103,8 +115,7 @@
             },
             "description": "The section"
           }
-        ],
-        "security": []
+        ]
       },
       "put": {
         "summary": "PUT /api/content/{section}",
@@ -128,7 +139,25 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "content": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "content"
+                ]
+              }
+            }
+          }
+        }
       }
     },
     "/api/events": {
@@ -138,8 +167,7 @@
           "200": {
             "description": "Success"
           }
-        },
-        "security": []
+        }
       }
     },
     "/api/events/{id}": {
@@ -160,8 +188,7 @@
             },
             "description": "The id"
           }
-        ],
-        "security": []
+        ]
       }
     },
     "/api/officers": {
@@ -171,8 +198,7 @@
           "200": {
             "description": "Success"
           }
-        },
-        "security": []
+        }
       }
     },
     "/api/profile/{userId}": {
@@ -193,6 +219,11 @@
             },
             "description": "The userId"
           }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -203,7 +234,12 @@
           "200": {
             "description": "Success"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/command/{command}": {
@@ -224,6 +260,11 @@
             },
             "description": "The command"
           }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -235,6 +276,11 @@
             "description": "Success"
           }
         },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "page",
@@ -301,6 +347,11 @@
             "description": "Success"
           }
         },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -347,7 +398,12 @@
           "200": {
             "description": "Success"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/members": {
@@ -357,7 +413,12 @@
           "200": {
             "description": "Success"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     }
   }

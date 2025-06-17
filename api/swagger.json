@@ -160,6 +160,16 @@
         "security": []
       }
     },
+    "/api/orgs": {
+      "get": {
+        "summary": "GET /api/orgs",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/officers": {
       "get": {
         "summary": "GET /api/officers",

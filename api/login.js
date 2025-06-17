@@ -74,7 +74,7 @@ async function discordLogin(req, res) {
       displayName,
       roles
     };
-    const token = jwt.sign(payload, jwtSecret);
+    const token = jwt.sign(payload, jwtSecret, { expiresIn: '30m' });
     res.json({ token });
   } catch (err) {
     console.error('Discord login error:', err);

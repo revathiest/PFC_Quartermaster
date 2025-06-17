@@ -10,6 +10,7 @@ const { syncUexFuelPrices } = require('../../utils/apiSync/syncUexFuelPrices');
 const { syncUexVehiclePurchasePrices } = require('../../utils/apiSync/syncUexVehiclePurchasePrices');
 const { syncUexVehicleRentalPrices } = require('../../utils/apiSync/syncUexVehicleRentalPrices');
 const { syncUexPois } = require('../../utils/apiSync/syncUexPoi');
+const { syncOrgs } = require('../../utils/apiSync/orgs');
 
 async function syncAllEndpoints() {
   const results = [];
@@ -98,6 +99,13 @@ async function syncAllEndpoints() {
     results.push({endpoint: 'poi', success: false, error: error.message });
   }
 
+  try {
+    const syncOrgResult = await syncOrgs();
+    results.push(syncOrgResult);
+  } catch (error) {
+    results.push({ endpoint: 'orgs', success: false, error: error.message });
+  }
+
   return results;
 }
 
@@ -114,5 +122,6 @@ module.exports = {
     syncUexFuelPrices,
     syncUexVehiclePurchasePrices,
     syncUexVehicleRentalPrices,
-    syncUexPois
+    syncUexPois,
+    syncOrgs
 };

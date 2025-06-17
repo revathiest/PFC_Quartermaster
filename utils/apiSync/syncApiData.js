@@ -11,6 +11,7 @@ const {
     syncUexVehiclePurchasePrices,
     syncUexVehicleRentalPrices,
     syncUexPois,
+    syncOrgs,
   } = require('../../botactions/api/syncEndpoints');
 
   const { EmbedBuilder } = require('discord.js');
@@ -77,6 +78,7 @@ const {
       await updateStep('Vehicle Prices', syncUexVehiclePurchasePrices);
       await updateStep('Vehicle Rentals', syncUexVehicleRentalPrices);
       await updateStep('Points of Interest', syncUexPois);
+      await updateStep('Organizations', syncOrgs);
     
       if (interaction) {
         embed.setTitle('✅ API Sync Complete').setTimestamp();

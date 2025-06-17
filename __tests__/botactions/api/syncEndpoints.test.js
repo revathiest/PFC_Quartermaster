@@ -11,7 +11,8 @@ const {
   syncUexFuelPrices,
   syncUexVehiclePurchasePrices,
   syncUexVehicleRentalPrices,
-  syncUexPois
+  syncUexPois,
+  syncOrgs
 } = require('../../../botactions/api/syncEndpoints');
 
 jest.mock('../../../utils/apiSync/manufacturers', () => ({ syncManufacturers: jest.fn() }));
@@ -26,6 +27,7 @@ jest.mock('../../../utils/apiSync/syncUexFuelPrices', () => ({ syncUexFuelPrices
 jest.mock('../../../utils/apiSync/syncUexVehiclePurchasePrices', () => ({ syncUexVehiclePurchasePrices: jest.fn() }));
 jest.mock('../../../utils/apiSync/syncUexVehicleRentalPrices', () => ({ syncUexVehicleRentalPrices: jest.fn() }));
 jest.mock('../../../utils/apiSync/syncUexPoi', () => ({ syncUexPois: jest.fn() }));
+jest.mock('../../../utils/apiSync/orgs', () => ({ syncOrgs: jest.fn() }));
 
 const manufacturers = require('../../../utils/apiSync/manufacturers');
 const vehicles = require('../../../utils/apiSync/vehicles');
@@ -39,6 +41,7 @@ const uexFuelPrices = require('../../../utils/apiSync/syncUexFuelPrices');
 const uexVehiclePurchasePrices = require('../../../utils/apiSync/syncUexVehiclePurchasePrices');
 const uexVehicleRentalPrices = require('../../../utils/apiSync/syncUexVehicleRentalPrices');
 const uexPois = require('../../../utils/apiSync/syncUexPoi');
+const orgs = require('../../../utils/apiSync/orgs');
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -59,7 +62,8 @@ describe('syncAllEndpoints', () => {
       uexFuelPrices.syncUexFuelPrices,
       uexVehiclePurchasePrices.syncUexVehiclePurchasePrices,
       uexVehicleRentalPrices.syncUexVehicleRentalPrices,
-      uexPois.syncUexPois
+      uexPois.syncUexPois,
+      orgs.syncOrgs
     ];
     fns.forEach((fn, i) => fn.mockResolvedValue({ id: i }));
 
@@ -82,11 +86,12 @@ describe('syncAllEndpoints', () => {
     uexVehiclePurchasePrices.syncUexVehiclePurchasePrices.mockResolvedValue('i');
     uexVehicleRentalPrices.syncUexVehicleRentalPrices.mockResolvedValue('j');
     uexPois.syncUexPois.mockResolvedValue('k');
+    orgs.syncOrgs.mockResolvedValue('l');
 
     const res = await syncAllEndpoints();
 
     expect(res[0]).toEqual({ endpoint: 'terminals', success: false, error: 'fail' });
-    expect(res.slice(1)).toEqual(['a','b','c','d','e','f','g','h','i','j','k']);
+    expect(res.slice(1)).toEqual(['a','b','c','d','e','f','g','h','i','j','k','l']);
     expect(uexTerminals.syncUexTerminals).toHaveBeenCalled();
     expect(uexPois.syncUexPois).toHaveBeenCalled();
   });

@@ -36,7 +36,6 @@ const spec = {
       }
     }
   },
-  security: [{ bearerAuth: [] }],
   paths: {}
 };
 
@@ -89,23 +88,25 @@ for (const [routerVar, base] of Object.entries(basePaths)) {
   }
 }
 
-// Paths that should be publicly accessible (no auth required)
-const publicPaths = [
-  '/api/data',
-  '/api/content',
-  '/api/content/{section}',
-  '/api/events',
-  '/api/events/{id}',
-  '/api/accolades',
-  '/api/accolades/{id}',
-  '/api/login',
-  '/api/officers'
-];
+// Endpoint methods that are publicly accessible (no auth required)
+const publicRoutes = {
+  '/api/data': ['get'],
+  '/api/content': ['get'],
+  '/api/content/{section}': ['get'],
+  '/api/events': ['get'],
+  '/api/events/{id}': ['get'],
+  '/api/accolades': ['get'],
+  '/api/accolades/{id}': ['get'],
+  '/api/login': ['post'],
+  '/api/officers': ['get']
+};
 
-for (const pathKey of publicPaths) {
-  if (spec.paths[pathKey]) {
-    for (const method of Object.keys(spec.paths[pathKey])) {
-      spec.paths[pathKey][method].security = [];
+for (const [pathKey, methodsObj] of Object.entries(spec.paths)) {
+  for (const method of Object.keys(methodsObj)) {
+    const isPublic =
+      publicRoutes[pathKey] && publicRoutes[pathKey].includes(method);
+    if (!isPublic) {
+      spec.paths[pathKey][method].security = [{ bearerAuth: [] }];
     }
   }
 }
@@ -150,6 +151,43 @@ if (spec.paths['/api/activity-log/search']) {
       }
     };
   }
+}
+
+// Request body docs for login endpoint
+if (spec.paths['/api/login'] && spec.paths['/api/login'].post) {
+  spec.paths['/api/login'].post.requestBody = {
+    required: true,
+    content: {
+      'application/json': {
+        schema: {
+          type: 'object',
+          properties: {
+            code: { type: 'string' },
+            redirectUri: { type: 'string' }
+          },
+          required: ['code', 'redirectUri']
+        }
+      }
+    }
+  };
+}
+
+// Request body docs for updating content
+if (spec.paths['/api/content/{section}'] && spec.paths['/api/content/{section}'].put) {
+  spec.paths['/api/content/{section}'].put.requestBody = {
+    required: true,
+    content: {
+      'application/json': {
+        schema: {
+          type: 'object',
+          properties: {
+            content: { type: 'string' }
+          },
+          required: ['content']
+        }
+      }
+    }
+  };
 }
 
 fs.writeFileSync(path.join(apiDir, 'swagger.json'), JSON.stringify(spec, null, 2));

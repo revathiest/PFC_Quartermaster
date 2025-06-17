@@ -10,6 +10,7 @@
 - `/api/accolades` endpoints are now public (no JWT required)
 - `GET /api/officers` endpoint listing officers and their bios
 - `/api/officers` endpoint is now public (no JWT required)
+- `GET /api/orgs` endpoint returning data for organizations listed in `org_tags`
 - `/officerbio` slash command allowing officers to set their bio
 - Removed `GET /api/uex/items/{name}/terminals` endpoint
 - Renamed `GET /api/uex/terminals/{id}/inventory` to `GET /api/uex/terminals/{id}`

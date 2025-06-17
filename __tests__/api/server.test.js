@@ -50,6 +50,7 @@ describe('api/server startApi', () => {
     expect(app.use).toHaveBeenCalledWith('/api/activity-log', expect.anything());
     expect(app.use).toHaveBeenCalledWith('/api/content', expect.anything());
     expect(app.use).toHaveBeenCalledWith('/api/events', expect.anything());
+    expect(app.use).toHaveBeenCalledWith('/api/orgs', expect.anything());
     expect(app.use).toHaveBeenCalledWith('/api/officers', expect.anything());
     expect(app.use).toHaveBeenCalledWith('/api/members', expect.anything());
     expect(app.get).toHaveBeenCalledWith('/api/data', expect.any(Function));

@@ -120,7 +120,7 @@ project root, or you can export them in your shell before running the bot.
 1. Redirect the user to Discord's OAuth2 authorization page using your client ID.
 2. After the user approves, Discord will redirect back with a `code` parameter.
 3. Send a `POST` request to `/api/login` with `{ "code": "<code>", "redirectUri": "<your redirect>" }`.
-4. The API exchanges the code for the user's Discord info and returns a JWT signed with `JWT_SECRET`.
+4. The API exchanges the code for the user's Discord info and returns a JWT signed with `JWT_SECRET`. Tokens expire after **30 minutes**.
 5. Use this token in the `Authorization: Bearer` header when calling protected `/api/*` endpoints.
 
 ## 🌐 Integrating Discord Login on a Website
@@ -139,7 +139,7 @@ project root, or you can export them in your shell before running the bot.
      .then(res => res.json())
      .then(({ token }) => localStorage.setItem('pfcToken', token));
    ```
-4. Store the returned JWT (e.g. in `localStorage`) and include it in an `Authorization: Bearer` header when calling any `/api/*` routes. If the API responds with `{ error: 'Missing token' }`, verify the header is set or that you're using `POST /api/login` rather than `GET`.
+4. Store the returned JWT (e.g. in `localStorage`) and include it in an `Authorization: Bearer` header when calling any `/api/*` routes. Tokens expire after **30 minutes**, so be prepared to re-authenticate. If the API responds with `{ error: 'Missing token' }`, verify the header is set or that you're using `POST /api/login` rather than `GET`.
 5. Optionally decode the JWT on the client to display the user's Discord username.
 
 ## 🗄️ Google Drive Setup
@@ -185,7 +185,7 @@ watch your files and automatically restart the bot during development.
 ## 📖 API Documentation
 
 API endpoints are documented using the OpenAPI specification. After running the tests or starting the server, `api/swagger.json` is regenerated automatically. To view the interactive documentation, start the API and visit [`/api/docs`](http://localhost:8003/api/docs).
-Since the API is secured with JWTs, obtain a token via `POST /api/login` and click **Authorize** in the Swagger UI to enter `Bearer <token>` for testing.
+Since the API is secured with JWTs, obtain a token via `POST /api/login` and click **Authorize** in the Swagger UI to enter `Bearer <token>` for testing. Tokens expire after **30 minutes**.
 The API now includes a `/api/commands` endpoint that lists all registered slash commands and `/api/command/{commandName}` for details about a specific command. The command names in the response are returned without the leading `/`.
 
 ## 🧪 Testing

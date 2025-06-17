@@ -40,12 +40,14 @@ describe('api/login discordLogin', () => {
     const res = mockRes();
     await discordLogin(req, res);
     const token = res.json.mock.calls[0][0].token;
-    expect(jwt.verify(token, 'jwt')).toMatchObject({
+    const decoded = jwt.verify(token, 'jwt');
+    expect(decoded).toMatchObject({
       id: '1',
       username: 'A',
       displayName: 'Tester',
       roles: ['Admin']
     });
+    expect(decoded.exp - decoded.iat).toBe(1800);
   });
 
   test('returns 400 when missing data', async () => {

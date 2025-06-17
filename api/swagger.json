@@ -201,6 +201,27 @@
         }
       }
     },
+    "/api/orgs/{sid}": {
+      "get": {
+        "summary": "GET /api/orgs/{sid}",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "parameters": [
+          {
+            "name": "sid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The sid"
+          }
+        ]
+      }
+    },
     "/api/officers": {
       "get": {
         "summary": "GET /api/officers",

@@ -30,4 +30,21 @@ async function listOrgs(req, res) {
 
 router.get('/', listOrgs);
 
-module.exports = { router, listOrgs };
+async function getOrg(req, res) {
+  const { sid } = req.params;
+  try {
+    const base = 'https://api.starcitizen-api.com/77210b95720bd50b3584ead32936dfd4/v1/';
+    const url = `${base}live/organization/${sid.toUpperCase()}`;
+    const text = await fetch(url).then(r => r.text());
+    const data = JSON.parse(text);
+    if (!data?.data) return res.status(404).json({ error: 'Not found' });
+    res.json({ org: data.data });
+  } catch (err) {
+    console.error('Failed to fetch org', sid, err);
+    res.status(500).json({ error: 'Server error' });
+  }
+}
+
+router.get('/:sid', getOrg);
+
+module.exports = { router, listOrgs, getOrg };
